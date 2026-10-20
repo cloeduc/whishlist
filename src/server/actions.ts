@@ -14,6 +14,7 @@ import {
   updateDisplayName,
 } from "../domain/users";
 import { createWishlist } from "../domain/import";
+import type { Wishlist } from "../domain/types";
 import { mailConfigured, sendInviteMail, sendPasswordResetMail } from "./mail";
 import {
   acceptInvite,
@@ -215,7 +216,10 @@ export async function createListAction(formData: FormData) {
   const person = String(formData.get("person") ?? "").trim();
   if (!category) redirect(`/listes/new?e=${encodeURIComponent("listNeedsCategory")}`);
   if (!person) redirect(`/listes/new?e=${encodeURIComponent("listNeedsPerson")}`);
-  const result = await updateDocument((doc) => {
+  type CreateListResult =
+    | { ok: true; wishlist: Wishlist }
+    | { ok: false; error: string };
+  const result = await updateDocument<CreateListResult>((doc) => {
     const created = createWishlist(doc, { ownerId: user.id, title, importTemplate: false });
     if (!created.ok) return { doc, result: created };
     const withType = addType(created.doc, {
@@ -232,7 +236,7 @@ export async function createListAction(formData: FormData) {
     if (!withPerson.ok) return { doc, result: withPerson };
     return {
       doc: withPerson.doc,
-      result: { ok: true as const, wishlist: created.wishlist },
+      result: { ok: true, wishlist: created.wishlist },
     };
   });
   if (!result.ok) redirect(`/listes/new?e=${encodeURIComponent(result.error)}`);
