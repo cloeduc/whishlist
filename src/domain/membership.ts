@@ -1,6 +1,67 @@
 import { clone, findMembership } from "./access";
+import { parseThemeForm, resolveTheme, type WishlistTheme } from "./theme";
 import { newToken } from "./tokens";
-import type { Database } from "./types";
+import type { Database, Wishlist } from "./types";
+
+const SUBTITLE_MAX = 280;
+
+function blankToNull(value: string | null | undefined): string | null {
+  const trimmed = (value ?? "").trim();
+  return trimmed ? trimmed : null;
+}
+
+function validHttpUrl(url: string | null): boolean {
+  if (url === null) return true;
+  return url.startsWith("http://") || url.startsWith("https://");
+}
+
+export function updateWishlistSettings(
+  doc: Database,
+  input: {
+    wishlistId: string;
+    actorId: string;
+    title?: string;
+    subtitle?: string | null;
+    coverImageUrl?: string | null;
+    theme?: Partial<WishlistTheme> | null;
+  },
+): { ok: true; doc: Database; wishlist: Wishlist } | { ok: false; error: string } {
+  const actor = findMembership(doc, input.wishlistId, input.actorId);
+  if (!actor) return { ok: false, error: "notMember" };
+  const wishlist = doc.wishlists.find((entry) => entry.id === input.wishlistId);
+  if (!wishlist) return { ok: false, error: "listMissing" };
+
+  const title =
+    input.title !== undefined ? input.title.trim() : wishlist.title;
+  if (!title) return { ok: false, error: "listNeedsTitle" };
+
+  const subtitle =
+    input.subtitle !== undefined ? blankToNull(input.subtitle) : wishlist.subtitle;
+  if (subtitle && subtitle.length > SUBTITLE_MAX) {
+    return { ok: false, error: "subtitleTooLong" };
+  }
+
+  const coverImageUrl =
+    input.coverImageUrl !== undefined
+      ? blankToNull(input.coverImageUrl)
+      : wishlist.coverImageUrl;
+  if (!validHttpUrl(coverImageUrl)) return { ok: false, error: "imageMustBeHttp" };
+
+  let theme = resolveTheme(wishlist.theme);
+  if (input.theme !== undefined && input.theme !== null) {
+    const parsed = parseThemeForm(input.theme);
+    if (!parsed.ok) return parsed;
+    theme = parsed.theme;
+  }
+
+  const next = clone(doc);
+  const target = next.wishlists.find((entry) => entry.id === input.wishlistId)!;
+  target.title = title;
+  target.subtitle = subtitle;
+  target.coverImageUrl = coverImageUrl;
+  target.theme = theme;
+  return { ok: true, doc: next, wishlist: target };
+}
 
 function wipeWishlist(doc: Database, wishlistId: string): void {
   doc.wishlists = doc.wishlists.filter((w) => w.id !== wishlistId);

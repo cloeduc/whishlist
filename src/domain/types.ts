@@ -1,3 +1,7 @@
+import type { WishlistTheme } from "./theme";
+
+export type { WishlistTheme };
+
 export type Role = "owner" | "member";
 export type ViewKind = "all" | "types" | "person";
 
@@ -14,6 +18,12 @@ export interface User {
 export interface Wishlist {
   id: string;
   title: string;
+  /** Sous-titre affiché sous le titre sur la page publique. */
+  subtitle: string | null;
+  /** Image d'illustration (URL http(s)) — sinon le cadeau SVG aux couleurs du thème. */
+  coverImageUrl: string | null;
+  /** Palette propre à la liste (défaut = favicon cadeau). */
+  theme: WishlistTheme;
   readToken: string;
   inviteToken: string;
   fromTemplate: boolean;
@@ -69,6 +79,8 @@ export interface Reservation {
   itemId: string;
   fromName: string | null;
   note: string | null;
+  /** Rempli si la réservation a été faite en étant connecté. */
+  userId: string | null;
   createdAt: string;
 }
 

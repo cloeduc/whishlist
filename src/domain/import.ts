@@ -1,4 +1,5 @@
 import { clone } from "./access";
+import { DEFAULT_WISHLIST_THEME } from "./theme";
 import { distinctTokens, newId } from "./tokens";
 import type { Database, SeedFile, Wishlist } from "./types";
 
@@ -73,6 +74,9 @@ export function createWishlist(
   const wishlist: Wishlist = {
     id,
     title,
+    subtitle: null,
+    coverImageUrl: null,
+    theme: { ...DEFAULT_WISHLIST_THEME },
     readToken: tokens.readToken,
     inviteToken: tokens.inviteToken,
     fromTemplate: input.importTemplate,

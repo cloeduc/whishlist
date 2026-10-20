@@ -7,6 +7,7 @@ import {
   leaveWishlist,
   regenerateInvite,
   removeMember,
+  updateWishlistSettings,
 } from "../../src/domain/membership";
 import { emptyDatabase, type Database } from "../../src/domain/types";
 
@@ -75,6 +76,67 @@ test("invitation, membres, départ du créateur", () => {
     name: "x",
     typeId: "missing",
     personId: "missing",
+  });
+  assert.equal(outsider.ok, false);
+});
+
+test("réglages : sous-titre, image et couleurs", () => {
+  const doc = base();
+  assert.equal(doc.wishlists[0]?.theme.primary, "#1e60ff");
+  const updated = updateWishlistSettings(doc, {
+    wishlistId: "w",
+    actorId: "a",
+    title: "Cloé et Tat'",
+    subtitle: "Nos idées cadeaux",
+    coverImageUrl: "https://cdn.example.com/cover.png",
+    theme: {
+      primary: "#112233",
+      accent: "#ff0000",
+      highlight: "#ffcc00",
+      background: "#f5f5ff",
+    },
+  });
+  assert.equal(updated.ok, true);
+  if (!updated.ok) return;
+  assert.equal(updated.wishlist.title, "Cloé et Tat'");
+  assert.equal(updated.wishlist.subtitle, "Nos idées cadeaux");
+  assert.equal(updated.wishlist.coverImageUrl, "https://cdn.example.com/cover.png");
+  assert.equal(updated.wishlist.theme.primary, "#112233");
+  assert.equal(updated.wishlist.theme.accent, "#ff0000");
+
+  const cleared = updateWishlistSettings(updated.doc, {
+    wishlistId: "w",
+    actorId: "a",
+    title: "Cloé et Tat'",
+    subtitle: "  ",
+    coverImageUrl: "",
+  });
+  assert.equal(cleared.ok, true);
+  if (!cleared.ok) return;
+  assert.equal(cleared.wishlist.subtitle, null);
+  assert.equal(cleared.wishlist.coverImageUrl, null);
+  assert.equal(cleared.wishlist.theme.primary, "#112233");
+
+  const badImage = updateWishlistSettings(doc, {
+    wishlistId: "w",
+    actorId: "a",
+    coverImageUrl: "ftp://nope",
+  });
+  assert.equal(badImage.ok, false);
+  if (badImage.ok) return;
+  assert.equal(badImage.error, "imageMustBeHttp");
+
+  const badColor = updateWishlistSettings(doc, {
+    wishlistId: "w",
+    actorId: "a",
+    theme: { primary: "blue" },
+  });
+  assert.equal(badColor.ok, false);
+
+  const outsider = updateWishlistSettings(doc, {
+    wishlistId: "w",
+    actorId: "b",
+    subtitle: "x",
   });
   assert.equal(outsider.ok, false);
 });

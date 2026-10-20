@@ -17,7 +17,12 @@ import {
   sendInviteAction,
   setItemArchivedFormAction,
 } from "../../../src/server/actions";
+import { resolveTheme } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
+import { AppearanceForm } from "@/components/site/appearance-form";
+import { CopyLinkField } from "@/components/site/copy-link-field";
+import { LiveGiftMark } from "@/components/site/live-gift-mark";
+import { WishlistThemeScope } from "@/components/site/wishlist-theme-scope";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -63,7 +68,7 @@ export default async function EditListPage({
     getDocument(),
   ]);
   if (!user) redirect(`/connexion?next=/listes/${id}`);
-  if (user.mustChangePassword) redirect("/changer-mot-de-passe");
+  if (user.mustChangePassword) redirect("/compte");
   const list = doc.wishlists.find((entry) => entry.id === id);
   if (!list) notFound();
   const membership = findMembership(doc, id, user.id);
@@ -103,10 +108,15 @@ export default async function EditListPage({
     sortOrder: item.sortOrder,
   }));
   const error = query.e ? await translateError(query.e) : null;
+  const theme = resolveTheme(list.theme);
   return (
+    <WishlistThemeScope theme={theme}>
     <main className="flex w-full flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h1 className="text-2xl font-medium tracking-tight">{list.title}</h1>
+        <div className="flex items-center gap-3">
+          <LiveGiftMark className="size-12" />
+          <h1 className="text-2xl font-medium tracking-tight">{list.title}</h1>
+        </div>
         <Button variant="outline" size="sm" nativeButton={false} render={<Link href={readUrl} />}>
           {t("viewAsGuest")}
         </Button>
@@ -255,15 +265,13 @@ export default async function EditListPage({
             </CardHeader>
             <CardContent>
               <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="read-url">{t("share.readLink")}</FieldLabel>
-                  <Input id="read-url" readOnly value={readUrl} />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="invite-url">{t("share.inviteLink")}</FieldLabel>
-                  <Input id="invite-url" readOnly value={inviteUrl} />
-                  <FieldDescription>{t("share.inviteHint")}</FieldDescription>
-                </Field>
+                <CopyLinkField id="read-url" label={t("share.readLink")} value={readUrl} />
+                <CopyLinkField
+                  id="invite-url"
+                  label={t("share.inviteLink")}
+                  value={inviteUrl}
+                  hint={t("share.inviteHint")}
+                />
                 <form action={sendInviteAction} className="flex flex-col gap-3">
                   <input type="hidden" name="wishlistId" value={id} />
                   <input type="hidden" name="onglet" value="partage" />
@@ -358,6 +366,21 @@ export default async function EditListPage({
               />
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("settings.appearance")}</CardTitle>
+              <CardDescription>{t("settings.appearanceHint")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AppearanceForm
+                wishlistId={id}
+                title={list.title}
+                subtitle={list.subtitle}
+                coverImageUrl={list.coverImageUrl}
+                theme={theme}
+              />
+            </CardContent>
+          </Card>
           {membership.role === "owner" ? (
             <Card>
               <CardHeader>
@@ -378,5 +401,6 @@ export default async function EditListPage({
         </div>
       ) : null}
     </main>
+    </WishlistThemeScope>
   );
 }

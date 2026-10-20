@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile, access } from "node:fs/promises";
 import path from "node:path";
 import { cache } from "react";
+import { resolveTheme } from "../domain/theme";
 import { emptyDatabase, type Database } from "../domain/types";
 import { withFileLock } from "./file";
 
@@ -22,9 +23,17 @@ function normalizeDocument(doc: Database): Database {
   for (const user of doc.users) {
     if (user.mustChangePassword === undefined) user.mustChangePassword = false;
   }
+  for (const list of doc.wishlists) {
+    if (list.subtitle === undefined) list.subtitle = null;
+    if (list.coverImageUrl === undefined) list.coverImageUrl = null;
+    list.theme = resolveTheme(list.theme);
+  }
   for (const item of doc.items) {
     if (item.imageUrl === undefined) item.imageUrl = null;
     if (item.archived === undefined) item.archived = false;
+  }
+  for (const reservation of doc.reservations) {
+    if (reservation.userId === undefined) reservation.userId = null;
   }
   return doc;
 }

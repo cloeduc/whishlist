@@ -6,7 +6,13 @@ import { cookieSecure, currentUser, origin } from "../auth/current";
 import { SESSION_COOKIE, sessionSecret, signSession } from "../auth/session";
 import { createPasswordReset, resetPasswordWithToken } from "../domain/password-reset";
 import { findMembership } from "../domain/access";
-import { authenticate, changePassword, normalizeEmail, registerUser } from "../domain/users";
+import {
+  authenticate,
+  changePassword,
+  normalizeEmail,
+  registerUser,
+  updateDisplayName,
+} from "../domain/users";
 import { createWishlist } from "../domain/import";
 import { mailConfigured, sendInviteMail, sendPasswordResetMail } from "./mail";
 import {
@@ -15,6 +21,7 @@ import {
   leaveWishlist,
   regenerateInvite,
   removeMember,
+  updateWishlistSettings,
 } from "../domain/membership";
 import {
   addPerson,
@@ -117,8 +124,21 @@ export async function loginAction(formData: FormData) {
   const user = authenticate(doc, email, password);
   if (!user) redirect(`/connexion?e=1&next=${encodeURIComponent(dest)}`);
   await openSession(user.id);
-  if (user.mustChangePassword) redirect("/changer-mot-de-passe");
+  if (user.mustChangePassword) redirect("/compte");
   redirect(dest);
+}
+
+export async function updateDisplayNameAction(formData: FormData) {
+  const user = await currentUser();
+  if (!user) redirect("/connexion");
+  if (user.mustChangePassword) redirect("/compte");
+  const displayName = String(formData.get("displayName") ?? "");
+  const result = await updateDocument((doc) => {
+    const saved = updateDisplayName(doc, { userId: user.id, displayName });
+    return { doc: saved.ok ? saved.doc : doc, result: saved };
+  });
+  if (!result.ok) redirect(`/compte?e=${result.error}`);
+  redirect("/compte?ok=name");
 }
 
 export async function changePasswordAction(formData: FormData) {
@@ -128,7 +148,7 @@ export async function changePasswordAction(formData: FormData) {
   const confirm = String(formData.get("confirm") ?? "");
   const currentPassword = String(formData.get("currentPassword") ?? "");
   if (!password || password !== confirm) {
-    redirect("/changer-mot-de-passe?e=mismatch");
+    redirect("/compte?e=mismatch");
   }
   const result = await updateDocument((doc) => {
     const saved = changePassword(doc, {
@@ -140,9 +160,9 @@ export async function changePasswordAction(formData: FormData) {
   });
   if (!result.ok) {
     const code = result.error.includes("actuel") ? "current" : "1";
-    redirect(`/changer-mot-de-passe?e=${code}`);
+    redirect(`/compte?e=${code}`);
   }
-  redirect(user.mustChangePassword ? "/" : "/changer-mot-de-passe?ok=1");
+  redirect(user.mustChangePassword ? "/" : "/compte?ok=1");
 }
 
 export async function logoutAction() {
@@ -189,11 +209,31 @@ export async function resetPasswordAction(formData: FormData) {
 export async function createListAction(formData: FormData) {
   const user = await currentUser();
   if (!user) redirect("/connexion");
-  if (user.mustChangePassword) redirect("/changer-mot-de-passe");
+  if (user.mustChangePassword) redirect("/compte");
   const title = String(formData.get("title") ?? "");
+  const category = String(formData.get("category") ?? "").trim();
+  const person = String(formData.get("person") ?? "").trim();
+  if (!category) redirect(`/listes/new?e=${encodeURIComponent("listNeedsCategory")}`);
+  if (!person) redirect(`/listes/new?e=${encodeURIComponent("listNeedsPerson")}`);
   const result = await updateDocument((doc) => {
     const created = createWishlist(doc, { ownerId: user.id, title, importTemplate: false });
-    return { doc: created.ok ? created.doc : doc, result: created };
+    if (!created.ok) return { doc, result: created };
+    const withType = addType(created.doc, {
+      wishlistId: created.wishlist.id,
+      actorId: user.id,
+      label: category,
+    });
+    if (!withType.ok) return { doc, result: withType };
+    const withPerson = addPerson(withType.doc, {
+      wishlistId: created.wishlist.id,
+      actorId: user.id,
+      label: person,
+    });
+    if (!withPerson.ok) return { doc, result: withPerson };
+    return {
+      doc: withPerson.doc,
+      result: { ok: true as const, wishlist: created.wishlist },
+    };
   });
   if (!result.ok) redirect(`/listes/new?e=${encodeURIComponent(result.error)}`);
   redirect(`/listes/${result.wishlist.id}`);
@@ -202,7 +242,7 @@ export async function createListAction(formData: FormData) {
 async function memberId(): Promise<string> {
   const user = await currentUser();
   if (!user) redirect("/connexion");
-  if (user.mustChangePassword) redirect("/changer-mot-de-passe");
+  if (user.mustChangePassword) redirect("/compte");
   return user.id;
 }
 
@@ -522,7 +562,7 @@ export async function regenerateInviteAction(formData: FormData) {
 export async function sendInviteAction(formData: FormData) {
   const user = await currentUser();
   if (!user) redirect("/connexion");
-  if (user.mustChangePassword) redirect("/changer-mot-de-passe");
+  if (user.mustChangePassword) redirect("/compte");
   const wishlistId = String(formData.get("wishlistId") ?? "");
   const email = normalizeEmail(String(formData.get("email") ?? ""));
   if (!email || !email.includes("@")) {
@@ -582,12 +622,40 @@ export async function deleteListAction(formData: FormData) {
   redirect("/");
 }
 
+export async function updateWishlistSettingsAction(formData: FormData) {
+  const actorId = await memberId();
+  const wishlistId = String(formData.get("wishlistId") ?? "");
+  const title = String(formData.get("title") ?? "");
+  const subtitle = String(formData.get("subtitle") ?? "");
+  const coverImageUrl = String(formData.get("coverImageUrl") ?? "");
+  const theme = {
+    primary: String(formData.get("primary") ?? ""),
+    accent: String(formData.get("accent") ?? ""),
+    highlight: String(formData.get("highlight") ?? ""),
+    background: String(formData.get("background") ?? ""),
+  };
+  const result = await updateDocument((doc) => {
+    const saved = updateWishlistSettings(doc, {
+      wishlistId,
+      actorId,
+      title,
+      subtitle,
+      coverImageUrl,
+      theme,
+    });
+    return { doc: saved.ok ? saved.doc : doc, result: saved };
+  });
+  if (!result.ok) redirectToList(wishlistId, formData, result.error);
+  redirectToList(wishlistId, formData);
+}
+
 export async function reserveAction(formData: FormData) {
   const readToken = String(formData.get("readToken") ?? "");
   const typeId = String(formData.get("typeId") ?? "");
   const itemId = String(formData.get("itemId") ?? "");
   const fromName = String(formData.get("fromName") ?? "");
   const note = String(formData.get("note") ?? "");
+  const user = await currentUser();
   const doc = await readDocument();
   const wishlist = doc.wishlists.find((w) => w.readToken === readToken);
   if (!wishlist) redirect("/");
@@ -598,6 +666,7 @@ export async function reserveAction(formData: FormData) {
       typeId,
       fromName,
       note,
+      userId: user?.id ?? null,
     });
     return { doc: saved.ok ? saved.doc : current, result: saved };
   });
@@ -613,7 +682,7 @@ export async function reserveAction(formData: FormData) {
 export async function joinInviteAction(token: string) {
   const user = await currentUser();
   if (!user) redirect(`/connexion?next=${encodeURIComponent(`/inviter/${token}`)}`);
-  if (user.mustChangePassword) redirect("/changer-mot-de-passe");
+  if (user.mustChangePassword) redirect("/compte");
   const result = await updateDocument((doc) => {
     const saved = acceptInvite(doc, { token, userId: user.id });
     return { doc: saved.ok ? saved.doc : doc, result: saved };

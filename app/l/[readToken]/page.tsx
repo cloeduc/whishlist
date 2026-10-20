@@ -12,14 +12,17 @@ import {
   type BudgetId,
 } from "../../../src/domain/filters";
 import { toPublicItem, type PublicItem } from "../../../src/domain/read";
+import { resolveTheme, themeToCssVars } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { PriorityStars } from "@/components/site/priority-stars";
+import { WishlistCover } from "@/components/site/wishlist-cover";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { getLocale, getTranslations } from "@/src/i18n/server";
+import type { CSSProperties } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -138,11 +141,20 @@ export default async function ReadPage({
   const budgetLabel = budget ? t(`budgets.${budget}`) : null;
   const heading = [allLabel, personLabel, budgetLabel].filter(Boolean).join(" · ");
   const emptyTitle = qui || budget ? t("emptyFiltered") : t("emptyList");
+  const theme = resolveTheme(list.theme);
+  const cssVars = themeToCssVars(theme);
+  const rootCss = Object.entries(cssVars)
+    .map(([key, value]) => `${key}:${value}`)
+    .join(";");
   return (
-    <main className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-medium tracking-tight">{list.title}</h1>
-        <p className="text-muted-foreground">{t("clickCategory")}</p>
+    <main className="flex flex-col gap-6" style={cssVars as CSSProperties}>
+      <style dangerouslySetInnerHTML={{ __html: `:root{${rootCss}}` }} />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+        <WishlistCover coverImageUrl={list.coverImageUrl} theme={theme} size="md" />
+        <div className="flex min-w-0 flex-col gap-2">
+          <h1 className="text-2xl font-bold tracking-tight">{list.title}</h1>
+          {list.subtitle ? <p className="text-muted-foreground text-pretty">{list.subtitle}</p> : null}
+        </div>
       </div>
       <nav aria-label={t("categoriesNav")} className="flex flex-wrap gap-2">
         <Button
