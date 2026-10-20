@@ -28,3 +28,7 @@ skills-lock.json
 tsconfig.tsbuildinfo
 
 tmp/
+
+# Notes locales (ne pas versionner)
+Audit_wording_*.md
+
