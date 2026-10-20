@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Backup quotidien du JSON Wishlist.
+# Backup quotidien du JSON Oh, You Shouldn't!.
 # - Copie datée mode 600
 # - Chiffrement AES si WHISHLIST_BACKUP_PASSPHRASE est set (openssl)
 # - Conserve WHISHLIST_BACKUP_KEEP jours (défaut 14)

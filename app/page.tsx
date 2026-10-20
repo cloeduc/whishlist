@@ -9,6 +9,7 @@ import { WishlistCover } from "@/components/site/wishlist-cover";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { GITHUB_REPO_URL } from "@/src/site/links";
 import { getTranslations } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +23,7 @@ export default async function HomePage() {
   if (user?.mustChangePassword) redirect("/compte");
   if (!user) {
     return (
-      <main>
+      <main className="flex flex-col gap-6">
         <GuestHero
           brand={tCommon("brand")}
           headline={t("guest.headline")}
@@ -30,9 +31,18 @@ export default async function HomePage() {
           createAccount={t("guest.createAccount")}
           createHint={t("guest.createHint")}
           hasAccount={t("guest.hasAccount")}
-          selfHost={t("guest.selfHost")}
-          github={t("guest.github")}
         />
+        <p className="text-sm text-muted-foreground">
+          {t("guest.selfHost")}{" "}
+          <a
+            href={GITHUB_REPO_URL}
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            {t("guest.github")}
+          </a>
+        </p>
       </main>
     );
   }

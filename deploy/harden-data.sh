@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Permissions owner-only sur env + volume data Wishlist.
+# Permissions owner-only sur env + volume data Oh, You Shouldn't!.
 set -euo pipefail
 
 ENV_FILE="${WHISHLIST_ENV_FILE:-$HOME/webserver/data/whishlist.env}"

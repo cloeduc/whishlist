@@ -1,11 +1,11 @@
 #!/bin/bash
-# Bootstrap Wishlist sur le Mac mini (image + compose + tunnel DNS/ingress).
+# Bootstrap Oh, You Shouldn't! sur le Mac mini (image + compose + tunnel DNS/ingress).
 set -euo pipefail
 
 REPO="${HOME}/webserver/repos/whishlist"
 DATA_DIR="${HOME}/webserver/data/whishlist"
 ENV_FILE="${HOME}/webserver/data/whishlist.env"
-DOMAIN="${WHISHLIST_DOMAIN:-wishlist.mesdamesduc.fr}"
+DOMAIN="${WHISHLIST_DOMAIN:-ohyoushouldnt.app}"
 PORT="${WHISHLIST_PORT:-8740}"
 TUNNEL_NAME="${WHISHLIST_TUNNEL:-immich-tunnel}"
 

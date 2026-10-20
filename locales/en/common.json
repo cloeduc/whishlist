@@ -1,12 +1,12 @@
 {
-  "brand": "Wishlist",
+  "brand": "Oh, You Shouldn't!",
   "meta": {
-    "title": "Wishlist — Wish lists to share",
+    "title": "Oh, You Shouldn't! — Wish lists to share",
     "description": "Create a wish list and share it with friends and family. They can reserve a gift without creating an account."
   },
   "nav": {
     "menuAria": "Main navigation",
-    "homeAria": "Wishlist — Home",
+    "homeAria": "Oh, You Shouldn't! — Home",
     "myLists": "My wish lists",
     "account": "My account",
     "logout": "Log out",
@@ -22,12 +22,12 @@
   },
   "locale": {
     "groupAria": "Language",
-    "fr": "Français",
-    "en": "English"
+    "fr": "FR",
+    "en": "EN"
   },
   "footer": {
-    "tagline": "Wishlist is a free and self-hostable project.",
+    "tagline": "Oh, You Shouldn't! is a free, vibe-coded, self-hostable project.",
     "github": "View the code on GitHub",
-    "support": "Support Wishlist"
+    "support": "Support Oh, You Shouldn't!"
   }
 }

@@ -1,13 +1,13 @@
 {
   "guest": {
-    "headline": "Les bonnes idées font les bons cadeaux.",
+    "headline": "Bon, j'ai quand même fait une liste.",
     "body": "Rassemblez vos envies dans une liste et partagez-la avec vos proches. Ils peuvent choisir un cadeau et le réserver, sans créer de compte.",
     "createAccount": "Créer ma liste",
     "createHint": "Un compte est nécessaire pour créer une liste.",
     "hasAccount": "Se connecter",
-    "selfHost": "Vous souhaitez héberger Wishlist vous-même ?",
+    "selfHost": "Vous souhaitez héberger Oh, mais fallait pas ! vous-même ?",
     "github": "Voir le code sur GitHub",
-    "support": "Soutenir Wishlist"
+    "support": "Soutenir Oh, mais fallait pas !"
   },
   "mine": {
     "title": "Mes listes",

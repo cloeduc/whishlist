@@ -1,8 +1,8 @@
-# Déployer Wishlist — Mac mini + Runtipi + Cloudflare
+# Déployer Oh, You Shouldn't! — Mac mini + Runtipi + Cloudflare
 
 > Déploiement générique (Docker, env, smoke) : voir le [README racine](../README.md).
 
-Domaine : `wishlist.mesdamesduc.fr`  
+Domaine : `ohyoushouldnt.app`  
 Port hôte : `8740`
 
 ## 0. Avant le Mac mini
@@ -24,10 +24,10 @@ docker build --pull -t whishlist:local .
 
 ## 2. Installer via Runtipi (UI)
 
-Settings → App Stores → `mesdamesduc` → Update → Wishlist → Install :
+Settings → App Stores → `mesdamesduc` → Update → Oh, You Shouldn't! → Install :
 
 - image : `whishlist:local`
-- URL : `https://wishlist.mesdamesduc.fr`
+- URL : `https://ohyoushouldnt.app`
 - secrets session : générés par Runtipi
 - Resend / MAIL_FROM : optionnels
 
@@ -45,9 +45,9 @@ WHISHLIST_DATA_DIR=$HOME/webserver/data/whishlist \
 ## 4. Cloudflare tunnel
 
 ```bash
-cloudflared tunnel route dns immich-tunnel wishlist.mesdamesduc.fr
+cloudflared tunnel route dns immich-tunnel ohyoushouldnt.app
 # puis ajouter dans /etc/cloudflared/config.yml :
-#   - hostname: wishlist.mesdamesduc.fr
+#   - hostname: ohyoushouldnt.app
 #     service: http://127.0.0.1:8740
 # restart cloudflared
 ```
@@ -55,8 +55,8 @@ cloudflared tunnel route dns immich-tunnel wishlist.mesdamesduc.fr
 ## 5. Smoke / ops
 
 ```bash
-curl -sS -o /dev/null -w "%{http_code}\n" -H "Host: wishlist.mesdamesduc.fr" http://127.0.0.1:8740/
-curl -sSI https://wishlist.mesdamesduc.fr
+curl -sS -o /dev/null -w "%{http_code}\n" -H "Host: ohyoushouldnt.app" http://127.0.0.1:8740/
+curl -sSI https://ohyoushouldnt.app
 bash deploy/ops-check.sh
 ```
 
@@ -98,6 +98,6 @@ chmod 600 ~/webserver/data/whishlist/wishlist.json
 | Clé | Rôle |
 |---|---|
 | `WHISHLIST_SESSION_SECRET` | cookies |
-| `WHISHLIST_APP_ORIGIN` | `https://wishlist.mesdamesduc.fr` |
+| `WHISHLIST_APP_ORIGIN` | `https://ohyoushouldnt.app` |
 | `WHISHLIST_RESEND_API_KEY` + `WHISHLIST_MAIL_FROM` | reset / invite |
 | `WHISHLIST_GEMINI_API_KEY` | enrich (optionnel) |

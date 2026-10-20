@@ -1,12 +1,12 @@
 {
-  "brand": "Wishlist",
+  "brand": "Oh, mais fallait pas !",
   "meta": {
-    "title": "Wishlist — Vos listes de cadeaux à partager",
+    "title": "Oh, mais fallait pas ! — Vos listes de cadeaux à partager",
     "description": "Créez une liste de cadeaux et partagez-la avec vos proches. Ils peuvent réserver une idée sans créer de compte."
   },
   "nav": {
     "menuAria": "Navigation principale",
-    "homeAria": "Wishlist — Accueil",
+    "homeAria": "Oh, mais fallait pas ! — Accueil",
     "myLists": "Mes listes",
     "account": "Mon compte",
     "logout": "Se déconnecter",
@@ -22,12 +22,12 @@
   },
   "locale": {
     "groupAria": "Langue",
-    "fr": "Français",
-    "en": "English"
+    "fr": "FR",
+    "en": "EN"
   },
   "footer": {
-    "tagline": "Wishlist est un projet libre et auto-hébergeable.",
+    "tagline": "Oh, mais fallait pas ! est un projet libre, vibe codé, et auto-hébergeable.",
     "github": "Voir le code sur GitHub",
-    "support": "Soutenir Wishlist"
+    "support": "Soutenir Oh, mais fallait pas !"
   }
 }

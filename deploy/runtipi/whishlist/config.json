@@ -1,5 +1,5 @@
 {
-  "name": "Wishlist",
+  "name": "Oh, You Shouldn't!",
   "id": "whishlist",
   "available": true,
   "exposable": true,
@@ -10,10 +10,10 @@
   "min_tipi_version": "4.0.0",
   "categories": ["utilities"],
   "short_desc": "Listes de cadeaux à lire sans compte",
-  "description": "Wishlist foyer — Next.js + JSON. Exposer en wishlist.mesdamesduc.fr via Cloudflare.",
+  "description": "Oh, mais fallait pas ! / Oh, You Shouldn't! — Next.js + JSON. Exposer en ohyoushouldnt.app via Cloudflare.",
   "author": "Mesdames Duc",
   "source": "https://github.com/cloeduc/whishlist",
-  "website": "https://wishlist.mesdamesduc.fr",
+  "website": "https://ohyoushouldnt.app",
   "supported_architectures": ["arm64", "amd64"],
   "created_at": 1760880000000,
   "updated_at": 1760880000000,
@@ -30,7 +30,7 @@
       "label": "URL publique",
       "env_variable": "WHISHLIST_PUBLIC_URL",
       "required": true,
-      "default": "https://wishlist.mesdamesduc.fr"
+      "default": "https://ohyoushouldnt.app"
     },
     {
       "type": "text",
@@ -50,7 +50,7 @@
     {
       "type": "text",
       "label": "MAIL_FROM",
-      "hint": "Wishlist <noreply@domaine.fr>",
+      "hint": "Oh, You Shouldn't! <noreply@domaine.fr>",
       "env_variable": "WHISHLIST_MAIL_FROM",
       "required": false
     },

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Smoke / hygiène ops Wishlist sur le Mac mini.
+# Smoke / hygiène ops Oh, You Shouldn't! sur le Mac mini.
 set -euo pipefail
 
-DOMAIN="${WHISHLIST_DOMAIN:-wishlist.mesdamesduc.fr}"
+DOMAIN="${WHISHLIST_DOMAIN:-ohyoushouldnt.app}"
 PORT="${WHISHLIST_PORT:-8740}"
 ENV_FILE="${WHISHLIST_ENV_FILE:-$HOME/webserver/data/whishlist.env}"
 DATA_DIR="${WHISHLIST_DATA_DIR:-$HOME/webserver/data/whishlist}"

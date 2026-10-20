@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { LocaleSwitcher } from "@/components/site/locale-switcher";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -66,7 +67,9 @@ export function SiteNav({
           {navLink("/inscription", t("nav.register"))}
         </>
       )}
-      <LocaleSwitcher locale={locale} />
+      <Suspense fallback={null}>
+        <LocaleSwitcher locale={locale} />
+      </Suspense>
       {supportUrl ? (
         <a
           href={supportUrl}

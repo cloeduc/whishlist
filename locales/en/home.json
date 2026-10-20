@@ -1,13 +1,13 @@
 {
   "guest": {
-    "headline": "Great gifts start with a wish list.",
+    "headline": "Well, I did make a list.",
     "body": "Create a wish list and share it with friends and family. They can choose and reserve a gift without creating an account.",
-    "createAccount": "Create my wish list",
+    "createAccount": "Make my list",
     "createHint": "You’ll need an account to create a wish list.",
     "hasAccount": "Log in",
-    "selfHost": "Want to host Wishlist yourself?",
+    "selfHost": "Want to host Oh, You Shouldn't! yourself?",
     "github": "View the code on GitHub",
-    "support": "Support Wishlist"
+    "support": "Support Oh, You Shouldn't!"
   },
   "mine": {
     "title": "My wish lists",

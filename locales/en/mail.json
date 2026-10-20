@@ -1,17 +1,17 @@
 {
   "reset": {
-    "subject": "Reset your Wishlist password",
+    "subject": "Reset your Oh, You Shouldn't! password",
     "intro": "You requested a password reset. Use the button below to choose a new password. This link is valid for 1 hour.",
     "openLink": "If the button doesn’t work, copy this link into your browser:",
     "cta": "Choose a new password",
     "ignore": "If you didn’t request this, you can ignore this email."
   },
   "invite": {
-    "subject": "You’re invited to join a list on Wishlist",
+    "subject": "You’re invited to join a list on Oh, You Shouldn't!",
     "intro": "You’ve been invited to join “{{listTitle}}” and help manage it. Log in or create an account to continue.",
     "openLink": "If the button doesn’t work, copy this link into your browser:",
     "cta": "Join wish list",
-    "ctaHint": "a Wishlist account is required",
+    "ctaHint": "an Oh, You Shouldn't! account is required",
     "ignore": "If you weren’t expecting this, ignore it."
   }
 }

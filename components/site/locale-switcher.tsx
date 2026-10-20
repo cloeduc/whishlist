@@ -1,35 +1,41 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
-import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { setLocaleAction } from "@/src/server/actions";
-import { isLocale, type Locale } from "@/src/i18n/config";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import type { Locale } from "@/src/i18n/config";
 
 export function LocaleSwitcher({ locale }: { locale: Locale }) {
   const { t } = useTranslation("common");
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const pathname = usePathname() ?? "/";
+  const searchParams = useSearchParams();
 
   return (
-    <NativeSelect
-      size="sm"
-      value={locale}
-      disabled={pending}
+    <div
+      className="flex items-center gap-0.5"
+      role="group"
       aria-label={t("locale.groupAria")}
-      className="shrink-0"
-      onChange={(event) => {
-        const next = event.target.value;
-        if (!isLocale(next) || next === locale) return;
-        startTransition(async () => {
-          await setLocaleAction(next);
-          router.refresh();
-        });
-      }}
     >
-      <NativeSelectOption value="fr">{t("locale.fr")}</NativeSelectOption>
-      <NativeSelectOption value="en">{t("locale.en")}</NativeSelectOption>
-    </NativeSelect>
+      {(["fr", "en"] as const).map((lang) => {
+        const active = locale === lang;
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("lang", lang);
+        return (
+          <a
+            key={lang}
+            href={`${pathname}?${params.toString()}`}
+            hrefLang={lang}
+            aria-current={active ? "true" : undefined}
+            className={cn(
+              buttonVariants({ variant: active ? "default" : "ghost", size: "sm" }),
+              "min-w-9 px-2 font-semibold uppercase tracking-wide",
+            )}
+          >
+            {t(`locale.${lang}`)}
+          </a>
+        );
+      })}
+    </div>
   );
 }

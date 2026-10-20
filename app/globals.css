@@ -243,9 +243,6 @@
 .guest-hero__cta {
   animation: guest-rise 0.85s ease-out 0.2s both;
 }
-.guest-hero__footer {
-  animation: guest-rise 0.9s ease-out 0.28s both;
-}
 @keyframes guest-bob {
   0%,
   100% {
@@ -282,8 +279,7 @@
   .guest-hero__brand,
   .guest-hero__headline,
   .guest-hero__body,
-  .guest-hero__cta,
-  .guest-hero__footer {
+  .guest-hero__cta {
     animation: none;
   }
 }

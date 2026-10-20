@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { GiftMark } from "@/components/site/gift-mark";
 import { Button } from "@/components/ui/button";
-import { GITHUB_REPO_URL } from "@/src/site/links";
 
 /** Landing hors session : brand + pitch + CTA, ambiance cadeau néo-brutale. */
 export function GuestHero({
@@ -11,8 +10,6 @@ export function GuestHero({
   createAccount,
   createHint,
   hasAccount,
-  selfHost,
-  github,
 }: {
   brand: string;
   headline: string;
@@ -20,8 +17,6 @@ export function GuestHero({
   createAccount: string;
   createHint: string;
   hasAccount: string;
-  selfHost: string;
-  github: string;
 }) {
   return (
     <section className="guest-hero relative isolate overflow-hidden rounded-base border-2 border-border shadow-shadow">
@@ -32,10 +27,12 @@ export function GuestHero({
           <GiftMark className="size-28 sm:size-36" title={brand} />
         </div>
         <div className="flex max-w-xl flex-col gap-4">
-          <p className="guest-hero__brand text-5xl font-black tracking-tight sm:text-6xl">{brand}</p>
-          <h1 className="guest-hero__headline text-balance text-2xl font-bold tracking-tight sm:text-3xl">
-            {headline}
+          <h1 className="guest-hero__brand text-balance text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+            {brand}
           </h1>
+          <p className="guest-hero__headline text-balance text-2xl font-bold tracking-tight sm:text-3xl">
+            {headline}
+          </p>
           <p className="guest-hero__body text-pretty text-base text-muted-foreground sm:text-lg">{body}</p>
         </div>
         <div className="guest-hero__cta flex flex-col items-start gap-2">
@@ -49,17 +46,6 @@ export function GuestHero({
           </div>
           <p className="text-sm text-muted-foreground">{createHint}</p>
         </div>
-        <p className="guest-hero__footer text-sm text-muted-foreground">
-          {selfHost}{" "}
-          <a
-            href={GITHUB_REPO_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
-          >
-            {github}
-          </a>
-        </p>
       </div>
     </section>
   );

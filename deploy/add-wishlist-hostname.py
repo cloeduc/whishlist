@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add wishlist.mesdamesduc.fr to the remotely-managed Cloudflare tunnel config.
+"""Add ohyoushouldnt.app to the remotely-managed Cloudflare tunnel config.
 
 Requires CF_API_TOKEN with Account.Cloudflare Tunnel:Edit (or Zero Trust edit).
 """
@@ -12,7 +12,7 @@ import urllib.request
 
 ACCOUNT = "0f5451fcdff45aa800d9100c6f3e9fc3"
 TUNNEL = "9b4d9b73-7474-4ebc-8e4e-40667845678b"
-HOSTNAME = os.environ.get("WHISHLIST_DOMAIN", "wishlist.mesdamesduc.fr")
+HOSTNAME = os.environ.get("WHISHLIST_DOMAIN", "ohyoushouldnt.app")
 SERVICE = os.environ.get("WHISHLIST_ORIGIN", "http://10.0.0.1:8740")
 
 

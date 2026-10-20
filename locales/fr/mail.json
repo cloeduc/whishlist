@@ -1,17 +1,17 @@
 {
   "reset": {
-    "subject": "Réinitialisez votre mot de passe Wishlist",
+    "subject": "Réinitialisez votre mot de passe — Oh, mais fallait pas !",
     "intro": "Vous avez demandé à réinitialiser votre mot de passe. Utilisez le bouton ci-dessous pour en choisir un nouveau. Ce lien est valable 1 heure.",
     "openLink": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :",
     "cta": "Choisir un nouveau mot de passe",
     "ignore": "Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail."
   },
   "invite": {
-    "subject": "Invitation à rejoindre une liste sur Wishlist",
+    "subject": "Invitation à rejoindre une liste sur Oh, mais fallait pas !",
     "intro": "Vous avez reçu une invitation à rejoindre « {{listTitle}} » pour participer à sa gestion. Connectez-vous ou créez un compte pour continuer.",
     "openLink": "Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :",
     "cta": "Rejoindre la liste",
-    "ctaHint": "un compte Wishlist est nécessaire",
+    "ctaHint": "un compte Oh, mais fallait pas ! est nécessaire",
     "ignore": "Si vous n'attendiez pas ce message, ignorez-le."
   }
 }

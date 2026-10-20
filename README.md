@@ -1,6 +1,6 @@
-# Wishlist
+# Oh, mais fallait pas ! / Oh, You Shouldn't!
 
-Listes de cadeaux partagées : lecture publique sans compte, édition à plusieurs avec compte, réservations anonymes (« J’offre »), catégories / « qui », archives, i18n FR/EN, enrichissement produit depuis une URL (Gemini / OpenAI).
+Listes de cadeaux partagées (`ohyoushouldnt.app`) : lecture publique sans compte, édition à plusieurs avec compte, réservations anonymes (« J’offre »), catégories / « qui », archives, i18n FR/EN, enrichissement produit depuis une URL (Gemini / OpenAI).
 
 Stack : **Next.js 15** (App Router) · **React 19** · stock JSON fichier · Docker standalone.
 
@@ -46,11 +46,11 @@ Données locales : `data/wishlist.json` (créé au premier lancement).
 | Variable | Requis | Rôle |
 |---|---|---|
 | `SESSION_SECRET` | **oui** | Signature des cookies de session |
-| `APP_ORIGIN` | prod | URL publique (`https://wishlist.mesdamesduc.fr`) pour mails / liens de partage |
+| `APP_ORIGIN` | prod | URL publique (`https://ohyoushouldnt.app`) pour mails / liens de partage |
 | `SUPPORT_URL` | non | Payment Link Stripe (« Soutenir le projet ») |
 | `WISHLIST_DATA_PATH` | non | Chemin du JSON (défaut `data/wishlist.json`) |
 | `RESEND_API_KEY` | non | Envoi d’e-mails |
-| `MAIL_FROM` | non | Expéditeur Resend, ex. `Wishlist <noreply@domaine.fr>` |
+| `MAIL_FROM` | non | Expéditeur Resend, ex. `Oh, You Shouldn't! <noreply@domaine.fr>` |
 | `PASSWORD_RESET_SHOW_LINK` | non | `1` = affiche le lien reset dans l’UI si mail KO (dev) |
 | `GEMINI_API_KEY` | non | Enrichissement URL (prioritaire si les deux clés sont set) |
 | `OPENAI_API_KEY` | non | Enrichissement URL (fallback) |
@@ -74,9 +74,9 @@ docker build -t whishlist:local .
 mkdir -p ./data-prod
 cat > whishlist.env <<'EOF'
 WHISHLIST_SESSION_SECRET=change-moi-par-une-longue-chaine-aleatoire
-WHISHLIST_APP_ORIGIN=https://wishlist.mesdamesduc.fr
+WHISHLIST_APP_ORIGIN=https://ohyoushouldnt.app
 # WHISHLIST_RESEND_API_KEY=re_...
-# WHISHLIST_MAIL_FROM=Wishlist <noreply@exemple.fr>
+# WHISHLIST_MAIL_FROM=Oh, You Shouldn't! <noreply@exemple.fr>
 # WHISHLIST_GEMINI_API_KEY=...
 # WHISHLIST_OPENAI_API_KEY=...
 EOF

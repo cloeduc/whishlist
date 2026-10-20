@@ -7,8 +7,8 @@ import {
 } from "../../src/auth/origin";
 
 test("normalizeAppOrigin accepte http(s) host only", () => {
-  assert.equal(normalizeAppOrigin("https://wishlist.mesdamesduc.fr"), "https://wishlist.mesdamesduc.fr");
-  assert.equal(normalizeAppOrigin("https://wishlist.mesdamesduc.fr/"), "https://wishlist.mesdamesduc.fr");
+  assert.equal(normalizeAppOrigin("https://ohyoushouldnt.app"), "https://ohyoushouldnt.app");
+  assert.equal(normalizeAppOrigin("https://ohyoushouldnt.app/"), "https://ohyoushouldnt.app");
   assert.equal(normalizeAppOrigin("http://localhost:3000"), "http://localhost:3000");
   assert.equal(normalizeAppOrigin("https://example.com/path"), null);
   assert.equal(normalizeAppOrigin("ftp://x"), null);
@@ -32,9 +32,9 @@ test("originFromHeaders prend le premier hop Forwarded", () => {
   assert.equal(
     originFromHeaders({
       host: "internal:3000",
-      forwardedHost: "wishlist.mesdamesduc.fr, evil.com",
+      forwardedHost: "ohyoushouldnt.app, evil.com",
       forwardedProto: "https, http",
     }),
-    "https://wishlist.mesdamesduc.fr",
+    "https://ohyoushouldnt.app",
   );
 });
