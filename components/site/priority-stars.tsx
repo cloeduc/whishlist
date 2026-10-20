@@ -15,7 +15,7 @@ export function PriorityStars({
       role="img"
       aria-label={`${n} sur ${PRIORITY_MAX}`}
       title={`${n} / ${PRIORITY_MAX}`}
-      className={`inline-flex items-center gap-0.5 text-main ${className}`}
+      className={`inline-flex items-center gap-0.5 text-highlight ${className}`}
     >
       {Array.from({ length: n }, (_, i) => (
         <StarIcon key={i} className="size-3.5 fill-current" aria-hidden />
