@@ -196,6 +196,98 @@
 *::-webkit-scrollbar-track {
   background: var(--sb-track-color);
 }
+/* Hero guest (accueil hors connexion) */
+.guest-hero {
+  background:
+    radial-gradient(ellipse 80% 60% at 100% 0%, color-mix(in oklab, var(--gift-yellow) 55%, transparent), transparent 55%),
+    radial-gradient(ellipse 70% 50% at 0% 100%, color-mix(in oklab, var(--gift-red) 28%, transparent), transparent 50%),
+    linear-gradient(160deg, #fff 0%, var(--background) 45%, color-mix(in oklab, var(--gift-blue) 12%, white) 100%);
+}
+.guest-hero__stripes {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  background-image: repeating-linear-gradient(
+    -18deg,
+    transparent,
+    transparent 14px,
+    color-mix(in oklab, var(--gift-blue) 14%, transparent) 14px,
+    color-mix(in oklab, var(--gift-blue) 14%, transparent) 15px
+  );
+}
+.guest-hero__glow {
+  pointer-events: none;
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: min(420px, 80vw);
+  height: min(420px, 80vw);
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--gift-yellow) 40%, transparent);
+  filter: blur(40px);
+  animation: guest-glow 6s ease-in-out infinite alternate;
+}
+.guest-hero__gift {
+  animation: guest-bob 3.2s ease-in-out infinite;
+}
+.guest-hero__brand {
+  animation: guest-rise 0.7s ease-out both;
+}
+.guest-hero__headline {
+  animation: guest-rise 0.75s ease-out 0.08s both;
+}
+.guest-hero__body {
+  animation: guest-rise 0.8s ease-out 0.14s both;
+}
+.guest-hero__cta {
+  animation: guest-rise 0.85s ease-out 0.2s both;
+}
+.guest-hero__footer {
+  animation: guest-rise 0.9s ease-out 0.28s both;
+}
+@keyframes guest-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+@keyframes guest-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes guest-glow {
+  from {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.12) translate(-12px, 18px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guest-hero__gift,
+  .guest-hero__glow,
+  .guest-hero__brand,
+  .guest-hero__headline,
+  .guest-hero__body,
+  .guest-hero__cta,
+  .guest-hero__footer {
+    animation: none;
+  }
+}
+
 *::-webkit-scrollbar-thumb {
   background: var(--sb-thumb-color);
 }

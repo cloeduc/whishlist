@@ -1,9 +1,12 @@
 {
   "guest": {
-    "title": "Lists are readable without an account",
-    "body": "Someone shared a link with you: open it. Without a link, there is no directory.",
+    "headline": "Gift lists, without the fuss",
+    "body": "Create a list, share the read link. Friends and family browse ideas and reserve without an account. Co-edit via invite. No public directory.",
     "createAccount": "Create an account",
-    "hasAccount": "I already have an account"
+    "hasAccount": "I already have an account",
+    "selfHost": "Prefer to self-host?",
+    "github": "Open source on GitHub",
+    "support": "Support the project ♥"
   },
   "mine": {
     "title": "My wishlists",

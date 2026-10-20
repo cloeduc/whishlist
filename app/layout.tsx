@@ -3,10 +3,12 @@ import { Geist } from "next/font/google";
 import Link from "next/link";
 import { currentUser } from "../src/auth/current";
 import { GiftMark } from "@/components/site/gift-mark";
+import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { cn } from "@/lib/utils";
 import { I18nProvider } from "@/src/i18n/client";
 import { getLocale, getTranslations } from "@/src/i18n/server";
+import { supportUrl } from "@/src/site/links";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
@@ -51,6 +53,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               />
             </header>
             {children}
+            <SiteFooter
+              selfHost={t("footer.selfHost")}
+              github={t("footer.github")}
+              support={t("footer.support")}
+              supportUrl={supportUrl()}
+            />
           </div>
         </I18nProvider>
       </body>

@@ -23,5 +23,10 @@
     "groupAria": "Langue",
     "fr": "FR",
     "en": "EN"
+  },
+  "footer": {
+    "selfHost": "Envie de votre propre instance ?",
+    "github": "Code libre sur GitHub — installez-la chez vous",
+    "support": "Soutenir le projet ♥"
   }
 }

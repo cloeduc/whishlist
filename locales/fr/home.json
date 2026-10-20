@@ -1,9 +1,12 @@
 {
   "guest": {
-    "title": "Les listes se lisent sans compte",
-    "body": "Quelqu'un t'a passé un lien : ouvre-le. Sans lien, il n'y a pas d'annuaire.",
+    "headline": "Des listes de cadeaux, sans friction",
+    "body": "Créez une liste, partagez le lien de lecture. Vos proches voient les idées et réservent sans compte. Pour co-éditer, invitez-les. Pas d'annuaire public.",
     "createAccount": "Créer un compte",
-    "hasAccount": "J'ai déjà un compte"
+    "hasAccount": "J'ai déjà un compte",
+    "selfHost": "Vous préférez héberger chez vous ?",
+    "github": "Code libre sur GitHub",
+    "support": "Soutenir le projet ♥"
   },
   "mine": {
     "title": "Mes wishlists",

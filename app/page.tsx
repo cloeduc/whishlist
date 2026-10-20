@@ -4,35 +4,37 @@ import { currentUser } from "../src/auth/current";
 import { resolveTheme } from "../src/domain/theme";
 import { getDocument } from "../src/store/db";
 import { GiftMark } from "@/components/site/gift-mark";
+import { GuestHero } from "@/components/site/guest-hero";
 import { WishlistCover } from "@/components/site/wishlist-cover";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { getTranslations } from "@/src/i18n/server";
+import { supportUrl } from "@/src/site/links";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [user, t] = await Promise.all([currentUser(), getTranslations("home")]);
+  const [user, t, tCommon] = await Promise.all([
+    currentUser(),
+    getTranslations("home"),
+    getTranslations("common"),
+  ]);
   if (user?.mustChangePassword) redirect("/compte");
   if (!user) {
     return (
-      <main className="flex flex-col gap-6">
-        <div className="flex max-w-xl flex-col gap-4">
-          <GiftMark className="size-[88px]" />
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-bold tracking-tight">{t("guest.title")}</h1>
-            <p className="text-muted-foreground">{t("guest.body")}</p>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button nativeButton={false} render={<Link href="/inscription" />}>
-            {t("guest.createAccount")}
-          </Button>
-          <Button variant="outline" nativeButton={false} render={<Link href="/connexion" />}>
-            {t("guest.hasAccount")}
-          </Button>
-        </div>
+      <main>
+        <GuestHero
+          brand={tCommon("brand")}
+          headline={t("guest.headline")}
+          body={t("guest.body")}
+          createAccount={t("guest.createAccount")}
+          hasAccount={t("guest.hasAccount")}
+          selfHost={t("guest.selfHost")}
+          github={t("guest.github")}
+          support={t("guest.support")}
+          supportHref={supportUrl()}
+        />
       </main>
     );
   }

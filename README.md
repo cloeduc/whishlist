@@ -47,6 +47,7 @@ Données locales : `data/wishlist.json` (créé au premier lancement).
 |---|---|---|
 | `SESSION_SECRET` | **oui** | Signature des cookies de session |
 | `APP_ORIGIN` | prod | URL publique (`https://wishlist.mesdamesduc.fr`) pour mails / liens de partage |
+| `SUPPORT_URL` | non | Payment Link Stripe (« Soutenir le projet ») |
 | `WISHLIST_DATA_PATH` | non | Chemin du JSON (défaut `data/wishlist.json`) |
 | `RESEND_API_KEY` | non | Envoi d’e-mails |
 | `MAIL_FROM` | non | Expéditeur Resend, ex. `Wishlist <noreply@domaine.fr>` |
