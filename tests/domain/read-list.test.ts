@@ -9,8 +9,12 @@ function sample(): Database {
   doc.wishlists.push({
     id: "w",
     title: "Liste",
+    subtitle: null,
+    coverImageUrl: null,
+    theme: { primary: "#1e60ff", accent: "#ff2d2d", highlight: "#ffd700", background: "#e8f0ff" },
     readToken: "read",
     inviteToken: "invite",
+    readPasswordHash: null,
     fromTemplate: false,
     createdAt: "2026-01-01T00:00:00.000Z",
   });

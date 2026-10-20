@@ -35,6 +35,7 @@ function normalizeDocument(doc: Database): Database {
   for (const list of doc.wishlists) {
     if (list.subtitle === undefined) list.subtitle = null;
     if (list.coverImageUrl === undefined) list.coverImageUrl = null;
+    if (list.readPasswordHash === undefined) list.readPasswordHash = null;
     list.theme = resolveTheme(list.theme);
   }
   for (const item of doc.items) {

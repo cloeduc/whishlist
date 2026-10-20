@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { currentUser } from "../../../../src/auth/current";
+import { canAccessPublicList } from "../../../../src/auth/public-list";
 import { availableItems } from "../../../../src/domain/reserve";
 import { reserveAction } from "../../../../src/server/actions";
 import { getDocument } from "../../../../src/store/db";
+import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,13 +25,27 @@ export default async function ReserverPage({
 }) {
   const { readToken } = await params;
   const query = await searchParams;
-  const [t, doc] = await Promise.all([getTranslations("public"), getDocument()]);
+  const [t, doc, user] = await Promise.all([getTranslations("public"), getDocument(), currentUser()]);
   const list = doc.wishlists.find((entry) => entry.readToken === readToken);
   if (!list) {
     return (
       <main>
         <h1 className="text-2xl font-medium tracking-tight">{t("missingList")}</h1>
       </main>
+    );
+  }
+  if (!(await canAccessPublicList(doc, list, user))) {
+    return (
+      <ReadUnlockForm
+        readToken={readToken}
+        title={list.title}
+        heading={t("unlock.heading")}
+        description={t("unlock.description")}
+        passwordLabel={t("unlock.password")}
+        passwordHint={t("unlock.passwordHint")}
+        submit={t("unlock.submit")}
+        error={null}
+      />
     );
   }
   const typeId = query.typeId ?? "";

@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { currentUser } from "../../../../src/auth/current";
+import { canAccessPublicList } from "../../../../src/auth/public-list";
 import { getDocument } from "../../../../src/store/db";
+import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
@@ -9,13 +12,27 @@ export const dynamic = "force-dynamic";
 
 export default async function TypesPage({ params }: { params: Promise<{ readToken: string }> }) {
   const { readToken } = await params;
-  const [t, doc] = await Promise.all([getTranslations("public"), getDocument()]);
+  const [t, doc, user] = await Promise.all([getTranslations("public"), getDocument(), currentUser()]);
   const list = doc.wishlists.find((entry) => entry.readToken === readToken);
   if (!list) {
     return (
       <main>
         <h1 className="text-2xl font-medium tracking-tight">{t("missingList")}</h1>
       </main>
+    );
+  }
+  if (!(await canAccessPublicList(doc, list, user))) {
+    return (
+      <ReadUnlockForm
+        readToken={readToken}
+        title={list.title}
+        heading={t("unlock.heading")}
+        description={t("unlock.description")}
+        passwordLabel={t("unlock.password")}
+        passwordHint={t("unlock.passwordHint")}
+        submit={t("unlock.submit")}
+        error={null}
+      />
     );
   }
   const types = doc.types.filter((type) => type.wishlistId === list.id);

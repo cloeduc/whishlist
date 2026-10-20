@@ -26,6 +26,8 @@ export interface Wishlist {
   theme: WishlistTheme;
   readToken: string;
   inviteToken: string;
+  /** Si non null, la page publique `/l/[readToken]` exige ce mot de passe (hash scrypt). */
+  readPasswordHash: string | null;
   fromTemplate: boolean;
   createdAt: string;
 }

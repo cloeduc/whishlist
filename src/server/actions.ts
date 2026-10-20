@@ -3,8 +3,15 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cookieSecure, currentUser, origin } from "../auth/current";
+import { canAccessPublicList } from "../auth/public-list";
+import { grantReadUnlock } from "../auth/read-unlock";
 import { SESSION_COOKIE, SESSION_TTL_SEC, sessionSecret, signSession } from "../auth/session";
 import { createPasswordReset, resetPasswordWithToken } from "../domain/password-reset";
+import {
+  clearReadPassword,
+  setReadPassword,
+  verifyReadPassword,
+} from "../domain/read-password";
 import { findMembership } from "../domain/access";
 import {
   authenticate,
@@ -604,6 +611,50 @@ export async function regenerateInviteAction(formData: FormData) {
   redirectToList(wishlistId, formData);
 }
 
+export async function setReadPasswordAction(formData: FormData) {
+  const actorId = await memberId();
+  const wishlistId = String(formData.get("wishlistId") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const result = await updateDocument((doc) => {
+    const saved = setReadPassword(doc, { wishlistId, actorId, password });
+    return { doc: saved.ok ? saved.doc : doc, result: saved };
+  });
+  if (!result.ok) redirectToList(wishlistId, formData, result.error);
+  redirectToList(wishlistId, formData, undefined, "readPassword");
+}
+
+export async function clearReadPasswordAction(formData: FormData) {
+  const actorId = await memberId();
+  const wishlistId = String(formData.get("wishlistId") ?? "");
+  const result = await updateDocument((doc) => {
+    const saved = clearReadPassword(doc, { wishlistId, actorId });
+    return { doc: saved.ok ? saved.doc : doc, result: saved };
+  });
+  if (!result.ok) redirectToList(wishlistId, formData, result.error);
+  redirectToList(wishlistId, formData, undefined, "readPasswordCleared");
+}
+
+export async function unlockPublicListAction(formData: FormData) {
+  const readToken = String(formData.get("readToken") ?? "");
+  const password = String(formData.get("password") ?? "");
+  try {
+    await rateLimitOrThrow(`read-unlock:${readToken.slice(0, 12)}`, 20, 15 * 60 * 1000);
+  } catch (error) {
+    if (isRateLimitError(error)) {
+      redirect(`/l/${readToken}?e=rateLimited`);
+    }
+    throw error;
+  }
+  const doc = await readDocument();
+  const list = doc.wishlists.find((entry) => entry.readToken === readToken);
+  if (!list) redirect("/");
+  if (!verifyReadPassword(list, password)) {
+    redirect(`/l/${readToken}?e=badPassword`);
+  }
+  await grantReadUnlock(list);
+  redirect(`/l/${readToken}`);
+}
+
 export async function sendInviteAction(formData: FormData) {
   const user = await currentUser();
   if (!user) redirect("/connexion");
@@ -719,6 +770,9 @@ export async function reserveAction(formData: FormData) {
   const doc = await readDocument();
   const wishlist = doc.wishlists.find((w) => w.readToken === readToken);
   if (!wishlist) redirect("/");
+  if (!(await canAccessPublicList(doc, wishlist, user))) {
+    redirect(`/l/${readToken}`);
+  }
   const result = await updateDocument((current) => {
     const saved = reserveItem(current, {
       wishlistId: wishlist.id,

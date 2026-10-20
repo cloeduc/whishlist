@@ -9,6 +9,7 @@ import { ItemForm } from "@/components/site/item-form";
 import { LabelChips } from "@/components/site/label-chips";
 import {
   cancelReservationAction,
+  clearReadPasswordAction,
   deleteItemAction,
   deleteListAction,
   leaveAction,
@@ -16,7 +17,9 @@ import {
   removeMemberAction,
   sendInviteAction,
   setItemArchivedFormAction,
+  setReadPasswordAction,
 } from "../../../src/server/actions";
+import { hasReadPassword, MIN_READ_PASSWORD_LENGTH } from "../../../src/domain/read-password";
 import { resolveTheme } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { AppearanceForm } from "@/components/site/appearance-form";
@@ -129,6 +132,16 @@ export default async function EditListPage({
       {query.ok === "invite" ? (
         <Alert>
           <AlertDescription>{t("inviteSent")}</AlertDescription>
+        </Alert>
+      ) : null}
+      {query.ok === "readPassword" ? (
+        <Alert>
+          <AlertDescription>{t("share.readPasswordSaved")}</AlertDescription>
+        </Alert>
+      ) : null}
+      {query.ok === "readPasswordCleared" ? (
+        <Alert>
+          <AlertDescription>{t("share.readPasswordCleared")}</AlertDescription>
         </Alert>
       ) : null}
       <nav aria-label={t("tabs.navLabel")} className="flex flex-wrap gap-2">
@@ -299,6 +312,44 @@ export default async function EditListPage({
                   </form>
                 ) : null}
               </FieldGroup>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("share.readPassword")}</CardTitle>
+              <CardDescription>{t("share.readPasswordHint")}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <p className="text-sm text-muted-foreground">
+                {hasReadPassword(list) ? t("share.readPasswordSet") : t("share.readPasswordUnset")}
+              </p>
+              <form action={setReadPasswordAction}>
+                <FieldGroup>
+                  <input type="hidden" name="wishlistId" value={id} />
+                  <input type="hidden" name="onglet" value="partage" />
+                  <Field>
+                    <FieldLabel htmlFor="read-password">{t("share.readPasswordLabel")}</FieldLabel>
+                    <Input
+                      id="read-password"
+                      name="password"
+                      type="password"
+                      required
+                      minLength={MIN_READ_PASSWORD_LENGTH}
+                      autoComplete="new-password"
+                    />
+                  </Field>
+                  <Button type="submit">{t("share.readPasswordSave")}</Button>
+                </FieldGroup>
+              </form>
+              {hasReadPassword(list) ? (
+                <form action={clearReadPasswordAction}>
+                  <input type="hidden" name="wishlistId" value={id} />
+                  <input type="hidden" name="onglet" value="partage" />
+                  <Button type="submit" variant="outline">
+                    {t("share.readPasswordClear")}
+                  </Button>
+                </form>
+              ) : null}
             </CardContent>
           </Card>
           <Card>

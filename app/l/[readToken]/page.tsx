@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ExternalLinkIcon } from "lucide-react";
+import { currentUser } from "../../../src/auth/current";
+import { canAccessPublicList } from "../../../src/auth/public-list";
 import {
   applyBudget,
   applyPerson,
@@ -15,6 +17,7 @@ import { toPublicItem, type PublicItem } from "../../../src/domain/read";
 import { resolveTheme, themeToCssVars } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { PriorityStars } from "@/components/site/priority-stars";
+import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { WishlistCover } from "@/components/site/wishlist-cover";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +26,15 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { getLocale, getTranslations } from "@/src/i18n/server";
 import type { CSSProperties } from "react";
+
+function unlockErrorMessage(
+  e: string | undefined,
+  t: (key: string) => string,
+): string | null {
+  if (e === "bad" || e === "badPassword") return t("unlock.badPassword");
+  if (e === "rate" || e === "rateLimited") return t("unlock.rateLimited");
+  return null;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -108,11 +120,16 @@ export default async function ReadPage({
   searchParams,
 }: {
   params: Promise<{ readToken: string }>;
-  searchParams: Promise<{ qui?: string; budget?: string; ok?: string }>;
+  searchParams: Promise<{ qui?: string; budget?: string; ok?: string; e?: string }>;
 }) {
   const { readToken } = await params;
   const query = await searchParams;
-  const [t, locale, doc] = await Promise.all([getTranslations("public"), getLocale(), getDocument()]);
+  const [t, locale, doc, user] = await Promise.all([
+    getTranslations("public"),
+    getLocale(),
+    getDocument(),
+    currentUser(),
+  ]);
   const list = doc.wishlists.find((entry) => entry.readToken === readToken);
   if (!list) {
     return (
@@ -121,6 +138,20 @@ export default async function ReadPage({
           <EmptyTitle>{t("missingList")}</EmptyTitle>
         </EmptyHeader>
       </Empty>
+    );
+  }
+  if (!(await canAccessPublicList(doc, list, user))) {
+    return (
+      <ReadUnlockForm
+        readToken={readToken}
+        title={list.title}
+        heading={t("unlock.heading")}
+        description={t("unlock.description")}
+        passwordLabel={t("unlock.password")}
+        passwordHint={t("unlock.passwordHint")}
+        submit={t("unlock.submit")}
+        error={unlockErrorMessage(query.e, t)}
+      />
     );
   }
   const types = doc.types.filter((type) => type.wishlistId === list.id);

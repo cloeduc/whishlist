@@ -79,6 +79,7 @@ export function createWishlist(
     theme: { ...DEFAULT_WISHLIST_THEME },
     readToken: tokens.readToken,
     inviteToken: tokens.inviteToken,
+    readPasswordHash: null,
     fromTemplate: input.importTemplate,
     createdAt: now,
   };

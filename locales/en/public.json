@@ -1,5 +1,14 @@
 {
   "missingList": "This list doesn't exist",
+  "unlock": {
+    "heading": "Protected list",
+    "description": "A password is required to view this wishlist.",
+    "password": "Password",
+    "passwordHint": "Ask the person who shared the link with you.",
+    "submit": "Open the list",
+    "badPassword": "Incorrect password.",
+    "rateLimited": "Too many attempts. Try again in a few minutes."
+  },
   "clickCategory": "Click a category to jump to it.",
   "categoriesNav": "Categories",
   "allList": "Whole list",

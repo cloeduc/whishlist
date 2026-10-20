@@ -1,5 +1,14 @@
 {
   "missingList": "Cette liste n'existe pas",
+  "unlock": {
+    "heading": "Liste protégée",
+    "description": "Un mot de passe est requis pour afficher cette wishlist.",
+    "password": "Mot de passe",
+    "passwordHint": "Demandez-le à la personne qui vous a partagé le lien.",
+    "submit": "Ouvrir la liste",
+    "badPassword": "Mot de passe incorrect.",
+    "rateLimited": "Trop de tentatives. Réessayez dans quelques minutes."
+  },
   "clickCategory": "Cliquer sur une catégorie pour y descendre.",
   "categoriesNav": "Catégories",
   "allList": "Toute la liste",

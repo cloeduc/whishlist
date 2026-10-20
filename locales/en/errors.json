@@ -41,6 +41,7 @@
   "emailTaken": "This email is already in use.",
   "passwordRequired": "Enter a new password.",
   "passwordTooShort": "Password must be at least 10 characters.",
+  "readPasswordTooShort": "The read password must be at least 4 characters.",
   "rateLimited": "Too many attempts. Try again in a few minutes.",
   "wrongCurrentPassword": "Current password is incorrect.",
   "emailInvalid": "Invalid email.",

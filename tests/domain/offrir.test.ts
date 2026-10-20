@@ -59,6 +59,7 @@ test("mes cadeaux : seulement les réservations liées au compte", () => {
     theme: { ...DEFAULT_WISHLIST_THEME },
     readToken: "rt",
     inviteToken: "it",
+    readPasswordHash: null,
     fromTemplate: false,
     createdAt: "2026-01-01T00:00:00.000Z",
   });

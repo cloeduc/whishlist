@@ -17,6 +17,7 @@ function doc(): Database {
     theme: { primary: "#1e60ff", accent: "#ff2d2d", highlight: "#ffd700", background: "#e8f0ff" },
     readToken: "r",
     inviteToken: "i",
+    readPasswordHash: null,
     fromTemplate: true,
     createdAt: "2026-01-01T00:00:00.000Z",
   });
