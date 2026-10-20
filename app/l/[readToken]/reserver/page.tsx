@@ -70,6 +70,10 @@ export default async function ReserverPage({
                 <input type="hidden" name="readToken" value={readToken} />
                 <input type="hidden" name="typeId" value="" />
                 <input type="hidden" name="itemId" value={picked.id} />
+                <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+                  <label htmlFor="website-a">Website</label>
+                  <input id="website-a" name="website" type="text" tabIndex={-1} autoComplete="off" />
+                </div>
                 <Field>
                   <FieldLabel htmlFor="fromName">{t("reserve.fromName")}</FieldLabel>
                   <Input id="fromName" name="fromName" autoComplete="name" />
@@ -119,6 +123,10 @@ export default async function ReserverPage({
                 <FieldGroup>
                   <input type="hidden" name="readToken" value={readToken} />
                   <input type="hidden" name="typeId" value={typeId} />
+                  <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+                    <label htmlFor="website-b">Website</label>
+                    <input id="website-b" name="website" type="text" tabIndex={-1} autoComplete="off" />
+                  </div>
                   <Field>
                     <FieldLabel htmlFor="itemId">{t("reserve.giftLabel")}</FieldLabel>
                     <NativeSelect id="itemId" name="itemId" className="w-full" required defaultValue="">

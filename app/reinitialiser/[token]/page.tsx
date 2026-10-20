@@ -6,8 +6,9 @@ import { getDocument } from "../../../src/store/db";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { getTranslations } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -37,12 +38,22 @@ export default async function ReinitialiserPage({
               <input type="hidden" name="token" value={token} />
               {query.e ? (
                 <Alert variant="destructive">
-                  <AlertDescription>{t("reset.errorGeneric")}</AlertDescription>
+                  <AlertDescription>
+                    {query.e === "password" ? t("reset.errorPassword") : t("reset.errorGeneric")}
+                  </AlertDescription>
                 </Alert>
               ) : null}
               <Field>
                 <FieldLabel htmlFor="password">{t("reset.password")}</FieldLabel>
-                <Input id="password" name="password" type="password" required autoComplete="new-password" />
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={MIN_PASSWORD_LENGTH}
+                  autoComplete="new-password"
+                />
+                <FieldDescription>{t("reset.passwordHint")}</FieldDescription>
               </Field>
               <Button type="submit">{t("reset.submit")}</Button>
             </FieldGroup>

@@ -1,5 +1,5 @@
 import { findMembership, clone } from "./access";
-import { hashPassword, verifyPassword } from "./passwords";
+import { hashPassword, passwordPolicyError, verifyPassword } from "./passwords";
 import { newId } from "./tokens";
 import type { Database, User } from "./types";
 
@@ -28,6 +28,8 @@ export function registerUser(
   if (!email || !email.includes("@") || !password || !displayName) {
     return { ok: false, error: "registerFields" };
   }
+  const policy = passwordPolicyError(password);
+  if (policy) return { ok: false, error: policy };
   if (doc.users.some((u) => u.email === email)) {
     return { ok: false, error: "emailTaken" };
   }
@@ -59,7 +61,8 @@ export function changePassword(
   input: { userId: string; password: string; currentPassword?: string },
 ): Ok<User> | Err {
   const password = input.password;
-  if (!password) return { ok: false, error: "passwordRequired" };
+  const policy = passwordPolicyError(password);
+  if (policy) return { ok: false, error: policy };
   const next = clone(doc);
   const user = next.users.find((entry) => entry.id === input.userId);
   if (!user) return { ok: false, error: "accountMissing" };

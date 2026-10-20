@@ -4,6 +4,15 @@ const N = 16384;
 const r = 8;
 const p = 1;
 
+export const MIN_PASSWORD_LENGTH = 10;
+
+/** `null` si OK, sinon code d'erreur i18n. */
+export function passwordPolicyError(password: string): string | null {
+  if (!password) return "passwordRequired";
+  if (password.length < MIN_PASSWORD_LENGTH) return "passwordTooShort";
+  return null;
+}
+
 export function hashPassword(password: string): string {
   const salt = randomBytes(16);
   const hash = scryptSync(password, salt, 32, { N, r, p });

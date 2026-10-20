@@ -10,32 +10,39 @@ import { readDocument, updateDocument } from "../../src/store/db";
 test("e-mail unique, casse, nom vide, hash", () => {
   const first = registerUser(emptyDatabase(), {
     email: " Ada@Example.com ",
-    password: "secret",
+    password: "secret-ok!!",
     displayName: "Ada",
   });
   assert.equal(first.ok, true);
   if (!first.ok) return;
   assert.equal(first.value.email, "ada@example.com");
-  assert.notEqual(first.value.passwordHash, "secret");
+  assert.notEqual(first.value.passwordHash, "secret-ok!!");
   const second = registerUser(first.doc, {
     email: "ada@example.com",
-    password: "autre",
+    password: "autre-ok!!!",
     displayName: "Ada",
   });
   assert.equal(second.ok, false);
   const blank = registerUser(emptyDatabase(), {
     email: "a@b.c",
-    password: "secret",
+    password: "secret-ok!!",
     displayName: "   ",
   });
   assert.equal(blank.ok, false);
+  const short = registerUser(emptyDatabase(), {
+    email: "short@example.com",
+    password: "short",
+    displayName: "Sam",
+  });
+  assert.equal(short.ok, false);
+  if (!short.ok) assert.equal(short.error, "passwordTooShort");
 });
 
 test("deux inscriptions simultanées du même e-mail", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "wl-acc-"));
   process.env.WISHLIST_DATA_PATH = path.join(dir, "wishlist.json");
   try {
-    const input = { email: "same@example.com", password: "secret", displayName: "Sam" };
+    const input = { email: "same@example.com", password: "secret-ok!!", displayName: "Sam" };
     await Promise.all([
       updateDocument((doc) => {
         const result = registerUser(doc, input);

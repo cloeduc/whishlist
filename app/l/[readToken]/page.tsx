@@ -243,9 +243,6 @@ export default async function ReadPage({
         <Button nativeButton={false} render={<Link href={`/l/${readToken}/reserver`} />}>
           {t("reserveIdea")}
         </Button>
-        <Button variant="ghost" nativeButton={false} render={<Link href={`/l/${readToken}/types`} />}>
-          {t("types")}
-        </Button>
       </div>
       {query.ok ? (
         <Alert>

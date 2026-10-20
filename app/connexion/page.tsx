@@ -30,7 +30,9 @@ export default async function ConnexionPage({
               <input type="hidden" name="next" value={next} />
               {query.e ? (
                 <Alert variant="destructive">
-                  <AlertDescription>{t("login.badCredentials")}</AlertDescription>
+                  <AlertDescription>
+                    {query.e === "rate" ? t("login.rateLimited") : t("login.badCredentials")}
+                  </AlertDescription>
                 </Alert>
               ) : null}
               <Field>

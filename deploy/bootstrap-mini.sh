@@ -28,6 +28,16 @@ if [[ ! -f "$ENV_FILE" ]]; then
   exit 1
 fi
 
+echo "== harden data perms =="
+chmod +x deploy/harden-data.sh
+WHISHLIST_ENV_FILE="$ENV_FILE" WHISHLIST_DATA_DIR="$DATA_DIR" bash deploy/harden-data.sh
+
+# APP_ORIGIN obligatoire pour les mails / liens (Host-header safe)
+if ! grep -q '^WHISHLIST_APP_ORIGIN=.\+' "$ENV_FILE"; then
+  echo "WHISHLIST_APP_ORIGIN=https://${DOMAIN}" >> "$ENV_FILE"
+  echo "appended WHISHLIST_APP_ORIGIN"
+fi
+
 echo "== compose up =="
 WHISHLIST_DATA_DIR="$DATA_DIR" docker compose \
   -f deploy/compose.prod.yml \

@@ -18,6 +18,7 @@ for (const line of readFileSync(".env", "utf8").split(/\r?\n/)) {
 
 const out = [
   `WHISHLIST_SESSION_SECRET=${env.SESSION_SECRET ?? ""}`,
+  `WHISHLIST_APP_ORIGIN=${env.APP_ORIGIN ?? "https://wishlist.mesdamesduc.fr"}`,
   `WHISHLIST_RESEND_API_KEY=${env.RESEND_API_KEY ?? ""}`,
   `WHISHLIST_MAIL_FROM=${env.MAIL_FROM ?? ""}`,
   `WHISHLIST_GEMINI_API_KEY=${env.GEMINI_API_KEY ?? ""}`,
@@ -28,5 +29,6 @@ const out = [
 writeFileSync("deploy/.whishlist.env.tmp", out);
 console.log("wrote deploy/.whishlist.env.tmp");
 console.log("has_session", Boolean(env.SESSION_SECRET));
+console.log("has_app_origin", Boolean(env.APP_ORIGIN ?? "https://wishlist.mesdamesduc.fr"));
 console.log("has_resend", Boolean(env.RESEND_API_KEY));
 console.log("has_from", Boolean(env.MAIL_FROM));

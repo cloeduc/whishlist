@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { getTranslations, translateError } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -29,11 +30,18 @@ export default async function ComptePage({
       ? t("changePassword.errorMismatch")
       : query.e === "current"
         ? t("changePassword.errorCurrent")
-        : query.e === "1"
-          ? t("changePassword.errorGeneric")
-          : null;
+        : query.e === "password"
+          ? t("changePassword.errorPassword")
+          : query.e === "1"
+            ? t("changePassword.errorGeneric")
+            : null;
   const profileError =
-    query.e && !passwordError && query.e !== "mismatch" && query.e !== "current" && query.e !== "1"
+    query.e &&
+    !passwordError &&
+    query.e !== "mismatch" &&
+    query.e !== "current" &&
+    query.e !== "password" &&
+    query.e !== "1"
       ? await translateError(query.e)
       : null;
   const profileOk = query.ok === "name";
@@ -180,11 +188,26 @@ export default async function ComptePage({
               ) : null}
               <Field>
                 <FieldLabel htmlFor="password">{t("changePassword.next")}</FieldLabel>
-                <Input id="password" name="password" type="password" required autoComplete="new-password" />
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={MIN_PASSWORD_LENGTH}
+                  autoComplete="new-password"
+                />
+                <FieldDescription>{t("changePassword.nextHint")}</FieldDescription>
               </Field>
               <Field>
                 <FieldLabel htmlFor="confirm">{t("changePassword.confirm")}</FieldLabel>
-                <Input id="confirm" name="confirm" type="password" required autoComplete="new-password" />
+                <Input
+                  id="confirm"
+                  name="confirm"
+                  type="password"
+                  required
+                  minLength={MIN_PASSWORD_LENGTH}
+                  autoComplete="new-password"
+                />
               </Field>
               <Button type="submit">
                 {forced ? t("changePassword.submitForced") : t("changePassword.submit")}

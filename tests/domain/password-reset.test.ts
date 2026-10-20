@@ -11,7 +11,7 @@ import { emptyDatabase } from "../../src/domain/types";
 test("reset : token, expiration, usage unique, e-mail inconnu silencieux", () => {
   const registered = registerUser(emptyDatabase(), {
     email: "ada@example.com",
-    password: "ancien",
+    password: "ancien-mdp!",
     displayName: "Ada",
   });
   assert.equal(registered.ok, true);
@@ -30,25 +30,25 @@ test("reset : token, expiration, usage unique, e-mail inconnu silencieux", () =>
 
   const expired = resetPasswordWithToken(created.doc, {
     token: created.token!,
-    password: "nouveau",
+    password: "nouveau-mdp",
     now: new Date("2026-10-19T14:00:01.000Z"),
   });
   assert.equal(expired.ok, false);
 
   const reset = resetPasswordWithToken(created.doc, {
     token: created.token!,
-    password: "nouveau",
+    password: "nouveau-mdp",
     now,
   });
   assert.equal(reset.ok, true);
   if (!reset.ok) return;
-  assert.equal(authenticate(reset.doc, "ada@example.com", "nouveau")?.id, reset.userId);
-  assert.equal(authenticate(reset.doc, "ada@example.com", "ancien"), null);
+  assert.equal(authenticate(reset.doc, "ada@example.com", "nouveau-mdp")?.id, reset.userId);
+  assert.equal(authenticate(reset.doc, "ada@example.com", "ancien-mdp!"), null);
   assert.equal(reset.doc.passwordResets.length, 0);
 
   const reuse = resetPasswordWithToken(reset.doc, {
     token: created.token!,
-    password: "autre",
+    password: "autre-mdp!!",
     now,
   });
   assert.equal(reuse.ok, false);

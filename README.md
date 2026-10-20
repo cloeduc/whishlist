@@ -46,6 +46,7 @@ Données locales : `data/wishlist.json` (créé au premier lancement).
 | Variable | Requis | Rôle |
 |---|---|---|
 | `SESSION_SECRET` | **oui** | Signature des cookies de session |
+| `APP_ORIGIN` | prod | URL publique (`https://wishlist.mesdamesduc.fr`) pour mails / liens de partage |
 | `WISHLIST_DATA_PATH` | non | Chemin du JSON (défaut `data/wishlist.json`) |
 | `RESEND_API_KEY` | non | Envoi d’e-mails |
 | `MAIL_FROM` | non | Expéditeur Resend, ex. `Wishlist <noreply@domaine.fr>` |
@@ -72,6 +73,7 @@ docker build -t whishlist:local .
 mkdir -p ./data-prod
 cat > whishlist.env <<'EOF'
 WHISHLIST_SESSION_SECRET=change-moi-par-une-longue-chaine-aleatoire
+WHISHLIST_APP_ORIGIN=https://wishlist.mesdamesduc.fr
 # WHISHLIST_RESEND_API_KEY=re_...
 # WHISHLIST_MAIL_FROM=Wishlist <noreply@exemple.fr>
 # WHISHLIST_GEMINI_API_KEY=...
@@ -90,7 +92,9 @@ WHISHLIST_DATA_DIR=./data-prod docker compose \
 
 App sur **http://localhost:8740** (port hôte configurable dans `deploy/compose.prod.yml`).
 
-Persistance : volume `WHISHLIST_DATA_DIR` → `/data/wishlist.json` dans le conteneur (`user 1000:1000`).
+Persistance : volume `WHISHLIST_DATA_DIR` → `/data/wishlist.json` dans le conteneur (`user 1000:1000`). Le JSON est écrit en mode `0600` (owner only) quand le FS le permet.
+
+Ops Mac mini : `deploy/harden-data.sh`, `deploy/backup-whishlist.sh` (AES si `WHISHLIST_BACKUP_PASSPHRASE`), `deploy/ops-check.sh` — détails dans [`deploy/DEPLOY-RUNTIPI.md`](deploy/DEPLOY-RUNTIPI.md).
 
 ### 4. Smoke
 

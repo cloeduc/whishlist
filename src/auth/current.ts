@@ -1,5 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { cache } from "react";
+import { originFromEnv, originFromHeaders } from "./origin";
 import { readSession, SESSION_COOKIE, sessionSecret } from "./session";
 import { getDocument } from "../store/db";
 import type { User } from "../domain/types";
@@ -16,11 +17,16 @@ export const currentUser = cache(async (): Promise<User | null> => {
   return doc.users.find((user) => user.id === userId) ?? null;
 });
 
+/** Base URL publique. Prod : `APP_ORIGIN` (évite Host-header poisoning sur reset/invite). */
 export async function origin(): Promise<string> {
+  const configured = originFromEnv();
+  if (configured) return configured;
   const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const proto = (h.get("x-forwarded-proto") ?? "http").split(",")[0]!.trim();
-  return `${proto}://${host}`;
+  return originFromHeaders({
+    host: h.get("host"),
+    forwardedHost: h.get("x-forwarded-host"),
+    forwardedProto: h.get("x-forwarded-proto"),
+  });
 }
 
 export function cookieSecure(): boolean {

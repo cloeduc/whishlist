@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cookieSecure, currentUser, origin } from "../auth/current";
-import { SESSION_COOKIE, sessionSecret, signSession } from "../auth/session";
+import { SESSION_COOKIE, SESSION_TTL_SEC, sessionSecret, signSession } from "../auth/session";
 import { createPasswordReset, resetPasswordWithToken } from "../domain/password-reset";
 import { findMembership } from "../domain/access";
 import {
@@ -16,6 +16,7 @@ import {
 import { createWishlist } from "../domain/import";
 import type { Wishlist } from "../domain/types";
 import { mailConfigured, sendInviteMail, sendPasswordResetMail } from "./mail";
+import { isRateLimitError, rateLimitOrThrow } from "./rate-limit";
 import {
   acceptInvite,
   deleteWishlist,
@@ -96,7 +97,7 @@ async function openSession(userId: string) {
     sameSite: "lax",
     secure: cookieSecure(),
     path: "/",
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: SESSION_TTL_SEC,
   });
 }
 
@@ -105,12 +106,25 @@ export async function registerAction(formData: FormData) {
   const password = String(formData.get("password") ?? "");
   const displayName = String(formData.get("displayName") ?? "");
   const dest = nextPath(formData.get("next"));
+  try {
+    await rateLimitOrThrow("register", 5, 60 * 60 * 1000);
+  } catch (error) {
+    if (isRateLimitError(error)) {
+      redirect(`/inscription?e=rate&next=${encodeURIComponent(dest)}`);
+    }
+    throw error;
+  }
   const result = await updateDocument((doc) => {
     const created = registerUser(doc, { email, password, displayName });
     return { doc: created.ok ? created.doc : doc, result: created };
   });
   if (!result.ok) {
-    const code = result.error.includes("déjà") ? "email" : "fields";
+    const code =
+      result.error === "emailTaken" || result.error.includes("déjà")
+        ? "email"
+        : result.error === "passwordTooShort"
+          ? "password"
+          : "fields";
     redirect(`/inscription?e=${code}&next=${encodeURIComponent(dest)}`);
   }
   await openSession(result.value.id);
@@ -121,6 +135,14 @@ export async function loginAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const dest = nextPath(formData.get("next"));
+  try {
+    await rateLimitOrThrow("login", 20, 15 * 60 * 1000);
+  } catch (error) {
+    if (isRateLimitError(error)) {
+      redirect(`/connexion?e=rate&next=${encodeURIComponent(dest)}`);
+    }
+    throw error;
+  }
   const doc = await readDocument();
   const user = authenticate(doc, email, password);
   if (!user) redirect(`/connexion?e=1&next=${encodeURIComponent(dest)}`);
@@ -160,7 +182,12 @@ export async function changePasswordAction(formData: FormData) {
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
   if (!result.ok) {
-    const code = result.error.includes("actuel") ? "current" : "1";
+    const code =
+      result.error === "wrongCurrentPassword" || result.error.includes("actuel")
+        ? "current"
+        : result.error === "passwordTooShort"
+          ? "password"
+          : "1";
     redirect(`/compte?e=${code}`);
   }
   redirect(user.mustChangePassword ? "/" : "/compte?ok=1");
@@ -174,6 +201,12 @@ export async function logoutAction() {
 
 export async function requestPasswordResetAction(formData: FormData) {
   const email = String(formData.get("email") ?? "");
+  try {
+    await rateLimitOrThrow("password-reset", 5, 60 * 60 * 1000);
+  } catch (error) {
+    if (isRateLimitError(error)) redirect("/mot-de-passe-oublie?e=rate");
+    throw error;
+  }
   const result = await updateDocument((doc) => {
     const created = createPasswordReset(doc, { email });
     return { doc: created.doc, result: created };
@@ -183,7 +216,8 @@ export async function requestPasswordResetAction(formData: FormData) {
     const base = await origin();
     const resetUrl = `${base}/reinitialiser/${result.token}`;
     const mail = await sendPasswordResetMail({ to: result.email, resetUrl });
-    if (!mail.sent && (process.env.NODE_ENV !== "production" || process.env.PASSWORD_RESET_SHOW_LINK === "1")) {
+    // Jamais de lien en clair en production (même si PASSWORD_RESET_SHOW_LINK=1).
+    if (!mail.sent && process.env.NODE_ENV !== "production") {
       reveal = resetUrl;
     }
   }
@@ -201,7 +235,8 @@ export async function resetPasswordAction(formData: FormData) {
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
   if (!result.ok) {
-    redirect(`/reinitialiser/${encodeURIComponent(token)}?e=1`);
+    const code = result.error === "passwordTooShort" ? "password" : "1";
+    redirect(`/reinitialiser/${encodeURIComponent(token)}?e=${code}`);
   }
   await openSession(result.userId);
   redirect("/");
@@ -328,6 +363,12 @@ export async function enrichFromUrlAction(input: {
   | { ok: false; error: string }
 > {
   const actorId = await memberId();
+  try {
+    await rateLimitOrThrow(`enrich:${actorId}`, 30, 60 * 60 * 1000);
+  } catch (error) {
+    if (isRateLimitError(error)) return { ok: false, error: "rateLimited" };
+    throw error;
+  }
   const wishlistId = input.wishlistId.trim();
   const trimmed = input.url.trim();
   if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) {
@@ -659,6 +700,21 @@ export async function reserveAction(formData: FormData) {
   const itemId = String(formData.get("itemId") ?? "");
   const fromName = String(formData.get("fromName") ?? "");
   const note = String(formData.get("note") ?? "");
+  // Honeypot anti-bot (doit rester vide).
+  if (String(formData.get("website") ?? "").trim()) {
+    redirect(`/l/${readToken}?ok=1`);
+  }
+  try {
+    await rateLimitOrThrow(`reserve:${readToken.slice(0, 12)}`, 15, 60 * 60 * 1000);
+  } catch (error) {
+    if (isRateLimitError(error)) {
+      const params = new URLSearchParams({ e: "rateLimited" });
+      if (typeId) params.set("typeId", typeId);
+      if (itemId) params.set("itemId", itemId);
+      redirect(`/l/${readToken}/reserver?${params}`);
+    }
+    throw error;
+  }
   const user = await currentUser();
   const doc = await readDocument();
   const wishlist = doc.wishlists.find((w) => w.readToken === readToken);

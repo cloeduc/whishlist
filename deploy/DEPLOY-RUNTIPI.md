@@ -52,9 +52,52 @@ cloudflared tunnel route dns immich-tunnel wishlist.mesdamesduc.fr
 # restart cloudflared
 ```
 
-## 5. Smoke
+## 5. Smoke / ops
 
 ```bash
 curl -sS -o /dev/null -w "%{http_code}\n" -H "Host: wishlist.mesdamesduc.fr" http://127.0.0.1:8740/
 curl -sSI https://wishlist.mesdamesduc.fr
+bash deploy/ops-check.sh
 ```
+
+### Permissions data
+
+```bash
+bash deploy/harden-data.sh
+```
+
+Env `~/webserver/data/whishlist.env` → `600`. Volume data → `700`, `wishlist.json` → `600`.
+
+### Backup chiffré (cron)
+
+```bash
+# une fois
+mkdir -p ~/webserver/backups/whishlist
+chmod 700 ~/webserver/backups/whishlist
+# passphrase longue dans un fichier 600 (pas dans le repo)
+echo '…' > ~/webserver/data/whishlist.backup.pass
+chmod 600 ~/webserver/data/whishlist.backup.pass
+
+# cron quotidien 03:15
+# 15 3 * * * WHISHLIST_BACKUP_PASSPHRASE="$(cat $HOME/webserver/data/whishlist.backup.pass)" \
+#   $HOME/webserver/repos/whishlist/deploy/backup-whishlist.sh >>$HOME/webserver/backups/whishlist/cron.log 2>&1
+```
+
+Restauration :
+
+```bash
+openssl enc -d -aes-256-cbc -pbkdf2 -pass env:WHISHLIST_BACKUP_PASSPHRASE \
+  -in ~/webserver/backups/whishlist/wishlist-….json.enc \
+  -out ~/webserver/data/whishlist/wishlist.json
+chmod 600 ~/webserver/data/whishlist/wishlist.json
+# puis recreate container
+```
+
+### Env requis (prod)
+
+| Clé | Rôle |
+|---|---|
+| `WHISHLIST_SESSION_SECRET` | cookies |
+| `WHISHLIST_APP_ORIGIN` | `https://wishlist.mesdamesduc.fr` |
+| `WHISHLIST_RESEND_API_KEY` + `WHISHLIST_MAIL_FROM` | reset / invite |
+| `WHISHLIST_GEMINI_API_KEY` | enrich (optionnel) |

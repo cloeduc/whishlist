@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function MotDePasseOubliePage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string; lien?: string; sansmail?: string }>;
+  searchParams: Promise<{ ok?: string; lien?: string; sansmail?: string; e?: string }>;
 }) {
   const query = await searchParams;
   const t = await getTranslations("auth");
@@ -27,6 +27,11 @@ export default async function MotDePasseOubliePage({
           <CardDescription>{t("forgot.description")}</CardDescription>
         </CardHeader>
         <CardContent>
+          {query.e === "rate" ? (
+            <Alert variant="destructive" className="mb-3">
+              <AlertDescription>{t("forgot.rateLimited")}</AlertDescription>
+            </Alert>
+          ) : null}
           {done ? (
             <div className="flex flex-col gap-3">
               <Alert>

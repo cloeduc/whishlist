@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, access } from "node:fs/promises";
+import { access, chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { cache } from "react";
 import { resolveTheme } from "../domain/theme";
@@ -9,12 +9,21 @@ export function dataFilePath(): string {
   return process.env.WISHLIST_DATA_PATH ?? path.join(process.cwd(), "data", "wishlist.json");
 }
 
+async function restrictDataFileMode(file: string): Promise<void> {
+  try {
+    await chmod(file, 0o600);
+  } catch {
+    // Windows / FS sans chmod — ignore
+  }
+}
+
 async function ensureFile(file: string): Promise<void> {
   await mkdir(path.dirname(file), { recursive: true });
   try {
     await access(file);
   } catch {
-    await writeFile(file, JSON.stringify(emptyDatabase(), null, 2), "utf8");
+    await writeFile(file, JSON.stringify(emptyDatabase(), null, 2), { encoding: "utf8", mode: 0o600 });
+    await restrictDataFileMode(file);
   }
 }
 
@@ -59,9 +68,10 @@ export async function updateDocument<T>(
     const doc = normalizeDocument(JSON.parse(raw) as Database);
     const { doc: next, result } = mutate(doc);
     const tmp = `${file}.tmp`;
-    await writeFile(tmp, JSON.stringify(next, null, 2), "utf8");
+    await writeFile(tmp, JSON.stringify(next, null, 2), { encoding: "utf8", mode: 0o600 });
     const { rename } = await import("node:fs/promises");
     await rename(tmp, file);
+    await restrictDataFileMode(file);
     return result;
   });
 }

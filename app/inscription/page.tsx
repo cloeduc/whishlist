@@ -3,8 +3,9 @@ import { registerAction } from "../../src/server/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { getTranslations } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,15 @@ export default async function InscriptionPage({
   const t = await getTranslations("auth");
   const next = query.next && query.next.startsWith("/") ? query.next : "/";
   const error =
-    query.e === "email" ? t("register.errorEmail") : query.e === "fields" ? t("register.errorFields") : null;
+    query.e === "email"
+      ? t("register.errorEmail")
+      : query.e === "password"
+        ? t("register.errorPassword")
+        : query.e === "rate"
+          ? t("register.rateLimited")
+          : query.e === "fields"
+            ? t("register.errorFields")
+            : null;
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-4">
       <Card>
@@ -45,7 +54,15 @@ export default async function InscriptionPage({
               </Field>
               <Field>
                 <FieldLabel htmlFor="password">{t("register.password")}</FieldLabel>
-                <Input id="password" name="password" type="password" required autoComplete="new-password" />
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  minLength={MIN_PASSWORD_LENGTH}
+                  autoComplete="new-password"
+                />
+                <FieldDescription>{t("register.passwordHint")}</FieldDescription>
               </Field>
               <Button type="submit">{t("register.submit")}</Button>
             </FieldGroup>

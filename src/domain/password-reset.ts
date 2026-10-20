@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { clone } from "./access";
-import { hashPassword } from "./passwords";
+import { hashPassword, passwordPolicyError } from "./passwords";
 import { newId } from "./tokens";
 import { normalizeEmail } from "./users";
 import type { Database } from "./types";
@@ -42,7 +42,8 @@ export function resetPasswordWithToken(
   input: { token: string; password: string; now?: Date },
 ): { ok: true; doc: Database; userId: string } | { ok: false; error: string } {
   const password = input.password;
-  if (!password) return { ok: false, error: "passwordRequired" };
+  const policy = passwordPolicyError(password);
+  if (policy) return { ok: false, error: policy };
   const token = input.token.trim();
   if (!token) return { ok: false, error: "resetLinkInvalid" };
   const now = input.now ?? new Date();

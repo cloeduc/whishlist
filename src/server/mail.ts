@@ -99,13 +99,21 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
+function redactMailLogBody(tag: string, text: string): string {
+  // Évite de stocker tokens reset / invite en clair dans data/mail.log (surtout en prod).
+  if (tag !== "password-reset" && tag !== "invite") return text;
+  if (process.env.NODE_ENV !== "production") return text;
+  return text.replace(/https?:\/\/\S+/g, "[redacted-url]");
+}
+
 async function logMailFallback(tag: string, to: string, text: string, reason: string) {
   try {
     const dir = path.join(process.cwd(), "data");
     await mkdir(dir, { recursive: true });
+    const body = redactMailLogBody(tag, text);
     await appendFile(
       path.join(dir, "mail.log"),
-      `\n--- ${new Date().toISOString()} ${tag} (${reason}) -> ${to}\n${text}\n`,
+      `\n--- ${new Date().toISOString()} ${tag} (${reason}) -> ${to}\n${body}\n`,
       "utf8",
     );
   } catch (error) {

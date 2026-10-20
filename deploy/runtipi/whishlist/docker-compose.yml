@@ -8,6 +8,7 @@ services:
       - PORT=3000
       - HOSTNAME=0.0.0.0
       - SESSION_SECRET=${WHISHLIST_SESSION_SECRET}
+      - APP_ORIGIN=${WHISHLIST_APP_ORIGIN:-https://wishlist.mesdamesduc.fr}
       - WISHLIST_DATA_PATH=/data/wishlist.json
       - RESEND_API_KEY=${WHISHLIST_RESEND_API_KEY}
       - MAIL_FROM=${WHISHLIST_MAIL_FROM}
