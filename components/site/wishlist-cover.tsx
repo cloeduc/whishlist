@@ -8,14 +8,23 @@ export function WishlistCover({
   theme,
   className,
   size = "md",
+  framed = true,
 }: {
   coverImageUrl: string | null | undefined;
   theme: WishlistTheme;
   className?: string;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
+  /** Cadre / ombre autour de l'illustration. */
+  framed?: boolean;
 }) {
   const box =
-    size === "lg" ? "size-36 sm:size-40" : size === "sm" ? "size-20" : "size-28 sm:size-32";
+    size === "lg"
+      ? "size-36 sm:size-40"
+      : size === "sm"
+        ? "size-20"
+        : size === "xs"
+          ? "size-12"
+          : "size-28 sm:size-32";
 
   if (coverImageUrl) {
     return (
@@ -25,7 +34,8 @@ export function WishlistCover({
         alt=""
         className={cn(
           box,
-          "shrink-0 rounded-base border-2 border-border object-cover shadow-shadow",
+          "shrink-0 rounded-base object-cover",
+          framed && "border-2 border-border shadow-shadow",
           className,
         )}
         referrerPolicy="no-referrer"
@@ -33,5 +43,5 @@ export function WishlistCover({
     );
   }
 
-  return <GiftMark theme={theme} className={cn(box, className)} />;
+  return <GiftMark theme={theme} framed={framed} className={cn(box, className)} />;
 }

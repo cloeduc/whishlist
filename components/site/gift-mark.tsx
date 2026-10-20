@@ -2,15 +2,18 @@ import type { WishlistTheme } from "@/src/domain/theme";
 import { DEFAULT_WISHLIST_THEME } from "@/src/domain/theme";
 import { cn } from "@/lib/utils";
 
-/** Cadeau SVG recolorable — fond blanc + ombre néo-brutale intégrée (un seul calque). */
+/** Cadeau SVG recolorable — fond blanc + ombre néo-brutale (désactivable via `framed`). */
 export function GiftMark({
   theme = DEFAULT_WISHLIST_THEME,
   className,
   title,
+  framed = true,
 }: {
   theme?: WishlistTheme;
   className?: string;
   title?: string;
+  /** Cadre blanc + ombre brute. `false` = juste le cadeau sur fond blanc. */
+  framed?: boolean;
 }) {
   const { primary, accent, highlight } = theme;
   return (
@@ -22,10 +25,14 @@ export function GiftMark({
       className={cn("shrink-0", className)}
     >
       {title ? <title>{title}</title> : null}
-      {/* Ombre brute décalée */}
-      <rect x="12" y="12" width="116" height="116" rx="24" fill="#000" />
-      {/* Fond blanc */}
-      <rect x="6" y="6" width="116" height="116" rx="24" fill="#fff" stroke="#000" strokeWidth="4" />
+      {framed ? (
+        <>
+          <rect x="12" y="12" width="116" height="116" rx="24" fill="#000" />
+          <rect x="6" y="6" width="116" height="116" rx="24" fill="#fff" stroke="#000" strokeWidth="4" />
+        </>
+      ) : (
+        <rect x="6" y="6" width="116" height="116" rx="24" fill="#fff" />
+      )}
       {/* Couvercle */}
       <rect x="30" y="44" width="72" height="18" rx="4" fill={accent} stroke="#000" strokeWidth="4" />
       {/* Corps */}
