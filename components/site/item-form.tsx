@@ -3,10 +3,10 @@
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { PRIORITY_MAX } from "@/src/domain/priority";
+import { PriorityStarPicker } from "@/components/site/priority-star-picker";
 import {
   enrichFromUrlAction,
   saveItemAction,
@@ -104,7 +104,7 @@ export function ItemForm({
 
   return (
     <form action={formAction} className="flex flex-col gap-3">
-      <FieldGroup>
+      <FieldGroup className="gap-3">
         <input type="hidden" name="wishlistId" value={wishlistId} />
         <input type="hidden" name="onglet" value={onglet} />
         {item ? <input type="hidden" name="itemId" value={item.id} /> : null}
@@ -114,52 +114,8 @@ export function ItemForm({
           </p>
         ) : null}
         <Field>
-          <FieldLabel htmlFor={`${id}-name`}>{t("form.name")}</FieldLabel>
-          <Input
-            id={`${id}-name`}
-            name="name"
-            required
-            value={draft.name}
-            onChange={(e) => setField("name", e.target.value)}
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor={`${id}-type`}>{t("form.type")}</FieldLabel>
-          <NativeSelect
-            id={`${id}-type`}
-            name="typeId"
-            className="w-full"
-            value={draft.typeId}
-            onChange={(e) => setField("typeId", e.target.value)}
-            required
-          >
-            {types.map((type) => (
-              <NativeSelectOption key={type.id} value={type.id}>
-                {type.label}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor={`${id}-person`}>{t("form.person")}</FieldLabel>
-          <NativeSelect
-            id={`${id}-person`}
-            name="personId"
-            className="w-full"
-            value={draft.personId}
-            onChange={(e) => setField("personId", e.target.value)}
-            required
-          >
-            {people.map((person) => (
-              <NativeSelectOption key={person.id} value={person.id}>
-                {person.label}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-        </Field>
-        <Field>
           <FieldLabel htmlFor={`${id}-url`}>{t("form.url")}</FieldLabel>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
             <Input
               id={`${id}-url`}
               name="url"
@@ -174,68 +130,107 @@ export function ItemForm({
               variant="neutral"
               disabled={enrichPending || !draft.url.trim()}
               onClick={enrich}
+              className="shrink-0"
             >
               {enrichPending ? t("common:actions.loading") : t("form.fetchInfos")}
             </Button>
           </div>
-          <FieldDescription>{t("form.fetchHint")}</FieldDescription>
         </Field>
+        <Field>
+          <FieldLabel htmlFor={`${id}-name`}>{t("form.name")}</FieldLabel>
+          <Input
+            id={`${id}-name`}
+            name="name"
+            required
+            value={draft.name}
+            onChange={(e) => setField("name", e.target.value)}
+          />
+        </Field>
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_6.5rem_auto] sm:items-end">
+          <Field>
+            <FieldLabel htmlFor={`${id}-type`}>{t("form.type")}</FieldLabel>
+            <NativeSelect
+              id={`${id}-type`}
+              name="typeId"
+              className="w-full"
+              value={draft.typeId}
+              onChange={(e) => setField("typeId", e.target.value)}
+              required
+            >
+              {types.map((type) => (
+                <NativeSelectOption key={type.id} value={type.id}>
+                  {type.label}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor={`${id}-person`}>{t("form.person")}</FieldLabel>
+            <NativeSelect
+              id={`${id}-person`}
+              name="personId"
+              className="w-full"
+              value={draft.personId}
+              onChange={(e) => setField("personId", e.target.value)}
+              required
+            >
+              {people.map((person) => (
+                <NativeSelectOption key={person.id} value={person.id}>
+                  {person.label}
+                </NativeSelectOption>
+              ))}
+            </NativeSelect>
+          </Field>
+          <Field>
+            <FieldLabel htmlFor={`${id}-price`}>{t("form.price")}</FieldLabel>
+            <Input
+              id={`${id}-price`}
+              name="price"
+              inputMode="decimal"
+              value={draft.price}
+              onChange={(e) => setField("price", e.target.value)}
+              placeholder="18.50"
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor={`${id}-priority`}>{t("form.priority")}</FieldLabel>
+            <PriorityStarPicker
+              id={`${id}-priority`}
+              value={draft.priority}
+              onChange={(next) => setField("priority", next)}
+            />
+          </Field>
+        </div>
         <Field>
           <FieldLabel htmlFor={`${id}-image`}>{t("form.image")}</FieldLabel>
-          {previewImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={previewImage}
-              alt=""
-              className="mb-2 size-16 rounded-base border-2 border-border object-cover"
-              referrerPolicy="no-referrer"
+          <div className="flex items-center gap-2">
+            <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-base border-2 border-border bg-secondary-background shadow-shadow">
+              {previewImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewImage}
+                  alt=""
+                  className="size-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : null}
+            </div>
+            <Input
+              id={`${id}-image`}
+              name="imageUrl"
+              type="url"
+              value={draft.imageUrl || previewImage}
+              onChange={(e) => {
+                const next = e.target.value;
+                setField("imageUrl", next);
+                setPreviewImage(next);
+              }}
+              placeholder="https://"
+              className="min-w-0 flex-1"
             />
-          ) : null}
-          <Input
-            id={`${id}-image`}
-            name="imageUrl"
-            type="url"
-            value={draft.imageUrl}
-            onChange={(e) => {
-              setField("imageUrl", e.target.value);
-              if (e.target.value) setPreviewImage(e.target.value);
-            }}
-            placeholder="https://"
-          />
-          <FieldDescription>{t("form.imageHint")}</FieldDescription>
+          </div>
         </Field>
-        <Field>
-          <FieldLabel htmlFor={`${id}-price`}>{t("form.price")}</FieldLabel>
-          <Input
-            id={`${id}-price`}
-            name="price"
-            inputMode="decimal"
-            value={draft.price}
-            onChange={(e) => setField("price", e.target.value)}
-            placeholder="18.50"
-          />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor={`${id}-priority`}>{t("form.priority")}</FieldLabel>
-          <NativeSelect
-            id={`${id}-priority`}
-            name="priority"
-            className="w-full"
-            value={draft.priority}
-            onChange={(e) => setField("priority", e.target.value)}
-          >
-            <NativeSelectOption value="">{t("form.priorityNone")}</NativeSelectOption>
-            {Array.from({ length: PRIORITY_MAX }, (_, i) => {
-              const value = String(i + 1);
-              return (
-                <NativeSelectOption key={value} value={value}>
-                  {"★".repeat(i + 1)}
-                </NativeSelectOption>
-              );
-            })}
-          </NativeSelect>
-        </Field>
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} className="w-full sm:w-auto">
           {pending
             ? t("common:actions.loading")
             : item
