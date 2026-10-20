@@ -16,11 +16,15 @@ export function LabelChips({
   kind,
   items,
   addPlaceholder,
+  addLabel,
+  addAria,
 }: {
   wishlistId: string;
   kind: "type" | "person";
   items: Chip[];
   addPlaceholder: string;
+  addLabel: string;
+  addAria: string;
 }) {
   const { t } = useTranslation(["list", "errors", "common"]);
   const router = useRouter();
@@ -118,20 +122,33 @@ export function LabelChips({
           ),
         )}
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <Input
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter") {
-              event.preventDefault();
-              addChip();
-            }
-          }}
-          placeholder={addPlaceholder}
-          className="h-9 max-w-xs"
-        />
-        <Button type="button" variant="outline" size="sm" disabled={pending || !draft.trim()} onClick={addChip}>
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="flex min-w-0 flex-col gap-1">
+          <label htmlFor={`label-add-${kind}`} className="text-sm font-medium">
+            {addLabel}
+          </label>
+          <Input
+            id={`label-add-${kind}`}
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                addChip();
+              }
+            }}
+            placeholder={addPlaceholder}
+            className="h-9 max-w-xs"
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={pending || !draft.trim()}
+          onClick={addChip}
+          aria-label={addAria}
+        >
           {t("categories.add")}
         </Button>
       </div>

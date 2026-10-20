@@ -1,30 +1,32 @@
 {
   "guest": {
-    "headline": "Des listes de cadeaux, sans friction",
-    "body": "Créez votre liste d'envies et partagez-la avec vos proches. Ils peuvent choisir et réserver un cadeau, sans créer de compte et sans gâcher la surprise.",
-    "createAccount": "Créer un compte",
-    "hasAccount": "J'ai déjà un compte",
-    "selfHost": "Vous préférez l'héberger vous-même ?",
-    "github": "Code source sur GitHub",
-    "support": "Soutenir le projet ♥"
+    "headline": "Les bonnes idées font les bons cadeaux.",
+    "body": "Rassemblez vos envies dans une liste et partagez-la avec vos proches. Ils peuvent choisir un cadeau et le réserver, sans créer de compte.",
+    "createAccount": "Créer ma liste",
+    "createHint": "Un compte est nécessaire pour créer une liste.",
+    "hasAccount": "Se connecter",
+    "selfHost": "Vous souhaitez héberger Wishlist vous-même ?",
+    "github": "Voir le code sur GitHub",
+    "support": "Soutenir Wishlist"
   },
   "mine": {
-    "title": "Mes wishlists",
-    "emptyTitle": "Tu n'as encore aucune liste.",
-    "emptyBody": "Crée-en une pour commencer.",
-    "newList": "Nouvelle wishlist"
+    "title": "Mes listes",
+    "emptyTitle": "Votre première liste commence ici",
+    "emptyBody": "Rassemblez vos idées cadeaux, puis partagez-les avec vos proches.",
+    "newList": "Créer une liste"
   },
   "newList": {
-    "title": "Nouvelle wishlist",
-    "description": "Titre, une première catégorie et une personne — tu pourras en ajouter ensuite.",
-    "titleLabel": "Titre",
-    "titlePlaceholder": "ex. Noël 2026, Anniversaire Alex…",
-    "categoryLabel": "Catégorie",
-    "categoryPlaceholder": "ex. Maison, Cuisine, Loisirs, Livres…",
-    "categoryHint": "Au moins une pour classer les idées.",
-    "personLabel": "Pour qui",
-    "personPlaceholder": "ex. Alex, Sam, Commun…",
-    "personHint": "Au moins une personne (ou « Commun »).",
-    "submit": "Créer"
+    "title": "Créer une liste",
+    "description": "Donnez un nom à votre liste, ajoutez une première catégorie et indiquez pour qui sont les cadeaux. Vous pourrez compléter ces informations ensuite.",
+    "titleLabel": "Nom de la liste",
+    "titlePlaceholder": "Ex. : Noël 2026, Anniversaire d'Alex",
+    "categoryLabel": "Première catégorie",
+    "categoryPlaceholder": "Ex. : Livres, Cuisine, Loisirs",
+    "categoryHint": "Les catégories servent à regrouper vos idées cadeaux.",
+    "personLabel": "Pour qui ?",
+    "personPlaceholder": "Ex. : Alex, Camille, Nous deux",
+    "personHint": "Indiquez une personne ou un groupe, par exemple « Nous deux ».",
+    "submit": "Créer la liste",
+    "cancel": "Annuler"
   }
 }

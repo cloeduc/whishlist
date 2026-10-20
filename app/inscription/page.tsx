@@ -47,6 +47,7 @@ export default async function InscriptionPage({
               <Field>
                 <FieldLabel htmlFor="displayName">{t("register.name")}</FieldLabel>
                 <Input id="displayName" name="displayName" required autoComplete="nickname" />
+                <FieldDescription>{t("register.nameHint")}</FieldDescription>
               </Field>
               <Field>
                 <FieldLabel htmlFor="email">{t("register.email")}</FieldLabel>

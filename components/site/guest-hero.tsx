@@ -9,6 +9,7 @@ export function GuestHero({
   headline,
   body,
   createAccount,
+  createHint,
   hasAccount,
   selfHost,
   github,
@@ -17,6 +18,7 @@ export function GuestHero({
   headline: string;
   body: string;
   createAccount: string;
+  createHint: string;
   hasAccount: string;
   selfHost: string;
   github: string;
@@ -36,13 +38,16 @@ export function GuestHero({
           </h1>
           <p className="guest-hero__body text-pretty text-base text-muted-foreground sm:text-lg">{body}</p>
         </div>
-        <div className="guest-hero__cta flex flex-wrap gap-3">
-          <Button size="lg" nativeButton={false} render={<Link href="/inscription" />}>
-            {createAccount}
-          </Button>
-          <Button size="lg" variant="outline" nativeButton={false} render={<Link href="/connexion" />}>
-            {hasAccount}
-          </Button>
+        <div className="guest-hero__cta flex flex-col items-start gap-2">
+          <div className="flex flex-wrap gap-3">
+            <Button size="lg" nativeButton={false} render={<Link href="/inscription" />}>
+              {createAccount}
+            </Button>
+            <Button size="lg" variant="outline" nativeButton={false} render={<Link href="/connexion" />}>
+              {hasAccount}
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">{createHint}</p>
         </div>
         <p className="guest-hero__footer text-sm text-muted-foreground">
           {selfHost}{" "}

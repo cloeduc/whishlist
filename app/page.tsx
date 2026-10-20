@@ -28,6 +28,7 @@ export default async function HomePage() {
           headline={t("guest.headline")}
           body={t("guest.body")}
           createAccount={t("guest.createAccount")}
+          createHint={t("guest.createHint")}
           hasAccount={t("guest.hasAccount")}
           selfHost={t("guest.selfHost")}
           github={t("guest.github")}

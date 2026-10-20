@@ -12,14 +12,17 @@ export function CopyLinkField({
   label,
   value,
   hint,
+  copyLabel,
 }: {
   id: string;
   label: string;
   value: string;
   hint?: string;
+  copyLabel?: string;
 }) {
   const { t } = useTranslation("list");
   const [copied, setCopied] = useState(false);
+  const copyAria = copyLabel ?? t("share.copy");
 
   useEffect(() => {
     if (!copied) return;
@@ -60,8 +63,8 @@ export function CopyLinkField({
           variant={copied ? "default" : "outline"}
           size="icon"
           onClick={copy}
-          aria-label={copied ? t("share.copied") : t("share.copy")}
-          title={copied ? t("share.copied") : t("share.copy")}
+          aria-label={copied ? t("share.copied") : copyAria}
+          title={copied ? t("share.copied") : copyAria}
         >
           {copied ? <CheckIcon /> : <CopyIcon />}
         </Button>

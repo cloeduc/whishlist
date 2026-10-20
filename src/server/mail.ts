@@ -49,7 +49,8 @@ export async function sendPasswordResetMail(input: {
   const subject = t("reset.subject");
   const text = [t("reset.intro"), "", t("reset.openLink"), input.resetUrl, "", t("reset.ignore")].join("\n");
   const html = `<p>${escapeHtml(t("reset.intro"))}</p>
-<p><a href="${input.resetUrl}">${escapeHtml(t("reset.cta"))}</a> (1h).</p>
+<p><a href="${input.resetUrl}">${escapeHtml(t("reset.cta"))}</a></p>
+<p>${escapeHtml(t("reset.openLink"))}<br/><a href="${input.resetUrl}">${escapeHtml(input.resetUrl)}</a></p>
 <p>${escapeHtml(t("reset.ignore"))}</p>`;
 
   return sendMail({
@@ -78,8 +79,9 @@ export async function sendInviteMail(input: {
     "",
     t("invite.ignore"),
   ].join("\n");
-  const html = `<p><strong>${escapeHtml(input.fromName)}</strong> — ${escapeHtml(t("invite.intro", vars))}</p>
+  const html = `<p>${escapeHtml(t("invite.intro", vars))}</p>
 <p><a href="${input.inviteUrl}">${escapeHtml(t("invite.cta"))}</a> (${escapeHtml(t("invite.ctaHint"))}).</p>
+<p>${escapeHtml(t("invite.openLink"))}<br/><a href="${input.inviteUrl}">${escapeHtml(input.inviteUrl)}</a></p>
 <p>${escapeHtml(t("invite.ignore"))}</p>`;
 
   return sendMail({

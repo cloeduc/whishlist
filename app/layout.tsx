@@ -38,10 +38,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <header className="flex flex-wrap items-center gap-3">
               <Link
                 href="/"
+                aria-label={t("nav.homeAria")}
                 className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground"
               >
-                <GiftMark className="size-8" title={t("brand")} />
-                {t("brand")}
+                <GiftMark className="size-8" title="" />
+                <span aria-hidden>{t("brand")}</span>
               </Link>
               <SiteNav
                 locale={locale}
@@ -55,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </header>
             {children}
             <SiteFooter
-              selfHost={t("footer.selfHost")}
+              tagline={t("footer.tagline")}
               github={t("footer.github")}
               support={t("footer.support")}
               supportUrl={supportUrl()}

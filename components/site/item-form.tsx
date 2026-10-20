@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { PriorityStarPicker } from "@/components/site/priority-star-picker";
@@ -189,7 +189,7 @@ export function ItemForm({
               inputMode="decimal"
               value={draft.price}
               onChange={(e) => setField("price", e.target.value)}
-              placeholder="18.50"
+              placeholder={t("form.pricePlaceholder")}
             />
           </Field>
           <Field>
@@ -199,6 +199,7 @@ export function ItemForm({
               value={draft.priority}
               onChange={(next) => setField("priority", next)}
             />
+            <FieldDescription>{t("form.priorityHint")}</FieldDescription>
           </Field>
         </div>
         <Field>
@@ -231,11 +232,7 @@ export function ItemForm({
           </div>
         </Field>
         <Button type="submit" disabled={pending} className="w-full sm:w-auto">
-          {pending
-            ? t("common:actions.loading")
-            : item
-              ? t("common:actions.save")
-              : t("common:actions.add")}
+          {pending ? t("common:actions.loading") : item ? t("form.save") : t("form.add")}
         </Button>
       </FieldGroup>
     </form>

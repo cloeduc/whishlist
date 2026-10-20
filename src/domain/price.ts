@@ -1,5 +1,5 @@
 export function parsePrice(input: string): number | null | "invalid" {
-  const trimmed = input.trim();
+  const trimmed = input.trim().replace(",", ".");
   if (!trimmed) return null;
   if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return "invalid";
   const cents = Math.round(Number(trimmed) * 100);
@@ -7,9 +7,11 @@ export function parsePrice(input: string): number | null | "invalid" {
   return cents;
 }
 
-export function formatPrice(cents: number | null): string | null {
+/** Affichage localisé ; devise inchangée (EUR). */
+export function formatPrice(cents: number | null, locale = "fr-FR"): string | null {
   if (cents === null) return null;
-  const euros = Math.floor(cents / 100);
-  const rest = String(cents % 100).padStart(2, "0");
-  return `€${euros}.${rest}`;
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "EUR",
+  }).format(cents / 100);
 }

@@ -8,7 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "node app.js",
-    "test": "node --import tsx --test --test-concurrency=1 tests/domain/read-list.test.ts tests/domain/accounts.test.ts tests/domain/password-reset.test.ts tests/domain/import.test.ts tests/domain/membership.test.ts tests/domain/items.test.ts tests/domain/filters.test.ts tests/domain/reserve.test.ts tests/domain/offrir.test.ts tests/domain/og-image.test.ts tests/domain/priority.test.ts tests/domain/product-from-url.test.ts tests/domain/theme.test.ts tests/domain/safe-http.test.ts tests/domain/origin.test.ts tests/domain/session.test.ts tests/domain/rate-limit.test.ts tests/domain/read-password.test.ts"
+    "test": "node --import tsx --test --test-concurrency=1 tests/domain/read-list.test.ts tests/domain/accounts.test.ts tests/domain/password-reset.test.ts tests/domain/import.test.ts tests/domain/membership.test.ts tests/domain/items.test.ts tests/domain/filters.test.ts tests/domain/reserve.test.ts tests/domain/offrir.test.ts tests/domain/og-image.test.ts tests/domain/priority.test.ts tests/domain/product-from-url.test.ts tests/domain/theme.test.ts tests/domain/safe-http.test.ts tests/domain/origin.test.ts tests/domain/session.test.ts tests/domain/rate-limit.test.ts tests/domain/read-password.test.ts tests/domain/price.test.ts tests/domain/reservation-claim.test.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

@@ -29,7 +29,7 @@ export function listOffrir(doc: Database, wishlistId: string): OffrirRow[] {
       const type = item ? doc.types.find((t) => t.id === item.typeId) : undefined;
       return {
         reservationId: reservation.id,
-        itemName: item?.name ?? "Idée retirée",
+        itemName: item?.name ?? "—",
         typeLabel: type?.label ?? "",
         fromName: reservation.fromName,
         note: reservation.note,
@@ -38,7 +38,7 @@ export function listOffrir(doc: Database, wishlistId: string): OffrirRow[] {
 }
 
 /** Cadeaux réservés en étant connecté (userId sur la réservation). */
-export function listMyOffers(doc: Database, userId: string): MyOfferRow[] {
+export function listMyOffers(doc: Database, userId: string, locale = "fr-FR"): MyOfferRow[] {
   return doc.reservations
     .filter((r) => r.userId === userId)
     .map((reservation) => {
@@ -47,11 +47,11 @@ export function listMyOffers(doc: Database, userId: string): MyOfferRow[] {
       const type = item ? doc.types.find((t) => t.id === item.typeId) : undefined;
       return {
         reservationId: reservation.id,
-        itemName: item?.name ?? "Idée retirée",
-        listTitle: list?.title ?? "Liste introuvable",
+        itemName: item?.name ?? "—",
+        listTitle: list?.title ?? "—",
         listReadToken: list?.readToken ?? "",
         typeLabel: type?.label ?? "",
-        priceLabel: formatPrice(item?.priceCents ?? null),
+        priceLabel: formatPrice(item?.priceCents ?? null, locale),
         fromName: reservation.fromName,
         note: reservation.note,
         createdAt: reservation.createdAt,

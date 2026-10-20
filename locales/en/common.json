@@ -1,12 +1,13 @@
 {
   "brand": "Wishlist",
   "meta": {
-    "title": "Wishlist",
-    "description": "Gift lists you can browse without an account."
+    "title": "Wishlist — Wish lists to share",
+    "description": "Create a wish list and share it with friends and family. They can reserve a gift without creating an account."
   },
   "nav": {
     "menuAria": "Main navigation",
-    "myLists": "My wishlists",
+    "homeAria": "Wishlist — Home",
+    "myLists": "My wish lists",
     "account": "My account",
     "logout": "Log out",
     "login": "Log in",
@@ -17,16 +18,16 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
-    "loading": "…"
+    "loading": "Loading…"
   },
   "locale": {
     "groupAria": "Language",
-    "fr": "FR",
-    "en": "EN"
+    "fr": "Français",
+    "en": "English"
   },
   "footer": {
-    "selfHost": "Want your own instance?",
-    "github": "Open source on GitHub — run it yourself",
-    "support": "Support the project ♥"
+    "tagline": "Wishlist is a free and self-hostable project.",
+    "github": "View the code on GitHub",
+    "support": "Support Wishlist"
   }
 }

@@ -1,30 +1,32 @@
 {
   "guest": {
-    "headline": "Gift lists, without the fuss",
-    "body": "Create your wish list and share it with your loved ones. They can pick and reserve a gift—no account needed, and no spoiled surprises.",
-    "createAccount": "Create an account",
-    "hasAccount": "I already have an account",
-    "selfHost": "Prefer to host it yourself?",
-    "github": "Source code on GitHub",
-    "support": "Support the project ♥"
+    "headline": "Great gifts start with a wish list.",
+    "body": "Create a wish list and share it with friends and family. They can choose and reserve a gift without creating an account.",
+    "createAccount": "Create my wish list",
+    "createHint": "You’ll need an account to create a wish list.",
+    "hasAccount": "Log in",
+    "selfHost": "Want to host Wishlist yourself?",
+    "github": "View the code on GitHub",
+    "support": "Support Wishlist"
   },
   "mine": {
-    "title": "My wishlists",
-    "emptyTitle": "You don't have a list yet.",
-    "emptyBody": "Create one to get started.",
-    "newList": "New wishlist"
+    "title": "My wish lists",
+    "emptyTitle": "Start your first wish list",
+    "emptyBody": "Gather your gift ideas, then share them with friends and family.",
+    "newList": "Create a wish list"
   },
   "newList": {
-    "title": "New wishlist",
-    "description": "Title, a first category, and a person — you can add more later.",
-    "titleLabel": "Title",
-    "titlePlaceholder": "e.g. Christmas 2026, Alex's birthday…",
-    "categoryLabel": "Category",
-    "categoryPlaceholder": "e.g. Home, Kitchen, Hobbies, Books…",
-    "categoryHint": "At least one to group ideas.",
-    "personLabel": "Who for",
-    "personPlaceholder": "e.g. Alex, Sam, Shared…",
-    "personHint": "At least one person (or “Shared”).",
-    "submit": "Create"
+    "title": "Create a wish list",
+    "description": "Name your wish list, add a first category, and choose who the gifts are for. You can add more categories and recipients later.",
+    "titleLabel": "List name",
+    "titlePlaceholder": "e.g. Christmas 2026, Alex’s birthday",
+    "categoryLabel": "First category",
+    "categoryPlaceholder": "e.g. Books, Kitchen, Hobbies",
+    "categoryHint": "Categories help you organize your gift ideas.",
+    "personLabel": "Gift recipient",
+    "personPlaceholder": "e.g. Alex, Sam, Both of us",
+    "personHint": "Enter a person or a group, such as “Both of us”.",
+    "submit": "Create wish list",
+    "cancel": "Cancel"
   }
 }

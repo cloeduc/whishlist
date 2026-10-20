@@ -1,17 +1,17 @@
 {
   "reset": {
     "subject": "Reset your Wishlist password",
-    "intro": "You asked to reset your Wishlist password.",
-    "openLink": "Open this link (valid for 1 hour):",
+    "intro": "You requested a password reset. Use the button below to choose a new password. This link is valid for 1 hour.",
+    "openLink": "If the button doesn’t work, copy this link into your browser:",
     "cta": "Choose a new password",
-    "ignore": "If you didn't request this, ignore this message."
+    "ignore": "If you didn’t request this, you can ignore this email."
   },
   "invite": {
-    "subject": "{{fromName}} invited you to “{{listTitle}}”",
-    "intro": "{{fromName}} invited you to contribute to the “{{listTitle}}” wishlist.",
-    "openLink": "Open this link (a Wishlist account is required):",
-    "cta": "Join the list",
+    "subject": "You’re invited to join a list on Wishlist",
+    "intro": "You’ve been invited to join “{{listTitle}}” and help manage it. Log in or create an account to continue.",
+    "openLink": "If the button doesn’t work, copy this link into your browser:",
+    "cta": "Join wish list",
     "ctaHint": "a Wishlist account is required",
-    "ignore": "If you weren't expecting this, ignore it."
+    "ignore": "If you weren’t expecting this, ignore it."
   }
 }

@@ -11,7 +11,8 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/u
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
-import { getTranslations, translateError } from "@/src/i18n/server";
+import { intlLocale } from "@/src/i18n/config";
+import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -22,9 +23,9 @@ export default async function ComptePage({
 }) {
   const user = await requireUser({ allowMustChangePassword: true });
   const query = await searchParams;
-  const [t, doc] = await Promise.all([getTranslations("auth"), getDocument()]);
+  const [t, doc, locale] = await Promise.all([getTranslations("auth"), getDocument(), getLocale()]);
   const forced = user.mustChangePassword;
-  const offers = forced ? [] : listMyOffers(doc, user.id);
+  const offers = forced ? [] : listMyOffers(doc, user.id, intlLocale(locale));
   const passwordError =
     query.e === "mismatch"
       ? t("changePassword.errorMismatch")

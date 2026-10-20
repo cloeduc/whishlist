@@ -56,12 +56,12 @@ export default async function ReserverPage({
       doc.items.find((item) => item.id === query.itemId && item.wishlistId === list.id)
     : null;
   const pickedAvailable = picked ? choices.some((item) => item.id === picked.id) : false;
-  const title = t("reserve.titleNamed", { title: list.title });
   const error = query.e ? await translateError(query.e) : null;
   return (
     <main className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-medium tracking-tight text-balance">{title}</h1>
+        <h1 className="text-2xl font-medium tracking-tight text-balance">{t("reserve.title")}</h1>
+        <p className="text-muted-foreground text-pretty">{t("reserve.listContext", { title: list.title })}</p>
         <Button variant="link" className="h-auto w-fit px-0" nativeButton={false} render={<Link href={`/l/${readToken}`} />}>
           {t("reserve.back")}
         </Button>
@@ -98,7 +98,9 @@ export default async function ReserverPage({
                 <Field>
                   <FieldLabel htmlFor="note">{t("reserve.note")}</FieldLabel>
                   <Textarea id="note" name="note" />
+                  <p className="text-sm text-muted-foreground">{t("reserve.privacyHint")}</p>
                 </Field>
+                <p className="text-sm text-muted-foreground">{t("reserve.noPurchaseHint")}</p>
                 <Button type="submit">{t("reserve.submit")}</Button>
               </FieldGroup>
             </form>
@@ -132,10 +134,7 @@ export default async function ReserverPage({
             </CardContent>
           </Card>
           <Card>
-            <CardHeader>
-              <CardTitle>{t("reserve.giftTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <form action={reserveAction}>
                 <FieldGroup>
                   <input type="hidden" name="readToken" value={readToken} />
@@ -164,7 +163,9 @@ export default async function ReserverPage({
                   <Field>
                     <FieldLabel htmlFor="note">{t("reserve.note")}</FieldLabel>
                     <Textarea id="note" name="note" />
+                    <p className="text-sm text-muted-foreground">{t("reserve.privacyHint")}</p>
                   </Field>
+                  <p className="text-sm text-muted-foreground">{t("reserve.noPurchaseHint")}</p>
                   <Button type="submit">{t("reserve.submit")}</Button>
                 </FieldGroup>
               </form>

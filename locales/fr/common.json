@@ -1,32 +1,33 @@
 {
   "brand": "Wishlist",
   "meta": {
-    "title": "Wishlist",
-    "description": "Listes de cadeaux à lire sans compte."
+    "title": "Wishlist — Vos listes de cadeaux à partager",
+    "description": "Créez une liste de cadeaux et partagez-la avec vos proches. Ils peuvent réserver une idée sans créer de compte."
   },
   "nav": {
     "menuAria": "Navigation principale",
-    "myLists": "Mes wishlists",
+    "homeAria": "Wishlist — Accueil",
+    "myLists": "Mes listes",
     "account": "Mon compte",
     "logout": "Se déconnecter",
-    "login": "Connexion",
-    "register": "Inscription"
+    "login": "Se connecter",
+    "register": "Créer un compte"
   },
   "actions": {
     "add": "Ajouter",
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",
-    "loading": "…"
+    "loading": "Chargement…"
   },
   "locale": {
     "groupAria": "Langue",
-    "fr": "FR",
-    "en": "EN"
+    "fr": "Français",
+    "en": "English"
   },
   "footer": {
-    "selfHost": "Envie de votre propre instance ?",
-    "github": "Code libre sur GitHub — installez-la chez vous",
-    "support": "Soutenir le projet ♥"
+    "tagline": "Wishlist est un projet libre et auto-hébergeable.",
+    "github": "Voir le code sur GitHub",
+    "support": "Soutenir Wishlist"
   }
 }
