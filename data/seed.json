@@ -1,237 +1,173 @@
 {
   "types": [
-    {
-      "id": "gaming",
-      "label": "Gaming"
-    },
-    {
-      "id": "tech",
-      "label": "Tech"
-    },
-    {
-      "id": "desk",
-      "label": "Desk setup"
-    },
-    {
-      "id": "audio",
-      "label": "Audio"
-    },
-    {
-      "id": "merch",
-      "label": "Merch"
-    }
+    { "id": "maison", "label": "Maison" },
+    { "id": "cuisine", "label": "Cuisine" },
+    { "id": "loisirs", "label": "Loisirs" },
+    { "id": "livres", "label": "Livres" }
   ],
   "people": [
-    {
-      "id": "me",
-      "label": "Me"
-    },
-    {
-      "id": "partner",
-      "label": "Partner"
-    },
-    {
-      "id": "shared",
-      "label": "Shared"
-    }
+    { "id": "alex", "label": "Alex" },
+    { "id": "sam", "label": "Sam" },
+    { "id": "commun", "label": "Commun" }
   ],
   "views": [
     {
       "id": "all",
-      "label": "All ideas",
+      "label": "Toutes les idées",
       "kind": "all",
       "typeIds": [],
       "personId": null,
       "pinned": true
     },
     {
-      "id": "gaming",
-      "label": "Gaming",
+      "id": "maison",
+      "label": "Maison",
       "kind": "types",
-      "typeIds": [
-        "gaming"
-      ],
+      "typeIds": ["maison"],
       "personId": null,
       "pinned": false
     },
     {
-      "id": "tech",
-      "label": "Tech",
+      "id": "cadeaux",
+      "label": "Cadeaux",
       "kind": "types",
-      "typeIds": [
-        "tech",
-        "desk",
-        "audio"
-      ],
+      "typeIds": ["cuisine", "loisirs", "livres"],
       "personId": null,
       "pinned": false
     }
   ],
   "items": [
     {
-      "id": "steam-deck",
-      "name": "Steam Deck OLED 1TB",
-      "typeId": "gaming",
-      "personId": "me",
-      "url": "https://store.steampowered.com/steamdeck",
+      "id": "lampe",
+      "name": "Lampe de chevet design",
+      "typeId": "maison",
+      "personId": "alex",
+      "url": "https://example.com/lampe",
       "imageUrl": null,
-      "priceCents": 67900,
-      "priority": "5",
+      "priceCents": 4500,
+      "priority": "3",
       "sortOrder": 1
     },
     {
-      "id": "dualsense",
-      "name": "DualSense Edge controller",
-      "typeId": "gaming",
-      "personId": "me",
-      "url": "https://www.playstation.com/accessories/dualsense-edge/",
+      "id": "plaid",
+      "name": "Plaid en laine",
+      "typeId": "maison",
+      "personId": "commun",
+      "url": "https://example.com/plaid",
       "imageUrl": null,
-      "priceCents": 23990,
-      "priority": "3",
+      "priceCents": 7900,
+      "priority": "2",
       "sortOrder": 2
     },
     {
-      "id": "zelda",
-      "name": "The Legend of Zelda: Tears of the Kingdom",
-      "typeId": "gaming",
-      "personId": "shared",
-      "url": "https://www.nintendo.com/store/products/the-legend-of-zelda-tears-of-the-kingdom-switch/",
+      "id": "plante",
+      "name": "Monstera en pot",
+      "typeId": "maison",
+      "personId": "sam",
+      "url": "https://example.com/plante",
       "imageUrl": null,
-      "priceCents": 6999,
-      "priority": "3",
+      "priceCents": 3500,
+      "priority": "4",
       "sortOrder": 3
     },
     {
-      "id": "switch2",
-      "name": "Nintendo Switch 2 (when it drops)",
-      "typeId": "gaming",
-      "personId": "shared",
-      "url": "https://www.nintendo.com/",
+      "id": "casserole",
+      "name": "Cocotte en fonte 24 cm",
+      "typeId": "cuisine",
+      "personId": "commun",
+      "url": "https://example.com/cocotte",
       "imageUrl": null,
-      "priceCents": null,
+      "priceCents": 18900,
       "priority": "5",
       "sortOrder": 4
     },
     {
-      "id": "mechanical-kb",
-      "name": "Keychron Q1 Pro (wireless)",
-      "typeId": "desk",
-      "personId": "me",
-      "url": "https://www.keychron.com/products/keychron-q1-pro-qmk-via-wireless-custom-mechanical-keyboard",
+      "id": "couteaux",
+      "name": "Set de couteaux de chef",
+      "typeId": "cuisine",
+      "personId": "alex",
+      "url": "https://example.com/couteaux",
       "imageUrl": null,
-      "priceCents": 20900,
-      "priority": "5",
+      "priceCents": 12900,
+      "priority": "3",
       "sortOrder": 5
     },
     {
-      "id": "mx-master",
-      "name": "Logitech MX Master 3S",
-      "typeId": "desk",
-      "personId": "me",
-      "url": "https://www.logitech.com/products/mice/mx-master-3s.html",
+      "id": "cafe",
+      "name": "Machine à café filtre",
+      "typeId": "cuisine",
+      "personId": "sam",
+      "url": "https://example.com/cafe",
       "imageUrl": null,
-      "priceCents": 10999,
-      "priority": "3",
+      "priceCents": 8900,
+      "priority": "4",
       "sortOrder": 6
     },
     {
-      "id": "monitor-arm",
-      "name": "Ergotron LX monitor arm",
-      "typeId": "desk",
-      "personId": "shared",
-      "url": "https://www.ergotron.com/en-us/products/product-details/45-241",
+      "id": "velo",
+      "name": "Casque vélo urbain",
+      "typeId": "loisirs",
+      "personId": "alex",
+      "url": "https://example.com/casque",
       "imageUrl": null,
-      "priceCents": 18900,
-      "priority": "2",
+      "priceCents": 6900,
+      "priority": "5",
       "sortOrder": 7
     },
     {
-      "id": "airpods-max",
-      "name": "AirPods Max",
-      "typeId": "audio",
-      "personId": "partner",
-      "url": "https://www.apple.com/airpods-max/",
+      "id": "jeu",
+      "name": "Jeu de société coopératif",
+      "typeId": "loisirs",
+      "personId": "commun",
+      "url": "https://example.com/jeu",
       "imageUrl": null,
-      "priceCents": 57900,
+      "priceCents": 1890,
       "priority": "3",
       "sortOrder": 8
     },
     {
-      "id": "sony-xm5",
-      "name": "Sony WH-1000XM5",
-      "typeId": "audio",
-      "personId": "me",
-      "url": "https://electronics.sony.com/audio/headphones/headband/p/wh1000xm5",
+      "id": "randonnee",
+      "name": "Sac à dos 30 L",
+      "typeId": "loisirs",
+      "personId": "sam",
+      "url": "https://example.com/sac",
       "imageUrl": null,
-      "priceCents": 34800,
-      "priority": "3",
+      "priceCents": 11900,
+      "priority": "2",
       "sortOrder": 9
     },
     {
-      "id": "kindle",
-      "name": "Kindle Paperwhite Signature",
-      "typeId": "tech",
-      "personId": "partner",
-      "url": "https://www.amazon.com/kindle-paperwhite",
+      "id": "roman",
+      "name": "Roman contemporain (édition reliée)",
+      "typeId": "livres",
+      "personId": "sam",
+      "url": "https://example.com/roman",
       "imageUrl": null,
-      "priceCents": 18999,
+      "priceCents": 2290,
       "priority": "2",
       "sortOrder": 10
     },
     {
-      "id": "ssd",
-      "name": "Samsung T7 Shield 2TB portable SSD",
-      "typeId": "tech",
-      "personId": "shared",
-      "url": "https://www.samsung.com/us/computing/memory-storage/portable-solid-state-drives/",
+      "id": "bd",
+      "name": "Coffret BD collector",
+      "typeId": "livres",
+      "personId": "alex",
+      "url": "https://example.com/bd",
       "imageUrl": null,
-      "priceCents": 16999,
+      "priceCents": 5500,
       "priority": "3",
       "sortOrder": 11
     },
     {
-      "id": "anker-gan",
-      "name": "Anker 140W GaN charger + USB-C cable pack",
-      "typeId": "tech",
-      "personId": "me",
-      "url": "https://www.anker.com/",
+      "id": "cookbook",
+      "name": "Livre de recettes de saison",
+      "typeId": "livres",
+      "personId": "commun",
+      "url": "https://example.com/recettes",
       "imageUrl": null,
-      "priceCents": 8999,
-      "priority": "2",
+      "priceCents": null,
+      "priority": "1",
       "sortOrder": 12
-    },
-    {
-      "id": "raspberry",
-      "name": "Raspberry Pi 5 starter kit",
-      "typeId": "tech",
-      "personId": "me",
-      "url": "https://www.raspberrypi.com/products/raspberry-pi-5/",
-      "imageUrl": null,
-      "priceCents": 12900,
-      "priority": "2",
-      "sortOrder": 13
-    },
-    {
-      "id": "hoodie",
-      "name": "GitHub Octocat hoodie",
-      "typeId": "merch",
-      "personId": "me",
-      "url": "https://thegithubshop.com/",
-      "imageUrl": null,
-      "priceCents": 5500,
-      "priority": "2",
-      "sortOrder": 14
-    },
-    {
-      "id": "lego-atari",
-      "name": "LEGO Atari 2600 set",
-      "typeId": "merch",
-      "personId": "shared",
-      "url": "https://www.lego.com/themes/icons/atari-2600",
-      "imageUrl": null,
-      "priceCents": 23999,
-      "priority": "3",
-      "sortOrder": 15
     }
   ]
 }

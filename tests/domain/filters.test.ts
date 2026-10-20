@@ -39,15 +39,15 @@ function doc() {
 test("filtres du seed de test", () => {
   const data = doc();
   const names = (view: string) => applyView(data, "w", `w:${view}`).map((item) => item.name);
-  const gaming = names("gaming");
-  assert.ok(gaming.includes("Steam Deck OLED 1TB"));
-  assert.ok(gaming.includes("DualSense Edge controller"));
-  assert.equal(gaming.includes("Keychron Q1 Pro (wireless)"), false);
-  const tech = names("tech");
-  assert.ok(tech.includes("Keychron Q1 Pro (wireless)"));
-  assert.ok(tech.includes("AirPods Max"));
-  assert.ok(tech.includes("Samsung T7 Shield 2TB portable SSD"));
-  assert.equal(tech.includes("Steam Deck OLED 1TB"), false);
+  const maison = names("maison");
+  assert.ok(maison.includes("Lampe de chevet design"));
+  assert.ok(maison.includes("Monstera en pot"));
+  assert.equal(maison.includes("Cocotte en fonte 24 cm"), false);
+  const cadeaux = names("cadeaux");
+  assert.ok(cadeaux.includes("Cocotte en fonte 24 cm"));
+  assert.ok(cadeaux.includes("Casque vélo urbain"));
+  assert.ok(cadeaux.includes("Roman contemporain (édition reliée)"));
+  assert.equal(cadeaux.includes("Lampe de chevet design"), false);
   assert.equal(applyView(data, "w", "w:unknown").length, seed.items.length);
 });
 
@@ -57,36 +57,37 @@ test("filtre par budget", () => {
   const names = (budget: Parameters<typeof applyBudget>[1]) =>
     applyBudget(all, budget).map((item) => item.name);
   const under = names("under-20");
-  assert.equal(under.includes("Steam Deck OLED 1TB"), false);
-  assert.equal(under.includes("Nintendo Switch 2 (when it drops)"), false);
+  assert.ok(under.includes("Jeu de société coopératif"));
+  assert.equal(under.includes("Cocotte en fonte 24 cm"), false);
   const mid = names("50-100");
-  assert.ok(mid.includes("The Legend of Zelda: Tears of the Kingdom"));
-  assert.ok(mid.includes("Anker 140W GaN charger + USB-C cable pack"));
-  assert.ok(names("over-100").includes("Steam Deck OLED 1TB"));
-  assert.ok(names("none").includes("Nintendo Switch 2 (when it drops)"));
-  assert.equal(names("none").includes("Steam Deck OLED 1TB"), false);
+  assert.ok(mid.includes("Plaid en laine"));
+  assert.ok(mid.includes("Casque vélo urbain"));
+  assert.ok(names("over-100").includes("Cocotte en fonte 24 cm"));
+  assert.ok(names("20-50").includes("Roman contemporain (édition reliée)"));
+  assert.ok(names("none").includes("Livre de recettes de saison"));
+  assert.equal(names("none").includes("Cocotte en fonte 24 cm"), false);
   assert.equal(applyBudget(all, parseBudget("nope")).length, seed.items.length);
 });
 
 test("qui se combine avec le type", () => {
   const data = doc();
-  const gaming = applyView(data, "w", "w:gaming");
-  const me = applyPerson(gaming, "w:me").map((item) => item.name);
-  assert.ok(me.includes("Steam Deck OLED 1TB"));
-  assert.equal(me.includes("The Legend of Zelda: Tears of the Kingdom"), false);
-  const shared = applyPerson(gaming, "w:shared").map((item) => item.name);
-  assert.ok(shared.includes("The Legend of Zelda: Tears of the Kingdom"));
-  assert.equal(shared.includes("Steam Deck OLED 1TB"), false);
-  assert.equal(applyPerson(gaming, null).length, gaming.length);
+  const maison = applyView(data, "w", "w:maison");
+  const alex = applyPerson(maison, "w:alex").map((item) => item.name);
+  assert.ok(alex.includes("Lampe de chevet design"));
+  assert.equal(alex.includes("Monstera en pot"), false);
+  const sam = applyPerson(maison, "w:sam").map((item) => item.name);
+  assert.ok(sam.includes("Monstera en pot"));
+  assert.equal(sam.includes("Lampe de chevet design"), false);
+  assert.equal(applyPerson(maison, null).length, maison.length);
 });
 
 test("tri par priorité dans une vue filtrée", () => {
   const data = doc();
-  const gaming = sortByPriority(applyView(data, "w", "w:gaming"));
-  assert.ok(gaming.length >= 2);
-  for (let i = 1; i < gaming.length; i++) {
-    const prev = Number(gaming[i - 1]?.priority ?? 0);
-    const next = Number(gaming[i]?.priority ?? 0);
+  const maison = sortByPriority(applyView(data, "w", "w:maison"));
+  assert.ok(maison.length >= 2);
+  for (let i = 1; i < maison.length; i++) {
+    const prev = Number(maison[i - 1]?.priority ?? 0);
+    const next = Number(maison[i]?.priority ?? 0);
     assert.ok(prev >= next);
   }
 });
@@ -99,13 +100,13 @@ test("groupement par catégorie alphabétique", () => {
   const labels = groups.map((group) => group.label);
   assert.deepEqual(
     labels,
-    [...labels].sort((a, b) => a.localeCompare(b, "en")),
+    [...labels].sort((a, b) => a.localeCompare(b, "fr")),
   );
-  assert.ok(labels.includes("Gaming"));
-  assert.ok(labels.includes("Tech"));
-  const gaming = groups.find((group) => group.label === "Gaming");
-  assert.ok(gaming);
-  assert.ok(gaming.items.some((item) => item.name === "Steam Deck OLED 1TB"));
+  assert.ok(labels.includes("Maison"));
+  assert.ok(labels.includes("Cuisine"));
+  const maison = groups.find((group) => group.label === "Maison");
+  assert.ok(maison);
+  assert.ok(maison.items.some((item) => item.name === "Lampe de chevet design"));
   assert.equal(
     groups.reduce((sum, group) => sum + group.items.length, 0),
     items.length,

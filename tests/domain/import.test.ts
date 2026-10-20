@@ -36,10 +36,10 @@ test("seed de test : idées préfixées, types et personnes", () => {
   const items = created.doc.items.filter((item) => item.wishlistId === "w1");
   assert.equal(items.length, seed.items.length);
   assert.ok(items.every((item) => item.id.startsWith("w1:")));
-  assert.ok(items.some((item) => item.name === "Steam Deck OLED 1TB"));
-  assert.equal(items.find((item) => item.name === "Steam Deck OLED 1TB")?.priceCents, 67900);
-  assert.ok(created.doc.types.some((type) => type.id === "w1:gaming" && type.label === "Gaming"));
-  assert.ok(created.doc.people.some((person) => person.id === "w1:me" && person.label === "Me"));
+  assert.ok(items.some((item) => item.name === "Cocotte en fonte 24 cm"));
+  assert.equal(items.find((item) => item.name === "Cocotte en fonte 24 cm")?.priceCents, 18900);
+  assert.ok(created.doc.types.some((type) => type.id === "w1:maison" && type.label === "Maison"));
+  assert.ok(created.doc.people.some((person) => person.id === "w1:alex" && person.label === "Alex"));
 });
 
 test("deux imports ne partagent pas d'ids", () => {
