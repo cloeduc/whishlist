@@ -5,10 +5,10 @@ import { useTranslation } from "react-i18next";
 import { GripVerticalIcon } from "lucide-react";
 import { parsePriority } from "@/src/domain/priority";
 import { deleteItemAction, setItemArchivedAction, setItemTypeAction } from "@/src/server/actions";
+import { ConfirmForm } from "@/components/site/confirm-form";
 import { ItemForm } from "@/components/site/item-form";
 import { PriorityStars } from "@/components/site/priority-stars";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -189,6 +189,7 @@ export function IdeasKanban({
                         <button
                           type="button"
                           className="mt-0.5 w-fit text-[11px] text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                          aria-label={t("kanban.archiveAria", { name: item.name })}
                           onClick={(event) => {
                             event.preventDefault();
                             event.stopPropagation();
@@ -224,14 +225,17 @@ export function IdeasKanban({
                 price={editingItem.price}
                 onglet="idees"
               />
-              <form action={deleteItemAction}>
-                <input type="hidden" name="wishlistId" value={wishlistId} />
-                <input type="hidden" name="itemId" value={editingItem.id} />
-                <input type="hidden" name="onglet" value="idees" />
-                <Button type="submit" variant="destructive" size="sm">
-                  {t("common:actions.delete")}
-                </Button>
-              </form>
+              <ConfirmForm
+                title={t("confirm.deleteIdeaTitle")}
+                description={t("confirm.deleteIdeaBody", { name: editingItem.name })}
+                confirmLabel={t("confirm.deleteIdeaConfirm")}
+                cancelLabel={t("confirm.deleteIdeaKeep")}
+                action={deleteItemAction}
+                fields={{ wishlistId, itemId: editingItem.id, onglet: "idees" }}
+                triggerLabel={t("form.delete")}
+                triggerVariant="destructive"
+                triggerSize="sm"
+              />
             </>
           ) : null}
         </DialogContent>

@@ -322,6 +322,18 @@ export function deletePerson(
   return { ok: true, doc: next };
 }
 
+function removeReservation(doc: Database, wishlistId: string, reservationId: string): Database | null {
+  const next = clone(doc);
+  const reservation = next.reservations.find(
+    (r) => r.id === reservationId && r.wishlistId === wishlistId,
+  );
+  if (!reservation) return null;
+  const item = next.items.find((i) => i.id === reservation.itemId && i.wishlistId === wishlistId);
+  if (item) item.archived = false;
+  next.reservations = next.reservations.filter((r) => r.id !== reservation.id);
+  return next;
+}
+
 export function cancelReservation(
   doc: Database,
   input: { wishlistId: string; actorId: string; reservationId: string },
@@ -329,13 +341,29 @@ export function cancelReservation(
   if (!findMembership(doc, input.wishlistId, input.actorId)) {
     return { ok: false, error: "notMember" };
   }
-  const next = clone(doc);
-  const reservation = next.reservations.find(
+  const next = removeReservation(doc, input.wishlistId, input.reservationId);
+  if (!next) return { ok: false, error: "reservationMissing" };
+  return { ok: true, doc: next };
+}
+
+/** Annulation par le réservant (compte lié ou claim cookie). */
+export function cancelOwnReservation(
+  doc: Database,
+  input: {
+    wishlistId: string;
+    reservationId: string;
+    userId: string | null;
+    claimedIds: ReadonlySet<string>;
+  },
+): { ok: true; doc: Database } | { ok: false; error: string } {
+  const reservation = doc.reservations.find(
     (r) => r.id === input.reservationId && r.wishlistId === input.wishlistId,
   );
   if (!reservation) return { ok: false, error: "reservationMissing" };
-  const item = next.items.find((i) => i.id === reservation.itemId && i.wishlistId === input.wishlistId);
-  if (item) item.archived = false;
-  next.reservations = next.reservations.filter((r) => r.id !== reservation.id);
+  const byAccount = Boolean(input.userId && reservation.userId === input.userId);
+  const byClaim = input.claimedIds.has(reservation.id);
+  if (!byAccount && !byClaim) return { ok: false, error: "accessDenied" };
+  const next = removeReservation(doc, input.wishlistId, input.reservationId);
+  if (!next) return { ok: false, error: "reservationMissing" };
   return { ok: true, doc: next };
 }

@@ -23,6 +23,7 @@ import { hasReadPassword, MIN_READ_PASSWORD_LENGTH } from "../../../src/domain/r
 import { resolveTheme } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { AppearanceForm } from "@/components/site/appearance-form";
+import { ConfirmForm } from "@/components/site/confirm-form";
 import { CopyLinkField } from "@/components/site/copy-link-field";
 import { LiveGiftMark } from "@/components/site/live-gift-mark";
 import { WishlistThemeScope } from "@/components/site/wishlist-theme-scope";
@@ -30,10 +31,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { getTranslations, translateError } from "@/src/i18n/server";
+import { intlLocale } from "@/src/i18n/config";
+import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -64,12 +66,14 @@ export default async function EditListPage({
   const { id } = await params;
   const query = await searchParams;
   const tab = parseTab(query.onglet);
-  const [t, tErrors, user, doc] = await Promise.all([
+  const [t, tErrors, user, doc, locale] = await Promise.all([
     getTranslations("list"),
     getTranslations("errors"),
     currentUser(),
     getDocument(),
+    getLocale(),
   ]);
+  const priceLocale = intlLocale(locale);
   if (!user) redirect(`/connexion?next=/listes/${id}`);
   if (user.mustChangePassword) redirect("/compte");
   const list = doc.wishlists.find((entry) => entry.id === id);
@@ -105,7 +109,7 @@ export default async function EditListPage({
     personLabel: personLabel.get(item.personId) ?? item.personId,
     url: item.url,
     imageUrl: item.imageUrl,
-    priceLabel: formatPrice(item.priceCents),
+    priceLabel: formatPrice(item.priceCents, priceLocale),
     price: euros(item.priceCents),
     priority: item.priority,
     sortOrder: item.sortOrder,
@@ -169,6 +173,7 @@ export default async function EditListPage({
           <Card className="max-w-3xl">
             <CardHeader>
               <CardTitle>{t("addIdea")}</CardTitle>
+              <CardDescription>{t("addIdeaHint")}</CardDescription>
             </CardHeader>
             <CardContent>
               <ItemForm wishlistId={id} types={types} people={people} onglet="idees" />
@@ -193,6 +198,7 @@ export default async function EditListPage({
             <Empty>
               <EmptyHeader>
                 <EmptyTitle>{t("archives.empty")}</EmptyTitle>
+                <EmptyDescription>{t("archives.emptyHint")}</EmptyDescription>
               </EmptyHeader>
             </Empty>
           ) : (
@@ -203,7 +209,9 @@ export default async function EditListPage({
                   <CardDescription className="flex flex-wrap gap-1">
                     <Badge variant="secondary">{typeLabel.get(item.typeId) ?? item.typeId}</Badge>
                     <Badge variant="outline">{personLabel.get(item.personId) ?? item.personId}</Badge>
-                    {item.priceCents !== null ? <Badge variant="outline">{formatPrice(item.priceCents)}</Badge> : null}
+                    {item.priceCents !== null ? (
+                      <Badge variant="outline">{formatPrice(item.priceCents, priceLocale)}</Badge>
+                    ) : null}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
@@ -216,14 +224,17 @@ export default async function EditListPage({
                       {t("archives.restore")}
                     </Button>
                   </form>
-                  <form action={deleteItemAction}>
-                    <input type="hidden" name="wishlistId" value={id} />
-                    <input type="hidden" name="itemId" value={item.id} />
-                    <input type="hidden" name="onglet" value="archives" />
-                    <Button type="submit" variant="destructive" size="sm">
-                      {t("archives.deleteForever")}
-                    </Button>
-                  </form>
+                  <ConfirmForm
+                    title={t("confirm.deleteArchiveTitle")}
+                    description={t("confirm.deleteArchiveBody", { name: item.name })}
+                    confirmLabel={t("confirm.deleteArchiveConfirm")}
+                    cancelLabel={t("confirm.deleteArchiveKeep")}
+                    action={deleteItemAction}
+                    fields={{ wishlistId: id, itemId: item.id, onglet: "archives" }}
+                    triggerLabel={t("archives.deleteForever")}
+                    triggerVariant="destructive"
+                    triggerSize="sm"
+                  />
                 </CardContent>
               </Card>
             ))
@@ -254,14 +265,21 @@ export default async function EditListPage({
                 <CardContent className="flex flex-col items-start gap-3">
                   {row.fromName ? <p>{t("reservations.from", { name: row.fromName })}</p> : null}
                   {row.note ? <p className="text-muted-foreground">{row.note}</p> : null}
-                  <form action={cancelReservationAction}>
-                    <input type="hidden" name="wishlistId" value={id} />
-                    <input type="hidden" name="reservationId" value={row.reservationId} />
-                    <input type="hidden" name="onglet" value="reservations" />
-                    <Button type="submit" variant="outline" size="sm">
-                      {t("reservations.cancel")}
-                    </Button>
-                  </form>
+                  <ConfirmForm
+                    title={t("reservations.cancelTitle")}
+                    description={t("reservations.cancelBody")}
+                    confirmLabel={t("reservations.cancelConfirm")}
+                    cancelLabel={t("reservations.cancelKeep")}
+                    action={cancelReservationAction}
+                    fields={{
+                      wishlistId: id,
+                      reservationId: row.reservationId,
+                      onglet: "reservations",
+                    }}
+                    triggerLabel={t("reservations.cancel")}
+                    triggerVariant="outline"
+                    triggerSize="sm"
+                  />
                 </CardContent>
               </Card>
             ))
@@ -271,21 +289,46 @@ export default async function EditListPage({
 
       {tab === "partage" ? (
         <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <h2 className="text-2xl font-bold tracking-tight">{t("share.title")}</h2>
+            <p className="text-muted-foreground text-pretty">{t("share.description")}</p>
+          </div>
           <Card>
             <CardHeader>
-              <CardTitle>{t("share.title")}</CardTitle>
-              <CardDescription>{t("share.description")}</CardDescription>
+              <CardTitle>{t("share.readTitle")}</CardTitle>
+              <CardDescription>{t("share.readDescription")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <FieldGroup>
-                <CopyLinkField id="read-url" label={t("share.readLink")} value={readUrl} />
-                <CopyLinkField
-                  id="invite-url"
-                  label={t("share.inviteLink")}
-                  value={inviteUrl}
-                  hint={t("share.inviteHint")}
-                />
-                <form action={sendInviteAction} className="flex flex-col gap-3">
+              <CopyLinkField
+                id="read-url"
+                label={t("share.readLink")}
+                value={readUrl}
+                copyLabel={t("share.copyRead")}
+              />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("share.collabTitle")}</CardTitle>
+              <CardDescription>{t("share.collabDescription")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CopyLinkField
+                id="invite-url"
+                label={t("share.inviteLink")}
+                value={inviteUrl}
+                copyLabel={t("share.copyInvite")}
+              />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("share.inviteEmailTitle")}</CardTitle>
+              <CardDescription>{t("share.inviteEmailDescription")}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <form action={sendInviteAction}>
+                <FieldGroup>
                   <input type="hidden" name="wishlistId" value={id} />
                   <input type="hidden" name="onglet" value="partage" />
                   <Field>
@@ -298,20 +341,26 @@ export default async function EditListPage({
                       autoComplete="email"
                       placeholder="prenom@exemple.fr"
                     />
-                    <FieldDescription>{t("share.inviteEmailHint")}</FieldDescription>
                   </Field>
                   <Button type="submit">{t("share.sendInvite")}</Button>
-                </form>
-                {membership.role === "owner" ? (
-                  <form action={regenerateInviteAction}>
-                    <input type="hidden" name="wishlistId" value={id} />
-                    <input type="hidden" name="onglet" value="partage" />
-                    <Button type="submit" variant="outline">
-                      {t("share.regenerate")}
-                    </Button>
-                  </form>
-                ) : null}
-              </FieldGroup>
+                </FieldGroup>
+              </form>
+              {membership.role === "owner" ? (
+                <div className="flex flex-col gap-2">
+                  <ConfirmForm
+                    title={t("confirm.regenTitle")}
+                    description={t("confirm.regenBody")}
+                    confirmLabel={t("confirm.regenConfirm")}
+                    cancelLabel={t("confirm.regenKeep")}
+                    action={regenerateInviteAction}
+                    fields={{ wishlistId: id, onglet: "partage" }}
+                    triggerLabel={t("share.regenerate")}
+                    triggerVariant="outline"
+                    confirmVariant="default"
+                  />
+                  <p className="text-sm text-muted-foreground">{t("share.regenerateHint")}</p>
+                </div>
+              ) : null}
             </CardContent>
           </Card>
           <Card>
@@ -320,13 +369,16 @@ export default async function EditListPage({
               <CardDescription>{t("share.readPasswordHint")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm font-medium">
                 {hasReadPassword(list) ? t("share.readPasswordSet") : t("share.readPasswordUnset")}
               </p>
               <form action={setReadPasswordAction}>
                 <FieldGroup>
                   <input type="hidden" name="wishlistId" value={id} />
                   <input type="hidden" name="onglet" value="partage" />
+                  <p className="text-sm font-medium">
+                    {hasReadPassword(list) ? t("share.readPasswordChange") : t("share.readPasswordDefine")}
+                  </p>
                   <Field>
                     <FieldLabel htmlFor="read-password">{t("share.readPasswordLabel")}</FieldLabel>
                     <Input
@@ -355,14 +407,17 @@ export default async function EditListPage({
           <Card>
             <CardHeader>
               <CardTitle>{t("share.members")}</CardTitle>
+              <CardDescription>{t("share.membersDescription")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               {members.map((member) => (
                 <div key={member.userId} className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="flex items-center gap-2">
-                    {member.user?.displayName}
-                    {member.role === "owner" ? <Badge variant="secondary">{t("share.owner")}</Badge> : null}
-                  </span>
+                  <p className="text-sm font-medium">
+                    {member.user?.displayName}{" "}
+                    <span className="font-normal text-muted-foreground">
+                      — {member.role === "owner" ? t("share.owner") : t("share.member")}
+                    </span>
+                  </p>
                   {membership.role === "owner" && member.userId !== user.id ? (
                     <form action={removeMemberAction}>
                       <input type="hidden" name="wishlistId" value={id} />
@@ -375,13 +430,18 @@ export default async function EditListPage({
                   ) : null}
                 </div>
               ))}
-              <form action={leaveAction} className="pt-2">
-                <input type="hidden" name="wishlistId" value={id} />
-                <input type="hidden" name="onglet" value="partage" />
-                <Button type="submit" variant="outline">
-                  {t("share.leave")}
-                </Button>
-              </form>
+              <div className="pt-2">
+                <ConfirmForm
+                  title={t("confirm.leaveTitle")}
+                  description={t("confirm.leaveBody")}
+                  confirmLabel={t("confirm.leaveConfirm")}
+                  cancelLabel={t("confirm.leaveKeep")}
+                  action={leaveAction}
+                  fields={{ wishlistId: id, onglet: "partage" }}
+                  triggerLabel={t("share.leave")}
+                  triggerVariant="outline"
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -399,7 +459,9 @@ export default async function EditListPage({
                 wishlistId={id}
                 kind="type"
                 items={types.map((type) => ({ id: type.id, label: type.label }))}
+                addLabel={t("categories.newType")}
                 addPlaceholder={t("categories.newTypePlaceholder")}
+                addAria={t("categories.addTypeAria")}
               />
             </CardContent>
           </Card>
@@ -413,7 +475,9 @@ export default async function EditListPage({
                 wishlistId={id}
                 kind="person"
                 items={people.map((person) => ({ id: person.id, label: person.label }))}
+                addLabel={t("categories.newPerson")}
                 addPlaceholder={t("categories.newPersonPlaceholder")}
+                addAria={t("categories.addPersonAria")}
               />
             </CardContent>
           </Card>
@@ -439,13 +503,16 @@ export default async function EditListPage({
                 <CardDescription>{t("settings.dangerHint")}</CardDescription>
               </CardHeader>
               <CardContent>
-                <form action={deleteListAction}>
-                  <input type="hidden" name="wishlistId" value={id} />
-                  <input type="hidden" name="onglet" value="reglages" />
-                  <Button type="submit" variant="destructive">
-                    {t("settings.delete")}
-                  </Button>
-                </form>
+                <ConfirmForm
+                  title={t("confirm.deleteListTitle", { name: list.title })}
+                  description={t("confirm.deleteListBody")}
+                  confirmLabel={t("confirm.deleteListConfirm")}
+                  cancelLabel={t("confirm.deleteListKeep")}
+                  action={deleteListAction}
+                  fields={{ wishlistId: id, onglet: "reglages" }}
+                  triggerLabel={t("settings.delete")}
+                  triggerVariant="destructive"
+                />
               </CardContent>
             </Card>
           ) : null}

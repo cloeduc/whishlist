@@ -1,11 +1,10 @@
 import Link from "next/link";
-import { ExternalLinkIcon } from "lucide-react";
 import { currentUser } from "../../../src/auth/current";
 import { canAccessPublicList } from "../../../src/auth/public-list";
+import { listClaimedReservationIds } from "../../../src/auth/reservation-claim";
 import {
   applyBudget,
   applyPerson,
-  applyView,
   BUDGETS,
   categoryAnchorId,
   groupByCategory,
@@ -13,17 +12,20 @@ import {
   sortByPriority,
   type BudgetId,
 } from "../../../src/domain/filters";
-import { toPublicItem, type PublicItem } from "../../../src/domain/read";
+import {
+  listPublicVisibleItems,
+  mineReservationIdsFor,
+  toPublicItem,
+} from "../../../src/domain/read";
 import { resolveTheme, themeToCssVars } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
-import { PriorityStars } from "@/components/site/priority-stars";
+import { PublicItemCard } from "@/components/site/public-item-card";
 import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { WishlistCover } from "@/components/site/wishlist-cover";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { intlLocale } from "@/src/i18n/config";
 import { getLocale, getTranslations } from "@/src/i18n/server";
 import type { CSSProperties } from "react";
 
@@ -47,74 +49,6 @@ function listHref(readToken: string, qui: string | null, budget: BudgetId | null
   return hash ? `${path}#${hash}` : path;
 }
 
-function ItemCard({
-  item,
-  readToken,
-  buyLink,
-  offerLabel,
-}: {
-  item: PublicItem;
-  readToken: string;
-  buyLink: string;
-  offerLabel: string;
-}) {
-  return (
-    <Card size="sm">
-      <CardHeader>
-        <div className="flex items-start gap-3">
-          {item.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={item.imageUrl}
-              alt=""
-              className="size-20 shrink-0 rounded-base border-2 border-border object-cover shadow-shadow"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
-          ) : null}
-          <div className="flex min-w-0 flex-1 flex-col gap-2">
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 flex-col gap-1">
-                <CardTitle className="text-balance">{item.name}</CardTitle>
-                <PriorityStars value={item.priority} />
-              </div>
-              {item.priceLabel ? (
-                <p className="shrink-0 text-2xl leading-none font-bold tabular-nums">{item.priceLabel}</p>
-              ) : null}
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <CardDescription className="flex flex-wrap gap-2">
-                <Badge variant="outline">{item.personLabel}</Badge>
-              </CardDescription>
-              {item.url ? (
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="ml-auto inline-flex items-center gap-1 text-xs leading-none underline underline-offset-2"
-                >
-                  <ExternalLinkIcon className="size-3" />
-                  {buyLink}
-                </a>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </CardHeader>
-      <CardFooter className="border-t-2 border-border pt-3">
-        <Button
-          size="sm"
-          className="w-full sm:w-auto"
-          nativeButton={false}
-          render={<Link href={`/l/${readToken}/reserver?itemId=${encodeURIComponent(item.id)}`} />}
-        >
-          {offerLabel}
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-}
-
 export default async function ReadPage({
   params,
   searchParams,
@@ -124,11 +58,12 @@ export default async function ReadPage({
 }) {
   const { readToken } = await params;
   const query = await searchParams;
-  const [t, locale, doc, user] = await Promise.all([
+  const [t, locale, doc, user, claimedIds] = await Promise.all([
     getTranslations("public"),
     getLocale(),
     getDocument(),
     currentUser(),
+    listClaimedReservationIds(readToken),
   ]);
   const list = doc.wishlists.find((entry) => entry.readToken === readToken);
   if (!list) {
@@ -154,24 +89,28 @@ export default async function ReadPage({
       />
     );
   }
+  const mineIds = mineReservationIdsFor(doc, list.id, user?.id ?? null, claimedIds);
   const types = doc.types.filter((type) => type.wishlistId === list.id);
   const people = doc.people.filter((person) => person.wishlistId === list.id);
   const qui = people.some((person) => person.id === query.qui) ? query.qui! : null;
   const budget = parseBudget(query.budget);
-  const reserved = new Set(
-    doc.reservations.filter((reservation) => reservation.wishlistId === list.id).map((reservation) => reservation.itemId),
-  );
-  const filtered = sortByPriority(applyBudget(applyPerson(applyView(doc, list.id, null), qui), budget)).filter(
-    (item) => !reserved.has(item.id),
-  );
-  const groups = groupByCategory(filtered, types).map((group) => group);
-  // locale-aware sort of category labels already in domain with "fr" — re-sort here
+  const priceLocale = intlLocale(locale);
+  const visible = listPublicVisibleItems(doc, list.id, mineIds);
+  const filtered = sortByPriority(applyBudget(applyPerson(visible, qui), budget));
+  const groups = groupByCategory(
+    filtered,
+    types,
+  ).map((group) => ({
+    ...group,
+    publicItems: group.items.map((item) => toPublicItem(doc, item, priceLocale, mineIds)),
+  }));
   groups.sort((a, b) => a.label.localeCompare(b.label, locale));
   const allLabel = t("allList");
   const personLabel = people.find((person) => person.id === qui)?.label;
   const budgetLabel = budget ? t(`budgets.${budget}`) : null;
   const heading = [allLabel, personLabel, budgetLabel].filter(Boolean).join(" · ");
   const emptyTitle = qui || budget ? t("emptyFiltered") : t("emptyList");
+  const emptyHint = qui || budget ? t("emptyHint") : t("emptyListHint");
   const theme = resolveTheme(list.theme);
   const cssVars = themeToCssVars(theme);
   const rootCss = Object.entries(cssVars)
@@ -185,6 +124,7 @@ export default async function ReadPage({
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="text-2xl font-bold tracking-tight">{list.title}</h1>
           {list.subtitle ? <p className="text-muted-foreground text-pretty">{list.subtitle}</p> : null}
+          <p className="text-muted-foreground text-pretty text-sm">{t("intro")}</p>
         </div>
       </div>
       <nav aria-label={t("categoriesNav")} className="flex flex-wrap gap-2">
@@ -286,7 +226,7 @@ export default async function ReadPage({
         <Empty>
           <EmptyHeader>
             <EmptyTitle>{emptyTitle}</EmptyTitle>
-            <EmptyDescription>{t("emptyHint")}</EmptyDescription>
+            <EmptyDescription>{emptyHint}</EmptyDescription>
           </EmptyHeader>
         </Empty>
       ) : (
@@ -294,13 +234,20 @@ export default async function ReadPage({
           {groups.map((group) => (
             <section key={group.typeId} id={categoryAnchorId(group.typeId)} className="scroll-mt-6 flex flex-col gap-3">
               <h3 className="text-xl font-medium tracking-tight border-b-2 border-border pb-2">{group.label}</h3>
-              {group.items.map((item) => (
-                <ItemCard
+              {group.publicItems.map((item) => (
+                <PublicItemCard
                   key={item.id}
-                  item={toPublicItem(doc, item)}
+                  item={item}
                   readToken={readToken}
                   buyLink={t("buyLink")}
+                  buyLinkAria={t("buyLinkAria", { name: item.name })}
                   offerLabel={t("iOffer")}
+                  mineLabel={t("reservation.mine")}
+                  cancelLabel={t("reservation.cancel")}
+                  cancelTitle={t("reservation.cancelTitle")}
+                  cancelDescription={t("reservation.cancelBody")}
+                  cancelConfirm={t("reservation.cancelConfirm")}
+                  cancelKeep={t("reservation.cancelKeep")}
                 />
               ))}
             </section>

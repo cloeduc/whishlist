@@ -4,6 +4,11 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { cookieSecure, currentUser, origin } from "../auth/current";
 import { canAccessPublicList } from "../auth/public-list";
+import {
+  grantReservationClaim,
+  listClaimedReservationIds,
+  revokeReservationClaim,
+} from "../auth/reservation-claim";
 import { grantReadUnlock } from "../auth/read-unlock";
 import { SESSION_COOKIE, SESSION_TTL_SEC, sessionSecret, signSession } from "../auth/session";
 import { createPasswordReset, resetPasswordWithToken } from "../domain/password-reset";
@@ -35,6 +40,7 @@ import {
 import {
   addPerson,
   addType,
+  cancelOwnReservation,
   cancelReservation,
   createItem,
   deleteItem,
@@ -790,7 +796,32 @@ export async function reserveAction(formData: FormData) {
     if (itemId) params.set("itemId", itemId);
     redirect(`/l/${readToken}/reserver?${params}`);
   }
+  if (result.ok && result.reservation) {
+    await grantReservationClaim(readToken, result.reservation.id);
+  }
   redirect(`/l/${readToken}?ok=1`);
+}
+
+export async function cancelMyReservationAction(formData: FormData) {
+  const readToken = String(formData.get("readToken") ?? "");
+  const reservationId = String(formData.get("reservationId") ?? "");
+  const user = await currentUser();
+  const claimedIds = await listClaimedReservationIds(readToken);
+  const doc = await readDocument();
+  const wishlist = doc.wishlists.find((w) => w.readToken === readToken);
+  if (!wishlist) redirect("/");
+  const result = await updateDocument((current) => {
+    const saved = cancelOwnReservation(current, {
+      wishlistId: wishlist.id,
+      reservationId,
+      userId: user?.id ?? null,
+      claimedIds,
+    });
+    return { doc: saved.ok ? saved.doc : current, result: saved };
+  });
+  if (!result.ok) redirect(`/l/${readToken}?e=${result.error}`);
+  await revokeReservationClaim(readToken, reservationId);
+  redirect(`/l/${readToken}`);
 }
 
 export async function joinInviteAction(token: string) {
