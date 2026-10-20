@@ -45,6 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </Link>
               <SiteNav
                 locale={locale}
+                supportUrl={supportUrl()}
                 user={
                   user
                     ? { displayName: user.displayName, mustChangePassword: user.mustChangePassword }

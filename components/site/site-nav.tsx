@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Heart } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { LocaleSwitcher } from "@/components/site/locale-switcher";
@@ -19,9 +20,11 @@ function isActive(pathname: string, href: string): boolean {
 export function SiteNav({
   locale,
   user,
+  supportUrl,
 }: {
   locale: Locale;
   user: { displayName: string; mustChangePassword: boolean } | null;
+  supportUrl: string | null;
 }) {
   const { t } = useTranslation("common");
   const pathname = usePathname() ?? "/";
@@ -64,6 +67,22 @@ export function SiteNav({
         </>
       )}
       <LocaleSwitcher locale={locale} />
+      {supportUrl ? (
+        <a
+          href={supportUrl}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t("footer.support")}
+          title={t("footer.support")}
+          className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }))}
+        >
+          <Heart
+            className="size-5 fill-destructive text-foreground"
+            strokeWidth={3.5}
+            aria-hidden
+          />
+        </a>
+      ) : null}
     </nav>
   );
 }

@@ -12,8 +12,6 @@ export function GuestHero({
   hasAccount,
   selfHost,
   github,
-  support,
-  supportHref,
 }: {
   brand: string;
   headline: string;
@@ -22,8 +20,6 @@ export function GuestHero({
   hasAccount: string;
   selfHost: string;
   github: string;
-  support: string;
-  supportHref: string | null;
 }) {
   return (
     <section className="guest-hero relative isolate overflow-hidden rounded-base border-2 border-border shadow-shadow">
@@ -47,16 +43,6 @@ export function GuestHero({
           <Button size="lg" variant="outline" nativeButton={false} render={<Link href="/connexion" />}>
             {hasAccount}
           </Button>
-          {supportHref ? (
-            <Button
-              size="lg"
-              variant="secondary"
-              nativeButton={false}
-              render={<a href={supportHref} target="_blank" rel="noreferrer" />}
-            >
-              {support}
-            </Button>
-          ) : null}
         </div>
         <p className="guest-hero__footer text-sm text-muted-foreground">
           {selfHost}{" "}

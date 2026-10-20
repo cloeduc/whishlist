@@ -1,11 +1,11 @@
 {
   "guest": {
     "headline": "Des listes de cadeaux, sans friction",
-    "body": "Créez une liste, partagez le lien de lecture. Vos proches voient les idées et réservent sans compte. Pour co-éditer, invitez-les. Pas d'annuaire public.",
+    "body": "Créez votre liste d'envies et partagez-la avec vos proches. Ils peuvent choisir et réserver un cadeau, sans créer de compte et sans gâcher la surprise.",
     "createAccount": "Créer un compte",
     "hasAccount": "J'ai déjà un compte",
-    "selfHost": "Vous préférez héberger chez vous ?",
-    "github": "Code libre sur GitHub",
+    "selfHost": "Vous préférez l'héberger vous-même ?",
+    "github": "Code source sur GitHub",
     "support": "Soutenir le projet ♥"
   },
   "mine": {

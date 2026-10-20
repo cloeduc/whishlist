@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { getTranslations } from "@/src/i18n/server";
-import { supportUrl } from "@/src/site/links";
 
 export const dynamic = "force-dynamic";
 
@@ -32,8 +31,6 @@ export default async function HomePage() {
           hasAccount={t("guest.hasAccount")}
           selfHost={t("guest.selfHost")}
           github={t("guest.github")}
-          support={t("guest.support")}
-          supportHref={supportUrl()}
         />
       </main>
     );
