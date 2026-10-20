@@ -23,6 +23,7 @@ export function reserveItem(
     typeId?: string;
     fromName?: string | null;
     note?: string | null;
+    userId?: string | null;
     now?: Date;
     id?: string;
   },
@@ -42,6 +43,7 @@ export function reserveItem(
     itemId: item.id,
     fromName: blank(input.fromName),
     note: blank(input.note),
+    userId: input.userId?.trim() ? input.userId.trim() : null,
     createdAt: (input.now ?? new Date()).toISOString(),
   };
   const next = clone(doc);

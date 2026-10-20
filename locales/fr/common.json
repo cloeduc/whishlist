@@ -5,8 +5,9 @@
     "description": "Listes de cadeaux à lire sans compte."
   },
   "nav": {
-    "password": "Mot de passe",
-    "newList": "Nouvelle liste",
+    "menuAria": "Navigation principale",
+    "myLists": "Mes wishlists",
+    "account": "Mon compte",
     "logout": "Se déconnecter",
     "login": "Connexion",
     "register": "Inscription"
@@ -20,6 +21,7 @@
   },
   "locale": {
     "groupAria": "Langue",
-    "switchAria": "Passer en {{locale}}"
+    "fr": "FR",
+    "en": "EN"
   }
 }

@@ -1,0 +1,198 @@
+import Link from "next/link";
+import { requireUser } from "../../src/auth/guard";
+import { listMyOffers } from "../../src/domain/offrir";
+import { changePasswordAction, updateDisplayNameAction } from "../../src/server/actions";
+import { getDocument } from "../../src/store/db";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { getTranslations, translateError } from "@/src/i18n/server";
+
+export const dynamic = "force-dynamic";
+
+export default async function ComptePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ e?: string; ok?: string }>;
+}) {
+  const user = await requireUser({ allowMustChangePassword: true });
+  const query = await searchParams;
+  const [t, doc] = await Promise.all([getTranslations("auth"), getDocument()]);
+  const forced = user.mustChangePassword;
+  const offers = forced ? [] : listMyOffers(doc, user.id);
+  const passwordError =
+    query.e === "mismatch"
+      ? t("changePassword.errorMismatch")
+      : query.e === "current"
+        ? t("changePassword.errorCurrent")
+        : query.e === "1"
+          ? t("changePassword.errorGeneric")
+          : null;
+  const profileError =
+    query.e && !passwordError && query.e !== "mismatch" && query.e !== "current" && query.e !== "1"
+      ? await translateError(query.e)
+      : null;
+  const profileOk = query.ok === "name";
+  const passwordOk = query.ok === "1";
+
+  return (
+    <main className="mx-auto flex w-full max-w-lg flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight">{t("account.title")}</h1>
+        {!forced ? <p className="text-muted-foreground">{t("account.subtitle")}</p> : null}
+      </div>
+
+      {forced ? (
+        <Alert variant="destructive">
+          <AlertDescription>{t("changePassword.descriptionForced", { email: user.email })}</AlertDescription>
+        </Alert>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("account.profile")}</CardTitle>
+            <CardDescription>{t("account.profileHint")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form action={updateDisplayNameAction} className="flex flex-col gap-4">
+              <FieldGroup>
+                {profileOk ? (
+                  <Alert>
+                    <AlertDescription>{t("account.nameSaved")}</AlertDescription>
+                  </Alert>
+                ) : null}
+                {profileError ? (
+                  <Alert variant="destructive">
+                    <AlertDescription>{profileError}</AlertDescription>
+                  </Alert>
+                ) : null}
+                <Field>
+                  <FieldLabel htmlFor="displayName">{t("account.displayName")}</FieldLabel>
+                  <Input
+                    id="displayName"
+                    name="displayName"
+                    required
+                    maxLength={80}
+                    defaultValue={user.displayName}
+                    autoComplete="nickname"
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="account-email">{t("account.email")}</FieldLabel>
+                  <Input id="account-email" value={user.email} readOnly className="bg-muted" />
+                  <p className="text-xs text-muted-foreground">{t("account.emailHint")}</p>
+                </Field>
+                <Button type="submit">{t("account.saveName")}</Button>
+              </FieldGroup>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {!forced ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("account.offers")}</CardTitle>
+            <CardDescription>{t("account.offersHint")}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            {offers.length === 0 ? (
+              <Empty className="shadow-none">
+                <EmptyHeader>
+                  <EmptyTitle>{t("account.offersEmpty")}</EmptyTitle>
+                  <EmptyDescription>{t("account.offersEmptyHint")}</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              offers.map((offer) => (
+                <div
+                  key={offer.reservationId}
+                  className="flex flex-col gap-2 rounded-base border-2 border-border bg-secondary-background p-3 shadow-shadow"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <p className="font-bold text-balance">{offer.itemName}</p>
+                      <p className="text-sm text-muted-foreground">{offer.listTitle}</p>
+                    </div>
+                    {offer.priceLabel ? (
+                      <p className="shrink-0 text-lg font-bold tabular-nums">{offer.priceLabel}</p>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {offer.typeLabel ? <Badge variant="outline">{offer.typeLabel}</Badge> : null}
+                    {offer.fromName ? (
+                      <Badge variant="secondary">{t("account.offeredAs", { name: offer.fromName })}</Badge>
+                    ) : null}
+                  </div>
+                  {offer.note ? <p className="text-sm text-pretty">{offer.note}</p> : null}
+                  {offer.listReadToken ? (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto w-fit px-0"
+                      nativeButton={false}
+                      render={<Link href={`/l/${offer.listReadToken}`} />}
+                    >
+                      {t("account.openList")}
+                    </Button>
+                  ) : null}
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{forced ? t("changePassword.titleForced") : t("changePassword.title")}</CardTitle>
+          {!forced ? (
+            <CardDescription>{t("changePassword.description", { email: user.email })}</CardDescription>
+          ) : null}
+        </CardHeader>
+        <CardContent>
+          <form action={changePasswordAction}>
+            <FieldGroup>
+              {passwordOk ? (
+                <Alert>
+                  <AlertDescription>{t("changePassword.success")}</AlertDescription>
+                </Alert>
+              ) : null}
+              {passwordError ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{passwordError}</AlertDescription>
+                </Alert>
+              ) : null}
+              {!forced ? (
+                <Field>
+                  <FieldLabel htmlFor="currentPassword">{t("changePassword.current")}</FieldLabel>
+                  <Input
+                    id="currentPassword"
+                    name="currentPassword"
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                  />
+                </Field>
+              ) : null}
+              <Field>
+                <FieldLabel htmlFor="password">{t("changePassword.next")}</FieldLabel>
+                <Input id="password" name="password" type="password" required autoComplete="new-password" />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="confirm">{t("changePassword.confirm")}</FieldLabel>
+                <Input id="confirm" name="confirm" type="password" required autoComplete="new-password" />
+              </Field>
+              <Button type="submit">
+                {forced ? t("changePassword.submitForced") : t("changePassword.submit")}
+              </Button>
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
+    </main>
+  );
+}

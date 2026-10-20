@@ -3,8 +3,8 @@ import { currentUser } from "../../../src/auth/current";
 import { createListAction } from "../../../src/server/actions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { getTranslations, translateError } from "@/src/i18n/server";
 
@@ -17,13 +17,14 @@ export default async function NewListPage({
 }) {
   const [user, t, query] = await Promise.all([currentUser(), getTranslations("home"), searchParams]);
   if (!user) redirect("/connexion?next=/listes/new");
-  if (user.mustChangePassword) redirect("/changer-mot-de-passe");
+  if (user.mustChangePassword) redirect("/compte");
   const error = query.e ? await translateError(query.e) : null;
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-4">
       <Card>
         <CardHeader>
           <CardTitle>{t("newList.title")}</CardTitle>
+          <CardDescription>{t("newList.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form action={createListAction}>
@@ -35,7 +36,35 @@ export default async function NewListPage({
               ) : null}
               <Field>
                 <FieldLabel htmlFor="title">{t("newList.titleLabel")}</FieldLabel>
-                <Input id="title" name="title" required />
+                <Input
+                  id="title"
+                  name="title"
+                  required
+                  placeholder={t("newList.titlePlaceholder")}
+                  autoComplete="off"
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="category">{t("newList.categoryLabel")}</FieldLabel>
+                <Input
+                  id="category"
+                  name="category"
+                  required
+                  placeholder={t("newList.categoryPlaceholder")}
+                  autoComplete="off"
+                />
+                <FieldDescription>{t("newList.categoryHint")}</FieldDescription>
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="person">{t("newList.personLabel")}</FieldLabel>
+                <Input
+                  id="person"
+                  name="person"
+                  required
+                  placeholder={t("newList.personPlaceholder")}
+                  autoComplete="off"
+                />
+                <FieldDescription>{t("newList.personHint")}</FieldDescription>
               </Field>
               <Button type="submit">{t("newList.submit")}</Button>
             </FieldGroup>

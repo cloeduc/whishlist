@@ -18,7 +18,7 @@ export default async function InvitePage({
   const { token } = await params;
   const query = await searchParams;
   const [t, user] = await Promise.all([getTranslations("public"), currentUser()]);
-  if (user?.mustChangePassword) redirect("/changer-mot-de-passe");
+  if (user?.mustChangePassword) redirect("/compte");
   const back = `/inviter/${token}`;
   if (!user) {
     return (

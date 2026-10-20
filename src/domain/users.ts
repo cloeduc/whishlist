@@ -89,4 +89,18 @@ export function setUserEmail(
   return { ok: true, doc: next, value: user };
 }
 
+export function updateDisplayName(
+  doc: Database,
+  input: { userId: string; displayName: string },
+): Ok<User> | Err {
+  const displayName = input.displayName.trim();
+  if (!displayName) return { ok: false, error: "displayNameRequired" };
+  if (displayName.length > 80) return { ok: false, error: "displayNameTooLong" };
+  const next = clone(doc);
+  const user = next.users.find((entry) => entry.id === input.userId);
+  if (!user) return { ok: false, error: "accountMissing" };
+  user.displayName = displayName;
+  return { ok: true, doc: next, value: user };
+}
+
 export { findMembership };

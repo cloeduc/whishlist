@@ -8,7 +8,7 @@ export async function requireUser(options?: {
   const user = await currentUser();
   if (!user) redirect("/connexion");
   if (user.mustChangePassword && !options?.allowMustChangePassword) {
-    redirect("/changer-mot-de-passe");
+    redirect("/compte");
   }
   return user;
 }

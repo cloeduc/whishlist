@@ -5,8 +5,9 @@
     "description": "Gift lists you can browse without an account."
   },
   "nav": {
-    "password": "Password",
-    "newList": "New list",
+    "menuAria": "Main navigation",
+    "myLists": "My wishlists",
+    "account": "My account",
     "logout": "Log out",
     "login": "Log in",
     "register": "Sign up"
@@ -20,6 +21,7 @@
   },
   "locale": {
     "groupAria": "Language",
-    "switchAria": "Switch to {{locale}}"
+    "fr": "FR",
+    "en": "EN"
   }
 }

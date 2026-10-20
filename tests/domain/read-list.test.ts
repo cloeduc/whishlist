@@ -50,6 +50,7 @@ function sample(): Database {
     itemId: "a",
     fromName: "Sam",
     note: "pour noël",
+    userId: null,
     createdAt: "2026-01-02T00:00:00.000Z",
   });
   return doc;

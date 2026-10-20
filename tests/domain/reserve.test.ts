@@ -12,6 +12,9 @@ function doc(): Database {
   data.wishlists.push({
     id: "w",
     title: "L",
+    subtitle: null,
+    coverImageUrl: null,
+    theme: { primary: "#1e60ff", accent: "#ff2d2d", highlight: "#ffd700", background: "#e8f0ff" },
     readToken: "r",
     inviteToken: "i",
     fromTemplate: true,
@@ -59,11 +62,21 @@ test("réservation, blank, type, champs vides", () => {
   assert.equal(availableItems(data, "w", "jeux").length, 1);
   const missing = reserveItem(data, { wishlistId: "w", itemId: "" });
   assert.equal(missing.ok, false);
-  const first = reserveItem(data, { wishlistId: "w", itemId: "gang", fromName: "  ", note: "" });
+  const first = reserveItem(data, {
+    wishlistId: "w",
+    itemId: "gang",
+    fromName: "  ",
+    note: "",
+    userId: "u1",
+  });
   assert.equal(first.ok, true);
   if (!first.ok) return;
   assert.equal(first.reservation.fromName, null);
   assert.equal(first.reservation.note, null);
+  assert.equal(first.reservation.userId, "u1");
+  const anon = reserveItem(data, { wishlistId: "w", itemId: "book" });
+  assert.equal(anon.ok, true);
+  if (anon.ok) assert.equal(anon.reservation.userId, null);
   assert.equal(first.doc.items.find((item) => item.id === "gang")?.archived, true);
   assert.equal(availableItems(first.doc, "w", "").length, 1);
   const second = reserveItem(first.doc, { wishlistId: "w", itemId: "gang", fromName: "Sam" });
