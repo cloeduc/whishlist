@@ -1,0 +1,27 @@
+services:
+  whishlist:
+    image: ${WHISHLIST_IMAGE}
+    pull_policy: never
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      - SESSION_SECRET=${WHISHLIST_SESSION_SECRET}
+      - WISHLIST_DATA_PATH=/data/wishlist.json
+      - RESEND_API_KEY=${WHISHLIST_RESEND_API_KEY}
+      - MAIL_FROM=${WHISHLIST_MAIL_FROM}
+      - PASSWORD_RESET_SHOW_LINK=${WHISHLIST_PASSWORD_RESET_SHOW_LINK:-}
+      - GEMINI_API_KEY=${WHISHLIST_GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${WHISHLIST_OPENAI_API_KEY:-}
+    volumes:
+      - ${APP_DATA_DIR}/data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    x-runtipi:
+      is_main: true
+      internal_port: 3000

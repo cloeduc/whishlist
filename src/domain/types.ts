@@ -1,0 +1,132 @@
+export type Role = "owner" | "member";
+export type ViewKind = "all" | "types" | "person";
+
+export interface User {
+  id: string;
+  email: string;
+  passwordHash: string;
+  displayName: string;
+  createdAt: string;
+  /** Si true, la session est redirigée vers le changement de mot de passe. */
+  mustChangePassword: boolean;
+}
+
+export interface Wishlist {
+  id: string;
+  title: string;
+  readToken: string;
+  inviteToken: string;
+  fromTemplate: boolean;
+  createdAt: string;
+}
+
+export interface Membership {
+  wishlistId: string;
+  userId: string;
+  role: Role;
+  joinedAt: string;
+}
+
+export interface WishType {
+  id: string;
+  wishlistId: string;
+  label: string;
+}
+
+export interface Person {
+  id: string;
+  wishlistId: string;
+  label: string;
+}
+
+export interface View {
+  id: string;
+  wishlistId: string;
+  label: string;
+  kind: ViewKind;
+  typeIds: string[];
+  personId: string | null;
+  pinned: boolean;
+}
+
+export interface Item {
+  id: string;
+  wishlistId: string;
+  name: string;
+  typeId: string;
+  url: string | null;
+  imageUrl: string | null;
+  priceCents: number | null;
+  priority: string | null;
+  personId: string;
+  sortOrder: number;
+  archived: boolean;
+}
+
+export interface Reservation {
+  id: string;
+  wishlistId: string;
+  itemId: string;
+  fromName: string | null;
+  note: string | null;
+  createdAt: string;
+}
+
+export interface PasswordReset {
+  id: string;
+  userId: string;
+  tokenHash: string;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export interface Database {
+  users: User[];
+  wishlists: Wishlist[];
+  memberships: Membership[];
+  types: WishType[];
+  people: Person[];
+  views: View[];
+  items: Item[];
+  reservations: Reservation[];
+  passwordResets: PasswordReset[];
+}
+
+export interface SeedFile {
+  types: { id: string; label: string }[];
+  people: { id: string; label: string }[];
+  views: {
+    id: string;
+    label: string;
+    kind: ViewKind;
+    typeIds: string[];
+    personId: string | null;
+    pinned: boolean;
+  }[];
+  items: {
+    id: string;
+    name: string;
+    typeId: string;
+    url: string | null;
+    imageUrl?: string | null;
+    priceCents: number | null;
+    priority: string | null;
+    personId: string;
+    sortOrder: number;
+    archived?: boolean;
+  }[];
+}
+
+export function emptyDatabase(): Database {
+  return {
+    users: [],
+    wishlists: [],
+    memberships: [],
+    types: [],
+    people: [],
+    views: [],
+    items: [],
+    reservations: [],
+    passwordResets: [],
+  };
+}

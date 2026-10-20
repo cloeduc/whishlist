@@ -1,0 +1,56 @@
+{
+  "missingList": "This list doesn't exist",
+  "clickCategory": "Click a category to jump to it.",
+  "categoriesNav": "Categories",
+  "allList": "Whole list",
+  "who": "Who",
+  "everyone": "Everyone",
+  "budget": "Budget",
+  "allPrices": "All prices",
+  "budgets": {
+    "under-20": "Under €20",
+    "20-50": "€20 to €50",
+    "50-100": "€50 to €100",
+    "over-100": "Over €100",
+    "none": "No price"
+  },
+  "reserveIdea": "I'll reserve an idea",
+  "types": "Types",
+  "buyLink": "Buy link",
+  "iOffer": "I'll get it",
+  "reservedTitle": "Got it",
+  "reservedBody": "The idea is reserved and left the list.",
+  "emptyFiltered": "No ideas for these filters.",
+  "emptyList": "No ideas on this list.",
+  "emptyHint": "The other buttons still work.",
+  "whoNav": "Who",
+  "budgetNav": "Budget",
+  "reserve": {
+    "titleNamed": "Reserve a gift — {{title}}",
+    "back": "Back to list",
+    "unavailable": "This idea is no longer available (already reserved or missing).",
+    "offerTitle": "I'll get: {{name}}",
+    "fromName": "From (optional)",
+    "note": "A short note?",
+    "submit": "I'll get it",
+    "typeTitle": "Gift type",
+    "filterLabel": "Filter the list",
+    "allTypes": "All types",
+    "filterSubmit": "Filter ideas",
+    "giftTitle": "The gift",
+    "giftLabel": "The gift I want to offer",
+    "choose": "Choose"
+  },
+  "typesPage": {
+    "title": "Types",
+    "back": "Back to list",
+    "empty": "No types."
+  },
+  "invite": {
+    "title": "Join a wishlist",
+    "body": "You need an account to edit this list. Reading doesn't require one.",
+    "register": "Sign up",
+    "login": "Log in",
+    "joinTitle": "Join this wishlist"
+  }
+}

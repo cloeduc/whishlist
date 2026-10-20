@@ -1,0 +1,56 @@
+{
+  "missingList": "Cette liste n'existe pas",
+  "clickCategory": "Cliquer sur une catégorie pour y descendre.",
+  "categoriesNav": "Catégories",
+  "allList": "Toute la liste",
+  "who": "Qui",
+  "everyone": "Tout le monde",
+  "budget": "Budget",
+  "allPrices": "Tous les prix",
+  "budgets": {
+    "under-20": "Moins de 20 €",
+    "20-50": "20 à 50 €",
+    "50-100": "50 à 100 €",
+    "over-100": "Plus de 100 €",
+    "none": "Sans prix"
+  },
+  "reserveIdea": "Je réserve une idée",
+  "types": "Types",
+  "buyLink": "Lien d'achat",
+  "iOffer": "J'offre",
+  "reservedTitle": "C'est noté",
+  "reservedBody": "L'idée est réservée et a disparu de la liste.",
+  "emptyFiltered": "Aucune idée pour ces filtres.",
+  "emptyList": "Aucune idée dans cette liste.",
+  "emptyHint": "Les autres boutons restent disponibles.",
+  "whoNav": "Qui",
+  "budgetNav": "Budget",
+  "reserve": {
+    "titleNamed": "Réserver un cadeau — {{title}}",
+    "back": "Retour à la liste",
+    "unavailable": "Cette idée n'est plus disponible (déjà réservée ou introuvable).",
+    "offerTitle": "J'offre : {{name}}",
+    "fromName": "De la part de (optionnel)",
+    "note": "Un petit mot ?",
+    "submit": "J'offre",
+    "typeTitle": "Type de cadeau",
+    "filterLabel": "Filtrer la liste",
+    "allTypes": "Tous les types",
+    "filterSubmit": "Filtrer les idées",
+    "giftTitle": "Le cadeau",
+    "giftLabel": "Le cadeau que je souhaite offrir",
+    "choose": "Choisir"
+  },
+  "typesPage": {
+    "title": "Types",
+    "back": "Retour à la liste",
+    "empty": "Aucun type."
+  },
+  "invite": {
+    "title": "Rejoindre une wishlist",
+    "body": "Il faut un compte pour éditer cette liste. La lecture, elle, n'en a pas besoin.",
+    "register": "S'inscrire",
+    "login": "Se connecter",
+    "joinTitle": "Rejoindre cette wishlist"
+  }
+}

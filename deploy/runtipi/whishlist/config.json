@@ -1,0 +1,72 @@
+{
+  "name": "Wishlist",
+  "id": "whishlist",
+  "available": true,
+  "exposable": true,
+  "dynamic_config": true,
+  "port": 8740,
+  "tipi_version": 1,
+  "version": "0.1.0",
+  "min_tipi_version": "4.0.0",
+  "categories": ["utilities"],
+  "short_desc": "Listes de cadeaux à lire sans compte",
+  "description": "Wishlist foyer — Next.js + JSON. Exposer en wishlist.mesdamesduc.fr via Cloudflare.",
+  "author": "Mesdames Duc",
+  "source": "https://github.com/cloeduc/whishlist",
+  "website": "https://wishlist.mesdamesduc.fr",
+  "supported_architectures": ["arm64", "amd64"],
+  "created_at": 1760880000000,
+  "updated_at": 1760880000000,
+  "form_fields": [
+    {
+      "type": "random",
+      "label": "Secret de session",
+      "env_variable": "WHISHLIST_SESSION_SECRET",
+      "min": 48,
+      "required": true
+    },
+    {
+      "type": "text",
+      "label": "URL publique",
+      "env_variable": "WHISHLIST_PUBLIC_URL",
+      "required": true,
+      "default": "https://wishlist.mesdamesduc.fr"
+    },
+    {
+      "type": "text",
+      "label": "Image Docker",
+      "hint": "Construite sur le Mac Mini: whishlist:local",
+      "env_variable": "WHISHLIST_IMAGE",
+      "required": true,
+      "default": "whishlist:local"
+    },
+    {
+      "type": "text",
+      "label": "Resend API key",
+      "hint": "re_… — reset de mot de passe",
+      "env_variable": "WHISHLIST_RESEND_API_KEY",
+      "required": false
+    },
+    {
+      "type": "text",
+      "label": "MAIL_FROM",
+      "hint": "Wishlist <noreply@domaine.fr>",
+      "env_variable": "WHISHLIST_MAIL_FROM",
+      "required": false
+    },
+    {
+      "type": "text",
+      "label": "Gemini API key",
+      "hint": "Prioritaire pour « Récupérer les infos »",
+      "env_variable": "WHISHLIST_GEMINI_API_KEY",
+      "required": false
+    },
+    {
+      "type": "text",
+      "label": "OpenAI API key",
+      "hint": "Fallback si Gemini absent",
+      "env_variable": "WHISHLIST_OPENAI_API_KEY",
+      "required": false
+    }
+  ]
+}

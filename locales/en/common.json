@@ -1,0 +1,25 @@
+{
+  "brand": "Wishlist",
+  "meta": {
+    "title": "Wishlist",
+    "description": "Gift lists you can browse without an account."
+  },
+  "nav": {
+    "password": "Password",
+    "newList": "New list",
+    "logout": "Log out",
+    "login": "Log in",
+    "register": "Sign up"
+  },
+  "actions": {
+    "add": "Add",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "…"
+  },
+  "locale": {
+    "groupAria": "Language",
+    "switchAria": "Switch to {{locale}}"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "reset": {
+    "subject": "Réinitialiser ton mot de passe — Wishlist",
+    "intro": "Tu as demandé à réinitialiser ton mot de passe Wishlist.",
+    "openLink": "Ouvre ce lien (valable 1 heure) :",
+    "cta": "Choisir un nouveau mot de passe",
+    "ignore": "Si tu n'es pas à l'origine de cette demande, ignore ce message."
+  },
+  "invite": {
+    "subject": "{{fromName}} t'invite sur « {{listTitle}} »",
+    "intro": "{{fromName}} t'invite à contribuer à la wishlist « {{listTitle}} ».",
+    "openLink": "Ouvre ce lien (il faut un compte Wishlist) :",
+    "cta": "Rejoindre la liste",
+    "ctaHint": "un compte Wishlist est nécessaire",
+    "ignore": "Si tu n'attendais pas ce message, ignore-le."
+  }
+}

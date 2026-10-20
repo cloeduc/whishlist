@@ -1,0 +1,82 @@
+{
+  "viewAsGuest": "View as guest",
+  "inviteSent": "Invite sent by email.",
+  "tabs": {
+    "idees": "Ideas",
+    "archives": "Archive",
+    "reservations": "Reservations",
+    "partage": "Sharing",
+    "reglages": "Settings",
+    "navLabel": "Admin"
+  },
+  "addIdea": "Add an idea",
+  "archives": {
+    "title": "Archive",
+    "hint": "Archived ideas no longer appear on the public list.",
+    "empty": "No archived ideas.",
+    "restore": "Restore",
+    "deleteForever": "Delete permanently"
+  },
+  "reservations": {
+    "title": "Reservations",
+    "empty": "No ideas are reserved.",
+    "from": "From {{name}}",
+    "cancel": "Cancel reservation"
+  },
+  "categories": {
+    "types": "Categories",
+    "typesHint": "Click a chip to rename. Press Enter to add.",
+    "rename": "Rename",
+    "renameAria": "Rename {{label}}",
+    "newType": "New category",
+    "newTypePlaceholder": "e.g. Kitchen",
+    "people": "For whom",
+    "peopleHint": "Specific to this list. Click to rename, × to remove (if no ideas use them).",
+    "newPerson": "New person",
+    "newPersonPlaceholder": "e.g. Alex",
+    "renamePersonAria": "Rename {{label}}",
+    "deleteChip": "Remove {{label}}",
+    "add": "Add"
+  },
+  "share": {
+    "title": "Share",
+    "description": "The read link can't edit the list.",
+    "readLink": "Read link",
+    "inviteLink": "Invite link",
+    "inviteHint": "An account that opens it becomes a member.",
+    "inviteEmail": "Invite by email",
+    "inviteEmailHint": "Sends the invite link. They need a Wishlist account.",
+    "sendInvite": "Send invite",
+    "regenerate": "Regenerate invite",
+    "members": "Members",
+    "owner": "Owner",
+    "remove": "Remove",
+    "leave": "Leave list"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Categories, people, and sensitive actions on this list.",
+    "danger": "Danger zone",
+    "dangerHint": "Deleting the list is permanent.",
+    "delete": "Delete list"
+  },
+  "form": {
+    "name": "Name",
+    "type": "Type",
+    "person": "Who",
+    "url": "Link",
+    "fetchInfos": "Fetch details",
+    "fetchHint": "OG / JSON-LD scrape, then AI fills name, price, image, and type.",
+    "image": "Image (manual)",
+    "imageHint": "Leave empty to keep / fetch the link image. Fill only to force a URL.",
+    "price": "Price (€)",
+    "priority": "Priority",
+    "priorityNone": "None"
+  },
+  "kanban": {
+    "hint": "Drag an idea between categories. Click a card to edit it.",
+    "moveAria": "Move {{name}}",
+    "archive": "Archive",
+    "editTitle": "Edit idea"
+  }
+}

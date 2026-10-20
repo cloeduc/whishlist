@@ -1,0 +1,82 @@
+{
+  "viewAsGuest": "Voir comme un invité",
+  "inviteSent": "Invitation envoyée par e-mail.",
+  "tabs": {
+    "idees": "Idées",
+    "archives": "Archives",
+    "reservations": "Réservations",
+    "partage": "Partage",
+    "reglages": "Réglages",
+    "navLabel": "Admin"
+  },
+  "addIdea": "Ajouter une idée",
+  "archives": {
+    "title": "Archives",
+    "hint": "Les idées archivées n'apparaissent plus sur la liste publique.",
+    "empty": "Aucune idée archivée.",
+    "restore": "Restaurer",
+    "deleteForever": "Supprimer définitivement"
+  },
+  "reservations": {
+    "title": "Réservations",
+    "empty": "Aucune idée n'est réservée.",
+    "from": "De la part de {{name}}",
+    "cancel": "Annuler la réservation"
+  },
+  "categories": {
+    "types": "Catégories",
+    "typesHint": "Clique une puce pour renommer. Entrée pour ajouter.",
+    "rename": "Renommer",
+    "renameAria": "Renommer {{label}}",
+    "newType": "Nouvelle catégorie",
+    "newTypePlaceholder": "ex. Cuisine",
+    "people": "Pour qui",
+    "peopleHint": "Propres à cette liste. Clique pour renommer, × pour retirer (si aucune idée ne les utilise).",
+    "newPerson": "Nouveau qui",
+    "newPersonPlaceholder": "ex. Alex",
+    "renamePersonAria": "Renommer {{label}}",
+    "deleteChip": "Retirer {{label}}",
+    "add": "Ajouter"
+  },
+  "share": {
+    "title": "Partager",
+    "description": "Le lien de lecture ne permet pas de modifier la liste.",
+    "readLink": "Lien de lecture",
+    "inviteLink": "Lien d'invitation",
+    "inviteHint": "Un compte qui l'ouvre devient membre.",
+    "inviteEmail": "Inviter par e-mail",
+    "inviteEmailHint": "Envoie le lien d'invitation. La personne devra avoir (ou créer) un compte.",
+    "sendInvite": "Envoyer l'invitation",
+    "regenerate": "Régénérer l'invitation",
+    "members": "Membres",
+    "owner": "Créateur",
+    "remove": "Retirer",
+    "leave": "Quitter la liste"
+  },
+  "settings": {
+    "title": "Réglages",
+    "description": "Catégories, personnes, et actions sensibles sur cette liste.",
+    "danger": "Zone sensible",
+    "dangerHint": "Supprimer la liste est définitif.",
+    "delete": "Supprimer la liste"
+  },
+  "form": {
+    "name": "Nom",
+    "type": "Type",
+    "person": "Qui",
+    "url": "Lien",
+    "fetchInfos": "Récupérer les infos",
+    "fetchHint": "Scraping OG / JSON-LD, puis l'IA remplit nom, prix, image et le type.",
+    "image": "Image (à la main)",
+    "imageHint": "Laisse vide pour garder / récupérer l'image du lien. Remplis seulement pour forcer une URL.",
+    "price": "Prix (€)",
+    "priority": "Priorité",
+    "priorityNone": "Aucune"
+  },
+  "kanban": {
+    "hint": "Glisse une idée d'une catégorie à l'autre. Clique une carte pour la modifier.",
+    "moveAria": "Déplacer {{name}}",
+    "archive": "Archiver",
+    "editTitle": "Modifier l'idée"
+  }
+}

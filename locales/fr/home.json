@@ -1,0 +1,19 @@
+{
+  "guest": {
+    "title": "Les listes se lisent sans compte",
+    "body": "Quelqu'un t'a passé un lien : ouvre-le. Sans lien, il n'y a pas d'annuaire.",
+    "createAccount": "Créer un compte",
+    "hasAccount": "J'ai déjà un compte"
+  },
+  "mine": {
+    "title": "Mes wishlists",
+    "emptyTitle": "Tu n'as encore aucune liste.",
+    "emptyBody": "Crée-en une pour commencer.",
+    "newList": "Nouvelle liste"
+  },
+  "newList": {
+    "title": "Nouvelle wishlist",
+    "titleLabel": "Titre",
+    "submit": "Créer"
+  }
+}

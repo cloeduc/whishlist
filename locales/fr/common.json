@@ -1,0 +1,25 @@
+{
+  "brand": "Wishlist",
+  "meta": {
+    "title": "Wishlist",
+    "description": "Listes de cadeaux à lire sans compte."
+  },
+  "nav": {
+    "password": "Mot de passe",
+    "newList": "Nouvelle liste",
+    "logout": "Se déconnecter",
+    "login": "Connexion",
+    "register": "Inscription"
+  },
+  "actions": {
+    "add": "Ajouter",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "loading": "…"
+  },
+  "locale": {
+    "groupAria": "Langue",
+    "switchAria": "Passer en {{locale}}"
+  }
+}

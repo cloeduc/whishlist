@@ -1,0 +1,19 @@
+{
+  "guest": {
+    "title": "Lists are readable without an account",
+    "body": "Someone shared a link with you: open it. Without a link, there is no directory.",
+    "createAccount": "Create an account",
+    "hasAccount": "I already have an account"
+  },
+  "mine": {
+    "title": "My wishlists",
+    "emptyTitle": "You don't have a list yet.",
+    "emptyBody": "Create one to get started.",
+    "newList": "New list"
+  },
+  "newList": {
+    "title": "New wishlist",
+    "titleLabel": "Title",
+    "submit": "Create"
+  }
+}
