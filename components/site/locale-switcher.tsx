@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { setLocaleAction } from "@/src/server/actions";
-import { locales, type Locale } from "@/src/i18n/config";
+import { isLocale, type Locale } from "@/src/i18n/config";
 
 export function LocaleSwitcher({ locale }: { locale: Locale }) {
   const { t } = useTranslation("common");
@@ -13,29 +13,23 @@ export function LocaleSwitcher({ locale }: { locale: Locale }) {
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="flex items-center gap-0.5" role="group" aria-label={t("locale.groupAria")}>
-      {locales.map((code) => {
-        const active = code === locale;
-        return (
-          <Button
-            key={code}
-            type="button"
-            variant={active ? "secondary" : "ghost"}
-            size="sm"
-            disabled={pending || active}
-            aria-current={active ? "true" : undefined}
-            aria-label={t("locale.switchAria", { locale: code.toUpperCase() })}
-            onClick={() => {
-              startTransition(async () => {
-                await setLocaleAction(code);
-                router.refresh();
-              });
-            }}
-          >
-            {code.toUpperCase()}
-          </Button>
-        );
-      })}
-    </div>
+    <NativeSelect
+      size="sm"
+      value={locale}
+      disabled={pending}
+      aria-label={t("locale.groupAria")}
+      className="shrink-0"
+      onChange={(event) => {
+        const next = event.target.value;
+        if (!isLocale(next) || next === locale) return;
+        startTransition(async () => {
+          await setLocaleAction(next);
+          router.refresh();
+        });
+      }}
+    >
+      <NativeSelectOption value="fr">{t("locale.fr")}</NativeSelectOption>
+      <NativeSelectOption value="en">{t("locale.en")}</NativeSelectOption>
+    </NativeSelect>
   );
 }

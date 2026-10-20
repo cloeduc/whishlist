@@ -9,11 +9,19 @@
     "title": "Mes wishlists",
     "emptyTitle": "Tu n'as encore aucune liste.",
     "emptyBody": "Crée-en une pour commencer.",
-    "newList": "Nouvelle liste"
+    "newList": "Nouvelle wishlist"
   },
   "newList": {
     "title": "Nouvelle wishlist",
+    "description": "Titre, une première catégorie et une personne — tu pourras en ajouter ensuite.",
     "titleLabel": "Titre",
+    "titlePlaceholder": "ex. Noël 2026, Anniversaire Alex…",
+    "categoryLabel": "Catégorie",
+    "categoryPlaceholder": "ex. Maison, Cuisine, Loisirs, Livres…",
+    "categoryHint": "Au moins une pour classer les idées.",
+    "personLabel": "Pour qui",
+    "personPlaceholder": "ex. Alex, Sam, Commun…",
+    "personHint": "Au moins une personne (ou « Commun »).",
     "submit": "Créer"
   }
 }

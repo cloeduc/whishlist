@@ -1,0 +1,69 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
+import { LocaleSwitcher } from "@/components/site/locale-switcher";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { logoutAction } from "@/src/server/actions";
+import type { Locale } from "@/src/i18n/config";
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/") {
+    return pathname === "/" || pathname.startsWith("/listes");
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function SiteNav({
+  locale,
+  user,
+}: {
+  locale: Locale;
+  user: { displayName: string; mustChangePassword: boolean } | null;
+}) {
+  const { t } = useTranslation("common");
+  const pathname = usePathname() ?? "/";
+
+  function navLink(href: string, label: string) {
+    const active = isActive(pathname, href);
+    return (
+      <Link
+        href={href}
+        prefetch
+        aria-current={active ? "page" : undefined}
+        className={cn(buttonVariants({ variant: active ? "default" : "ghost", size: "sm" }))}
+      >
+        {label}
+      </Link>
+    );
+  }
+
+  return (
+    <nav className="ml-auto flex flex-wrap items-center gap-2" aria-label={t("nav.menuAria")}>
+      {user ? (
+        <>
+          <span className="px-1 text-sm text-muted-foreground">{user.displayName}</span>
+          {!user.mustChangePassword ? (
+            <>
+              {navLink("/", t("nav.myLists"))}
+              {navLink("/compte", t("nav.account"))}
+            </>
+          ) : null}
+          <form action={logoutAction}>
+            <Button type="submit" variant="ghost" size="sm">
+              {t("nav.logout")}
+            </Button>
+          </form>
+        </>
+      ) : (
+        <>
+          {navLink("/connexion", t("nav.login"))}
+          {navLink("/inscription", t("nav.register"))}
+        </>
+      )}
+      <LocaleSwitcher locale={locale} />
+    </nav>
+  );
+}
