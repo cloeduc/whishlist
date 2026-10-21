@@ -26,6 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { intlLocale } from "@/src/i18n/config";
 import { getLocale, getTranslations } from "@/src/i18n/server";
+import { headers } from "next/headers";
 import type { CSSProperties } from "react";
 
 function unlockErrorMessage(
@@ -111,9 +112,10 @@ export default async function ReadPage({
   const rootCss = Object.entries(cssVars)
     .map(([key, value]) => `${key}:${value}`)
     .join(";");
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <main className="flex flex-col gap-6" style={cssVars as CSSProperties}>
-      <style dangerouslySetInnerHTML={{ __html: `:root{${rootCss}}` }} />
+      <style nonce={nonce} dangerouslySetInnerHTML={{ __html: `:root{${rootCss}}` }} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <WishlistCover coverImageUrl={list.coverImageUrl} theme={theme} size="md" />
         <div className="flex min-w-0 flex-col gap-2">

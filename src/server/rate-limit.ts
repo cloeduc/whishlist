@@ -16,19 +16,31 @@ export function takeToken(key: string, limit: number, windowMs: number, now = Da
   return true;
 }
 
-/** IP posée par le proxy (Cloudflare ou X-Real-IP). `X-Forwarded-For` client n’est pas utilisé. */
+function trustedIp(value: string | null | undefined): string | null {
+  const hop = value?.split(",")[0]?.trim() ?? "";
+  if (!hop || hop.length > 64) return null;
+  if (!/^[0-9a-fA-F:.]+$/.test(hop)) return null;
+  return hop;
+}
+
+/**
+ * IP posée par le proxy (Cloudflare, puis X-Real-IP).
+ * `X-Forwarded-For` n’est pas lu : le client peut l’inventer.
+ * `null` s’il n’y a pas d’IP de confiance — jamais un seau partagé « unknown ».
+ */
 export function clientAddress(header: {
   cfConnectingIp?: string | null;
   realIp?: string | null;
-}): string {
-  const cf = header.cfConnectingIp?.split(",")[0]?.trim();
-  if (cf) return cf;
-  const real = header.realIp?.split(",")[0]?.trim();
-  if (real) return real;
-  return "unknown";
+}): string | null {
+  return trustedIp(header.cfConnectingIp) ?? trustedIp(header.realIp);
 }
 
-export async function clientIp(): Promise<string> {
+/** Sans IP de confiance : en production on refuse, en dev on ne limite pas. */
+export function missingIpPolicy(nodeEnv = process.env.NODE_ENV): "skip" | "deny" {
+  return nodeEnv === "production" ? "deny" : "skip";
+}
+
+export async function clientIp(): Promise<string | null> {
   const h = await headers();
   return clientAddress({
     cfConnectingIp: h.get("cf-connecting-ip"),
@@ -42,6 +54,10 @@ export async function rateLimitOrThrow(
   windowMs: number,
 ): Promise<void> {
   const ip = await clientIp();
+  if (!ip) {
+    if (missingIpPolicy() === "deny") throw new RateLimitError(scope);
+    return;
+  }
   if (!takeToken(`${scope}:${ip}`, limit, windowMs)) {
     throw new RateLimitError(scope);
   }
