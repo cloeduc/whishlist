@@ -1,13 +1,24 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import { loginAction } from "../../src/server/actions";
+import { LinkButton } from "@/components/site/link-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { getTranslations } from "@/src/i18n/server";
+import { publicPageMetadata } from "@/src/site/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return publicPageMetadata({
+    title: t("login.metaTitle"),
+    description: t("login.metaDescription"),
+    path: "/connexion",
+  });
+}
 
 export default async function ConnexionPage({
   searchParams,
@@ -21,7 +32,7 @@ export default async function ConnexionPage({
     <main className="mx-auto flex w-full max-w-md flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>{t("login.title")}</CardTitle>
+          <CardTitle as="h1">{t("login.title")}</CardTitle>
           <CardDescription>{t("login.description")}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -44,21 +55,16 @@ export default async function ConnexionPage({
                 <Input id="password" name="password" type="password" required autoComplete="current-password" />
               </Field>
               <Button type="submit">{t("login.submit")}</Button>
-              <Button
-                variant="link"
-                className="h-auto justify-start px-0"
-                nativeButton={false}
-                render={<Link href="/mot-de-passe-oublie" />}
-              >
+              <LinkButton href="/mot-de-passe-oublie" variant="link" className="h-auto justify-start px-0">
                 {t("login.forgot")}
-              </Button>
+              </LinkButton>
             </FieldGroup>
           </form>
         </CardContent>
       </Card>
-      <Button variant="link" nativeButton={false} render={<Link href={`/inscription?next=${encodeURIComponent(next)}`} />}>
+      <LinkButton href={`/inscription?next=${encodeURIComponent(next)}`} variant="link">
         {t("login.createAccount")}
-      </Button>
+      </LinkButton>
     </main>
   );
 }

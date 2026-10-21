@@ -19,15 +19,102 @@ function metaContent(html: string, attr: "property" | "name" | "itemprop", key: 
   return null;
 }
 
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  quot: '"',
+  apos: "'",
+  lt: "<",
+  gt: ">",
+  nbsp: " ",
+  eacute: "é",
+  Eacute: "É",
+  egrave: "è",
+  Egrave: "È",
+  agrave: "à",
+  Agrave: "À",
+  aacute: "á",
+  acirc: "â",
+  Acirc: "Â",
+  ccedil: "ç",
+  Ccedil: "Ç",
+  ugrave: "ù",
+  uacute: "ú",
+  ucirc: "û",
+  ocirc: "ô",
+  Ocirc: "Ô",
+  icirc: "î",
+  Icirc: "Î",
+  iuml: "ï",
+  euml: "ë",
+  oelig: "œ",
+  euro: "€",
+  rsquo: "’",
+  lsquo: "‘",
+  rdquo: "”",
+  ldquo: "“",
+  ndash: "–",
+  mdash: "—",
+};
+
 function decodeHtml(value: string): string {
   return value
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
+    .replace(/&([a-zA-Z]+);/g, (match, name: string) => NAMED_ENTITIES[name] ?? match)
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
     .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)));
+}
+
+function cleanProductName(name: string | null): string | null {
+  if (!name) return null;
+  const cleaned = name
+    .replace(/\s*[|\-–—]\s*Missegle\s*$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return cleaned || null;
+}
+
+function isLikelyLogoOrChrome(url: string): boolean {
+  return /logo|favicon|sprite|icon-menu|menu-deroulant|size-guide|guide-des-tailles|placeholder|1x1|pixel/i.test(
+    url,
+  );
+}
+
+function imageScore(url: string): number {
+  let score = 0;
+  if (/img_upload|product|media|cdn|uploads?\//i.test(url)) score += 5;
+  if (/\.(jpe?g|webp)(\?|$)/i.test(url)) score += 2;
+  if (/png(\?|$)/i.test(url)) score += 1;
+  if (isLikelyLogoOrChrome(url)) score -= 10;
+  return score;
+}
+
+function visibleEuroPrice(html: string): string | null {
+  const cartIdx = html.search(/Ajouter au panier|Add to (?:cart|bag)|Ajouter\s+au\s+panier/i);
+  const zone = cartIdx >= 0 ? html.slice(Math.max(0, cartIdx - 3000), cartIdx) : html.slice(0, 80_000);
+  const matches = [...zone.matchAll(/(\d{1,5}(?:[.,]\d{2})?)\s*€/g)];
+  if (matches.length === 0) return null;
+  // Le prix produit est en général le dernier montant avant « Ajouter au panier ».
+  const candidate = matches.at(-1)?.[1] ?? null;
+  return normalizePrice(candidate);
+}
+
+function productImageFromHtml(html: string, pageUrl: string): string | null {
+  const candidates = [
+    ...html.matchAll(
+      /(?:src|data-src|content)=["'](https?:\/\/[^"']+\.(?:jpe?g|png|webp)(?:\?[^"']*)?)["']/gi,
+    ),
+  ]
+    .map((match) => match[1]!)
+    .map((raw) => {
+      try {
+        return new URL(raw, pageUrl).toString();
+      } catch {
+        return null;
+      }
+    })
+    .filter((url): url is string => Boolean(url))
+    .filter((url) => !isLikelyLogoOrChrome(url))
+    .sort((a, b) => imageScore(b) - imageScore(a));
+  return candidates[0] ?? null;
 }
 
 function pageTitle(html: string): string | null {
@@ -147,19 +234,27 @@ function jsonLdHints(html: string, pageUrl: string): ProductHints {
 
 export function extractProductHints(html: string, pageUrl: string): ProductHints {
   const ld = jsonLdHints(html, pageUrl);
-  const name =
+  const name = cleanProductName(
     ld.name ??
-    metaContent(html, "property", "og:title") ??
-    metaContent(html, "name", "twitter:title") ??
-    metaContent(html, "itemprop", "name") ??
-    pageTitle(html);
+      metaContent(html, "property", "og:title") ??
+      metaContent(html, "name", "twitter:title") ??
+      metaContent(html, "itemprop", "name") ??
+      pageTitle(html),
+  );
   const price =
     ld.price ??
     normalizePrice(metaContent(html, "property", "product:price:amount")) ??
     normalizePrice(metaContent(html, "property", "og:price:amount")) ??
     normalizePrice(metaContent(html, "itemprop", "price")) ??
-    normalizePrice(metaContent(html, "name", "price"));
-  const imageUrl = ld.imageUrl ?? extractOgImage(html, pageUrl);
+    normalizePrice(metaContent(html, "name", "price")) ??
+    visibleEuroPrice(html);
+  const ogImage = extractOgImage(html, pageUrl);
+  const imageUrl =
+    (ld.imageUrl && !isLikelyLogoOrChrome(ld.imageUrl) ? ld.imageUrl : null) ??
+    (ogImage && !isLikelyLogoOrChrome(ogImage) ? ogImage : null) ??
+    productImageFromHtml(html, pageUrl) ??
+    ogImage ??
+    ld.imageUrl;
   return {
     name: name?.trim() || null,
     price,

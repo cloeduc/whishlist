@@ -16,11 +16,24 @@ export function takeToken(key: string, limit: number, windowMs: number, now = Da
   return true;
 }
 
+/** IP posée par le proxy (Cloudflare ou X-Real-IP). `X-Forwarded-For` client n’est pas utilisé. */
+export function clientAddress(header: {
+  cfConnectingIp?: string | null;
+  realIp?: string | null;
+}): string {
+  const cf = header.cfConnectingIp?.split(",")[0]?.trim();
+  if (cf) return cf;
+  const real = header.realIp?.split(",")[0]?.trim();
+  if (real) return real;
+  return "unknown";
+}
+
 export async function clientIp(): Promise<string> {
   const h = await headers();
-  const forwarded = h.get("x-forwarded-for")?.split(",")[0]?.trim();
-  if (forwarded) return forwarded;
-  return h.get("x-real-ip")?.trim() || "unknown";
+  return clientAddress({
+    cfConnectingIp: h.get("cf-connecting-ip"),
+    realIp: h.get("x-real-ip"),
+  });
 }
 
 export async function rateLimitOrThrow(

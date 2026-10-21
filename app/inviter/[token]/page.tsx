@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "../../../src/auth/current";
 import { joinInviteAction } from "../../../src/server/actions";
 import { getDocument } from "../../../src/store/db";
+import { LinkButton } from "@/components/site/link-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { getTranslations, translateError } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -28,12 +27,10 @@ export default async function InvitePage({
         <h1 className="text-2xl font-medium tracking-tight">{t("invite.title")}</h1>
         <p className="text-muted-foreground">{t("invite.body")}</p>
         <div className="flex flex-wrap gap-2">
-          <Button nativeButton={false} render={<Link href={`/inscription?next=${encodeURIComponent(back)}`} />}>
-            {t("invite.register")}
-          </Button>
-          <Button variant="outline" nativeButton={false} render={<Link href={`/connexion?next=${encodeURIComponent(back)}`} />}>
+          <LinkButton href={`/inscription?next=${encodeURIComponent(back)}`}>{t("invite.register")}</LinkButton>
+          <LinkButton href={`/connexion?next=${encodeURIComponent(back)}`} variant="outline">
             {t("invite.login")}
-          </Button>
+          </LinkButton>
         </div>
       </main>
     );

@@ -1,12 +1,15 @@
 "use client";
 
-import { useActionState, useEffect, useState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
+import { SparklesIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { PriorityStarPicker } from "@/components/site/priority-star-picker";
+import type { LlmImpact } from "@/src/domain/llm-impact";
 import {
   enrichFromUrlAction,
   saveItemAction,
@@ -38,6 +41,13 @@ function initialDraft(input: {
   };
 }
 
+function formatImpactNumber(value: number, digits = 2): string {
+  if (value >= 10) return value.toFixed(0);
+  if (value >= 1) return value.toFixed(1);
+  if (value >= 0.01) return value.toFixed(digits);
+  return value.toExponential(1);
+}
+
 export function ItemForm({
   wishlistId,
   types,
@@ -45,6 +55,7 @@ export function ItemForm({
   item,
   price,
   onglet = "idees",
+  llmEnabled = false,
 }: {
   wishlistId: string;
   types: { id: string; label: string }[];
@@ -60,21 +71,26 @@ export function ItemForm({
   };
   price?: string;
   onglet?: string;
+  llmEnabled?: boolean;
 }) {
   const { t } = useTranslation(["list", "common", "errors"]);
   const id = item?.id ?? "new";
   const [state, formAction, pending] = useActionState(saveItemAction, null as SaveItemState);
+  const [appliedState, setAppliedState] = useState(state);
   const [draft, setDraft] = useState(() => initialDraft({ item, price, types, people }));
   const [previewImage, setPreviewImage] = useState(item?.imageUrl ?? "");
   const [enrichError, setEnrichError] = useState<string | null>(null);
   const [enrichPending, startEnrich] = useTransition();
+  const [impact, setImpact] = useState<LlmImpact | null>(null);
+  const [usedLlm, setUsedLlm] = useState(false);
 
-  useEffect(() => {
+  if (state !== appliedState) {
+    setAppliedState(state);
     if (state?.draft) {
       setDraft(state.draft);
       if (state.draft.imageUrl) setPreviewImage(state.draft.imageUrl);
     }
-  }, [state]);
+  }
 
   function setField<K extends keyof ItemFormDraft>(key: K, value: ItemFormDraft[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }));
@@ -82,6 +98,8 @@ export function ItemForm({
 
   function enrich() {
     setEnrichError(null);
+    setImpact(null);
+    setUsedLlm(false);
     startEnrich(async () => {
       const result = await enrichFromUrlAction({ url: draft.url, wishlistId });
       if (!result.ok) {
@@ -96,6 +114,8 @@ export function ItemForm({
         typeId: result.typeId || prev.typeId,
       }));
       if (result.imageUrl) setPreviewImage(result.imageUrl);
+      setUsedLlm(result.usedLlm);
+      setImpact(result.impact);
     });
   }
 
@@ -125,17 +145,54 @@ export function ItemForm({
               placeholder="https://"
               className="min-w-0 flex-1"
             />
-            <Button
-              type="button"
-              variant="neutral"
-              disabled={enrichPending || !draft.url.trim()}
-              onClick={enrich}
-              className="shrink-0"
-            >
-              {enrichPending ? t("common:actions.loading") : t("form.fetchInfos")}
-            </Button>
+            {llmEnabled ? (
+              <Button
+                type="button"
+                variant="neutral"
+                disabled={enrichPending || !draft.url.trim()}
+                onClick={enrich}
+                className="shrink-0"
+              >
+                {enrichPending ? t("common:actions.loading") : t("form.fetchInfosAi")}
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="neutral"
+                disabled={enrichPending || !draft.url.trim()}
+                onClick={enrich}
+                className="shrink-0"
+              >
+                {enrichPending ? t("common:actions.loading") : t("form.fetchInfos")}
+              </Button>
+            )}
           </div>
         </Field>
+        {usedLlm ? (
+          <Alert>
+            <SparklesIcon />
+            <AlertTitle>{t("form.aiTitle")}</AlertTitle>
+            <AlertDescription>
+              <p>{t("form.aiBody")}</p>
+              {impact ? (
+                <ul className="mt-2 list-disc pl-4">
+                  <li>
+                    {t("form.aiTokens", {
+                      count: impact.totalTokens,
+                    })}
+                  </li>
+                  <li>
+                    {t("form.aiCo2", {
+                      grams: formatImpactNumber(impact.co2Grams),
+                      beef: formatImpactNumber(impact.beefGrams, 3),
+                    })}
+                  </li>
+                </ul>
+              ) : null}
+              <p className="mt-2 text-xs">{t("form.aiDisclaimer")}</p>
+            </AlertDescription>
+          </Alert>
+        ) : null}
         <Field>
           <FieldLabel htmlFor={`${id}-name`}>{t("form.name")}</FieldLabel>
           <Input

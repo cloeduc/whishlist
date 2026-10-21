@@ -18,10 +18,10 @@ export function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
 }
 
-export function registerUser(
+export async function registerUser(
   doc: Database,
   input: { email: string; password: string; displayName: string; now?: Date; id?: string },
-): Ok<User> | Err {
+): Promise<Ok<User> | Err> {
   const email = normalizeEmail(input.email);
   const displayName = input.displayName.trim();
   const password = input.password;
@@ -36,30 +36,31 @@ export function registerUser(
   const user: User = {
     id: input.id ?? newId(),
     email,
-    passwordHash: hashPassword(password),
+    passwordHash: await hashPassword(password),
     displayName,
     createdAt: (input.now ?? new Date()).toISOString(),
     mustChangePassword: false,
+    sessionVersion: 0,
   };
   const next = clone(doc);
   next.users.push(user);
   return { ok: true, doc: next, value: user };
 }
 
-export function authenticate(doc: Database, email: string, password: string): User | null {
+export async function authenticate(doc: Database, email: string, password: string): Promise<User | null> {
   const user = doc.users.find((u) => u.email === normalizeEmail(email));
   if (!user) {
-    hashPassword(password);
+    await hashPassword(password);
     return null;
   }
-  if (!verifyPassword(password, user.passwordHash)) return null;
+  if (!(await verifyPassword(password, user.passwordHash))) return null;
   return user;
 }
 
-export function changePassword(
+export async function changePassword(
   doc: Database,
   input: { userId: string; password: string; currentPassword?: string },
-): Ok<User> | Err {
+): Promise<Ok<User> | Err> {
   const password = input.password;
   const policy = passwordPolicyError(password);
   if (policy) return { ok: false, error: policy };
@@ -67,12 +68,13 @@ export function changePassword(
   const user = next.users.find((entry) => entry.id === input.userId);
   if (!user) return { ok: false, error: "accountMissing" };
   if (input.currentPassword !== undefined) {
-    if (!verifyPassword(input.currentPassword, user.passwordHash)) {
+    if (!(await verifyPassword(input.currentPassword, user.passwordHash))) {
       return { ok: false, error: "wrongCurrentPassword" };
     }
   }
-  user.passwordHash = hashPassword(password);
+  user.passwordHash = await hashPassword(password);
   user.mustChangePassword = false;
+  user.sessionVersion = (user.sessionVersion ?? 0) + 1;
   return { ok: true, doc: next, value: user };
 }
 

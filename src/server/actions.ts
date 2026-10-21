@@ -27,7 +27,7 @@ import {
 } from "../domain/users";
 import { createWishlist } from "../domain/import";
 import type { Wishlist } from "../domain/types";
-import { mailConfigured, sendInviteMail, sendPasswordResetMail } from "./mail";
+import { mailConfigured, sendAlreadyRegisteredMail, sendInviteMail, sendPasswordResetMail } from "./mail";
 import { isRateLimitError, rateLimitOrThrow } from "./rate-limit";
 import {
   acceptInvite,
@@ -48,12 +48,14 @@ import {
   deleteType,
   renamePerson,
   renameType,
+  reorderTypes,
   setItemArchived,
   setItemType,
   updateItem,
 } from "../domain/items";
 import { fetchPageHtml } from "../domain/fetch-page";
 import { fetchOgImage } from "../domain/og-image";
+import { estimateLlmImpact, type LlmImpact } from "../domain/llm-impact";
 import { parsePrice } from "../domain/price";
 import { extractProductHints } from "../domain/product-from-url";
 import { llmConfigured, refineProductWithLlm } from "../domain/product-llm";
@@ -101,11 +103,11 @@ function nextPath(value: FormDataEntryValue | null): string {
   return value;
 }
 
-async function openSession(userId: string) {
+async function openSession(userId: string, sessionVersion = 0) {
   const secret = sessionSecret();
   if (!secret) throw new Error("SESSION_SECRET manquant");
   const jar = await cookies();
-  jar.set(SESSION_COOKIE, signSession(userId, secret), {
+  jar.set(SESSION_COOKIE, signSession(userId, secret, Date.now(), sessionVersion), {
     httpOnly: true,
     sameSite: "lax",
     secure: cookieSecure(),
@@ -127,21 +129,24 @@ export async function registerAction(formData: FormData) {
     }
     throw error;
   }
-  const result = await updateDocument((doc) => {
-    const created = registerUser(doc, { email, password, displayName });
+  const result = await updateDocument(async (doc) => {
+    const created = await registerUser(doc, { email, password, displayName });
     return { doc: created.ok ? created.doc : doc, result: created };
   });
   if (!result.ok) {
-    const code =
-      result.error === "emailTaken" || result.error.includes("déjà")
-        ? "email"
-        : result.error === "passwordTooShort"
-          ? "password"
-          : "fields";
+    if (result.error === "emailTaken" || result.error.includes("déjà")) {
+      const base = await origin();
+      await sendAlreadyRegisteredMail({
+        to: normalizeEmail(email),
+        loginUrl: `${base}/connexion`,
+      });
+      redirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}`);
+    }
+    const code = result.error === "passwordTooShort" ? "password" : "fields";
     redirect(`/inscription?e=${code}&next=${encodeURIComponent(dest)}`);
   }
-  await openSession(result.value.id);
-  redirect(dest);
+  await openSession(result.value.id, result.value.sessionVersion ?? 0);
+  redirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}`);
 }
 
 export async function loginAction(formData: FormData) {
@@ -157,9 +162,9 @@ export async function loginAction(formData: FormData) {
     throw error;
   }
   const doc = await readDocument();
-  const user = authenticate(doc, email, password);
+  const user = await authenticate(doc, email, password);
   if (!user) redirect(`/connexion?e=1&next=${encodeURIComponent(dest)}`);
-  await openSession(user.id);
+  await openSession(user.id, user.sessionVersion ?? 0);
   if (user.mustChangePassword) redirect("/compte");
   redirect(dest);
 }
@@ -186,8 +191,8 @@ export async function changePasswordAction(formData: FormData) {
   if (!password || password !== confirm) {
     redirect("/compte?e=mismatch");
   }
-  const result = await updateDocument((doc) => {
-    const saved = changePassword(doc, {
+  const result = await updateDocument(async (doc) => {
+    const saved = await changePassword(doc, {
       userId: user.id,
       password,
       currentPassword: user.mustChangePassword ? undefined : currentPassword,
@@ -203,6 +208,7 @@ export async function changePasswordAction(formData: FormData) {
           : "1";
     redirect(`/compte?e=${code}`);
   }
+  await openSession(user.id, result.value.sessionVersion ?? 0);
   redirect(user.mustChangePassword ? "/" : "/compte?ok=1");
 }
 
@@ -243,15 +249,15 @@ export async function requestPasswordResetAction(formData: FormData) {
 export async function resetPasswordAction(formData: FormData) {
   const token = String(formData.get("token") ?? "");
   const password = String(formData.get("password") ?? "");
-  const result = await updateDocument((doc) => {
-    const saved = resetPasswordWithToken(doc, { token, password });
+  const result = await updateDocument(async (doc) => {
+    const saved = await resetPasswordWithToken(doc, { token, password });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
   if (!result.ok) {
     const code = result.error === "passwordTooShort" ? "password" : "1";
     redirect(`/reinitialiser/${encodeURIComponent(token)}?e=${code}`);
   }
-  await openSession(result.userId);
+  await openSession(result.userId, result.sessionVersion);
   redirect("/");
 }
 
@@ -372,7 +378,15 @@ export async function enrichFromUrlAction(input: {
   url: string;
   wishlistId: string;
 }): Promise<
-  | { ok: true; name: string; price: string; imageUrl: string; typeId: string; usedLlm: boolean }
+  | {
+      ok: true;
+      name: string;
+      price: string;
+      imageUrl: string;
+      typeId: string;
+      usedLlm: boolean;
+      impact: LlmImpact | null;
+    }
   | { ok: false; error: string }
 > {
   const actorId = await memberId();
@@ -398,8 +412,13 @@ export async function enrichFromUrlAction(input: {
   if (!page) return { ok: false, error: "pageLoadFailed" };
   let hints = extractProductHints(page.html, page.finalUrl);
   const usedLlm = llmConfigured();
+  let impact: LlmImpact | null = null;
   if (usedLlm) {
-    hints = await refineProductWithLlm(page.finalUrl, page.html, hints, types);
+    const refined = await refineProductWithLlm(page.finalUrl, page.html, hints, types);
+    hints = refined.hints;
+    if (refined.usage.totalTokens > 0) {
+      impact = estimateLlmImpact(refined.usage.totalTokens);
+    }
   }
   if (!hints.name && !hints.price && !hints.imageUrl) {
     return {
@@ -414,7 +433,25 @@ export async function enrichFromUrlAction(input: {
     imageUrl: hints.imageUrl ?? "",
     typeId: hints.typeId ?? "",
     usedLlm,
+    impact,
   };
+}
+
+export async function reorderTypesAction(input: {
+  wishlistId: string;
+  orderedTypeIds: string[];
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const actorId = await memberId();
+  const result = await updateDocument((doc) => {
+    const saved = reorderTypes(doc, {
+      wishlistId: input.wishlistId,
+      actorId,
+      orderedTypeIds: input.orderedTypeIds,
+    });
+    return { doc: saved.ok ? saved.doc : doc, result: saved };
+  });
+  if (!result.ok) return { ok: false, error: result.error };
+  return { ok: true };
 }
 
 export async function deleteItemAction(formData: FormData) {
@@ -621,8 +658,8 @@ export async function setReadPasswordAction(formData: FormData) {
   const actorId = await memberId();
   const wishlistId = String(formData.get("wishlistId") ?? "");
   const password = String(formData.get("password") ?? "");
-  const result = await updateDocument((doc) => {
-    const saved = setReadPassword(doc, { wishlistId, actorId, password });
+  const result = await updateDocument(async (doc) => {
+    const saved = await setReadPassword(doc, { wishlistId, actorId, password });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
   if (!result.ok) redirectToList(wishlistId, formData, result.error);
@@ -654,7 +691,7 @@ export async function unlockPublicListAction(formData: FormData) {
   const doc = await readDocument();
   const list = doc.wishlists.find((entry) => entry.readToken === readToken);
   if (!list) redirect("/");
-  if (!verifyReadPassword(list, password)) {
+  if (!(await verifyReadPassword(list, password))) {
     redirect(`/l/${readToken}?e=badPassword`);
   }
   await grantReadUnlock(list);
@@ -666,6 +703,12 @@ export async function sendInviteAction(formData: FormData) {
   if (!user) redirect("/connexion");
   if (user.mustChangePassword) redirect("/compte");
   const wishlistId = String(formData.get("wishlistId") ?? "");
+  try {
+    await rateLimitOrThrow(`invite:${user.id}`, 8, 60 * 60 * 1000);
+  } catch (error) {
+    if (isRateLimitError(error)) redirectToList(wishlistId, formData, "rateLimited");
+    throw error;
+  }
   const email = normalizeEmail(String(formData.get("email") ?? ""));
   if (!email || !email.includes("@")) {
     redirectToList(wishlistId, formData, "emailRequired");

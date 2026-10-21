@@ -36,19 +36,25 @@ export function AppearanceForm({
   const [draftSubtitle, setDraftSubtitle] = useState(subtitle ?? "");
   const [draftCover, setDraftCover] = useState(coverImageUrl ?? "");
   const [colors, setColors] = useState<WishlistTheme>(initialTheme);
+  const [source, setSource] = useState({ title, subtitle, coverImageUrl, initialTheme });
+  if (
+    source.title !== title ||
+    source.subtitle !== subtitle ||
+    source.coverImageUrl !== coverImageUrl ||
+    source.initialTheme !== initialTheme
+  ) {
+    setSource({ title, subtitle, coverImageUrl, initialTheme });
+    setDraftTitle(title);
+    setDraftSubtitle(subtitle ?? "");
+    setDraftCover(coverImageUrl ?? "");
+    setColors(initialTheme);
+  }
 
   const previewTheme = useMemo(() => resolveTheme(colors), [colors]);
 
   useEffect(() => {
     setLiveTheme(previewTheme);
   }, [previewTheme, setLiveTheme]);
-
-  useEffect(() => {
-    setDraftTitle(title);
-    setDraftSubtitle(subtitle ?? "");
-    setDraftCover(coverImageUrl ?? "");
-    setColors(initialTheme);
-  }, [title, subtitle, coverImageUrl, initialTheme]);
 
   function setColor(key: keyof WishlistTheme, value: string) {
     setColors((prev) => ({ ...prev, [key]: value }));

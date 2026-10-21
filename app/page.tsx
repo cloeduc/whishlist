@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "../src/auth/current";
@@ -5,12 +6,22 @@ import { resolveTheme } from "../src/domain/theme";
 import { getDocument } from "../src/store/db";
 import { GiftMark } from "@/components/site/gift-mark";
 import { GuestHero } from "@/components/site/guest-hero";
+import { LinkButton } from "@/components/site/link-button";
 import { WishlistCover } from "@/components/site/wishlist-cover";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { GITHUB_REPO_URL } from "@/src/site/links";
 import { getTranslations } from "@/src/i18n/server";
+import { publicPageMetadata } from "@/src/site/seo";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("common");
+  return publicPageMetadata({
+    title: t("meta.title"),
+    description: t("meta.description"),
+    path: "/",
+  });
+}
 
 export const dynamic = "force-dynamic";
 
@@ -55,9 +66,9 @@ export default async function HomePage() {
     <main className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-medium tracking-tight">{t("mine.title")}</h1>
-        <Button size="sm" nativeButton={false} render={<Link href="/listes/new" />}>
+        <LinkButton href="/listes/new" size="sm">
           {t("mine.newList")}
-        </Button>
+        </LinkButton>
       </div>
       {mine.length === 0 ? (
         <Empty>
@@ -69,9 +80,7 @@ export default async function HomePage() {
             <EmptyDescription>{t("mine.emptyBody")}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button nativeButton={false} render={<Link href="/listes/new" />}>
-              {t("mine.newList")}
-            </Button>
+            <LinkButton href="/listes/new">{t("mine.newList")}</LinkButton>
           </EmptyContent>
         </Empty>
       ) : (

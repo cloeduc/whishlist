@@ -22,8 +22,8 @@ function doc(): Database {
     createdAt: "2026-01-01T00:00:00.000Z",
   });
   data.types.push(
-    { id: "jeux", wishlistId: "w", label: "Jeux" },
-    { id: "livres", wishlistId: "w", label: "Livres" },
+    { id: "jeux", wishlistId: "w", label: "Jeux", sortOrder: 0 },
+    { id: "livres", wishlistId: "w", label: "Livres", sortOrder: 1 },
   );
   data.people.push({ id: "p", wishlistId: "w", label: "Couple" });
   data.items.push(

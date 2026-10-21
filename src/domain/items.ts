@@ -178,7 +178,11 @@ export function addType(
   if (!wishlist) return { ok: false, error: "listMissing" };
   const typeId = input.id ?? newId();
   const next = clone(doc);
-  next.types.push({ id: typeId, wishlistId: input.wishlistId, label });
+  const sortOrder =
+    next.types
+      .filter((type) => type.wishlistId === input.wishlistId)
+      .reduce((max, type) => Math.max(max, type.sortOrder ?? 0), -1) + 1;
+  next.types.push({ id: typeId, wishlistId: input.wishlistId, label, sortOrder });
   next.views.push({
     id: newId(),
     wishlistId: input.wishlistId,
@@ -246,6 +250,34 @@ export function deleteType(
         view.typeIds.length === 0
       ),
   );
+  return { ok: true, doc: next };
+}
+
+export function reorderTypes(
+  doc: Database,
+  input: { wishlistId: string; actorId: string; orderedTypeIds: string[] },
+): { ok: true; doc: Database } | { ok: false; error: string } {
+  if (!findMembership(doc, input.wishlistId, input.actorId)) {
+    return { ok: false, error: "notMember" };
+  }
+  const current = doc.types.filter((type) => type.wishlistId === input.wishlistId);
+  if (current.length === 0) return { ok: true, doc };
+  if (input.orderedTypeIds.length !== current.length) {
+    return { ok: false, error: "typeMissing" };
+  }
+  const currentIds = new Set(current.map((type) => type.id));
+  if (input.orderedTypeIds.some((id) => !currentIds.has(id))) {
+    return { ok: false, error: "typeMissing" };
+  }
+  if (new Set(input.orderedTypeIds).size !== input.orderedTypeIds.length) {
+    return { ok: false, error: "typeMissing" };
+  }
+  const next = clone(doc);
+  const order = new Map(input.orderedTypeIds.map((id, index) => [id, index]));
+  for (const type of next.types) {
+    if (type.wishlistId !== input.wishlistId) continue;
+    type.sortOrder = order.get(type.id) ?? type.sortOrder;
+  }
   return { ok: true, doc: next };
 }
 

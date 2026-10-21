@@ -50,7 +50,15 @@
     "deleteArchiveTitle": "Supprimer définitivement ?",
     "deleteArchiveBody": "« {{name}} » sera définitivement supprimé.",
     "deleteArchiveConfirm": "Supprimer définitivement",
-    "deleteArchiveKeep": "Conserver"
+    "deleteArchiveKeep": "Conserver",
+    "clearPasswordTitle": "Retirer le mot de passe de la liste ?",
+    "clearPasswordBody": "Toute personne disposant du lien pourra de nouveau consulter la liste.",
+    "clearPasswordConfirm": "Retirer le mot de passe",
+    "clearPasswordKeep": "Garder le mot de passe",
+    "removeMemberTitle": "Retirer {{name}} de la liste ?",
+    "removeMemberBody": "Cette personne ne pourra plus modifier la liste tant que vous ne l’invitez pas à nouveau.",
+    "removeMemberConfirm": "Retirer de la liste",
+    "removeMemberKeep": "Garder ce membre"
   },
   "categories": {
     "types": "Catégories",
@@ -89,7 +97,7 @@
     "regenerate": "Remplacer le lien d'invitation",
     "regenerateHint": "L'ancien lien d'invitation ne fonctionnera plus. Les membres déjà présents ne sont pas affectés.",
     "readPassword": "Protéger l'accès à votre liste",
-    "readPasswordHint": "Sans mot de passe, toute personne disposant du lien peut consulter la liste. Avec un mot de passe, elle devra aussi le saisir pour y accéder.",
+    "readPasswordHint": "Sans mot de passe, toute personne disposant du lien peut consulter la liste. Avec un mot de passe d’au moins 8 caractères, elle devra aussi le saisir.",
     "readPasswordSet": "Votre liste est protégée par un mot de passe. En saisir un nouveau le remplace.",
     "readPasswordUnset": "Cette liste n'est pas protégée par un mot de passe.",
     "readPasswordDefine": "Définir un mot de passe",
@@ -146,16 +154,25 @@
     "add": "Ajouter l'idée",
     "save": "Enregistrer les modifications",
     "delete": "Supprimer l'idée",
-    "close": "Fermer"
+    "close": "Fermer",
+    "fetchInfosAi": "Récupérer avec l’IA",
+    "aiTitle": "Informations proposées par une IA",
+    "aiBody": "Ces champs ont été préremplis à l’aide d’un modèle de langage. Relisez-les avant d’enregistrer.",
+    "aiTokens": "{{count}} tokens utilisés pour cette récupération",
+    "aiCo2": "Environ {{grams}} g de CO₂e — soit l’équivalent d’environ {{beef}} g de viande rouge",
+    "aiDisclaimer": "Ordres de grandeur indicatifs, pas un bilan carbone certifié."
   },
-  "kanban": {
-    "hint": "Ouvrez une idée pour la modifier. Vous pouvez aussi la faire glisser vers une autre catégorie.",
-    "moveAria": "Déplacer « {{name}} »",
+  "accordion": {
+    "hint": "Ouvrez une catégorie pour voir ses idées. Les flèches changent l’ordre des catégories. Le menu déplace une idée.",
+    "moveAria": "Déplacer « {{name}} » vers une catégorie",
+    "moveUp": "Monter « {{name}} »",
+    "moveDown": "Descendre « {{name}} »",
+    "edit": "Modifier",
     "editAria": "Modifier « {{name}} »",
+    "reorderAria": "Réordonner la catégorie « {{name}} »",
     "archive": "Archiver",
     "archiveAria": "Archiver « {{name}} »",
-    "editTitle": "Modifier l'idée cadeau",
-    "emptyTitle": "Aucune idée pour le moment",
-    "emptyBody": "Ajoutez votre première idée avec un lien ou en remplissant le formulaire."
+    "editTitle": "Modifier l’idée cadeau",
+    "emptyCategory": "Aucune idée dans cette catégorie."
   }
 }

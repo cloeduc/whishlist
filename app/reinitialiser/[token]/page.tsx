@@ -1,8 +1,9 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { findValidPasswordReset } from "../../../src/domain/password-reset";
 import { resetPasswordAction } from "../../../src/server/actions";
 import { getDocument } from "../../../src/store/db";
+import { LinkButton } from "@/components/site/link-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +13,14 @@ import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { getTranslations } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return {
+    title: t("reset.metaTitle"),
+    description: t("reset.metaDescription"),
+  };
+}
 
 export default async function ReinitialiserPage({
   params,
@@ -29,7 +38,7 @@ export default async function ReinitialiserPage({
     <main className="mx-auto flex w-full max-w-md flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>{t("reset.title")}</CardTitle>
+          <CardTitle as="h1">{t("reset.title")}</CardTitle>
           <CardDescription>{t("reset.description")}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -60,9 +69,9 @@ export default async function ReinitialiserPage({
           </form>
         </CardContent>
       </Card>
-      <Button variant="link" nativeButton={false} render={<Link href="/mot-de-passe-oublie" />}>
+      <LinkButton href="/mot-de-passe-oublie" variant="link">
         {t("reset.newLink")}
-      </Button>
+      </LinkButton>
     </main>
   );
 }

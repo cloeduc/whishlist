@@ -1,0 +1,19 @@
+{
+  "supportUrl": "https://buy.stripe.com/…",
+  "project": {
+    "fr": {
+      "intro": "Je suis Cloé. Dans ma famille, nous notons nos envies au fil de l’année dans des listes volontairement trop remplies : nos proches trouvent un cadeau qui nous plaît vraiment, et nous gardons la surprise.",
+      "portrait": {
+        "src": "/instance/portrait.png",
+        "alt": "Portrait de Cloé"
+      }
+    },
+    "en": {
+      "intro": "I’m Cloé. In my family, we collect gift ideas throughout the year in deliberately overfilled wish lists: our loved ones can find something we’ll genuinely enjoy, while the surprise stays intact.",
+      "portrait": {
+        "src": "/instance/portrait.png",
+        "alt": "Portrait of Cloé"
+      }
+    }
+  }
+}

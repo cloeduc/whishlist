@@ -16,9 +16,9 @@ Le dépôt git est sur `main`. Le nom de branche ci-dessus est l'identifiant de 
 
 **Primary Dependencies**: Next.js 15 (App Router), React 19, `proper-lockfile`. `tsx` pour lancer `node:test`. Pas de module natif.
 
-**Storage**: `data/seed.json` versionné (modèle d'import uniquement). `data/wishlist.json` ignoré par git, vide au premier lancement. Écriture atomique sous lock.
+**Storage**: `data/seed.json` versionné (fixture de domaine), `data/demo-seed.json` versionné (scénario visuel fictif). `data/wishlist.json` ignoré par git, vide au premier lancement. Écriture atomique sous lock.
 
-**Testing**: `node:test` via `tsx` sur `src/domain` et le store (catalogue, filtres, course de réservation). Parcours navigateur décrits dans [quickstart.md](quickstart.md), pas de Playwright.
+**Testing**: `node:test` via `tsx` sur `src/domain` et le store (catalogue, filtres, course de réservation, validité du seed de démo). Parcours navigateur décrits dans [quickstart.md](quickstart.md). Playwright peut être utilisé pour les captures du guide avec une base générée dans `tmp/`, jamais avec la base de production.
 
 **Target Platform**: Navigateur (téléphone compris). Prod : PlanetHoster N0C, Phusion Passenger, process Node unique.
 
@@ -83,8 +83,11 @@ src/
 ├── domain/                 # filtres, validation, transitions, zéro import Next
 └── store/                  # lock, seed, JSON
 data/
-├── seed.json               # versionné
+├── seed.json               # fixture de domaine versionnée
+├── demo-seed.json          # scénario fictif pour démo/captures
 └── wishlist.json           # gitignoré, runtime
+scripts/
+└── create-demo-data.mjs    # génère une base complète vers un chemin explicite
 tests/
 ├── domain/
 └── store/

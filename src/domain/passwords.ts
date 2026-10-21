@@ -1,4 +1,18 @@
-import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { randomBytes, scrypt as scryptCb, timingSafeEqual } from "node:crypto";
+
+function scryptAsync(
+  password: string,
+  salt: Buffer,
+  keylen: number,
+  options: { N: number; r: number; p: number },
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    scryptCb(password, salt, keylen, options, (error, derived) => {
+      if (error) reject(error);
+      else resolve(derived);
+    });
+  });
+}
 
 const N = 16384;
 const r = 8;
@@ -13,19 +27,19 @@ export function passwordPolicyError(password: string): string | null {
   return null;
 }
 
-export function hashPassword(password: string): string {
+export async function hashPassword(password: string): Promise<string> {
   const salt = randomBytes(16);
-  const hash = scryptSync(password, salt, 32, { N, r, p });
+  const hash = await scryptAsync(password, salt, 32, { N, r, p });
   return `scrypt$${N}$${r}$${p}$${salt.toString("base64")}$${hash.toString("base64")}`;
 }
 
-export function verifyPassword(password: string, stored: string): boolean {
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
   const parts = stored.split("$");
   if (parts.length !== 6 || parts[0] !== "scrypt") return false;
   const [, n, rr, pp, saltB64, hashB64] = parts;
   const salt = Buffer.from(saltB64, "base64");
   const expected = Buffer.from(hashB64, "base64");
-  const actual = scryptSync(password, salt, expected.length, {
+  const actual = await scryptAsync(password, salt, expected.length, {
     N: Number(n),
     r: Number(rr),
     p: Number(pp),

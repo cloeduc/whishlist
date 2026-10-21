@@ -50,7 +50,15 @@
     "deleteArchiveTitle": "Delete permanently?",
     "deleteArchiveBody": "“{{name}}” will be permanently deleted.",
     "deleteArchiveConfirm": "Delete permanently",
-    "deleteArchiveKeep": "Keep"
+    "deleteArchiveKeep": "Keep",
+    "clearPasswordTitle": "Remove the list password?",
+    "clearPasswordBody": "Anyone with the link will be able to view the list again.",
+    "clearPasswordConfirm": "Remove password",
+    "clearPasswordKeep": "Keep password",
+    "removeMemberTitle": "Remove {{name}} from the list?",
+    "removeMemberBody": "They won’t be able to edit the list until you invite them again.",
+    "removeMemberConfirm": "Remove from list",
+    "removeMemberKeep": "Keep this member"
   },
   "categories": {
     "types": "Categories",
@@ -89,7 +97,7 @@
     "regenerate": "Replace invitation link",
     "regenerateHint": "The previous invitation link will stop working. Existing members are not affected.",
     "readPassword": "Protect access to your list",
-    "readPasswordHint": "Without a password, anyone with the link can view the list. With a password, they’ll also need to enter it to access the list.",
+    "readPasswordHint": "Without a password, anyone with the link can view the list. With a password of at least 8 characters, they’ll also need to enter it.",
     "readPasswordSet": "Your list is password-protected. Entering a new one replaces it.",
     "readPasswordUnset": "This list isn’t password-protected.",
     "readPasswordDefine": "Set a password",
@@ -146,16 +154,25 @@
     "add": "Add idea",
     "save": "Save changes",
     "delete": "Delete idea",
-    "close": "Close"
+    "close": "Close",
+    "fetchInfosAi": "Fill with AI",
+    "aiTitle": "Details suggested by AI",
+    "aiBody": "These fields were prefilled using a language model. Review them before saving.",
+    "aiTokens": "{{count}} tokens used for this lookup",
+    "aiCo2": "About {{grams}} g CO₂e — roughly equivalent to {{beef}} g of red meat",
+    "aiDisclaimer": "Indicative orders of magnitude, not a certified carbon footprint."
   },
-  "kanban": {
-    "hint": "Open an idea to edit it. You can also drag it to another category.",
-    "moveAria": "Move “{{name}}”",
+  "accordion": {
+    "hint": "Open a category to see its ideas. The arrows reorder categories. The menu moves an idea.",
+    "moveAria": "Move “{{name}}” to a category",
+    "moveUp": "Move “{{name}}” up",
+    "moveDown": "Move “{{name}}” down",
+    "edit": "Edit",
     "editAria": "Edit “{{name}}”",
+    "reorderAria": "Reorder category “{{name}}”",
     "archive": "Archive",
     "archiveAria": "Archive “{{name}}”",
     "editTitle": "Edit gift idea",
-    "emptyTitle": "No gift ideas yet",
-    "emptyBody": "Add your first idea using a link or by filling in the form."
+    "emptyCategory": "No ideas in this category."
   }
 }

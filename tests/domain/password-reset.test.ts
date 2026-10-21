@@ -8,8 +8,8 @@ import {
 import { authenticate, registerUser } from "../../src/domain/users";
 import { emptyDatabase } from "../../src/domain/types";
 
-test("reset : token, expiration, usage unique, e-mail inconnu silencieux", () => {
-  const registered = registerUser(emptyDatabase(), {
+test("reset : token, expiration, usage unique, e-mail inconnu silencieux", async () => {
+  const registered = await registerUser(emptyDatabase(), {
     email: "ada@example.com",
     password: "ancien-mdp!",
     displayName: "Ada",
@@ -28,25 +28,25 @@ test("reset : token, expiration, usage unique, e-mail inconnu silencieux", () =>
   assert.equal(created.doc.passwordResets.length, 1);
   assert.equal(findValidPasswordReset(created.doc, created.token!, now), true);
 
-  const expired = resetPasswordWithToken(created.doc, {
+  const expired = await resetPasswordWithToken(created.doc, {
     token: created.token!,
     password: "nouveau-mdp",
     now: new Date("2026-10-19T14:00:01.000Z"),
   });
   assert.equal(expired.ok, false);
 
-  const reset = resetPasswordWithToken(created.doc, {
+  const reset = await resetPasswordWithToken(created.doc, {
     token: created.token!,
     password: "nouveau-mdp",
     now,
   });
   assert.equal(reset.ok, true);
   if (!reset.ok) return;
-  assert.equal(authenticate(reset.doc, "ada@example.com", "nouveau-mdp")?.id, reset.userId);
-  assert.equal(authenticate(reset.doc, "ada@example.com", "ancien-mdp!"), null);
+  assert.equal((await authenticate(reset.doc, "ada@example.com", "nouveau-mdp"))?.id, reset.userId);
+  assert.equal(await authenticate(reset.doc, "ada@example.com", "ancien-mdp!"), null);
   assert.equal(reset.doc.passwordResets.length, 0);
 
-  const reuse = resetPasswordWithToken(reset.doc, {
+  const reuse = await resetPasswordWithToken(reset.doc, {
     token: created.token!,
     password: "autre-mdp!!",
     now,

@@ -7,8 +7,8 @@ import { emptyDatabase } from "../../src/domain/types";
 import { registerUser } from "../../src/domain/users";
 import { readDocument, updateDocument } from "../../src/store/db";
 
-test("e-mail unique, casse, nom vide, hash", () => {
-  const first = registerUser(emptyDatabase(), {
+test("e-mail unique, casse, nom vide, hash", async () => {
+  const first = await registerUser(emptyDatabase(), {
     email: " Ada@Example.com ",
     password: "secret-ok!!",
     displayName: "Ada",
@@ -17,19 +17,19 @@ test("e-mail unique, casse, nom vide, hash", () => {
   if (!first.ok) return;
   assert.equal(first.value.email, "ada@example.com");
   assert.notEqual(first.value.passwordHash, "secret-ok!!");
-  const second = registerUser(first.doc, {
+  const second = await registerUser(first.doc, {
     email: "ada@example.com",
     password: "autre-ok!!!",
     displayName: "Ada",
   });
   assert.equal(second.ok, false);
-  const blank = registerUser(emptyDatabase(), {
+  const blank = await registerUser(emptyDatabase(), {
     email: "a@b.c",
     password: "secret-ok!!",
     displayName: "   ",
   });
   assert.equal(blank.ok, false);
-  const short = registerUser(emptyDatabase(), {
+  const short = await registerUser(emptyDatabase(), {
     email: "short@example.com",
     password: "short",
     displayName: "Sam",
@@ -44,12 +44,12 @@ test("deux inscriptions simultanées du même e-mail", async () => {
   try {
     const input = { email: "same@example.com", password: "secret-ok!!", displayName: "Sam" };
     await Promise.all([
-      updateDocument((doc) => {
-        const result = registerUser(doc, input);
+      updateDocument(async (doc) => {
+        const result = await registerUser(doc, input);
         return { doc: result.ok ? result.doc : doc, result };
       }),
-      updateDocument((doc) => {
-        const result = registerUser(doc, input);
+      updateDocument(async (doc) => {
+        const result = await registerUser(doc, input);
         return { doc: result.ok ? result.doc : doc, result };
       }),
     ]);

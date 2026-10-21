@@ -9,13 +9,14 @@ function prefix(wishlistId: string, id: string): string {
 
 export function importTemplate(doc: Database, wishlistId: string, seed: SeedFile): Database {
   const next = clone(doc);
-  for (const type of seed.types) {
+  seed.types.forEach((type, index) => {
     next.types.push({
       id: prefix(wishlistId, type.id),
       wishlistId,
       label: type.label,
+      sortOrder: index,
     });
-  }
+  });
   for (const person of seed.people) {
     next.people.push({
       id: prefix(wishlistId, person.id),

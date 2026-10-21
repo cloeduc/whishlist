@@ -23,7 +23,7 @@ export default async function NewListPage({
     <main className="mx-auto flex w-full max-w-md flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>{t("newList.title")}</CardTitle>
+          <CardTitle as="h1">{t("newList.title")}</CardTitle>
           <CardDescription>{t("newList.description")}</CardDescription>
         </CardHeader>
         <CardContent>

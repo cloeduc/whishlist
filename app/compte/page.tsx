@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { requireUser } from "../../src/auth/guard";
 import { listMyOffers } from "../../src/domain/offrir";
 import { changePasswordAction, updateDisplayNameAction } from "../../src/server/actions";
 import { getDocument } from "../../src/store/db";
+import { LinkButton } from "@/components/site/link-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -138,15 +138,14 @@ export default async function ComptePage({
                   </div>
                   {offer.note ? <p className="text-sm text-pretty">{offer.note}</p> : null}
                   {offer.listReadToken ? (
-                    <Button
+                    <LinkButton
+                      href={`/l/${offer.listReadToken}`}
                       variant="link"
                       size="sm"
                       className="h-auto w-fit px-0"
-                      nativeButton={false}
-                      render={<Link href={`/l/${offer.listReadToken}`} />}
                     >
                       {t("account.openList")}
-                    </Button>
+                    </LinkButton>
                   ) : null}
                 </div>
               ))

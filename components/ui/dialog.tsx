@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { XIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,7 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean;
 }) {
+  const { t } = useTranslation("common");
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -61,7 +63,7 @@ function DialogContent({
             render={<Button variant="ghost" size="icon-sm" className="absolute top-2 right-2" />}
           >
             <XIcon />
-            <span className="sr-only">Fermer</span>
+            <span className="sr-only">{t("actions.close")}</span>
           </DialogPrimitive.Close>
         ) : null}
       </DialogPrimitive.Popup>

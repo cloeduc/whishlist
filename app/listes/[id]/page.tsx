@@ -1,10 +1,11 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { currentUser, origin } from "../../../src/auth/current";
 import { findMembership } from "../../../src/domain/access";
 import { listOffrir } from "../../../src/domain/offrir";
 import { formatPrice } from "../../../src/domain/price";
-import { IdeasKanban } from "@/components/site/ideas-kanban";
+import { IdeasAccordion } from "@/components/site/ideas-accordion";
+import { LinkButton } from "@/components/site/link-button";
+import { llmConfigured } from "@/src/domain/product-llm";
 import { ItemForm } from "@/components/site/item-form";
 import { LabelChips } from "@/components/site/label-chips";
 import {
@@ -51,9 +52,13 @@ function tabHref(listId: string, tab: TabId): string {
   return tab === "idees" ? `/listes/${listId}` : `/listes/${listId}?onglet=${tab}`;
 }
 
-function euros(cents: number | null): string {
+function euros(cents: number | null, locale: string): string {
   if (cents === null) return "";
-  return `${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, "0")}`;
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: false,
+  }).format(cents / 100);
 }
 
 export default async function EditListPage({
@@ -90,7 +95,9 @@ export default async function EditListPage({
   const base = await origin();
   const readUrl = `${base}/l/${list.readToken}`;
   const inviteUrl = `${base}/inviter/${list.inviteToken}`;
-  const types = doc.types.filter((type) => type.wishlistId === id);
+  const types = doc.types
+    .filter((type) => type.wishlistId === id)
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label));
   const people = doc.people.filter((person) => person.wishlistId === id);
   const items = doc.items.filter((item) => item.wishlistId === id).sort((a, b) => a.sortOrder - b.sortOrder);
   const activeItems = items.filter((item) => !item.archived);
@@ -101,7 +108,7 @@ export default async function EditListPage({
   const reservations = listOffrir(doc, id);
   const personLabel = new Map(people.map((person) => [person.id, person.label]));
   const typeLabel = new Map(types.map((type) => [type.id, type.label]));
-  const kanbanItems = activeItems.map((item) => ({
+  const ideaItems = activeItems.map((item) => ({
     id: item.id,
     name: item.name,
     typeId: item.typeId,
@@ -110,12 +117,13 @@ export default async function EditListPage({
     url: item.url,
     imageUrl: item.imageUrl,
     priceLabel: formatPrice(item.priceCents, priceLocale),
-    price: euros(item.priceCents),
+    price: euros(item.priceCents, priceLocale),
     priority: item.priority,
     sortOrder: item.sortOrder,
   }));
   const error = query.e ? await translateError(query.e) : null;
   const theme = resolveTheme(list.theme);
+  const llmEnabled = llmConfigured();
   return (
     <WishlistThemeScope theme={theme}>
     <main className="flex w-full flex-col gap-6">
@@ -124,9 +132,9 @@ export default async function EditListPage({
           <LiveGiftMark className="size-12" />
           <h1 className="text-2xl font-medium tracking-tight">{list.title}</h1>
         </div>
-        <Button variant="outline" size="sm" nativeButton={false} render={<Link href={readUrl} />}>
+        <LinkButton href={readUrl} variant="outline" size="sm">
           {t("viewAsGuest")}
-        </Button>
+        </LinkButton>
       </div>
       {error ? (
         <Alert variant="destructive">
@@ -150,21 +158,19 @@ export default async function EditListPage({
       ) : null}
       <nav aria-label={t("tabs.navLabel")} className="flex flex-wrap gap-2">
         {TAB_IDS.map((entry) => (
-          <Button
+          <LinkButton
             key={entry}
+            href={tabHref(id, entry)}
             size="sm"
             className="h-auto max-w-full whitespace-normal text-left"
             variant={tab === entry ? "default" : "outline"}
-            nativeButton={false}
-            render={
-              <Link href={tabHref(id, entry)} aria-current={tab === entry ? "true" : undefined} />
-            }
+            aria-current={tab === entry ? "true" : undefined}
           >
             {t(`tabs.${entry}`)}
             {entry === "reservations" && reservations.length > 0 ? ` (${reservations.length})` : null}
             {entry === "idees" ? ` (${activeItems.length})` : null}
             {entry === "archives" && archivedItems.length > 0 ? ` (${archivedItems.length})` : null}
-          </Button>
+          </LinkButton>
         ))}
       </nav>
 
@@ -176,17 +182,26 @@ export default async function EditListPage({
               <CardDescription>{t("addIdeaHint")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ItemForm wishlistId={id} types={types} people={people} onglet="idees" />
+              <ItemForm
+                wishlistId={id}
+                types={types}
+                people={people}
+                onglet="idees"
+                llmEnabled={llmEnabled}
+              />
             </CardContent>
           </Card>
-          <div className="relative left-1/2 w-screen -translate-x-1/2 px-4">
-            <IdeasKanban
-              wishlistId={id}
-              types={types.map((type) => ({ id: type.id, label: type.label }))}
-              people={people.map((person) => ({ id: person.id, label: person.label }))}
-              items={kanbanItems}
-            />
-          </div>
+          <IdeasAccordion
+            wishlistId={id}
+            types={types.map((type) => ({
+              id: type.id,
+              label: type.label,
+              sortOrder: type.sortOrder,
+            }))}
+            people={people.map((person) => ({ id: person.id, label: person.label }))}
+            items={ideaItems}
+            llmEnabled={llmEnabled}
+          />
         </div>
       ) : null}
 
@@ -363,47 +378,52 @@ export default async function EditListPage({
               ) : null}
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>{t("share.readPassword")}</CardTitle>
-              <CardDescription>{t("share.readPasswordHint")}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <p className="text-sm font-medium">
-                {hasReadPassword(list) ? t("share.readPasswordSet") : t("share.readPasswordUnset")}
-              </p>
-              <form action={setReadPasswordAction}>
-                <FieldGroup>
-                  <input type="hidden" name="wishlistId" value={id} />
-                  <input type="hidden" name="onglet" value="partage" />
-                  <p className="text-sm font-medium">
-                    {hasReadPassword(list) ? t("share.readPasswordChange") : t("share.readPasswordDefine")}
-                  </p>
-                  <Field>
-                    <FieldLabel htmlFor="read-password">{t("share.readPasswordLabel")}</FieldLabel>
-                    <Input
-                      id="read-password"
-                      name="password"
-                      type="password"
-                      required
-                      minLength={MIN_READ_PASSWORD_LENGTH}
-                      autoComplete="new-password"
-                    />
-                  </Field>
-                  <Button type="submit">{t("share.readPasswordSave")}</Button>
-                </FieldGroup>
-              </form>
-              {hasReadPassword(list) ? (
-                <form action={clearReadPasswordAction}>
-                  <input type="hidden" name="wishlistId" value={id} />
-                  <input type="hidden" name="onglet" value="partage" />
-                  <Button type="submit" variant="outline">
-                    {t("share.readPasswordClear")}
-                  </Button>
+          {membership.role === "owner" ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("share.readPassword")}</CardTitle>
+                <CardDescription>{t("share.readPasswordHint")}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-4">
+                <p className="text-sm font-medium">
+                  {hasReadPassword(list) ? t("share.readPasswordSet") : t("share.readPasswordUnset")}
+                </p>
+                <form action={setReadPasswordAction}>
+                  <FieldGroup>
+                    <input type="hidden" name="wishlistId" value={id} />
+                    <input type="hidden" name="onglet" value="partage" />
+                    <p className="text-sm font-medium">
+                      {hasReadPassword(list) ? t("share.readPasswordChange") : t("share.readPasswordDefine")}
+                    </p>
+                    <Field>
+                      <FieldLabel htmlFor="read-password">{t("share.readPasswordLabel")}</FieldLabel>
+                      <Input
+                        id="read-password"
+                        name="password"
+                        type="password"
+                        required
+                        minLength={MIN_READ_PASSWORD_LENGTH}
+                        autoComplete="new-password"
+                      />
+                    </Field>
+                    <Button type="submit">{t("share.readPasswordSave")}</Button>
+                  </FieldGroup>
                 </form>
-              ) : null}
-            </CardContent>
-          </Card>
+                {hasReadPassword(list) ? (
+                  <ConfirmForm
+                    title={t("confirm.clearPasswordTitle")}
+                    description={t("confirm.clearPasswordBody")}
+                    confirmLabel={t("confirm.clearPasswordConfirm")}
+                    cancelLabel={t("confirm.clearPasswordKeep")}
+                    action={clearReadPasswordAction}
+                    fields={{ wishlistId: id, onglet: "partage" }}
+                    triggerLabel={t("share.readPasswordClear")}
+                    triggerVariant="outline"
+                  />
+                ) : null}
+              </CardContent>
+            </Card>
+          ) : null}
           <Card>
             <CardHeader>
               <CardTitle>{t("share.members")}</CardTitle>
@@ -419,14 +439,19 @@ export default async function EditListPage({
                     </span>
                   </p>
                   {membership.role === "owner" && member.userId !== user.id ? (
-                    <form action={removeMemberAction}>
-                      <input type="hidden" name="wishlistId" value={id} />
-                      <input type="hidden" name="userId" value={member.userId} />
-                      <input type="hidden" name="onglet" value="partage" />
-                      <Button type="submit" variant="outline" size="sm">
-                        {t("share.remove")}
-                      </Button>
-                    </form>
+                    <ConfirmForm
+                      title={t("confirm.removeMemberTitle", {
+                        name: member.user?.displayName ?? t("share.member"),
+                      })}
+                      description={t("confirm.removeMemberBody")}
+                      confirmLabel={t("confirm.removeMemberConfirm")}
+                      cancelLabel={t("confirm.removeMemberKeep")}
+                      action={removeMemberAction}
+                      fields={{ wishlistId: id, userId: member.userId, onglet: "partage" }}
+                      triggerLabel={t("share.remove")}
+                      triggerVariant="outline"
+                      triggerSize="sm"
+                    />
                   ) : null}
                 </div>
               ))}

@@ -2,8 +2,9 @@
 
 import { XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,15 +30,16 @@ export function LabelChips({
   const { t } = useTranslation(["list", "errors", "common"]);
   const router = useRouter();
   const [chips, setChips] = useState(items);
+  const [sourceItems, setSourceItems] = useState(items);
+  if (items !== sourceItems) {
+    setSourceItems(items);
+    setChips(items);
+  }
   const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-
-  useEffect(() => {
-    setChips(items);
-  }, [items]);
 
   function run(op: Parameters<typeof manageLabelAction>[0], onOk?: () => void) {
     setError(null);
@@ -112,11 +114,11 @@ export function LabelChips({
               </button>
               <button
                 type="button"
-                className="inline-flex size-5 items-center justify-center rounded-base hover:bg-background"
+                className="inline-flex size-8 items-center justify-center rounded-base hover:bg-background focus-visible:ring-2 focus-visible:ring-black"
                 aria-label={t("categories.deleteChip", { label: chip.label })}
                 onClick={() => removeChip(chip.id)}
               >
-                <XIcon className="size-3" />
+                <XIcon className="size-4" aria-hidden />
               </button>
             </Badge>
           ),
@@ -152,7 +154,11 @@ export function LabelChips({
           {t("categories.add")}
         </Button>
       </div>
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? (
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
     </div>
   );
 }

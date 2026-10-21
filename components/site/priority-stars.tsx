@@ -23,7 +23,7 @@ export function PriorityStars({
       className={`inline-flex items-center gap-0.5 text-highlight ${className}`}
     >
       {Array.from({ length: n }, (_, i) => (
-        <StarIcon key={i} className="size-3.5 fill-current" aria-hidden />
+        <StarIcon key={i} className="size-3.5 fill-current stroke-foreground" strokeWidth={1.75} aria-hidden />
       ))}
     </span>
   );

@@ -6,6 +6,13 @@
     "cta": "Choose a new password",
     "ignore": "If you didn’t request this, you can ignore this email."
   },
+  "already": {
+    "subject": "This address already has an Oh, You Shouldn't! account",
+    "intro": "Someone tried to create an account with this address. If it was you, log in. Otherwise, ignore this email.",
+    "openLink": "Log in page:",
+    "cta": "Log in",
+    "ignore": "If you didn’t try to sign up, you can ignore this email. Your password has not changed."
+  },
   "invite": {
     "subject": "You’re invited to join a list on Oh, You Shouldn't!",
     "intro": "You’ve been invited to join “{{listTitle}}” and help manage it. Log in or create an account to continue.",

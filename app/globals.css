@@ -26,7 +26,7 @@
   --muted-foreground: oklch(0.4 0 0);
   --accent: var(--gift-yellow);
   --accent-foreground: oklch(0% 0 0);
-  --destructive: var(--gift-red);
+  --destructive: #c41212;
   --border: oklch(0% 0 0);
   --input: oklch(0% 0 0);
   --ring: var(--gift-blue);

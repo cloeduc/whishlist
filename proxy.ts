@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isLocale, localeCookie } from "@/src/i18n/config";
 
-/** `?lang=en|fr` sets the locale cookie then strips the query (shareable list links). */
-export function middleware(request: NextRequest) {
+/** `?lang=en|fr` pose le cookie de langue puis retire la query (liens de liste partageables). */
+export function proxy(request: NextRequest) {
   const lang = request.nextUrl.searchParams.get("lang");
   if (!isLocale(lang)) return NextResponse.next();
 

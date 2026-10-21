@@ -37,10 +37,10 @@ export function createPasswordReset(
   return { ok: true, doc: next, token, email: user.email };
 }
 
-export function resetPasswordWithToken(
+export async function resetPasswordWithToken(
   doc: Database,
   input: { token: string; password: string; now?: Date },
-): { ok: true; doc: Database; userId: string } | { ok: false; error: string } {
+): Promise<{ ok: true; doc: Database; userId: string; sessionVersion: number } | { ok: false; error: string }> {
   const password = input.password;
   const policy = passwordPolicyError(password);
   if (policy) return { ok: false, error: policy };
@@ -56,10 +56,11 @@ export function resetPasswordWithToken(
   const next = clone(doc);
   const user = next.users.find((entry) => entry.id === reset.userId);
   if (!user) return { ok: false, error: "resetLinkInvalid" };
-  user.passwordHash = hashPassword(password);
+  user.passwordHash = await hashPassword(password);
   user.mustChangePassword = false;
+  user.sessionVersion = (user.sessionVersion ?? 0) + 1;
   next.passwordResets = next.passwordResets.filter((entry) => entry.userId !== user.id);
-  return { ok: true, doc: next, userId: user.id };
+  return { ok: true, doc: next, userId: user.id, sessionVersion: user.sessionVersion };
 }
 
 export function findValidPasswordReset(

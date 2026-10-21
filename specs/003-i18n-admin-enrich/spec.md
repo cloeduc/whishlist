@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-20
 
-**Status**: Implemented
+**Status**: Implemented — complété par les pages publiques de présentation et le scénario de démonstration.
 
 **Input**: Évolutions post-socle — internationalisation, réglages (catégories / qui), conservation du formulaire, enrichissement produit IA, auth mail, déploiement documenté.
 
@@ -61,18 +61,32 @@ L’onglet **Réglages** regroupe la gestion des catégories, des personnes (« 
 
 Un opérateur déploie via Docker + `deploy/compose.prod.yml` en suivant le README (env, volume data, smoke HTTP 200). Licence MIT.
 
+### User Story 7 - Comprendre et prendre en main le projet (Priority: P2)
+
+Un visiteur peut lire l'origine du projet, consulter la FAQ, suivre un guide utilisateur et accéder aux mentions légales, en français ou en anglais.
+
+**Acceptance Scenarios**:
+
+1. **Given** la locale FR ou EN, **When** on ouvre `/projet`, `/faq`, `/guide` ou `/mentions-legales`, **Then** la page et ses métadonnées utilisent cette locale.
+2. **Given** n'importe quelle page, **When** on atteint le pied de page, **Then** ces quatre pages sont accessibles.
+3. **Given** le guide, **When** une capture d'écran est ajoutée, **Then** elle provient d'une base fictive générée hors `data/wishlist.json`.
+4. **Given** la page projet, **When** elle présente le service, **Then** elle explique la pratique familiale de la liste sur-alimentée sans promettre une surprise ou une confidentialité absolue.
+
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
 - **FR-001**: Locales supportées MUST être `fr` (défaut) et `en`, persistées (cookie `NEXT_LOCALE`).
-- **FR-002**: Les chaînes UI et erreurs exposées MUST passer par i18next (namespaces `common`, `auth`, `home`, `list`, `public`, `errors`, `mail`).
+- **FR-002**: Les chaînes UI et erreurs exposées MUST passer par i18next (namespaces `common`, `auth`, `home`, `list`, `public`, `errors`, `mail`, `content`).
 - **FR-003**: Le domaine MUST renvoyer des codes d’erreur stables ; la couche présentation les traduit.
 - **FR-004**: Réglages MUST permettre d’ajouter / renommer / retirer catégories et « qui » (retrait bloqué si utilisés).
 - **FR-005**: Partage MUST exposer « Quitter la liste » ; Réglages MUST exposer « Supprimer la liste » (owner).
 - **FR-006**: `saveItemAction` MUST conserver le draft côté client en cas d’échec.
 - **FR-007**: L’enrichissement URL MUST être optionnel (clés API) et choisir un `typeId` de la liste quand l’IA est disponible.
 - **FR-008**: Une lecture JSON / requête RSC MUST être dédupliquée (`getDocument` / `cache`) ; i18n MUST être réutilisé par locale (pas de re-init à chaque `t()`).
+- **FR-009**: Les pages `/projet`, `/faq`, `/guide` et `/mentions-legales` MUST être publiques, bilingues et reliées depuis le pied de page.
+- **FR-010**: Une fixture de démonstration MUST utiliser uniquement des personnes, comptes, liens et cadeaux fictifs ; sa génération MUST exiger un chemin de sortie explicite.
+- **FR-011**: Les captures du guide MUST utiliser cette fixture et MUST NOT lire ou modifier la base de production.
 
 ### Key Entities
 

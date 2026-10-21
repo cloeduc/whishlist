@@ -2,7 +2,7 @@
 
 Listes de cadeaux partagées (`ohyoushouldnt.app`) : lecture publique sans compte, édition à plusieurs avec compte, réservations anonymes (« J’offre »), catégories / « qui », archives, i18n FR/EN, enrichissement produit depuis une URL (Gemini / OpenAI).
 
-Stack : **Next.js 15** (App Router) · **React 19** · stock JSON fichier · Docker standalone.
+Stack : **Next.js 16** (App Router) · **React 19** · stock JSON fichier · Docker standalone.
 
 ---
 
@@ -39,6 +39,26 @@ npm run build     # build prod local
 
 Données locales : `data/wishlist.json` (créé au premier lancement).
 
+### Base de démonstration
+
+Pour tester les parcours ou produire des captures sans utiliser de données réelles :
+
+```bash
+npm run demo:data -- tmp/demo-wishlist.json
+WISHLIST_DATA_PATH=tmp/demo-wishlist.json npm run dev
+```
+
+Comptes fictifs : `alex@example.test` et `camille@example.test`.
+`DEMO_PASSWORD` est obligatoire (10 caractères minimum) pour `demo:data` et `demo:capture`.
+
+Captures du guide (FR + EN) :
+
+```bash
+DEMO_BASE_URL=http://localhost:3010 npm run demo:capture
+```
+
+Les PNG sont écrits dans `public/guide/fr` et `public/guide/en`.
+
 ---
 
 ## Variables d’environnement
@@ -49,6 +69,7 @@ Données locales : `data/wishlist.json` (créé au premier lancement).
 | `APP_ORIGIN` | prod | URL publique (`https://ohyoushouldnt.app`) pour mails / liens de partage |
 | `SUPPORT_URL` | non | Payment Link Stripe (« Soutenir le projet ») |
 | `WISHLIST_DATA_PATH` | non | Chemin du JSON (défaut `data/wishlist.json`) |
+| `INSTANCE_CONTENT_PATH` | non | JSON privé personnalisant la page projet |
 | `RESEND_API_KEY` | non | Envoi d’e-mails |
 | `MAIL_FROM` | non | Expéditeur Resend, ex. `Oh, You Shouldn't! <noreply@domaine.fr>` |
 | `PASSWORD_RESET_SHOW_LINK` | non | `1` = affiche le lien reset dans l’UI si mail KO (dev) |
@@ -143,6 +164,18 @@ Détails Runtipi + Cloudflare : [`deploy/DEPLOY-RUNTIPI.md`](deploy/DEPLOY-RUNTI
 5. Langue : bouton **FR / EN** dans le header (`?lang=en` force l’anglais)
 
 Sans Resend : les liens de reset MDP partent dans `data/password-reset.log` (ou le volume `/data`).
+
+---
+
+## Personnaliser une instance sans modifier le dépôt
+
+Copie `data/instance-content.example.json` vers `data/instance-content.json`, puis
+adapte le récit FR/EN et le lien Stripe (supportUrl). Place éventuellement le portrait dans
+`public/instance/portrait.png`.
+
+Ces deux chemins sont ignorés par Git. Sans eux, la page `/projet` affiche le
+contenu générique du dépôt. `INSTANCE_CONTENT_PATH` permet de placer le JSON
+ailleurs en production.
 
 ---
 

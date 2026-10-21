@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { currentUser } from "../../../../src/auth/current";
 import { canAccessPublicList } from "../../../../src/auth/public-list";
 import { getDocument } from "../../../../src/store/db";
+import { LinkButton } from "@/components/site/link-button";
 import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { getTranslations } from "@/src/i18n/server";
 
@@ -35,14 +34,16 @@ export default async function TypesPage({ params }: { params: Promise<{ readToke
       />
     );
   }
-  const types = doc.types.filter((type) => type.wishlistId === list.id);
+  const types = doc.types
+    .filter((type) => type.wishlistId === list.id)
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label));
   return (
     <main className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-medium tracking-tight">{t("typesPage.title")}</h1>
-        <Button variant="link" className="h-auto w-fit px-0" nativeButton={false} render={<Link href={`/l/${readToken}`} />}>
+        <LinkButton href={`/l/${readToken}`} variant="link" className="h-auto w-fit px-0">
           {t("typesPage.back")}
-        </Button>
+        </LinkButton>
       </div>
       {types.length === 0 ? (
         <Empty>

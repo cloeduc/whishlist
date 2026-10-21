@@ -5,6 +5,7 @@
     "description": "Create a wish list and share it with friends and family. They can reserve a gift without creating an account."
   },
   "nav": {
+    "skip": "Skip to content",
     "menuAria": "Main navigation",
     "homeAria": "Oh, You Shouldn't! — Home",
     "myLists": "My wish lists",
@@ -18,7 +19,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "close": "Close"
   },
   "locale": {
     "groupAria": "Language",
@@ -26,8 +28,19 @@
     "en": "EN"
   },
   "footer": {
-    "tagline": "Oh, You Shouldn't! is a free, vibe-coded, self-hostable project.",
+    "info": "Information",
+    "tagline": "Oh, You Shouldn't! is a free, self-hostable project.",
     "github": "View the code on GitHub",
-    "support": "Support Oh, You Shouldn't!"
+    "support": "Support the project"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "This link doesn’t go anywhere.",
+    "home": "Back to home"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "Reload the page. If it keeps happening, try again in a moment.",
+    "retry": "Try again"
   }
 }

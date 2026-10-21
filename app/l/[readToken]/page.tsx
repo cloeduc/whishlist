@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { currentUser } from "../../../src/auth/current";
 import { canAccessPublicList } from "../../../src/auth/public-list";
 import { listClaimedReservationIds } from "../../../src/auth/reservation-claim";
@@ -19,11 +18,11 @@ import {
 } from "../../../src/domain/read";
 import { resolveTheme, themeToCssVars } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
+import { LinkButton } from "@/components/site/link-button";
 import { PublicItemCard } from "@/components/site/public-item-card";
 import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { WishlistCover } from "@/components/site/wishlist-cover";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { intlLocale } from "@/src/i18n/config";
 import { getLocale, getTranslations } from "@/src/i18n/server";
@@ -97,14 +96,10 @@ export default async function ReadPage({
   const priceLocale = intlLocale(locale);
   const visible = listPublicVisibleItems(doc, list.id, mineIds);
   const filtered = sortByPriority(applyBudget(applyPerson(visible, qui), budget));
-  const groups = groupByCategory(
-    filtered,
-    types,
-  ).map((group) => ({
+  const groups = groupByCategory(filtered, types).map((group) => ({
     ...group,
     publicItems: group.items.map((item) => toPublicItem(doc, item, priceLocale, mineIds)),
   }));
-  groups.sort((a, b) => a.label.localeCompare(b.label, locale));
   const allLabel = t("allList");
   const personLabel = people.find((person) => person.id === qui)?.label;
   const budgetLabel = budget ? t(`budgets.${budget}`) : null;
@@ -128,92 +123,79 @@ export default async function ReadPage({
         </div>
       </div>
       <nav aria-label={t("categoriesNav")} className="flex flex-wrap gap-2">
-        <Button
+        <LinkButton
+          href={listHref(readToken, qui, budget)}
           size="sm"
           className="h-auto max-w-full whitespace-normal text-left"
           variant="default"
-          nativeButton={false}
-          render={<Link href={listHref(readToken, qui, budget)} aria-current="true" />}
+          aria-current="true"
         >
           {allLabel}
-        </Button>
+        </LinkButton>
         {groups.map((group) => (
-          <Button
+          <LinkButton
             key={group.typeId}
+            href={listHref(readToken, qui, budget, categoryAnchorId(group.typeId))}
             size="sm"
             className="h-auto max-w-full whitespace-normal text-left"
             variant="outline"
-            nativeButton={false}
-            render={<Link href={listHref(readToken, qui, budget, categoryAnchorId(group.typeId))} />}
           >
             {group.label}
-          </Button>
+          </LinkButton>
         ))}
       </nav>
       {people.length > 0 ? (
         <nav aria-label={t("whoNav")} className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">{t("who")}</span>
-          <Button
+          <LinkButton
+            href={listHref(readToken, null, budget)}
             size="sm"
             className="h-auto max-w-full whitespace-normal text-left"
             variant={qui === null ? "default" : "outline"}
-            nativeButton={false}
-            render={<Link href={listHref(readToken, null, budget)} aria-current={qui === null ? "true" : undefined} />}
+            aria-current={qui === null ? "true" : undefined}
           >
             {t("everyone")}
-          </Button>
+          </LinkButton>
           {people.map((person) => (
-            <Button
+            <LinkButton
               key={person.id}
+              href={listHref(readToken, person.id, budget)}
               size="sm"
               className="h-auto max-w-full whitespace-normal text-left"
               variant={qui === person.id ? "default" : "outline"}
-              nativeButton={false}
-              render={
-                <Link
-                  href={listHref(readToken, person.id, budget)}
-                  aria-current={qui === person.id ? "true" : undefined}
-                />
-              }
+              aria-current={qui === person.id ? "true" : undefined}
             >
               {person.label}
-            </Button>
+            </LinkButton>
           ))}
         </nav>
       ) : null}
       <nav aria-label={t("budgetNav")} className="flex flex-wrap items-center gap-2">
         <span className="text-sm text-muted-foreground">{t("budget")}</span>
-        <Button
+        <LinkButton
+          href={listHref(readToken, qui, null)}
           size="sm"
           className="h-auto max-w-full whitespace-normal text-left"
           variant={budget === null ? "default" : "outline"}
-          nativeButton={false}
-          render={<Link href={listHref(readToken, qui, null)} aria-current={budget === null ? "true" : undefined} />}
+          aria-current={budget === null ? "true" : undefined}
         >
           {t("allPrices")}
-        </Button>
+        </LinkButton>
         {BUDGETS.map((entry) => (
-          <Button
+          <LinkButton
             key={entry.id}
+            href={listHref(readToken, qui, entry.id)}
             size="sm"
             className="h-auto max-w-full whitespace-normal text-left"
             variant={budget === entry.id ? "default" : "outline"}
-            nativeButton={false}
-            render={
-              <Link
-                href={listHref(readToken, qui, entry.id)}
-                aria-current={budget === entry.id ? "true" : undefined}
-              />
-            }
+            aria-current={budget === entry.id ? "true" : undefined}
           >
             {t(`budgets.${entry.id}`)}
-          </Button>
+          </LinkButton>
         ))}
       </nav>
       <div className="flex flex-wrap gap-2">
-        <Button nativeButton={false} render={<Link href={`/l/${readToken}/reserver`} />}>
-          {t("reserveIdea")}
-        </Button>
+        <LinkButton href={`/l/${readToken}/reserver`}>{t("reserveIdea")}</LinkButton>
       </div>
       {query.ok ? (
         <Alert>

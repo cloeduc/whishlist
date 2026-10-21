@@ -5,6 +5,7 @@
     "description": "Créez une liste de cadeaux et partagez-la avec vos proches. Ils peuvent réserver une idée sans créer de compte."
   },
   "nav": {
+    "skip": "Aller au contenu",
     "menuAria": "Navigation principale",
     "homeAria": "Oh, mais fallait pas ! — Accueil",
     "myLists": "Mes listes",
@@ -18,7 +19,8 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "delete": "Supprimer",
-    "loading": "Chargement…"
+    "loading": "Chargement…",
+    "close": "Fermer"
   },
   "locale": {
     "groupAria": "Langue",
@@ -26,8 +28,19 @@
     "en": "EN"
   },
   "footer": {
-    "tagline": "Oh, mais fallait pas ! est un projet libre, vibe codé, et auto-hébergeable.",
+    "info": "Informations",
+    "tagline": "Oh, mais fallait pas ! est un projet libre et auto-hébergeable.",
     "github": "Voir le code sur GitHub",
-    "support": "Soutenir Oh, mais fallait pas !"
+    "support": "Soutenir le projet"
+  },
+  "notFound": {
+    "title": "Page introuvable",
+    "body": "Ce lien ne mène nulle part.",
+    "home": "Retour à l’accueil"
+  },
+  "error": {
+    "title": "Quelque chose s’est mal passé",
+    "body": "Rechargez la page. Si ça continue, réessayez dans un moment.",
+    "retry": "Réessayer"
   }
 }

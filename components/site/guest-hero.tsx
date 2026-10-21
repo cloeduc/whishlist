@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { GiftMark } from "@/components/site/gift-mark";
-import { Button } from "@/components/ui/button";
+import { LinkButton } from "@/components/site/link-button";
 
 /** Landing hors session : brand + pitch + CTA, ambiance cadeau néo-brutale. */
 export function GuestHero({
@@ -37,12 +36,12 @@ export function GuestHero({
         </div>
         <div className="guest-hero__cta flex flex-col items-start gap-2">
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" nativeButton={false} render={<Link href="/inscription" />}>
+            <LinkButton href="/inscription" size="lg">
               {createAccount}
-            </Button>
-            <Button size="lg" variant="outline" nativeButton={false} render={<Link href="/connexion" />}>
+            </LinkButton>
+            <LinkButton href="/connexion" size="lg" variant="outline">
               {hasAccount}
-            </Button>
+            </LinkButton>
           </div>
           <p className="text-sm text-muted-foreground">{createHint}</p>
         </div>

@@ -92,16 +92,17 @@ test("tri par priorité dans une vue filtrée", () => {
   }
 });
 
-test("groupement par catégorie alphabétique", () => {
+test("groupement par catégorie selon sortOrder", () => {
   const data = doc();
   const items = sortByPriority(applyView(data, "w", null));
   const types = data.types.filter((type) => type.wishlistId === "w");
   const groups = groupByCategory(items, types);
   const labels = groups.map((group) => group.label);
-  assert.deepEqual(
-    labels,
-    [...labels].sort((a, b) => a.localeCompare(b, "fr")),
-  );
+  const orderedLabels = [...types]
+    .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label, "fr"))
+    .map((type) => type.label)
+    .filter((label) => labels.includes(label));
+  assert.deepEqual(labels, orderedLabels);
   assert.ok(labels.includes("Maison"));
   assert.ok(labels.includes("Cuisine"));
   const maison = groups.find((group) => group.label === "Maison");

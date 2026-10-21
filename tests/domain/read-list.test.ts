@@ -18,7 +18,7 @@ function sample(): Database {
     fromTemplate: false,
     createdAt: "2026-01-01T00:00:00.000Z",
   });
-  doc.types.push({ id: "t", wishlistId: "w", label: "Jeux" });
+  doc.types.push({ id: "t", wishlistId: "w", label: "Jeux", sortOrder: 0 });
   doc.people.push({ id: "p", wishlistId: "w", label: "Couple" });
   doc.items.push(
     {

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  contrastRatio,
   DEFAULT_WISHLIST_THEME,
   parseThemeForm,
   resolveTheme,
@@ -32,6 +33,15 @@ test("parseThemeForm valide ou rejette", () => {
 test("themeToCssVars mappe les tokens", () => {
   const vars = themeToCssVars(DEFAULT_WISHLIST_THEME);
   assert.equal(vars["--main"], DEFAULT_WISHLIST_THEME.primary);
-  assert.equal(vars["--destructive"], DEFAULT_WISHLIST_THEME.accent);
+  assert.equal(vars["--gift-red"], DEFAULT_WISHLIST_THEME.accent);
+  assert.ok(contrastRatio("#ffffff", vars["--destructive"]!) >= 4.5);
   assert.equal(vars["--highlight"], DEFAULT_WISHLIST_THEME.highlight);
+});
+
+test("parseThemeForm refuse un bouton ou un fond illisible", () => {
+  const bright = parseThemeForm({ primary: "#ffff00" });
+  assert.equal(bright.ok, false);
+  if (!bright.ok) assert.equal(bright.error, "themeContrast");
+  const dark = parseThemeForm({ background: "#111111" });
+  assert.equal(dark.ok, false);
 });

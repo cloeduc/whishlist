@@ -1,0 +1,149 @@
+{
+  "types": [
+    { "id": "livres", "label": "Livres" },
+    { "id": "maison", "label": "Maison" },
+    { "id": "loisirs", "label": "Loisirs" },
+    { "id": "gourmand", "label": "Gourmand" }
+  ],
+  "people": [
+    { "id": "alex", "label": "Alex" },
+    { "id": "camille", "label": "Camille" },
+    { "id": "nous", "label": "Nous deux" }
+  ],
+  "views": [
+    {
+      "id": "all",
+      "label": "Toutes les idées",
+      "kind": "all",
+      "typeIds": [],
+      "personId": null,
+      "pinned": true
+    },
+    {
+      "id": "alex",
+      "label": "Alex",
+      "kind": "person",
+      "typeIds": [],
+      "personId": "alex",
+      "pinned": false
+    },
+    {
+      "id": "camille",
+      "label": "Camille",
+      "kind": "person",
+      "typeIds": [],
+      "personId": "camille",
+      "pinned": false
+    },
+    {
+      "id": "nous",
+      "label": "Nous deux",
+      "kind": "person",
+      "typeIds": [],
+      "personId": "nous",
+      "pinned": false
+    }
+  ],
+  "items": [
+    {
+      "id": "roman",
+      "name": "Un beau roman à découvrir",
+      "typeId": "livres",
+      "personId": "alex",
+      "url": "https://example.com/roman",
+      "imageUrl": null,
+      "priceCents": 2400,
+      "priority": "4",
+      "sortOrder": 1
+    },
+    {
+      "id": "carnet",
+      "name": "Carnet relié pour les idées",
+      "typeId": "livres",
+      "personId": "camille",
+      "url": "https://example.com/carnet",
+      "imageUrl": null,
+      "priceCents": 1850,
+      "priority": "3",
+      "sortOrder": 2
+    },
+    {
+      "id": "lampe",
+      "name": "Lampe de lecture",
+      "typeId": "maison",
+      "personId": "alex",
+      "url": "https://example.com/lampe",
+      "imageUrl": null,
+      "priceCents": 4900,
+      "priority": "5",
+      "sortOrder": 3
+    },
+    {
+      "id": "plaid",
+      "name": "Plaid tout doux",
+      "typeId": "maison",
+      "personId": "nous",
+      "url": "https://example.com/plaid",
+      "imageUrl": null,
+      "priceCents": 6900,
+      "priority": "4",
+      "sortOrder": 4
+    },
+    {
+      "id": "atelier",
+      "name": "Atelier de céramique à deux",
+      "typeId": "loisirs",
+      "personId": "nous",
+      "url": "https://example.com/atelier",
+      "imageUrl": null,
+      "priceCents": 11000,
+      "priority": "5",
+      "sortOrder": 5
+    },
+    {
+      "id": "jeu",
+      "name": "Jeu de société coopératif",
+      "typeId": "loisirs",
+      "personId": "camille",
+      "url": "https://example.com/jeu",
+      "imageUrl": null,
+      "priceCents": 3600,
+      "priority": "4",
+      "sortOrder": 6
+    },
+    {
+      "id": "chocolat",
+      "name": "Assortiment de chocolats",
+      "typeId": "gourmand",
+      "personId": "alex",
+      "url": "https://example.com/chocolat",
+      "imageUrl": null,
+      "priceCents": 2800,
+      "priority": "3",
+      "sortOrder": 7
+    },
+    {
+      "id": "brunch",
+      "name": "Brunch du dimanche",
+      "typeId": "gourmand",
+      "personId": "nous",
+      "url": null,
+      "imageUrl": null,
+      "priceCents": null,
+      "priority": null,
+      "sortOrder": 8
+    },
+    {
+      "id": "archive",
+      "name": "Ancienne idée déjà remplacée",
+      "typeId": "maison",
+      "personId": "camille",
+      "url": null,
+      "imageUrl": null,
+      "priceCents": null,
+      "priority": "1",
+      "sortOrder": 9,
+      "archived": true
+    }
+  ]
+}

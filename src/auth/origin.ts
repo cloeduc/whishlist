@@ -15,8 +15,15 @@ export function normalizeAppOrigin(raw: string): string | null {
   }
 }
 
-export function originFromEnv(env: NodeJS.ProcessEnv = process.env): string | null {
-  const raw = env.APP_ORIGIN ?? env.WHISHLIST_APP_ORIGIN;
+export function originFromEnv(env?: {
+  APP_ORIGIN?: string;
+  WHISHLIST_APP_ORIGIN?: string;
+}): string | null {
+  const source = env ?? {
+    APP_ORIGIN: process.env.APP_ORIGIN,
+    WHISHLIST_APP_ORIGIN: process.env.WHISHLIST_APP_ORIGIN,
+  };
+  const raw = source.APP_ORIGIN ?? source.WHISHLIST_APP_ORIGIN;
   if (!raw) return null;
   return normalizeAppOrigin(raw);
 }

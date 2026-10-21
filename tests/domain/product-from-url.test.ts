@@ -27,6 +27,20 @@ test("fallback og:title et product:price:amount", () => {
   assert.equal(hints.imageUrl, "https://cdn.example.com/lampe.jpg");
 });
 
+test("décode les entités HTML et lit un prix € visible", () => {
+  const html = `
+    <title>D&eacute;bardeur en laine m&eacute;rinos - Boutique</title>
+    <meta property="og:image" content="https://shop.example.com/logo-big.webp" />
+    <img src="https://shop.example.com/back/img_upload/product.jpg" />
+    <p class="price">71,30 €</p>
+    <button>Ajouter au panier</button>
+  `;
+  const hints = extractProductHints(html, "https://shop.example.com/p/1");
+  assert.equal(hints.name, "Débardeur en laine mérinos - Boutique");
+  assert.equal(hints.price, "71.30");
+  assert.equal(hints.imageUrl, "https://shop.example.com/back/img_upload/product.jpg");
+});
+
 test("resolveTypeId mappe un label (casse ignorée)", () => {
   const types = [
     { id: "t1", label: "Cuisine" },

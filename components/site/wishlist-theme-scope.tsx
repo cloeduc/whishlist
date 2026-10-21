@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type CSSProperties,
@@ -40,10 +39,11 @@ export function WishlistThemeScope({
   children: ReactNode;
 }) {
   const [theme, setThemeState] = useState(() => resolveTheme(initialTheme));
-
-  useEffect(() => {
+  const [sourceTheme, setSourceTheme] = useState(initialTheme);
+  if (initialTheme !== sourceTheme) {
+    setSourceTheme(initialTheme);
     setThemeState(resolveTheme(initialTheme));
-  }, [initialTheme]);
+  }
 
   const setTheme = useCallback((next: WishlistTheme) => {
     setThemeState(resolveTheme(next));

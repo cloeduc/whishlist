@@ -1,4 +1,5 @@
 import { stripHtmlForLlm } from "./fetch-page";
+import { emptyUsage, type LlmUsage } from "./llm-impact";
 import { mergeHints, resolveTypeId, type ProductHints } from "./product-from-url";
 
 function parseJsonObject(text: string): Record<string, unknown> | null {
@@ -68,8 +69,10 @@ Réponds UNIQUEMENT en JSON compact avec exactement ces clés:
 Si une info est introuvable, mets null.`;
 }
 
-async function callGemini(apiKey: string, prompt: string): Promise<Record<string, unknown> | null> {
-  const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+type LlmCallResult = { json: Record<string, unknown> | null; usage: LlmUsage };
+
+async function callGemini(apiKey: string, prompt: string): Promise<LlmCallResult> {
+  const model = process.env.GEMINI_MODEL?.trim() || "gemini-3.8-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(apiKey)}`;
   const response = await fetch(url, {
     method: "POST",
@@ -82,15 +85,26 @@ async function callGemini(apiKey: string, prompt: string): Promise<Record<string
       },
     }),
   });
-  if (!response.ok) return null;
+  if (!response.ok) return { json: null, usage: emptyUsage() };
   const data = (await response.json()) as {
     candidates?: { content?: { parts?: { text?: string }[] } }[];
+    usageMetadata?: {
+      promptTokenCount?: number;
+      candidatesTokenCount?: number;
+      totalTokenCount?: number;
+    };
   };
   const text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
-  return parseJsonObject(text);
+  const promptTokens = data.usageMetadata?.promptTokenCount ?? 0;
+  const completionTokens = data.usageMetadata?.candidatesTokenCount ?? 0;
+  const totalTokens = data.usageMetadata?.totalTokenCount ?? promptTokens + completionTokens;
+  return {
+    json: parseJsonObject(text),
+    usage: { promptTokens, completionTokens, totalTokens },
+  };
 }
 
-async function callOpenAi(apiKey: string, prompt: string): Promise<Record<string, unknown> | null> {
+async function callOpenAi(apiKey: string, prompt: string): Promise<LlmCallResult> {
   const model = process.env.OPENAI_MODEL?.trim() || "gpt-4o-mini";
   const response = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -108,12 +122,19 @@ async function callOpenAi(apiKey: string, prompt: string): Promise<Record<string
       ],
     }),
   });
-  if (!response.ok) return null;
+  if (!response.ok) return { json: null, usage: emptyUsage() };
   const data = (await response.json()) as {
     choices?: { message?: { content?: string } }[];
+    usage?: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
   };
   const text = data.choices?.[0]?.message?.content ?? "";
-  return parseJsonObject(text);
+  const promptTokens = data.usage?.prompt_tokens ?? 0;
+  const completionTokens = data.usage?.completion_tokens ?? 0;
+  const totalTokens = data.usage?.total_tokens ?? promptTokens + completionTokens;
+  return {
+    json: parseJsonObject(text),
+    usage: { promptTokens, completionTokens, totalTokens },
+  };
 }
 
 export function llmConfigured(): boolean {
@@ -125,16 +146,19 @@ export async function refineProductWithLlm(
   html: string,
   hints: ProductHints,
   types: { id: string; label: string }[] = [],
-): Promise<ProductHints> {
+): Promise<{ hints: ProductHints; usage: LlmUsage }> {
   const gemini = process.env.GEMINI_API_KEY?.trim();
   const openai = process.env.OPENAI_API_KEY?.trim();
-  if (!gemini && !openai) return hints;
+  if (!gemini && !openai) return { hints, usage: emptyUsage() };
   const prompt = buildPrompt(pageUrl, html, hints, types);
   try {
-    const raw = gemini ? await callGemini(gemini, prompt) : await callOpenAi(openai!, prompt);
-    if (!raw) return hints;
-    return mergeHints(hints, hintsFromLlmJson(raw, types));
+    const result = gemini ? await callGemini(gemini, prompt) : await callOpenAi(openai!, prompt);
+    if (!result.json) return { hints, usage: result.usage };
+    return {
+      hints: mergeHints(hints, hintsFromLlmJson(result.json, types)),
+      usage: result.usage,
+    };
   } catch {
-    return hints;
+    return { hints, usage: emptyUsage() };
   }
 }

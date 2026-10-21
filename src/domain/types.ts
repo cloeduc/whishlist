@@ -13,6 +13,8 @@ export interface User {
   createdAt: string;
   /** Si true, la session est redirigée vers le changement de mot de passe. */
   mustChangePassword: boolean;
+  /** Incrémenté à chaque changement de mot de passe. Les jetons plus anciens sont refusés. */
+  sessionVersion?: number;
 }
 
 export interface Wishlist {
@@ -43,6 +45,8 @@ export interface WishType {
   id: string;
   wishlistId: string;
   label: string;
+  /** Ordre d’affichage des catégories (accordéon). */
+  sortOrder: number;
 }
 
 export interface Person {

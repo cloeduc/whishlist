@@ -11,6 +11,7 @@ data/wishlist.json
 data/password-reset.log
 data/mail.log
 data/*.tmp
+data/instance-content.json
 data-prod/
 *.tmp
 *.swp
@@ -28,6 +29,7 @@ skills-lock.json
 tsconfig.tsbuildinfo
 
 tmp/
+public/instance/
 
 # Notes locales (ne pas versionner)
 Audit_wording_*.md

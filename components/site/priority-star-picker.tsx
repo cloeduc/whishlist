@@ -50,7 +50,11 @@ export function PriorityStarPicker({
             onBlur={() => setHover(0)}
             onClick={() => onChange(selected === n ? "" : String(n))}
           >
-            <StarIcon className={cn("size-5", filled && "fill-current")} aria-hidden />
+            <StarIcon
+              className={cn("size-5", filled && "fill-current stroke-foreground")}
+              strokeWidth={filled ? 1.75 : 1.5}
+              aria-hidden
+            />
           </button>
         );
       })}

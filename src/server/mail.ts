@@ -62,6 +62,27 @@ export async function sendPasswordResetMail(input: {
   });
 }
 
+export async function sendAlreadyRegisteredMail(input: {
+  to: string;
+  loginUrl: string;
+}): Promise<{ sent: boolean }> {
+  const t = await getTranslations("mail");
+  const subject = t("already.subject");
+  const text = [t("already.intro"), "", t("already.openLink"), input.loginUrl, "", t("already.ignore")].join(
+    "\n",
+  );
+  const html = `<p>${escapeHtml(t("already.intro"))}</p>
+<p><a href="${input.loginUrl}">${escapeHtml(t("already.cta"))}</a></p>
+<p>${escapeHtml(t("already.ignore"))}</p>`;
+  return sendMail({
+    to: input.to,
+    subject,
+    text,
+    html,
+    logTag: "register-existing",
+  });
+}
+
 export async function sendInviteMail(input: {
   to: string;
   inviteUrl: string;

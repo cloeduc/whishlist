@@ -11,10 +11,13 @@ export const currentUser = cache(async (): Promise<User | null> => {
   const jar = await cookies();
   const token = jar.get(SESSION_COOKIE)?.value;
   if (!token) return null;
-  const userId = readSession(token, secret);
-  if (!userId) return null;
+  const claims = readSession(token, secret);
+  if (!claims) return null;
   const doc = await getDocument();
-  return doc.users.find((user) => user.id === userId) ?? null;
+  const user = doc.users.find((entry) => entry.id === claims.userId) ?? null;
+  if (!user) return null;
+  if ((user.sessionVersion ?? 0) !== claims.sessionVersion) return null;
+  return user;
 });
 
 /** Base URL publique. Prod : `APP_ORIGIN` (évite Host-header poisoning sur reset/invite). */

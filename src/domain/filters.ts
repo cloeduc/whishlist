@@ -32,12 +32,12 @@ export interface CategoryGroup {
   items: Item[];
 }
 
-/** Groupes par type, libellés en ordre alphabétique (fr). */
+/** Groupes par type, dans l’ordre des catégories (sortOrder) puis libellé. */
 export function groupByCategory(
   items: Item[],
-  types: { id: string; label: string }[],
+  types: { id: string; label: string; sortOrder?: number }[],
 ): CategoryGroup[] {
-  const labelById = new Map(types.map((type) => [type.id, type.label]));
+  const typeById = new Map(types.map((type) => [type.id, type]));
   const groups = new Map<string, Item[]>();
   for (const item of items) {
     const bucket = groups.get(item.typeId) ?? [];
@@ -47,10 +47,14 @@ export function groupByCategory(
   return [...groups.entries()]
     .map(([typeId, groupItems]) => ({
       typeId,
-      label: labelById.get(typeId) ?? typeId,
+      label: typeById.get(typeId)?.label ?? typeId,
       items: groupItems,
     }))
-    .sort((a, b) => a.label.localeCompare(b.label, "fr"));
+    .sort((a, b) => {
+      const orderA = typeById.get(a.typeId)?.sortOrder ?? 0;
+      const orderB = typeById.get(b.typeId)?.sortOrder ?? 0;
+      return orderA - orderB || a.label.localeCompare(b.label, "fr");
+    });
 }
 
 export function categoryAnchorId(typeId: string): string {

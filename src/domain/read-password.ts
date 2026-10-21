@@ -2,8 +2,8 @@ import { clone, findMembership } from "./access";
 import { hashPassword, verifyPassword } from "./passwords";
 import type { Database, Wishlist } from "./types";
 
-/** MDP de lecture publique : plus souple que le compte (partage famille). */
-export const MIN_READ_PASSWORD_LENGTH = 4;
+/** Mot de passe de lecture : réservé au propriétaire, plus court que le compte. */
+export const MIN_READ_PASSWORD_LENGTH = 8;
 
 export function hasReadPassword(list: Wishlist): boolean {
   return Boolean(list.readPasswordHash);
@@ -15,19 +15,19 @@ export function readPasswordPolicyError(password: string): string | null {
   return null;
 }
 
-export function setReadPassword(
+export async function setReadPassword(
   doc: Database,
   input: { wishlistId: string; actorId: string; password: string },
-): { ok: true; doc: Database } | { ok: false; error: string } {
-  if (!findMembership(doc, input.wishlistId, input.actorId)) {
-    return { ok: false, error: "notMember" };
-  }
+): Promise<{ ok: true; doc: Database } | { ok: false; error: string }> {
+  const actor = findMembership(doc, input.wishlistId, input.actorId);
+  if (!actor) return { ok: false, error: "notMember" };
+  if (actor.role !== "owner") return { ok: false, error: "ownerSetReadPassword" };
   const policy = readPasswordPolicyError(input.password);
   if (policy) return { ok: false, error: policy };
   const next = clone(doc);
   const list = next.wishlists.find((entry) => entry.id === input.wishlistId);
   if (!list) return { ok: false, error: "listMissing" };
-  list.readPasswordHash = hashPassword(input.password);
+  list.readPasswordHash = await hashPassword(input.password);
   return { ok: true, doc: next };
 }
 
@@ -35,9 +35,9 @@ export function clearReadPassword(
   doc: Database,
   input: { wishlistId: string; actorId: string },
 ): { ok: true; doc: Database } | { ok: false; error: string } {
-  if (!findMembership(doc, input.wishlistId, input.actorId)) {
-    return { ok: false, error: "notMember" };
-  }
+  const actor = findMembership(doc, input.wishlistId, input.actorId);
+  if (!actor) return { ok: false, error: "notMember" };
+  if (actor.role !== "owner") return { ok: false, error: "ownerSetReadPassword" };
   const next = clone(doc);
   const list = next.wishlists.find((entry) => entry.id === input.wishlistId);
   if (!list) return { ok: false, error: "listMissing" };
@@ -45,7 +45,7 @@ export function clearReadPassword(
   return { ok: true, doc: next };
 }
 
-export function verifyReadPassword(list: Wishlist, password: string): boolean {
+export async function verifyReadPassword(list: Wishlist, password: string): Promise<boolean> {
   if (!list.readPasswordHash) return true;
   return verifyPassword(password, list.readPasswordHash);
 }

@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { currentUser } from "../../../../src/auth/current";
 import { canAccessPublicList } from "../../../../src/auth/public-list";
 import { availableItems } from "../../../../src/domain/reserve";
 import { reserveAction } from "../../../../src/server/actions";
 import { getDocument } from "../../../../src/store/db";
+import { LinkButton } from "@/components/site/link-button";
 import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -62,9 +62,9 @@ export default async function ReserverPage({
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-medium tracking-tight text-balance">{t("reserve.title")}</h1>
         <p className="text-muted-foreground text-pretty">{t("reserve.listContext", { title: list.title })}</p>
-        <Button variant="link" className="h-auto w-fit px-0" nativeButton={false} render={<Link href={`/l/${readToken}`} />}>
+        <LinkButton href={`/l/${readToken}`} variant="link" className="h-auto w-fit px-0">
           {t("reserve.back")}
-        </Button>
+        </LinkButton>
       </div>
       {error ? (
         <Alert variant="destructive">

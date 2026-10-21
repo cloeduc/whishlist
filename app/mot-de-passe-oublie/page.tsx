@@ -1,13 +1,24 @@
-import Link from "next/link";
+import type { Metadata } from "next";
 import { requestPasswordResetAction } from "../../src/server/actions";
+import { LinkButton } from "@/components/site/link-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { getTranslations } from "@/src/i18n/server";
+import { publicPageMetadata } from "@/src/site/seo";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("auth");
+  return publicPageMetadata({
+    title: t("forgot.metaTitle"),
+    description: t("forgot.metaDescription"),
+    path: "/mot-de-passe-oublie",
+  });
+}
 
 export default async function MotDePasseOubliePage({
   searchParams,
@@ -23,7 +34,7 @@ export default async function MotDePasseOubliePage({
     <main className="mx-auto flex w-full max-w-md flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle>{t("forgot.title")}</CardTitle>
+          <CardTitle as="h1">{t("forgot.title")}</CardTitle>
           <CardDescription>{t("forgot.description")}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -44,15 +55,15 @@ export default async function MotDePasseOubliePage({
                 <Alert>
                   <AlertDescription className="flex flex-col gap-2">
                     <span>{t("forgot.devLink")}</span>
-                    <Link href={lien} className="break-all underline underline-offset-2">
+                    <a href={lien} className="break-all underline underline-offset-2">
                       {lien}
-                    </Link>
+                    </a>
                   </AlertDescription>
                 </Alert>
               ) : null}
-              <Button variant="outline" nativeButton={false} render={<Link href="/connexion" />}>
+              <LinkButton href="/connexion" variant="outline">
                 {t("forgot.back")}
-              </Button>
+              </LinkButton>
             </div>
           ) : (
             <form action={requestPasswordResetAction}>
@@ -68,9 +79,9 @@ export default async function MotDePasseOubliePage({
         </CardContent>
       </Card>
       {!done ? (
-        <Button variant="link" nativeButton={false} render={<Link href="/connexion" />}>
+        <LinkButton href="/connexion" variant="link">
           {t("forgot.back")}
-        </Button>
+        </LinkButton>
       ) : null}
     </main>
   );

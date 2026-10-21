@@ -23,7 +23,7 @@ function doc(): Database {
     fromTemplate: false,
     createdAt: "2026-01-01T00:00:00.000Z",
   });
-  data.types.push({ id: "t", wishlistId: "w", label: "Jeux" });
+  data.types.push({ id: "t", wishlistId: "w", label: "Jeux", sortOrder: 0 });
   data.people.push({ id: "p", wishlistId: "w", label: "Alex" });
   data.items.push({
     id: "gift",

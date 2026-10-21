@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-18
 
-**Status**: Implemented (socle) — évolutions dans `003-i18n-admin-enrich`. Import produit du catalogue perso retiré ; seed = fixture de test.
+**Status**: Implemented (socle) — évolutions dans `003-i18n-admin-enrich`. Import produit du catalogue perso retiré ; `data/seed.json` reste une fixture de domaine et `data/demo-seed.json` fournit un scénario de démonstration sans données réelles.
 
 **Input**: User description: "Reproduire le doc Superhuman « Toute la whishlist », et permettre de s'inscrire pour créer ses propres wishlists et des wishlists communes. Pas besoin d'être inscrit pour visionner la wishlist de quelqu'un."
 
@@ -229,6 +229,10 @@ Un membre ajoute une idée, corrige un prix ou un lien, retire une idée, ajoute
 - Les contraintes d'exploitation sont dans la constitution, pas dans cette spec.
 
 
-## Seed de test
+## Données de test et de démonstration
 
-Le catalogue personnel (annexe 79 idées) a été retiré du dépôt. `data/seed.json` est un fixture générique tech/gaming pour les tests uniquement — plus d'import produit.
+Le catalogue personnel (annexe 79 idées) a été retiré du dépôt. `data/seed.json` reste une fixture générique utilisée par les tests de domaine : elle n'est pas proposée à l'import dans le produit.
+
+`data/demo-seed.json` décrit un foyer fictif et couvre les états utiles aux démonstrations et captures : plusieurs catégories et destinataires, prix et liens facultatifs, niveaux d'envie, une idée archivée et une idée destinée à être réservée. Le script `npm run demo:data -- <chemin>` produit une base complète avec deux comptes fictifs, une liste collaborative et une réservation. Il MUST refuser de cibler implicitement `data/wishlist.json` : le chemin de sortie est toujours explicite.
+
+Les adresses utilisent le domaine réservé `.test`, les liens cadeaux `example.com`, et aucun secret ou compte de production n'est réutilisé.

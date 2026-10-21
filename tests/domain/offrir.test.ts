@@ -6,7 +6,7 @@ import { emptyDatabase } from "../../src/domain/types";
 
 test("offrir scopé à la liste, champs vides, zéro ligne", () => {
   const doc = emptyDatabase();
-  doc.types.push({ id: "t", wishlistId: "w", label: "Jeux" });
+  doc.types.push({ id: "t", wishlistId: "w", label: "Jeux", sortOrder: 0 });
   doc.items.push({
     id: "gang",
     wishlistId: "w",
@@ -63,7 +63,7 @@ test("mes cadeaux : seulement les réservations liées au compte", () => {
     fromTemplate: false,
     createdAt: "2026-01-01T00:00:00.000Z",
   });
-  doc.types.push({ id: "t", wishlistId: "w", label: "Jeux" });
+  doc.types.push({ id: "t", wishlistId: "w", label: "Jeux", sortOrder: 0 });
   doc.items.push({
     id: "gang",
     wishlistId: "w",

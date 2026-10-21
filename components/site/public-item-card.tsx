@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { ExternalLinkIcon } from "lucide-react";
 import type { PublicItem } from "@/src/domain/read";
 import { cancelMyReservationAction } from "@/src/server/actions";
 import { ConfirmForm } from "@/components/site/confirm-form";
+import { LinkButton } from "@/components/site/link-button";
 import { PriorityStars } from "@/components/site/priority-stars";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function PublicItemCard({
@@ -93,14 +92,13 @@ export function PublicItemCard({
             confirmVariant="destructive"
           />
         ) : (
-          <Button
+          <LinkButton
+            href={`/l/${readToken}/reserver?itemId=${encodeURIComponent(item.id)}`}
             size="sm"
             className="w-full sm:w-auto"
-            nativeButton={false}
-            render={<Link href={`/l/${readToken}/reserver?itemId=${encodeURIComponent(item.id)}`} />}
           >
             {offerLabel}
-          </Button>
+          </LinkButton>
         )}
       </CardFooter>
     </Card>

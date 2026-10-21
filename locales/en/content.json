@@ -1,0 +1,157 @@
+{
+  "nav": {
+    "project": "The project",
+    "faq": "FAQ",
+    "guide": "Guide",
+    "legal": "Legal notice"
+  },
+  "project": {
+    "metaTitle": "The project — Oh, You Shouldn't!",
+    "metaDescription": "Why we built this open-source gift wish list app, and why we recommend keeping more ideas than you need.",
+    "eyebrow": "Why this project?",
+    "title": "Plenty of ideas. Gifts people genuinely want.",
+    "intro": "In our family, we write down gift ideas throughout the year. We deliberately keep more ideas than we need, so friends and family can choose something we’ll love. People who manage the list can see reservations.",
+    "practiceTitle": "The extra-full wish list",
+    "practiceBody": "A good wish list doesn’t dictate one exact gift. It offers enough possibilities for the gift giver to choose. Small treats, special objects, books, experiences: variety makes choosing easier.",
+    "beforeTitle": "Before this app",
+    "beforeBody": "We used a no-code tool that wasn’t designed for this purpose. Existing services didn’t suit us: commercial link tracking, ads, mandatory accounts just to view a list, or no way to build a list together.",
+    "buildTitle": "An open-source project",
+    "buildBody": "The project is open source and self-hostable, so anyone can inspect it, adapt it, or run their own copy.",
+    "usefulTitle": "Will anyone else need it?",
+    "usefulBody": "We don’t know yet whether this app will be useful beyond our family. We do wholeheartedly recommend the extra-full wish list: it leaves the choice to the person giving the gift, and reservations stay visible to the people managing the list.",
+    "cta": "Make my list",
+    "guide": "Read the guide",
+    "github": "View the code on GitHub",
+    "support": "Support the project"
+  },
+  "faq": {
+    "metaTitle": "Frequently asked questions — Oh, You Shouldn't!",
+    "metaDescription": "Accounts, reservations, collaborative wish lists, privacy, and how Oh, You Shouldn't! works.",
+    "eyebrow": "Frequently asked questions",
+    "title": "Everything to know before making a list.",
+    "intro": "You need an account to create a list. Viewing one and reserving a gift does not require an account.",
+    "items": [
+      {
+        "q": "Why put so many ideas on one list?",
+        "a": "A well-stocked list gives useful guidance without dictating a gift. Friends and family can choose according to their budget and taste. People who manage the list can see reservations."
+      },
+      {
+        "q": "Do I need an account to view a list?",
+        "a": "No. Anyone with the link can view the list and reserve a gift. If the list is password-protected, they’ll also need to enter its password."
+      },
+      {
+        "q": "What does reserving a gift do?",
+        "a": "It lets others know someone intends to give that gift. No purchase or payment is made through the site."
+      },
+      {
+        "q": "Can I build a list with someone else?",
+        "a": "Yes. Send them the editing invitation link. They’ll need to log in or create an account before joining the list."
+      },
+      {
+        "q": "Who can see reservations?",
+        "a": "People managing the list can view its reservations. If the list is for you, it’s best to avoid that screen — unless you’re also the sort of person who turns the house upside down looking for hidden Christmas presents. On the shared list, gift givers can also recognize their own reservations in the same browser or through their account."
+      },
+      {
+        "q": "Can I cancel a reservation?",
+        "a": "Yes, if you made it with your account or from the same browser. The gift then becomes available again."
+      },
+      {
+        "q": "Are gift links tracked for commercial purposes?",
+        "a": "No. The project does not add affiliate tracking and does not sell browsing data. Links go directly to the websites entered with each gift idea."
+      },
+      {
+        "q": "Can I host the app myself?",
+        "a": "Yes. The code is open source, and the repository includes deployment instructions."
+      }
+    ]
+  },
+  "guide": {
+    "metaTitle": "User guide — Oh, You Shouldn't!",
+    "metaDescription": "Create, fill, share, and manage a collaborative gift wish list.",
+    "eyebrow": "User guide",
+    "title": "Your first wish list, step by step.",
+    "intro": "A few minutes are enough to create a list, add ideas, and share it.",
+    "steps": [
+      {
+        "title": "1. Create your account",
+        "body": "Enter your display name, email address, and a password. Your account is for creating and editing lists; friends and family don’t need one to view them."
+      },
+      {
+        "title": "2. Create a wish list",
+        "body": "Name it, add a first category, and choose who the gifts are for. You can add more details later."
+      },
+      {
+        "title": "3. Add gift ideas",
+        "body": "Paste a link to prefill details, or enter them yourself. Organize each idea by category and recipient."
+      },
+      {
+        "title": "4. Customize your list",
+        "body": "In settings, change its description, colors, and illustration. You can also add categories and recipients."
+      },
+      {
+        "title": "5. Share the right link",
+        "body": "The wish list link lets people view and reserve gifts. The editing invitation link lets someone join and edit the list, so only share it with the intended people."
+      },
+      {
+        "title": "6. Keep track of reservations",
+        "body": "The Reservations tab shows reserved gifts. Reserving does not place an order; the purchase happens separately."
+      }
+    ],
+    "guestTitle": "Received a wish list?",
+    "guestBody": "Open the link, browse the ideas, and choose “Reserve this gift.” You can leave your name and a message. No account is required.",
+    "tipTitle": "Our advice",
+    "tipBody": "Don’t wait for a special occasion. Add ideas throughout the year and keep more than you need: choosing stays easy. People who manage the list can see reservations.",
+    "screens": {
+      "publicAlt": "Example of a shared wish list with filters and gift ideas.",
+      "publicCaption": "The shared list filters ideas and lets people reserve a gift without an account.",
+      "listsAlt": "Screen showing wish lists created by and shared with the account.",
+      "listsCaption": "Once signed in, your wish lists live here. One list is enough to get started.",
+      "adminAlt": "Wish list management screen with the add form and categories.",
+      "adminCaption": "Ideas are grouped by category in an accordion, so a full list stays easy to browse.",
+      "settingsAlt": "Customization settings for a gift wish list.",
+      "settingsCaption": "Categories, recipients, and appearance give the list its identity.",
+      "sharingAlt": "Sharing settings for a gift wish list.",
+      "sharingCaption": "Two distinct links: one to view and reserve, one to join as an editor.",
+      "reservationsAlt": "Screen for tracking reserved gifts.",
+      "reservationsCaption": "Reservation tracking is useful… unless the list is for you.",
+      "reserveAlt": "Form for reserving a gift from a shared wish list.",
+      "reserveCaption": "Reserving signals your choice to other gift givers without placing an order.",
+      "accountAlt": "Account creation form.",
+      "accountCaption": "An account is for creating and editing lists. Friends and family don’t need one to view them.",
+      "publicTitle": "The shared list",
+      "reserveTitle": "Reserve a gift",
+      "ideaAlt": "Form for adding a new gift idea.",
+      "ideaCaption": "Add an idea: a link is often enough to start, then you can refine the details.",
+      "aiAlt": "Message showing AI prefilled the fields, with an impact estimate.",
+      "aiCaption": "When AI helps, it’s clearly labeled, with estimated tokens and CO₂.",
+      "aiTitle": "AI-assisted lookup",
+      "categoriesAlt": "Gift ideas organized in an accordion by category.",
+      "categoriesCaption": "Categories form an accordion: the arrows change the order, the menu moves an idea. Dragging still works.",
+      "categoriesTitle": "Organize by category"
+    },
+    "cta": "Make my list",
+    "extrasTitle": "Two useful moves"
+  },
+  "legal": {
+    "metaTitle": "Legal notice — Oh, You Shouldn't!",
+    "metaDescription": "Publisher, hosting provider, and information about personal data.",
+    "eyebrow": "Legal information",
+    "title": "Legal notice",
+    "intro": "Who publishes Oh, You Shouldn't!, who hosts it, and how to get in touch.",
+    "publisherTitle": "Publisher",
+    "publisherBody": "This website is published on a non-professional basis by an individual.",
+    "publisherLaw": "In accordance with Article 1-1, II of French Law No. 2004-575 of 21 June 2004 on confidence in the digital economy, the publisher has provided their personal identification details to the hosting provider and does not make them publicly available.",
+    "hostTitle": "Hosting provider",
+    "hostName": "PlanetHoster Inc.",
+    "hostAddress": "4416 Louis-B.-Mayer Street, Laval, Quebec H7P 0G1, Canada",
+    "hostWebsite": "www.planethoster.com",
+    "privacyTitle": "Personal data",
+    "privacyBody": "The site uses the information required to create accounts, manage wish lists, and record reservations. It does not add commercial tracking to gift links and does not display advertising.",
+    "hostAddressLabel": "Address",
+    "hostWebsiteLabel": "Website",
+    "cookiesBody": "The site sets cookies: wishlist_session (login, 30 days, httpOnly), NEXT_LOCALE (chosen language, 1 year), a wl_ru_… cookie that remembers a list password for 14 days, and a wl_rc_… cookie that finds reservations made without an account for 90 days. These cookies are not used for advertising.",
+    "mailBody": "When email sending is configured, messages (invites, password resets, an address that already has an account) go through Resend. The recipient address and the message content are then sent to that provider.",
+    "aiBody": "When a Gemini or OpenAI key is configured, the page behind a gift link can be sent to that service to prefill an idea. Nothing is sent if no key is configured.",
+    "contact": "For questions or to exercise your rights: contact@ohyoushouldnt.app."
+  }
+}
