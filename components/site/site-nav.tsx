@@ -24,7 +24,7 @@ export function SiteNav({
   supportUrl,
 }: {
   locale: Locale;
-  user: { displayName: string; mustChangePassword: boolean } | null;
+  user: { mustChangePassword: boolean } | null;
   supportUrl: string | null;
 }) {
   const { t } = useTranslation("common");
@@ -48,7 +48,6 @@ export function SiteNav({
     <nav className="ml-auto flex flex-wrap items-center gap-2" aria-label={t("nav.menuAria")}>
       {user ? (
         <>
-          <span className="px-1 text-sm text-muted-foreground">{user.displayName}</span>
           {!user.mustChangePassword ? (
             <>
               {navLink("/", t("nav.myLists"))}

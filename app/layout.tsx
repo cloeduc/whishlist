@@ -68,11 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <SiteNav
                 locale={locale}
                 supportUrl={supportUrl()}
-                user={
-                  user
-                    ? { displayName: user.displayName, mustChangePassword: user.mustChangePassword }
-                    : null
-                }
+                user={user ? { mustChangePassword: user.mustChangePassword } : null}
               />
             </header>
             <div id="contenu" tabIndex={-1} className="outline-none">
