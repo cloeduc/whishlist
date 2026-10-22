@@ -66,8 +66,8 @@
     ]
   },
   "guide": {
-    "metaTitle": "User guide — Oh, You Shouldn't!",
-    "metaDescription": "Create, fill, share, and manage a collaborative gift wish list.",
+    "metaTitle": "Create and share a wish list — Guide",
+    "metaDescription": "Create a list, add ideas, and share the link. Friends and family choose a gift and reserve it, without creating an account.",
     "eyebrow": "User guide",
     "title": "Your first wish list, step by step.",
     "intro": "A few minutes are enough to create a list, add ideas, and share it.",
@@ -134,7 +134,7 @@
   },
   "legal": {
     "metaTitle": "Legal notice — Oh, You Shouldn't!",
-    "metaDescription": "Publisher, hosting provider, and information about personal data.",
+    "metaDescription": "Who publishes Oh, You Shouldn't!, who hosts the site, and where to write with a question or a request about your personal data.",
     "eyebrow": "Legal information",
     "title": "Legal notice",
     "intro": "Who publishes Oh, You Shouldn't!, who hosts it, and how to get in touch.",

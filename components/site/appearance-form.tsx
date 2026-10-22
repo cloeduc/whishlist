@@ -145,7 +145,7 @@ export function AppearanceForm({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={draftCover.trim()}
-                alt=""
+                alt={t("settings.coverAlt")}
                 className="size-28 rounded-base border-2 border-border object-cover shadow-shadow"
                 referrerPolicy="no-referrer"
               />

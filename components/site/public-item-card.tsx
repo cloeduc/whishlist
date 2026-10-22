@@ -40,7 +40,7 @@ export function PublicItemCard({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={item.imageUrl}
-              alt=""
+              alt={item.name}
               className="size-20 shrink-0 rounded-base border-2 border-border object-cover shadow-shadow"
               loading="lazy"
               referrerPolicy="no-referrer"

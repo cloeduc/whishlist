@@ -9,6 +9,7 @@ export function WishlistCover({
   className,
   size = "md",
   framed = true,
+  alt = "",
 }: {
   coverImageUrl: string | null | undefined;
   theme: WishlistTheme;
@@ -16,6 +17,8 @@ export function WishlistCover({
   size?: "xs" | "sm" | "md" | "lg";
   /** Cadre / ombre autour de l'illustration. */
   framed?: boolean;
+  /** Nom de la liste, lorsque l'illustration n'est pas purement décorative. */
+  alt?: string;
 }) {
   const box =
     size === "lg"
@@ -31,7 +34,7 @@ export function WishlistCover({
       // eslint-disable-next-line @next/next/no-img-element
       <img
         src={coverImageUrl}
-        alt=""
+        alt={alt}
         className={cn(
           box,
           "shrink-0 rounded-base object-cover",
@@ -43,5 +46,5 @@ export function WishlistCover({
     );
   }
 
-  return <GiftMark theme={theme} framed={framed} className={cn(box, className)} />;
+  return <GiftMark theme={theme} framed={framed} title={alt || undefined} className={cn(box, className)} />;
 }

@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import { cache } from "react";
 import { originFromEnv, originFromHeaders } from "./origin";
+import { preferredOrigin } from "../site/seo";
 import { readSession, SESSION_COOKIE, sessionSecret } from "./session";
 import { getDocument } from "../store/db";
 import type { User } from "../domain/types";
@@ -22,7 +23,7 @@ export const currentUser = cache(async (): Promise<User | null> => {
 
 /** Base URL publique. Prod : `APP_ORIGIN` (évite Host-header poisoning sur reset/invite). */
 export async function origin(): Promise<string> {
-  const configured = originFromEnv();
+  const configured = preferredOrigin(originFromEnv());
   if (configured) return configured;
   const h = await headers();
   return originFromHeaders({

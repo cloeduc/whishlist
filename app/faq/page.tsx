@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { ContentPage } from "@/components/site/content-page";
 import { getTranslations } from "@/src/i18n/server";
+import { faqPageJsonLd } from "@/src/site/faq-jsonld";
 import { publicPageMetadata } from "@/src/site/seo";
 
 type FaqItem = { q: string; a: string };
@@ -17,8 +19,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FaqPage() {
   const t = await getTranslations("content");
   const items = t("faq.items", { returnObjects: true }) as unknown as FaqItem[];
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <ContentPage eyebrow={t("faq.eyebrow")} title={t("faq.title")} intro={t("faq.intro")}>
+      <script
+        type="application/ld+json"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: faqPageJsonLd(items) }}
+      />
       <div className="flex flex-col gap-3">
         {items.map((item) => (
           <details

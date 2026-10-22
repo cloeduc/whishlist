@@ -267,7 +267,7 @@ export function ItemForm({
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={previewImage}
-                  alt=""
+                  alt={draft.name.trim() || t("form.imageAlt")}
                   className="size-full object-cover"
                   referrerPolicy="no-referrer"
                 />

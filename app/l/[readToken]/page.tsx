@@ -117,7 +117,7 @@ export default async function ReadPage({
     <main className="flex flex-col gap-6" style={cssVars as CSSProperties}>
       <style nonce={nonce} dangerouslySetInnerHTML={{ __html: `:root{${rootCss}}` }} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <WishlistCover coverImageUrl={list.coverImageUrl} theme={theme} size="md" />
+        <WishlistCover coverImageUrl={list.coverImageUrl} theme={theme} size="md" alt={list.title} />
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="text-2xl font-bold tracking-tight">{list.title}</h1>
           {list.subtitle ? <p className="text-muted-foreground text-pretty">{list.subtitle}</p> : null}

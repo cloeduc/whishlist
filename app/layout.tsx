@@ -8,8 +8,8 @@ import { SiteNav } from "@/components/site/site-nav";
 import { cn } from "@/lib/utils";
 import { I18nProvider } from "@/src/i18n/client";
 import { getLocale, getTranslations } from "@/src/i18n/server";
-import { originFromEnv } from "@/src/auth/origin";
 import { supportUrl } from "@/src/site/links";
+import { siteOrigin } from "@/src/site/seo";
 import "./globals.css";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
@@ -19,7 +19,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const [t, locale] = await Promise.all([getTranslations("common"), getLocale()]);
-  const origin = originFromEnv() ?? "http://localhost:3000";
+  const origin = siteOrigin();
   return {
     metadataBase: new URL(origin),
     title: t("meta.title"),

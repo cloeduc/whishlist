@@ -66,8 +66,8 @@
     ]
   },
   "guide": {
-    "metaTitle": "Guide utilisateur — Oh, mais fallait pas !",
-    "metaDescription": "Créez, remplissez, partagez et gérez une liste de cadeaux collaborative.",
+    "metaTitle": "Créer et partager une liste de cadeaux — Guide",
+    "metaDescription": "Créez une liste, ajoutez vos idées et partagez le lien. Vos proches choisissent un cadeau et le réservent, sans créer de compte.",
     "eyebrow": "Guide utilisateur",
     "title": "Votre première liste, pas à pas.",
     "intro": "Quelques minutes suffisent pour créer une liste, ajouter des idées et la partager.",
@@ -134,7 +134,7 @@
   },
   "legal": {
     "metaTitle": "Mentions légales — Oh, mais fallait pas !",
-    "metaDescription": "Éditeur, hébergeur et informations relatives aux données personnelles.",
+    "metaDescription": "Qui publie Oh, mais fallait pas !, qui héberge le site, et où écrire pour une question ou pour vos données personnelles.",
     "eyebrow": "Informations légales",
     "title": "Mentions légales",
     "intro": "Qui publie Oh, mais fallait pas !, qui l’héberge, et où écrire.",

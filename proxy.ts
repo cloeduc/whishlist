@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { isLocale, localeCookie } from "@/src/i18n/config";
 import { contentSecurityPolicy } from "@/src/server/content-security";
+import { legacyHostRedirect } from "@/src/site/seo";
 
 function cspHeaders(request: NextRequest) {
   const policy = contentSecurityPolicy({ dev: process.env.NODE_ENV === "development" });
@@ -13,6 +14,17 @@ function cspHeaders(request: NextRequest) {
 /** `?lang=en|fr` pose le cookie de langue puis retire la query (liens de liste partageables). */
 export function proxy(request: NextRequest) {
   const { requestHeaders, value } = cspHeaders(request);
+  const moved = legacyHostRedirect(
+    request.headers.get("host"),
+    request.nextUrl.pathname,
+    request.nextUrl.search,
+  );
+  if (moved) {
+    const response = NextResponse.redirect(moved, 301);
+    response.headers.set("Content-Security-Policy", value);
+    return response;
+  }
+
   const lang = request.nextUrl.searchParams.get("lang");
 
   if (!isLocale(lang)) {

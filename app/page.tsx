@@ -94,6 +94,7 @@ export default async function HomePage() {
                     theme={resolveTheme(list.theme)}
                     size="xs"
                     framed={false}
+                    alt={list.title}
                   />
                 </Link>
                 <div className="flex min-w-0 flex-col gap-1">
