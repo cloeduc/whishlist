@@ -150,6 +150,9 @@
     "hostAddressLabel": "Address",
     "hostWebsiteLabel": "Website",
     "cookiesBody": "The site sets cookies: wishlist_session (login, 30 days, httpOnly), NEXT_LOCALE (chosen language, 1 year), a wl_ru_… cookie that remembers a list password for 14 days, and a wl_rc_… cookie that finds reservations made without an account for 90 days. These cookies are not used for advertising.",
+    "audienceBody": "When audience measurement is configured, visits to public pages are counted with Umami, on the instance operator’s server. List, login, account, invitation, and password-reset addresses are not sent. This count does not set a cookie. The choice is made in the footer and stays in this browser.",
+    "optOut": "Don’t measure my visit",
+    "optOutOn": "Visit not measured. Turn it back on",
     "mailBody": "When email sending is configured, messages (invites, password resets, an address that already has an account) go through Resend. The recipient address and the message content are then sent to that provider.",
     "aiBody": "When a Gemini or OpenAI key is configured, the page behind a gift link can be sent to that service to prefill an idea. Nothing is sent if no key is configured.",
     "contact": "For questions or to exercise your rights: contact@ohyoushouldnt.app."

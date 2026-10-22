@@ -6,6 +6,8 @@ services:
     container_name: whishlist
     restart: unless-stopped
     user: "1000:1000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8740:3000"
     environment:
@@ -20,6 +22,8 @@ services:
       MAIL_FROM: ${WHISHLIST_MAIL_FROM:-}
       GEMINI_API_KEY: ${WHISHLIST_GEMINI_API_KEY:-}
       OPENAI_API_KEY: ${WHISHLIST_OPENAI_API_KEY:-}
+      UMAMI_WEBSITE_ID: ${WHISHLIST_UMAMI_WEBSITE_ID:-}
+      UMAMI_URL: ${WHISHLIST_UMAMI_URL:-}
     volumes:
       - ${WHISHLIST_DATA_DIR:-./data-prod}:/data
     healthcheck:

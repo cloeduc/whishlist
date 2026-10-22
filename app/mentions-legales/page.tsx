@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { ContentPage, ContentSection } from "@/components/site/content-page";
 import { llmConfigured } from "@/src/domain/product-llm";
 import { getTranslations } from "@/src/i18n/server";
+import { analyticsConfigured } from "@/src/server/analytics";
 import { mailConfigured } from "@/src/server/mail";
 import { publicPageMetadata } from "@/src/site/seo";
 
@@ -56,6 +57,7 @@ export default async function LegalPage() {
         <div className="flex flex-col gap-3">
           <p>{t("legal.privacyBody")}</p>
           <p>{t("legal.cookiesBody")}</p>
+          {analyticsConfigured() ? <p>{t("legal.audienceBody")}</p> : null}
           {mailConfigured() ? <p>{t("legal.mailBody")}</p> : null}
           {llmConfigured() ? <p>{t("legal.aiBody")}</p> : null}
           <p>

@@ -150,6 +150,9 @@
     "hostAddressLabel": "Adresse",
     "hostWebsiteLabel": "Site web",
     "cookiesBody": "Le site dépose des cookies : wishlist_session (connexion, 30 jours, httpOnly), NEXT_LOCALE (langue choisie, 1 an), un cookie wl_ru_… qui mémorise le mot de passe d’une liste pendant 14 jours, et un cookie wl_rc_… qui retrouve les réservations faites sans compte pendant 90 jours. Ces cookies ne servent pas à de la publicité.",
+    "audienceBody": "Quand une mesure d’audience est configurée, les visites des pages publiques sont comptées avec Umami, chez l’exploitant de l’instance. Les adresses de listes, de connexion, de compte, d’invitation et de réinitialisation ne partent pas. Ce comptage ne dépose pas de cookie. Le refus se règle dans le pied de page et reste dans ce navigateur.",
+    "optOut": "Ne pas mesurer ma visite",
+    "optOutOn": "Visite non mesurée. Réactiver",
     "mailBody": "Quand l’envoi d’e-mails est configuré, les messages (invitation, réinitialisation de mot de passe, adresse déjà utilisée) passent par Resend. L’adresse du destinataire et le contenu du message sont alors transmis à ce prestataire.",
     "aiBody": "Quand une clé Gemini ou OpenAI est configurée, le contenu de la page d’un lien cadeau peut être envoyé à ce service pour préremplir une idée. Rien n’est envoyé si aucune clé n’est configurée.",
     "contact": "Pour une question ou pour exercer un droit : contact@ohyoushouldnt.app."

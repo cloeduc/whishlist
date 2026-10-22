@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { AnalyticsOptOut } from "@/components/site/analytics-opt-out";
 import { SupportLabel } from "@/components/site/support-label";
 import type { Locale } from "@/src/i18n/config";
 import { withLocale } from "@/src/i18n/locale-path";
@@ -19,6 +20,7 @@ export function SiteFooter({
   guide,
   legal,
   locale,
+  analytics,
 }: {
   infoLabel: string;
   tagline: string;
@@ -30,6 +32,7 @@ export function SiteFooter({
   guide: string;
   legal: string;
   locale: Locale;
+  analytics: { offLabel: string; onLabel: string } | null;
 }) {
   return (
     <footer className="border-t-2 border-border pt-4 text-sm text-muted-foreground">
@@ -71,6 +74,12 @@ export function SiteFooter({
             >
               <SupportLabel>{support}</SupportLabel>
             </a>
+          </>
+        ) : null}
+        {analytics ? (
+          <>
+            <span aria-hidden>·</span>
+            <AnalyticsOptOut offLabel={analytics.offLabel} onLabel={analytics.onLabel} />
           </>
         ) : null}
       </p>

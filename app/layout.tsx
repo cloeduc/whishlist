@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import Link from "next/link";
 import { currentUser } from "../src/auth/current";
+import { AnalyticsScript } from "@/components/site/analytics-script";
 import { GiftMark } from "@/components/site/gift-mark";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { I18nProvider } from "@/src/i18n/client";
 import { withLocale } from "@/src/i18n/locale-path";
 import { getLocale, getTranslations } from "@/src/i18n/server";
+import { analyticsConfigured } from "@/src/server/analytics";
 import { supportUrl } from "@/src/site/links";
 import { siteOrigin } from "@/src/site/seo";
 import "./globals.css";
@@ -46,6 +48,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     getTranslations("common"),
     getTranslations("content"),
   ]);
+  const analytics = analyticsConfigured();
   return (
     <html lang={locale} className={cn("overflow-x-clip font-sans", geist.variable)}>
       <body className="overflow-x-clip">
@@ -86,9 +89,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               guide={tContent("nav.guide")}
               legal={tContent("nav.legal")}
               locale={locale}
+              analytics={
+                analytics
+                  ? { offLabel: tContent("legal.optOut"), onLabel: tContent("legal.optOutOn") }
+                  : null
+              }
             />
           </div>
         </I18nProvider>
+        <AnalyticsScript />
       </body>
     </html>
   );
