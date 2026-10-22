@@ -29,6 +29,7 @@
   "buyLink": "Visit website",
   "buyLinkAria": "Visit the website for “{{name}}”",
   "iOffer": "Reserve this gift",
+  "iOfferAria": "Reserve this gift: {{name}}",
   "wishLevel": "Wish level: {{rating}} out of {{max}}",
   "reservedTitle": "Gift reserved",
   "reservedBody": "You’ve reserved this gift. You’ll need to purchase it separately. It stays visible to you on this list.",

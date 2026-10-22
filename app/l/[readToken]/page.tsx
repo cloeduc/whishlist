@@ -26,6 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { intlLocale } from "@/src/i18n/config";
 import { getLocale, getTranslations } from "@/src/i18n/server";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import type { CSSProperties } from "react";
 
@@ -39,6 +40,22 @@ function unlockErrorMessage(
 }
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ readToken: string }>;
+}): Promise<Metadata> {
+  const { readToken } = await params;
+  const [t, tCommon, doc] = await Promise.all([
+    getTranslations("public"),
+    getTranslations("common"),
+    getDocument(),
+  ]);
+  const list = doc.wishlists.find((entry) => entry.readToken === readToken);
+  const name = list?.title.trim();
+  return { title: name ? `${name} — ${tCommon("brand")}` : t("missingList") };
+}
 
 function listHref(readToken: string, qui: string | null, budget: BudgetId | null, hash?: string): string {
   const params = new URLSearchParams();
@@ -226,6 +243,7 @@ export default async function ReadPage({
                   buyLink={t("buyLink")}
                   buyLinkAria={t("buyLinkAria", { name: item.name })}
                   offerLabel={t("iOffer")}
+                  offerAria={t("iOfferAria", { name: item.name })}
                   mineLabel={t("reservation.mine")}
                   cancelLabel={t("reservation.cancel")}
                   cancelTitle={t("reservation.cancelTitle")}

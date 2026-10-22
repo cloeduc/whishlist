@@ -3,6 +3,8 @@ import type { ComponentProps, ReactNode } from "react";
 import type { VariantProps } from "class-variance-authority";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { withLocale } from "@/src/i18n/locale-path";
+import { getLocale } from "@/src/i18n/server";
 
 type LinkButtonProps = {
   href: string;
@@ -14,7 +16,7 @@ type LinkButtonProps = {
   Pick<ComponentProps<"a">, "aria-current" | "aria-label">;
 
 /** Lien habillé comme un bouton, sans `role="button"`. */
-export function LinkButton({
+export async function LinkButton({
   href,
   variant,
   size,
@@ -32,8 +34,9 @@ export function LinkButton({
       </a>
     );
   }
+  const locale = await getLocale();
   return (
-    <Link href={href} target={target} rel={rel} className={classes} {...rest}>
+    <Link href={withLocale(locale, href)} target={target} rel={rel} className={classes} {...rest}>
       {children}
     </Link>
   );

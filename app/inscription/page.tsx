@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
-  return publicPageMetadata({
+  return await publicPageMetadata({
     title: t("register.metaTitle"),
     description: t("register.metaDescription"),
     path: "/inscription",

@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { redirect as navigationRedirect } from "next/navigation";
 import { cookieSecure, currentUser, origin } from "../auth/current";
 import { canAccessPublicList } from "../auth/public-list";
 import {
@@ -61,6 +61,8 @@ import { extractProductHints } from "../domain/product-from-url";
 import { llmConfigured, refineProductWithLlm } from "../domain/product-llm";
 import { reserveItem } from "../domain/reserve";
 import { isLocale, localeCookie, type Locale } from "../i18n/config";
+import { withLocale } from "../i18n/locale-path";
+import { getLocale } from "../i18n/server";
 import { readDocument, updateDocument } from "../store/db";
 function blankUrl(value: string): string | null {
   const trimmed = value.trim();
@@ -69,12 +71,17 @@ function blankUrl(value: string): string | null {
 
 const ADMIN_ONGLETS = new Set(["idees", "archives", "reservations", "partage", "reglages"]);
 
-function redirectToList(
+async function localeRedirect(path: string): Promise<never> {
+  const locale = await getLocale();
+  navigationRedirect(withLocale(locale, path));
+}
+
+async function redirectToList(
   wishlistId: string,
   formData: FormData,
   error?: string,
   ok?: string,
-): never {
+): Promise<never> {
   const raw = String(formData.get("onglet") ?? "");
   const mapped = raw === "categories" ? "reglages" : raw;
   const onglet = ADMIN_ONGLETS.has(mapped) ? mapped : "idees";
@@ -83,7 +90,7 @@ function redirectToList(
   if (error) params.set("e", error);
   if (ok) params.set("ok", ok);
   const query = params.toString();
-  redirect(query ? `/listes/${wishlistId}?${query}` : `/listes/${wishlistId}`);
+  return localeRedirect(query ? `/listes/${wishlistId}?${query}` : `/listes/${wishlistId}`);
 }
 
 async function resolveImageUrl(input: {
@@ -125,7 +132,7 @@ export async function registerAction(formData: FormData) {
     await rateLimitOrThrow("register", 5, 60 * 60 * 1000);
   } catch (error) {
     if (isRateLimitError(error)) {
-      redirect(`/inscription?e=rate&next=${encodeURIComponent(dest)}`);
+      return localeRedirect(`/inscription?e=rate&next=${encodeURIComponent(dest)}`);
     }
     throw error;
   }
@@ -138,15 +145,15 @@ export async function registerAction(formData: FormData) {
       const base = await origin();
       await sendAlreadyRegisteredMail({
         to: normalizeEmail(email),
-        loginUrl: `${base}/connexion`,
+        loginUrl: `${base}${withLocale(await getLocale(), "/connexion")}`,
       });
-      redirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}`);
+      return localeRedirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}`);
     }
     const code = result.error === "passwordTooShort" ? "password" : "fields";
-    redirect(`/inscription?e=${code}&next=${encodeURIComponent(dest)}`);
+    return localeRedirect(`/inscription?e=${code}&next=${encodeURIComponent(dest)}`);
   }
   await openSession(result.value.id, result.value.sessionVersion ?? 0);
-  redirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}`);
+  return localeRedirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}`);
 }
 
 export async function loginAction(formData: FormData) {
@@ -157,39 +164,39 @@ export async function loginAction(formData: FormData) {
     await rateLimitOrThrow("login", 20, 15 * 60 * 1000);
   } catch (error) {
     if (isRateLimitError(error)) {
-      redirect(`/connexion?e=rate&next=${encodeURIComponent(dest)}`);
+      return localeRedirect(`/connexion?e=rate&next=${encodeURIComponent(dest)}`);
     }
     throw error;
   }
   const doc = await readDocument();
   const user = await authenticate(doc, email, password);
-  if (!user) redirect(`/connexion?e=1&next=${encodeURIComponent(dest)}`);
+  if (!user) return localeRedirect(`/connexion?e=1&next=${encodeURIComponent(dest)}`);
   await openSession(user.id, user.sessionVersion ?? 0);
-  if (user.mustChangePassword) redirect("/compte");
-  redirect(dest);
+  if (user.mustChangePassword) return localeRedirect("/compte");
+  return localeRedirect(dest);
 }
 
 export async function updateDisplayNameAction(formData: FormData) {
   const user = await currentUser();
-  if (!user) redirect("/connexion");
-  if (user.mustChangePassword) redirect("/compte");
+  if (!user) return localeRedirect("/connexion");
+  if (user.mustChangePassword) return localeRedirect("/compte");
   const displayName = String(formData.get("displayName") ?? "");
   const result = await updateDocument((doc) => {
     const saved = updateDisplayName(doc, { userId: user.id, displayName });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirect(`/compte?e=${result.error}`);
-  redirect("/compte?ok=name");
+  if (!result.ok) return localeRedirect(`/compte?e=${result.error}`);
+  return localeRedirect("/compte?ok=name");
 }
 
 export async function changePasswordAction(formData: FormData) {
   const user = await currentUser();
-  if (!user) redirect("/connexion");
+  if (!user) return localeRedirect("/connexion");
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
   const currentPassword = String(formData.get("currentPassword") ?? "");
   if (!password || password !== confirm) {
-    redirect("/compte?e=mismatch");
+    return localeRedirect("/compte?e=mismatch");
   }
   const result = await updateDocument(async (doc) => {
     const saved = await changePassword(doc, {
@@ -206,16 +213,16 @@ export async function changePasswordAction(formData: FormData) {
         : result.error === "passwordTooShort"
           ? "password"
           : "1";
-    redirect(`/compte?e=${code}`);
+    return localeRedirect(`/compte?e=${code}`);
   }
   await openSession(user.id, result.value.sessionVersion ?? 0);
-  redirect(user.mustChangePassword ? "/" : "/compte?ok=1");
+  return localeRedirect(user.mustChangePassword ? "/" : "/compte?ok=1");
 }
 
 export async function logoutAction() {
   const jar = await cookies();
   jar.delete(SESSION_COOKIE);
-  redirect("/");
+  return localeRedirect("/");
 }
 
 export async function requestPasswordResetAction(formData: FormData) {
@@ -223,7 +230,7 @@ export async function requestPasswordResetAction(formData: FormData) {
   try {
     await rateLimitOrThrow("password-reset", 5, 60 * 60 * 1000);
   } catch (error) {
-    if (isRateLimitError(error)) redirect("/mot-de-passe-oublie?e=rate");
+    if (isRateLimitError(error)) return localeRedirect("/mot-de-passe-oublie?e=rate");
     throw error;
   }
   const result = await updateDocument((doc) => {
@@ -233,7 +240,7 @@ export async function requestPasswordResetAction(formData: FormData) {
   let reveal: string | null = null;
   if (result.token && result.email) {
     const base = await origin();
-    const resetUrl = `${base}/reinitialiser/${result.token}`;
+    const resetUrl = `${base}${withLocale(await getLocale(), `/reinitialiser/${result.token}`)}`;
     const mail = await sendPasswordResetMail({ to: result.email, resetUrl });
     // Jamais de lien en clair en production (même si PASSWORD_RESET_SHOW_LINK=1).
     if (!mail.sent && process.env.NODE_ENV !== "production") {
@@ -241,9 +248,9 @@ export async function requestPasswordResetAction(formData: FormData) {
     }
   }
   if (reveal) {
-    redirect(`/mot-de-passe-oublie?ok=1&lien=${encodeURIComponent(reveal)}`);
+    return localeRedirect(`/mot-de-passe-oublie?ok=1&lien=${encodeURIComponent(reveal)}`);
   }
-  redirect(`/mot-de-passe-oublie?ok=1${mailConfigured() ? "" : "&sansmail=1"}`);
+  return localeRedirect(`/mot-de-passe-oublie?ok=1${mailConfigured() ? "" : "&sansmail=1"}`);
 }
 
 export async function resetPasswordAction(formData: FormData) {
@@ -255,21 +262,21 @@ export async function resetPasswordAction(formData: FormData) {
   });
   if (!result.ok) {
     const code = result.error === "passwordTooShort" ? "password" : "1";
-    redirect(`/reinitialiser/${encodeURIComponent(token)}?e=${code}`);
+    return localeRedirect(`/reinitialiser/${encodeURIComponent(token)}?e=${code}`);
   }
   await openSession(result.userId, result.sessionVersion);
-  redirect("/");
+  return localeRedirect("/");
 }
 
 export async function createListAction(formData: FormData) {
   const user = await currentUser();
-  if (!user) redirect("/connexion");
-  if (user.mustChangePassword) redirect("/compte");
+  if (!user) return localeRedirect("/connexion");
+  if (user.mustChangePassword) return localeRedirect("/compte");
   const title = String(formData.get("title") ?? "");
   const category = String(formData.get("category") ?? "").trim();
   const person = String(formData.get("person") ?? "").trim();
-  if (!category) redirect(`/listes/new?e=${encodeURIComponent("listNeedsCategory")}`);
-  if (!person) redirect(`/listes/new?e=${encodeURIComponent("listNeedsPerson")}`);
+  if (!category) return localeRedirect(`/listes/new?e=${encodeURIComponent("listNeedsCategory")}`);
+  if (!person) return localeRedirect(`/listes/new?e=${encodeURIComponent("listNeedsPerson")}`);
   type CreateListResult =
     | { ok: true; wishlist: Wishlist }
     | { ok: false; error: string };
@@ -293,14 +300,14 @@ export async function createListAction(formData: FormData) {
       result: { ok: true, wishlist: created.wishlist },
     };
   });
-  if (!result.ok) redirect(`/listes/new?e=${encodeURIComponent(result.error)}`);
-  redirect(`/listes/${result.wishlist.id}`);
+  if (!result.ok) return localeRedirect(`/listes/new?e=${encodeURIComponent(result.error)}`);
+  return localeRedirect(`/listes/${result.wishlist.id}`);
 }
 
 async function memberId(): Promise<string> {
   const user = await currentUser();
-  if (!user) redirect("/connexion");
-  if (user.mustChangePassword) redirect("/compte");
+  if (!user) return localeRedirect("/connexion");
+  if (user.mustChangePassword) return localeRedirect("/compte");
   return user.id;
 }
 
@@ -371,7 +378,7 @@ export async function saveItemAction(
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
   if (!result.ok) return fail(result.error);
-  redirectToList(wishlistId, formData);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function enrichFromUrlAction(input: {
@@ -462,8 +469,8 @@ export async function deleteItemAction(formData: FormData) {
     const saved = deleteItem(doc, { wishlistId, actorId, itemId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function setItemTypeAction(input: {
@@ -509,8 +516,8 @@ export async function setItemArchivedFormAction(formData: FormData) {
   const itemId = String(formData.get("itemId") ?? "");
   const archived = String(formData.get("archived") ?? "") === "1";
   const result = await setItemArchivedAction({ wishlistId, itemId, archived });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function addTypeAction(formData: FormData) {
@@ -521,8 +528,8 @@ export async function addTypeAction(formData: FormData) {
     const saved = addType(doc, { wishlistId, actorId, label });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function renameTypeAction(formData: FormData) {
@@ -534,8 +541,8 @@ export async function renameTypeAction(formData: FormData) {
     const saved = renameType(doc, { wishlistId, actorId, typeId, label });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function deleteTypeAction(formData: FormData) {
@@ -546,8 +553,8 @@ export async function deleteTypeAction(formData: FormData) {
     const saved = deleteType(doc, { wishlistId, actorId, typeId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function manageLabelAction(input: {
@@ -602,8 +609,8 @@ export async function addPersonAction(formData: FormData) {
     const saved = addPerson(doc, { wishlistId, actorId, label });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function renamePersonAction(formData: FormData) {
@@ -615,8 +622,8 @@ export async function renamePersonAction(formData: FormData) {
     const saved = renamePerson(doc, { wishlistId, actorId, personId, label });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function deletePersonAction(formData: FormData) {
@@ -627,8 +634,8 @@ export async function deletePersonAction(formData: FormData) {
     const saved = deletePerson(doc, { wishlistId, actorId, personId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function cancelReservationAction(formData: FormData) {
@@ -639,8 +646,8 @@ export async function cancelReservationAction(formData: FormData) {
     const saved = cancelReservation(doc, { wishlistId, actorId, reservationId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function regenerateInviteAction(formData: FormData) {
@@ -650,8 +657,8 @@ export async function regenerateInviteAction(formData: FormData) {
     const saved = regenerateInvite(doc, { wishlistId, actorId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function setReadPasswordAction(formData: FormData) {
@@ -662,8 +669,8 @@ export async function setReadPasswordAction(formData: FormData) {
     const saved = await setReadPassword(doc, { wishlistId, actorId, password });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData, undefined, "readPassword");
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData, undefined, "readPassword");
 }
 
 export async function clearReadPasswordAction(formData: FormData) {
@@ -673,8 +680,8 @@ export async function clearReadPasswordAction(formData: FormData) {
     const saved = clearReadPassword(doc, { wishlistId, actorId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData, undefined, "readPasswordCleared");
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData, undefined, "readPasswordCleared");
 }
 
 export async function unlockPublicListAction(formData: FormData) {
@@ -684,43 +691,43 @@ export async function unlockPublicListAction(formData: FormData) {
     await rateLimitOrThrow(`read-unlock:${readToken.slice(0, 12)}`, 20, 15 * 60 * 1000);
   } catch (error) {
     if (isRateLimitError(error)) {
-      redirect(`/l/${readToken}?e=rateLimited`);
+      return localeRedirect(`/l/${readToken}?e=rateLimited`);
     }
     throw error;
   }
   const doc = await readDocument();
   const list = doc.wishlists.find((entry) => entry.readToken === readToken);
-  if (!list) redirect("/");
+  if (!list) return localeRedirect("/");
   if (!(await verifyReadPassword(list, password))) {
-    redirect(`/l/${readToken}?e=badPassword`);
+    return localeRedirect(`/l/${readToken}?e=badPassword`);
   }
   await grantReadUnlock(list);
-  redirect(`/l/${readToken}`);
+  return localeRedirect(`/l/${readToken}`);
 }
 
 export async function sendInviteAction(formData: FormData) {
   const user = await currentUser();
-  if (!user) redirect("/connexion");
-  if (user.mustChangePassword) redirect("/compte");
+  if (!user) return localeRedirect("/connexion");
+  if (user.mustChangePassword) return localeRedirect("/compte");
   const wishlistId = String(formData.get("wishlistId") ?? "");
   try {
     await rateLimitOrThrow(`invite:${user.id}`, 8, 60 * 60 * 1000);
   } catch (error) {
-    if (isRateLimitError(error)) redirectToList(wishlistId, formData, "rateLimited");
+    if (isRateLimitError(error)) return redirectToList(wishlistId, formData, "rateLimited");
     throw error;
   }
   const email = normalizeEmail(String(formData.get("email") ?? ""));
   if (!email || !email.includes("@")) {
-    redirectToList(wishlistId, formData, "emailRequired");
+    return redirectToList(wishlistId, formData, "emailRequired");
   }
   const doc = await readDocument();
   if (!findMembership(doc, wishlistId, user.id)) {
-    redirectToList(wishlistId, formData, "notMember");
+    return redirectToList(wishlistId, formData, "notMember");
   }
   const list = doc.wishlists.find((entry) => entry.id === wishlistId);
-  if (!list) redirectToList(wishlistId, formData, "listMissing");
+  if (!list) return redirectToList(wishlistId, formData, "listMissing");
   const base = await origin();
-  const inviteUrl = `${base}/inviter/${list.inviteToken}`;
+  const inviteUrl = `${base}${withLocale(await getLocale(), `/inviter/${list.inviteToken}`)}`;
   const mail = await sendInviteMail({
     to: email,
     inviteUrl,
@@ -728,9 +735,9 @@ export async function sendInviteAction(formData: FormData) {
     fromName: user.displayName,
   });
   if (!mail.sent) {
-    redirectToList(wishlistId, formData, mailConfigured() ? "inviteSendFailed" : "mailNotConfigured");
+    return redirectToList(wishlistId, formData, mailConfigured() ? "inviteSendFailed" : "mailNotConfigured");
   }
-  redirectToList(wishlistId, formData, undefined, "invite");
+  return redirectToList(wishlistId, formData, undefined, "invite");
 }
 
 export async function removeMemberAction(formData: FormData) {
@@ -741,8 +748,8 @@ export async function removeMemberAction(formData: FormData) {
     const saved = removeMember(doc, { wishlistId, actorId, userId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function leaveAction(formData: FormData) {
@@ -752,8 +759,8 @@ export async function leaveAction(formData: FormData) {
     const saved = leaveWishlist(doc, { wishlistId, actorId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirect("/");
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return localeRedirect("/");
 }
 
 export async function deleteListAction(formData: FormData) {
@@ -763,8 +770,8 @@ export async function deleteListAction(formData: FormData) {
     const saved = deleteWishlist(doc, { wishlistId, actorId });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirect("/");
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return localeRedirect("/");
 }
 
 export async function updateWishlistSettingsAction(formData: FormData) {
@@ -790,8 +797,8 @@ export async function updateWishlistSettingsAction(formData: FormData) {
     });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirectToList(wishlistId, formData, result.error);
-  redirectToList(wishlistId, formData);
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
 }
 
 export async function reserveAction(formData: FormData) {
@@ -802,7 +809,7 @@ export async function reserveAction(formData: FormData) {
   const note = String(formData.get("note") ?? "");
   // Honeypot anti-bot (doit rester vide).
   if (String(formData.get("website") ?? "").trim()) {
-    redirect(`/l/${readToken}?ok=1`);
+    return localeRedirect(`/l/${readToken}?ok=1`);
   }
   try {
     await rateLimitOrThrow(`reserve:${readToken.slice(0, 12)}`, 15, 60 * 60 * 1000);
@@ -811,16 +818,16 @@ export async function reserveAction(formData: FormData) {
       const params = new URLSearchParams({ e: "rateLimited" });
       if (typeId) params.set("typeId", typeId);
       if (itemId) params.set("itemId", itemId);
-      redirect(`/l/${readToken}/reserver?${params}`);
+      return localeRedirect(`/l/${readToken}/reserver?${params}`);
     }
     throw error;
   }
   const user = await currentUser();
   const doc = await readDocument();
   const wishlist = doc.wishlists.find((w) => w.readToken === readToken);
-  if (!wishlist) redirect("/");
+  if (!wishlist) return localeRedirect("/");
   if (!(await canAccessPublicList(doc, wishlist, user))) {
-    redirect(`/l/${readToken}`);
+    return localeRedirect(`/l/${readToken}`);
   }
   const result = await updateDocument((current) => {
     const saved = reserveItem(current, {
@@ -837,12 +844,12 @@ export async function reserveAction(formData: FormData) {
     const params = new URLSearchParams({ e: result.error });
     if (typeId) params.set("typeId", typeId);
     if (itemId) params.set("itemId", itemId);
-    redirect(`/l/${readToken}/reserver?${params}`);
+    return localeRedirect(`/l/${readToken}/reserver?${params}`);
   }
   if (result.ok && result.reservation) {
     await grantReservationClaim(readToken, result.reservation.id);
   }
-  redirect(`/l/${readToken}?ok=1`);
+  return localeRedirect(`/l/${readToken}?ok=1`);
 }
 
 export async function cancelMyReservationAction(formData: FormData) {
@@ -852,7 +859,7 @@ export async function cancelMyReservationAction(formData: FormData) {
   const claimedIds = await listClaimedReservationIds(readToken);
   const doc = await readDocument();
   const wishlist = doc.wishlists.find((w) => w.readToken === readToken);
-  if (!wishlist) redirect("/");
+  if (!wishlist) return localeRedirect("/");
   const result = await updateDocument((current) => {
     const saved = cancelOwnReservation(current, {
       wishlistId: wishlist.id,
@@ -862,21 +869,21 @@ export async function cancelMyReservationAction(formData: FormData) {
     });
     return { doc: saved.ok ? saved.doc : current, result: saved };
   });
-  if (!result.ok) redirect(`/l/${readToken}?e=${result.error}`);
+  if (!result.ok) return localeRedirect(`/l/${readToken}?e=${result.error}`);
   await revokeReservationClaim(readToken, reservationId);
-  redirect(`/l/${readToken}`);
+  return localeRedirect(`/l/${readToken}`);
 }
 
 export async function joinInviteAction(token: string) {
   const user = await currentUser();
-  if (!user) redirect(`/connexion?next=${encodeURIComponent(`/inviter/${token}`)}`);
-  if (user.mustChangePassword) redirect("/compte");
+  if (!user) return localeRedirect(`/connexion?next=${encodeURIComponent(`/inviter/${token}`)}`);
+  if (user.mustChangePassword) return localeRedirect("/compte");
   const result = await updateDocument((doc) => {
     const saved = acceptInvite(doc, { token, userId: user.id });
     return { doc: saved.ok ? saved.doc : doc, result: saved };
   });
-  if (!result.ok) redirect(`/inviter/${token}?e=${encodeURIComponent(result.error)}`);
-  redirect(`/listes/${result.wishlistId}`);
+  if (!result.ok) return localeRedirect(`/inviter/${token}?e=${encodeURIComponent(result.error)}`);
+  return localeRedirect(`/listes/${result.wishlistId}`);
 }
 
 export async function setLocaleAction(locale: Locale) {

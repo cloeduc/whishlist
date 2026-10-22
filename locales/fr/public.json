@@ -29,6 +29,7 @@
   "buyLink": "Voir le site",
   "buyLinkAria": "Voir le site pour « {{name}} »",
   "iOffer": "Réserver ce cadeau",
+  "iOfferAria": "Réserver ce cadeau : {{name}}",
   "wishLevel": "Niveau d'envie : {{rating}} sur {{max}}",
   "reservedTitle": "Cadeau réservé",
   "reservedBody": "Vous avez réservé ce cadeau. L'achat reste à effectuer séparément. Il reste visible pour vous sur cette liste.",

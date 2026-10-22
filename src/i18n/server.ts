@@ -1,7 +1,7 @@
 import { createInstance, type i18n, type TFunction } from "i18next";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 import { cache } from "react";
-import { defaultLocale, isLocale, localeCookie, namespaces, type Locale, type Namespace } from "./config";
+import { defaultLocale, isLocale, namespaces, type Locale, type Namespace } from "./config";
 import { resources } from "./resources";
 
 const ready = new Map<Locale, Promise<i18n>>();
@@ -32,11 +32,8 @@ void i18nFor("fr");
 void i18nFor("en");
 
 export const getLocale = cache(async (): Promise<Locale> => {
-  const jar = await cookies();
-  const fromCookie = jar.get(localeCookie)?.value;
-  if (isLocale(fromCookie)) return fromCookie;
-  const accept = (await headers()).get("accept-language")?.toLowerCase() ?? "";
-  if (accept.split(",")[0]?.trim().startsWith("en")) return "en";
+  const fromUrl = (await headers()).get("x-locale");
+  if (isLocale(fromUrl)) return fromUrl;
   return defaultLocale;
 });
 

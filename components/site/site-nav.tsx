@@ -10,12 +10,14 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { logoutAction } from "@/src/server/actions";
 import type { Locale } from "@/src/i18n/config";
+import { stripLocalePrefix, withLocale } from "@/src/i18n/locale-path";
 
 function isActive(pathname: string, href: string): boolean {
+  const path = stripLocalePrefix(pathname).path;
   if (href === "/") {
-    return pathname === "/" || pathname.startsWith("/listes");
+    return path === "/" || path.startsWith("/listes");
   }
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return path === href || path.startsWith(`${href}/`);
 }
 
 export function SiteNav({
@@ -34,7 +36,7 @@ export function SiteNav({
     const active = isActive(pathname, href);
     return (
       <Link
-        href={href}
+        href={withLocale(locale, href)}
         prefetch
         aria-current={active ? "page" : undefined}
         className={cn(buttonVariants({ variant: active ? "default" : "ghost", size: "sm" }))}

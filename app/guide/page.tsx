@@ -11,7 +11,7 @@ type GuideScreen = { src: string; alt: string; caption: string };
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("content");
-  return publicPageMetadata({
+  return await publicPageMetadata({
     title: t("guide.metaTitle"),
     description: t("guide.metaDescription"),
     path: "/guide",

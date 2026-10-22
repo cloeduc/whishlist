@@ -9,7 +9,8 @@
 
 :root {
   /* Palette cadeau néo-brutaliste : bleu / rouge / jaune / noir */
-  --gift-blue: #1e60ff;
+  /* #1a56e8 : 5,2:1 sur #e8f0ff, 5,9:1 pour le blanc des boutons. */
+  --gift-blue: #1a56e8;
   --gift-red: #ff2d2d;
   --gift-yellow: #ffd700;
   --background: #e8f0ff;
@@ -181,6 +182,10 @@
   }
   h1, h2, h3, h4, h5, h6 {
     font-weight: var(--font-weight-heading);
+  }
+  a:focus-visible {
+    outline: 2px solid #000;
+    outline-offset: 2px;
   }
 }
 * {

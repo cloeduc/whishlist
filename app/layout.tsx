@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { cn } from "@/lib/utils";
 import { I18nProvider } from "@/src/i18n/client";
+import { withLocale } from "@/src/i18n/locale-path";
 import { getLocale, getTranslations } from "@/src/i18n/server";
 import { supportUrl } from "@/src/site/links";
 import { siteOrigin } from "@/src/site/seo";
@@ -58,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </a>
             <header className="flex flex-wrap items-center gap-3">
               <Link
-                href="/"
+                href={withLocale(locale, "/")}
                 aria-label={t("nav.homeAria")}
                 className="flex items-center gap-2 text-lg font-bold tracking-tight text-foreground"
               >
@@ -84,6 +85,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               faq={tContent("nav.faq")}
               guide={tContent("nav.guide")}
               legal={tContent("nav.legal")}
+              locale={locale}
             />
           </div>
         </I18nProvider>

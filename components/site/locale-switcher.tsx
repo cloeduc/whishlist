@@ -1,15 +1,15 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/src/i18n/config";
+import { withLocale } from "@/src/i18n/locale-path";
 
 export function LocaleSwitcher({ locale }: { locale: Locale }) {
   const { t } = useTranslation("common");
   const pathname = usePathname() ?? "/";
-  const searchParams = useSearchParams();
 
   return (
     <div
@@ -19,13 +19,12 @@ export function LocaleSwitcher({ locale }: { locale: Locale }) {
     >
       {(["fr", "en"] as const).map((lang) => {
         const active = locale === lang;
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("lang", lang);
         return (
           <a
             key={lang}
-            href={`${pathname}?${params.toString()}`}
+            href={withLocale(lang, pathname)}
             hrefLang={lang}
+            lang={lang}
             aria-current={active ? "true" : undefined}
             className={cn(
               buttonVariants({ variant: active ? "default" : "ghost", size: "sm" }),

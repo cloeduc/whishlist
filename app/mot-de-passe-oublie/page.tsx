@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
-  return publicPageMetadata({
+  return await publicPageMetadata({
     title: t("forgot.metaTitle"),
     description: t("forgot.metaDescription"),
     path: "/mot-de-passe-oublie",

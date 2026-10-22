@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { originFromEnv } from "@/src/auth/origin";
+import { getLocale } from "@/src/i18n/server";
+import { withLocale } from "@/src/i18n/locale-path";
 
 /** Ancien nom d'hôte, encore servi. Les liens publics doivent viser le domaine actuel. */
 const LEGACY_ORIGIN = "https://wishlist.mesdamesduc.fr";
@@ -31,21 +33,33 @@ export function legacyHostRedirect(hostHeader: string | null, pathname: string, 
   return url;
 }
 
-/** Pages marketing et comptes publics. Pas de hreflang : la langue est un cookie. */
-export function publicPageMetadata(input: {
+/** Pages publiques. Le canonique et hreflang suivent l'adresse de la langue. */
+export async function publicPageMetadata(input: {
   title: string;
   description: string;
   path: string;
-}): Metadata {
+}): Promise<Metadata> {
+  const locale = await getLocale();
+  const fr = withLocale("fr", input.path);
+  const en = withLocale("en", input.path);
+  const canonical = withLocale(locale, input.path);
   return {
     title: input.title,
     description: input.description,
-    alternates: { canonical: input.path },
+    alternates: {
+      canonical,
+      languages: {
+        fr,
+        en,
+        "x-default": fr,
+      },
+    },
     openGraph: {
       title: input.title,
       description: input.description,
-      url: input.path,
+      url: canonical,
       type: "website",
+      locale: locale === "en" ? "en_US" : "fr_FR",
     },
     robots: { index: true, follow: true },
   };

@@ -7,7 +7,7 @@ import { publicPageMetadata } from "@/src/site/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("content");
-  return publicPageMetadata({
+  return await publicPageMetadata({
     title: t("legal.metaTitle"),
     description: t("legal.metaDescription"),
     path: "/mentions-legales",

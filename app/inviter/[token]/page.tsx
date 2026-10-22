@@ -4,7 +4,8 @@ import { joinInviteAction } from "../../../src/server/actions";
 import { getDocument } from "../../../src/store/db";
 import { LinkButton } from "@/components/site/link-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { getTranslations, translateError } from "@/src/i18n/server";
+import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
+import { withLocale } from "@/src/i18n/locale-path";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +18,13 @@ export default async function InvitePage({
 }) {
   const { token } = await params;
   const query = await searchParams;
-  const [t, user, doc] = await Promise.all([getTranslations("public"), currentUser(), getDocument()]);
-  if (user?.mustChangePassword) redirect("/compte");
+  const [t, user, doc, locale] = await Promise.all([
+    getTranslations("public"),
+    currentUser(),
+    getDocument(),
+    getLocale(),
+  ]);
+  if (user?.mustChangePassword) redirect(withLocale(locale, "/compte"));
   const list = doc.wishlists.find((entry) => entry.inviteToken === token);
   const back = `/inviter/${token}`;
   if (!user) {

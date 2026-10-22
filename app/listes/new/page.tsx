@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { getTranslations, translateError } from "@/src/i18n/server";
+import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
+import { withLocale } from "@/src/i18n/locale-path";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +16,14 @@ export default async function NewListPage({
 }: {
   searchParams: Promise<{ e?: string }>;
 }) {
-  const [user, t, query] = await Promise.all([currentUser(), getTranslations("home"), searchParams]);
-  if (!user) redirect("/connexion?next=/listes/new");
-  if (user.mustChangePassword) redirect("/compte");
+  const [user, t, query, locale] = await Promise.all([
+    currentUser(),
+    getTranslations("home"),
+    searchParams,
+    getLocale(),
+  ]);
+  if (!user) redirect(withLocale(locale, "/connexion?next=/listes/new"));
+  if (user.mustChangePassword) redirect(withLocale(locale, "/compte"));
   const error = query.e ? await translateError(query.e) : null;
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-4">

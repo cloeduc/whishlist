@@ -37,6 +37,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { intlLocale } from "@/src/i18n/config";
 import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
+import { withLocale } from "@/src/i18n/locale-path";
 
 export const dynamic = "force-dynamic";
 
@@ -79,8 +80,8 @@ export default async function EditListPage({
     getLocale(),
   ]);
   const priceLocale = intlLocale(locale);
-  if (!user) redirect(`/connexion?next=/listes/${id}`);
-  if (user.mustChangePassword) redirect("/compte");
+  if (!user) redirect(withLocale(locale, `/connexion?next=/listes/${id}`));
+  if (user.mustChangePassword) redirect(withLocale(locale, "/compte"));
   const list = doc.wishlists.find((entry) => entry.id === id);
   if (!list) notFound();
   const membership = findMembership(doc, id, user.id);
@@ -93,8 +94,8 @@ export default async function EditListPage({
     );
   }
   const base = await origin();
-  const readUrl = `${base}/l/${list.readToken}`;
-  const inviteUrl = `${base}/inviter/${list.inviteToken}`;
+  const readUrl = `${base}${withLocale(locale, `/l/${list.readToken}`)}`;
+  const inviteUrl = `${base}${withLocale(locale, `/inviter/${list.inviteToken}`)}`;
   const types = doc.types
     .filter((type) => type.wishlistId === id)
     .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label));

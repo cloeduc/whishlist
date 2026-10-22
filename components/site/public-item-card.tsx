@@ -13,6 +13,7 @@ export function PublicItemCard({
   buyLink,
   buyLinkAria,
   offerLabel,
+  offerAria,
   mineLabel,
   cancelLabel,
   cancelTitle,
@@ -25,6 +26,7 @@ export function PublicItemCard({
   buyLink: string;
   buyLinkAria: string;
   offerLabel: string;
+  offerAria: string;
   mineLabel: string;
   cancelLabel: string;
   cancelTitle: string;
@@ -96,6 +98,7 @@ export function PublicItemCard({
             href={`/l/${readToken}/reserver?itemId=${encodeURIComponent(item.id)}`}
             size="sm"
             className="w-full sm:w-auto"
+            aria-label={offerAria}
           >
             {offerLabel}
           </LinkButton>

@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { isLocale, localeCookie } from "@/src/i18n/config";
+import { localeCookie } from "@/src/i18n/config";
+import { decideLocaleRoute } from "@/src/i18n/locale-path";
 import { contentSecurityPolicy } from "@/src/server/content-security";
 import { legacyHostRedirect } from "@/src/site/seo";
 
@@ -11,7 +12,16 @@ function cspHeaders(request: NextRequest) {
   return { requestHeaders, value: policy.value };
 }
 
-/** `?lang=en|fr` pose le cookie de langue puis retire la query (liens de liste partageables). */
+function withLocaleCookie(response: NextResponse, request: NextRequest, locale: "fr" | "en") {
+  response.cookies.set(localeCookie, locale, {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 365,
+    sameSite: "lax",
+    secure: request.nextUrl.protocol === "https:",
+  });
+}
+
+/** L'adresse porte la langue. Le français n'a pas de préfixe, l'anglais est sous `/en`. */
 export function proxy(request: NextRequest) {
   const { requestHeaders, value } = cspHeaders(request);
   const moved = legacyHostRedirect(
@@ -25,24 +35,37 @@ export function proxy(request: NextRequest) {
     return response;
   }
 
-  const lang = request.nextUrl.searchParams.get("lang");
+  const decision = decideLocaleRoute({
+    pathname: request.nextUrl.pathname,
+    search: request.nextUrl.search,
+    nextUrl: request.headers.get("next-url"),
+  });
 
-  if (!isLocale(lang)) {
-    const response = NextResponse.next({ request: { headers: requestHeaders } });
+  if (decision.type === "redirect") {
+    const url = request.nextUrl.clone();
+    url.pathname = decision.pathname;
+    url.search = decision.search;
+    const response = NextResponse.redirect(url, decision.status);
     response.headers.set("Content-Security-Policy", value);
+    withLocaleCookie(response, request, decision.locale);
     return response;
   }
 
-  const url = request.nextUrl.clone();
-  url.searchParams.delete("lang");
-  const response = NextResponse.redirect(url);
-  response.cookies.set(localeCookie, lang, {
-    path: "/",
-    maxAge: 60 * 60 * 24 * 365,
-    sameSite: "lax",
-    secure: request.nextUrl.protocol === "https:",
-  });
+  requestHeaders.set("x-locale", decision.locale);
+  const response =
+    decision.type === "rewrite"
+      ? NextResponse.rewrite(
+          (() => {
+            const url = request.nextUrl.clone();
+            url.pathname = decision.pathname;
+            url.search = decision.search;
+            return url;
+          })(),
+          { request: { headers: requestHeaders } },
+        )
+      : NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", value);
+  withLocaleCookie(response, request, decision.locale);
   return response;
 }
 

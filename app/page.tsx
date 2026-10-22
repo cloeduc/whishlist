@@ -11,12 +11,13 @@ import { WishlistCover } from "@/components/site/wishlist-cover";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { GITHUB_REPO_URL } from "@/src/site/links";
-import { getTranslations } from "@/src/i18n/server";
+import { getLocale, getTranslations } from "@/src/i18n/server";
+import { withLocale } from "@/src/i18n/locale-path";
 import { publicPageMetadata } from "@/src/site/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("common");
-  return publicPageMetadata({
+  return await publicPageMetadata({
     title: t("meta.title"),
     description: t("meta.description"),
     path: "/",
@@ -26,12 +27,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [user, t, tCommon] = await Promise.all([
+  const [user, t, tCommon, locale] = await Promise.all([
     currentUser(),
     getTranslations("home"),
     getTranslations("common"),
+    getLocale(),
   ]);
-  if (user?.mustChangePassword) redirect("/compte");
+  if (user?.mustChangePassword) redirect(withLocale(locale, "/compte"));
   if (!user) {
     return (
       <main className="flex flex-col gap-6">
@@ -88,7 +90,7 @@ export default async function HomePage() {
           {mine.map((list) => (
             <Card key={list.id} size="sm">
               <CardHeader className="flex flex-row items-center gap-3">
-                <Link href={`/listes/${list.id}`} className="shrink-0" tabIndex={-1} aria-hidden>
+                <Link href={withLocale(locale, `/listes/${list.id}`)} className="shrink-0" tabIndex={-1} aria-hidden>
                   <WishlistCover
                     coverImageUrl={list.coverImageUrl}
                     theme={resolveTheme(list.theme)}
@@ -99,7 +101,7 @@ export default async function HomePage() {
                 </Link>
                 <div className="flex min-w-0 flex-col gap-1">
                   <CardTitle>
-                    <Link href={`/listes/${list.id}`} className="hover:underline">
+                    <Link href={withLocale(locale, `/listes/${list.id}`)} className="hover:underline">
                       {list.title}
                     </Link>
                   </CardTitle>

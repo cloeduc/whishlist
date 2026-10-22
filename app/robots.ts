@@ -9,7 +9,18 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/l/", "/inviter/", "/reinitialiser/", "/compte", "/listes/"],
+      disallow: [
+      "/l/",
+      "/en/l/",
+      "/inviter/",
+      "/en/inviter/",
+      "/reinitialiser/",
+      "/en/reinitialiser/",
+      "/compte",
+      "/en/compte",
+      "/listes/",
+      "/en/listes/",
+    ],
     },
     sitemap: new URL("/sitemap.xml", siteOrigin()).toString(),
   };

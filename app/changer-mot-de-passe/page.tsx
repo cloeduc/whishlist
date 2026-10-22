@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { getLocale } from "@/src/i18n/server";
+import { withLocale } from "@/src/i18n/locale-path";
 
 export const dynamic = "force-dynamic";
 
@@ -13,5 +15,6 @@ export default async function ChangerMotDePassePage({
   if (query.e) params.set("e", query.e);
   if (query.ok) params.set("ok", query.ok);
   const qs = params.toString();
-  redirect(qs ? `/compte?${qs}` : "/compte");
+  const locale = await getLocale();
+  redirect(withLocale(locale, qs ? `/compte?${qs}` : "/compte"));
 }

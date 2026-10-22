@@ -10,7 +10,7 @@ import { publicPageMetadata } from "@/src/site/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("content");
-  return publicPageMetadata({
+  return await publicPageMetadata({
     title: t("project.metaTitle"),
     description: t("project.metaDescription"),
     path: "/projet",

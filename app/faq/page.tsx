@@ -9,7 +9,7 @@ type FaqItem = { q: string; a: string };
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("content");
-  return publicPageMetadata({
+  return await publicPageMetadata({
     title: t("faq.metaTitle"),
     description: t("faq.metaDescription"),
     path: "/faq",

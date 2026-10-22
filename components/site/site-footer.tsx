@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { SupportLabel } from "@/components/site/support-label";
+import type { Locale } from "@/src/i18n/config";
+import { withLocale } from "@/src/i18n/locale-path";
 
 const GITHUB = "https://github.com/cloeduc/whishlist";
 
@@ -16,6 +18,7 @@ export function SiteFooter({
   faq,
   guide,
   legal,
+  locale,
 }: {
   infoLabel: string;
   tagline: string;
@@ -26,21 +29,22 @@ export function SiteFooter({
   faq: string;
   guide: string;
   legal: string;
+  locale: Locale;
 }) {
   return (
     <footer className="border-t-2 border-border pt-4 text-sm text-muted-foreground">
       <nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label={infoLabel}>
-        <Link href="/projet" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link href={withLocale(locale, "/projet")} className="font-medium text-foreground underline-offset-4 hover:underline">
           {project}
         </Link>
-        <Link href="/faq" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link href={withLocale(locale, "/faq")} className="font-medium text-foreground underline-offset-4 hover:underline">
           {faq}
         </Link>
-        <Link href="/guide" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link href={withLocale(locale, "/guide")} className="font-medium text-foreground underline-offset-4 hover:underline">
           {guide}
         </Link>
         <Link
-          href="/mentions-legales"
+          href={withLocale(locale, "/mentions-legales")}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           {legal}
