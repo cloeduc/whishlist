@@ -21,7 +21,7 @@ git checkout main
 git pull --ff-only origin main
 
 echo "== docker build =="
-DOCKER_BUILDKIT=0 docker build --pull -t whishlist:local .
+docker build --pull -t whishlist:local .
 
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "Missing $ENV_FILE (WHISHLIST_SESSION_SECRET, optional RESEND)"
