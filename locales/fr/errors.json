@@ -72,5 +72,7 @@
   "originNotAllowed": "Cette origine n'est pas autorisée à appeler l'API.",
   "apiVersionUnsupported": "Cette version de l'API n'est plus prise en charge. Mettez l'application à jour.",
   "notFound": "Cette adresse n'existe pas.",
-  "serverError": "Une erreur est survenue. Réessayez plus tard."
+  "serverError": "Une erreur est survenue. Réessayez plus tard.",
+  "idInvalid": "Identifiant invalide.",
+  "idConflict": "Cet identifiant est déjà utilisé."
 }

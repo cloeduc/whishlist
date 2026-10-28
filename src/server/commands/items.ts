@@ -1,4 +1,5 @@
 import { findMembership } from "../../domain/access";
+import { idTaken, isClientId } from "../../domain/client-ids";
 import { fetchPageHtml } from "../../domain/fetch-page";
 import {
   cancelReservation,
@@ -82,6 +83,8 @@ async function mutateItem(
 export type ItemFields = {
   wishlistId: string;
   itemId?: string;
+  /** Création : identifiant choisi par le client ; un renvoi rend l'idée existante. */
+  clientId?: string;
   name: string;
   typeId: string;
   personId: string;
@@ -92,14 +95,22 @@ export type ItemFields = {
   priority: string;
 };
 
-export async function saveItem(ctx: CommandContext, input: ItemFields): Promise<CommandResult<{ item: Item }>> {
+export async function saveItem(
+  ctx: CommandContext,
+  input: ItemFields,
+): Promise<CommandResult<{ item: Item; replayed: boolean }>> {
   const active = activeUser(ctx);
   if (!active.ok) return active;
   const actorId = active.user.id;
+  const clientId = input.itemId ? undefined : input.clientId;
+  if (clientId !== undefined && !isClientId(clientId)) return { ok: false, error: "idInvalid" };
   const price = parsePrice(input.price);
   if (price === "invalid") return { ok: false, error: "priceInvalid" };
   const doc = await readDocument();
   if (!findMembership(doc, input.wishlistId, actorId)) return { ok: false, error: "notMember" };
+  // Renvoi d'une création déjà reçue : rien à recalculer (ni image à chercher).
+  const sent = clientId ? replayedItem(doc, input.wishlistId, clientId) : null;
+  if (sent) return sent;
   const current = input.itemId ? itemIn(doc, input.wishlistId, input.itemId) : null;
   const url = blankUrl(input.url);
   const imageUrl = await resolveImageUrl({
@@ -121,14 +132,35 @@ export async function saveItem(ctx: CommandContext, input: ItemFields): Promise<
     priority: input.priority,
   };
   const itemId = input.itemId;
-  return writeItem(actorId, input.wishlistId, (latest) => {
+  let replayed = false;
+  const saved = await writeItem(actorId, input.wishlistId, (latest) => {
     if (itemId) {
-      const saved = updateItem(latest, { ...fields, itemId });
-      return saved.ok ? { ...saved, itemId } : saved;
+      const updated = updateItem(latest, { ...fields, itemId });
+      return updated.ok ? { ...updated, itemId } : updated;
     }
-    const created = createItem(latest, fields);
+    // Vérifié de nouveau dans l'écriture : deux envois simultanés ne font qu'une idée.
+    if (clientId) {
+      const again = replayedItem(latest, input.wishlistId, clientId);
+      if (again) {
+        replayed = again.ok;
+        return again.ok ? { ok: true, doc: latest, itemId: clientId } : again;
+      }
+    }
+    const created = createItem(latest, { ...fields, id: clientId });
     return created.ok ? { ok: true, doc: created.doc, itemId: created.item.id } : created;
   });
+  return saved.ok ? { ...saved, replayed } : saved;
+}
+
+/** Idée déjà créée avec cet identifiant : la même liste → renvoi ; ailleurs → conflit ; sinon null. */
+function replayedItem(
+  doc: Database,
+  wishlistId: string,
+  clientId: string,
+): { ok: true; item: Item; replayed: true } | { ok: false; error: string } | null {
+  if (!idTaken(doc, clientId)) return null;
+  const item = itemIn(doc, wishlistId, clientId);
+  return item ? { ok: true, item, replayed: true } : { ok: false, error: "idConflict" };
 }
 
 export function setItemType(ctx: CommandContext, input: { wishlistId: string; itemId: string; typeId: string }) {

@@ -3,7 +3,10 @@ import path from "node:path";
 import { chromium } from "playwright";
 
 const baseURL = process.env.DEMO_BASE_URL ?? "http://localhost:3010";
-const outputRoot = path.resolve(process.argv[2] ?? "public/guide");
+// `--mobile` : écrans du site en largeur de téléphone, référence de design de l'app (feature 005).
+const mobile = process.argv.includes("--mobile");
+const outputArg = process.argv.slice(2).find((arg) => !arg.startsWith("--"));
+const outputRoot = path.resolve(outputArg ?? (mobile ? "specs/005-mobile-list-app/design/web-mobile" : "public/guide"));
 const password = process.env.DEMO_PASSWORD;
 if (!password || password.length < 10) {
   console.error("DEMO_PASSWORD is required (at least 10 characters).");
@@ -224,6 +227,60 @@ async function captureLocale(locale) {
   await capture("reservations", `/listes/demo-list?onglet=reservations&lang=${locale.code}`);
 
   await context.close();
+}
+
+/**
+ * Mode mobile : 390 × 844, densité 2, pages entières avec l'en-tête et le pied du site,
+ * en français. Mêmes noms que les captures de specs/005-mobile-list-app/design-reference.md.
+ */
+async function captureMobile() {
+  await mkdir(outputRoot, { recursive: true });
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 2,
+    isMobile: true,
+    hasTouch: true,
+    locale: "fr-FR",
+  });
+  const page = await context.newPage();
+  async function shot(name, pathname) {
+    await page.goto(`${baseURL}${pathname}`, { waitUntil: "load", timeout: 60000 });
+    // Les outils de dev de Next.js (serveur de dev) ne font pas partie du site.
+    // Par le DOM : la CSP du site refuse une feuille de style injectée.
+    await page.evaluate(() => {
+      document.querySelectorAll("[data-nextjs-dev-overlay], nextjs-portal").forEach((el) => {
+        el.style.display = "none";
+      });
+    });
+    await sleep(400);
+    await page.screenshot({ path: path.join(outputRoot, `${name}.png`), fullPage: true, animations: "disabled" });
+    console.log(`${name}: ${page.url()}`);
+  }
+  await shot("01-accueil", "/?lang=fr");
+  await shot("02-connexion", "/connexion");
+  await shot("03-inscription", "/inscription");
+  await shot("12-liste-publique", "/l/demo-list-lecture");
+  await page.goto(`${baseURL}/connexion`, { waitUntil: "load" });
+  await page.getByLabel(locales[0].emailLabel).fill("alex@example.test");
+  await page.getByLabel(locales[0].passwordLabel).fill(password);
+  await page.getByRole("button", { name: locales[0].loginButton }).click();
+  await page.waitForURL("**/");
+  await shot("04-mes-listes", "/");
+  await shot("05-nouvelle-liste", "/listes/new");
+  await shot("06-liste-idees", "/listes/demo-list");
+  await shot("07-liste-archives", "/listes/demo-list?onglet=archives");
+  await shot("08-liste-reservations", "/listes/demo-list?onglet=reservations");
+  await shot("09-liste-partage", "/listes/demo-list?onglet=partage");
+  await shot("10-liste-reglages", "/listes/demo-list?onglet=reglages");
+  await shot("11-compte", "/compte");
+  await context.close();
+}
+
+if (mobile) {
+  await captureMobile();
+  await browser.close();
+  console.log(`Screenshots written to ${outputRoot}`);
+  process.exit(0);
 }
 
 for (const locale of locales) {

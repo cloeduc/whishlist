@@ -1,0 +1,48 @@
+{
+  "loading": "Loading…",
+  "back": "Back",
+  "retry": "Try again",
+  "session": {
+    "expired": "You have been signed out. Please log in again."
+  },
+  "upgrade": {
+    "title": "Update the app",
+    "body": "The server no longer supports this version of the app. Install the latest version to continue."
+  },
+  "lists": {
+    "itemCount_one": "{{count}} idea",
+    "itemCount_other": "{{count}} ideas",
+    "missing": "This list no longer exists, or you are no longer a member.",
+    "notSentYet": "This list hasn't been sent yet. You can do this once you are back online."
+  },
+  "offline": {
+    "needsNetwork": "This needs a connection. Try again once you are back online.",
+    "unreachable": "The server can't be reached. Check your connection, then try again.",
+    "banner": "Offline · last updated at {{time}}",
+    "bannerNoDate": "Offline",
+    "pendingCount_one": "{{count}} change waiting to be sent.",
+    "pendingCount_other": "{{count}} changes waiting to be sent.",
+    "pending": "Waiting",
+    "rejected": "This change was not saved.",
+    "fix": "Fix",
+    "discard": "Discard",
+    "savedOffline": "Saved on this phone. It will be sent as soon as you are back online.",
+    "logoutTitle": "Log out anyway?",
+    "logoutWarning_one": "{{count}} change has not been sent yet. It will be lost if you log out.",
+    "logoutWarning_other": "{{count}} changes have not been sent yet. They will be lost if you log out.",
+    "logoutConfirm": "Log out and lose the changes",
+    "logoutKeep": "Stay logged in"
+  },
+  "share": {
+    "qrLabel": "QR code of the list link",
+    "qrHint": "Let another phone scan this code to open the list.",
+    "share": "Share",
+    "message": "{{title}} — {{url}}",
+    "passwordNotice": "This list is protected by a password. Give it to your friends and family along with the link.",
+    "manageOnSite": "Manage sharing on the website",
+    "pendingList": "This list hasn't been sent yet. Its link will be available once you are back online."
+  },
+  "settings": {
+    "offline": "List settings need a connection. Try again once you are back online."
+  }
+}

@@ -1,0 +1,36 @@
+import type { ReactNode } from "react";
+import { View } from "react-native";
+
+import { tokens } from "@/theme/tokens";
+import { BrandHeader } from "@/ui/BrandHeader";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { Screen } from "@/ui/Screen";
+
+/** Écrans sans connexion (`02-connexion.png`, `03-inscription.png`) : en-tête du site, puis une carte-formulaire. */
+export function AuthLayout({
+  title,
+  description,
+  children,
+  below,
+}: {
+  title: string;
+  description?: string;
+  children: ReactNode;
+  /** Sous la carte (lien « Créer un compte »). */
+  below?: ReactNode;
+}) {
+  return (
+    <Screen>
+      <BrandHeader />
+      <Card>
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          {description ? <CardDescription>{description}</CardDescription> : null}
+        </CardHeader>
+        <CardContent>{children}</CardContent>
+      </Card>
+      {/* Centré, comme le lien « Créer un compte » sous la carte du site. */}
+      {below ? <View style={{ flexDirection: "row", justifyContent: "center", gap: tokens.space[3] }}>{below}</View> : null}
+    </Screen>
+  );
+}

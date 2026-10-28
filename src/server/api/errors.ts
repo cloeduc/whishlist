@@ -23,6 +23,7 @@ const STATUS_BY_CODE: Record<string, number> = {
   inviteLinkBroken: 404,
 
   itemAlreadyReserved: 409,
+  idConflict: 409,
   apiVersionUnsupported: 410,
   payloadTooLarge: 413,
   unsupportedMediaType: 415,

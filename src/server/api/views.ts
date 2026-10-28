@@ -91,7 +91,17 @@ export type MeView = { id: string; email: string; displayName: string; mustChang
 
 export type SessionView = { token: string; expiresAt: string; user: MeView };
 
-export type ListSummaryView = { id: string; title: string; role: Role; itemCount: number; readUrl: string };
+export type ListSummaryView = {
+  id: string;
+  title: string;
+  /** Depuis 1.1.0 : ce qu'affiche la carte de « Mes listes » (couverture, sous-titre). */
+  subtitle: string | null;
+  coverImageUrl: string | null;
+  theme: WishlistTheme;
+  role: Role;
+  itemCount: number;
+  readUrl: string;
+};
 
 export type MemberItemView = Omit<PublicItemView, "mine" | "reservationId"> & { archived: boolean; sortOrder: number };
 
@@ -143,6 +153,9 @@ export function toListSummary(
   return {
     id: wishlist.id,
     title: wishlist.title,
+    subtitle: wishlist.subtitle,
+    coverImageUrl: wishlist.coverImageUrl,
+    theme: wishlist.theme,
     role,
     itemCount: listItems(doc, wishlist.id).length,
     readUrl: siteUrl(origin, locale, `/l/${wishlist.readToken}`),

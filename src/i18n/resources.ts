@@ -7,6 +7,7 @@ import publicEn from "../../locales/en/public.json";
 import errorsEn from "../../locales/en/errors.json";
 import mailEn from "../../locales/en/mail.json";
 import contentEn from "../../locales/en/content.json";
+import mobileEn from "../../locales/en/mobile.json";
 import commonFr from "../../locales/fr/common.json";
 import authFr from "../../locales/fr/auth.json";
 import homeFr from "../../locales/fr/home.json";
@@ -15,6 +16,7 @@ import publicFr from "../../locales/fr/public.json";
 import errorsFr from "../../locales/fr/errors.json";
 import mailFr from "../../locales/fr/mail.json";
 import contentFr from "../../locales/fr/content.json";
+import mobileFr from "../../locales/fr/mobile.json";
 
 export const resources = {
   fr: {
@@ -26,6 +28,7 @@ export const resources = {
     errors: errorsFr,
     mail: mailFr,
     content: contentFr,
+    mobile: mobileFr,
   },
   en: {
     common: commonEn,
@@ -36,5 +39,6 @@ export const resources = {
     errors: errorsEn,
     mail: mailEn,
     content: contentEn,
+    mobile: mobileEn,
   },
 } satisfies Resource;

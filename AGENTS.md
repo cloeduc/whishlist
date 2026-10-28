@@ -11,7 +11,8 @@
 - Tests : `npm test` (tous les fichiers `tests/domain/*.test.ts`)
 - Build prod : `npm run build`
 - Données de démo : `npm run demo:data -- tmp/demo-wishlist.json` puis `WISHLIST_DATA_PATH=tmp/demo-wishlist.json npm run dev` (`DEMO_PASSWORD` obligatoire)
-- Captures du guide : `DEMO_BASE_URL=http://localhost:3010 npm run demo:capture` (écrit `public/guide/{fr,en}`)
+- Captures du guide : `DEMO_BASE_URL=http://localhost:3010 npm run demo:capture` (écrit `public/guide/{fr,en}`) ; `-- --mobile` écrit les captures en largeur de téléphone dans `specs/005-mobile-list-app/design/web-mobile/`
+- App mobile (`mobile/`, package séparé) : `npm --prefix mobile ci`, puis `npm --prefix mobile run lint|typecheck|test` ; simulateur : `EXPO_PUBLIC_API_URL=http://localhost:3010 npm --prefix mobile run ios` (ou `android`) ; types de l'API : `npm --prefix mobile run api:types` après un changement du contrat
 - Image Docker : `docker build -t whishlist:local .` (déploiement : `README.md` et `deploy/DEPLOY-RUNTIPI.md`)
 
 ## Fichiers générés
@@ -21,6 +22,7 @@ La revue de code les ignore :
 - `next-env.d.ts`, `package-lock.json`, `.next/`
 - `public/guide/**` (captures produites par `demo:capture`)
 - `.claude/skills/speckit-*`, `.specify/scripts/`, `.specify/templates/`, `.specify/extensions/` (installés par Spec Kit)
+- `mobile/package-lock.json`, `mobile/src/api/schema.d.ts` (généré depuis le contrat par `api:types`), `mobile/ios/`, `mobile/android/` (générés par Expo, non versionnés)
 
 ## Conventions
 
@@ -32,6 +34,7 @@ La revue de code les ignore :
   - `app/api/v1/` et `src/server/api/` : API JSON, adaptateurs : `withApi` → corps JSON → commande → `apiJson` / `apiError`. Une route se décrit d'abord dans le contrat `specs/004-mobile-api/contracts/openapi.yaml` ; `tests/domain/api-contract.test.ts` vérifie que chaque opération a sa route.
   - `src/auth/` : session, cookies, accès aux listes publiques.
   - `app/` : pages App Router, sans règle métier.
+  - `mobile/` : app Expo, cliente de l'API, sans règle métier propre (elle reprend du site les modules purs : `src/i18n/`, `src/domain/price.ts`, `theme.ts`, `priority.ts`, `client-ids.ts`). Écrans dans `mobile/app/` (Expo Router) ; composants dans `mobile/src/ui/` (un par composant de `components/ui/`, même apparence) ; valeurs de design dans `mobile/src/theme/tokens.ts`, vérifiées contre `app/globals.css` par un test ; textes lus dans `locales/` (namespace `mobile` pour les textes propres à l'app) ; écritures sur les listes et les idées par la file hors ligne (`mobile/src/offline/`). Un écran n'écrit aucun style en dur : il compose les composants de `mobile/src/ui/`.
 - **HTTP sortant** : toujours via `safeHttpGet` / `assertSafeFetchUrl` (`src/domain/safe-http.ts`), jamais un `fetch` direct sur une URL fournie par l'utilisateur.
 - **UI** : primitives dans `components/ui/` (shadcn, Base UI) ; composants métier dans `components/site/`. Réutiliser l'existant avant d'en créer.
 - **i18n** :
@@ -47,6 +50,7 @@ La revue de code les ignore :
 ## Tests
 
 - `node:test` + `tsx`, dans `tests/domain/<module>.test.ts`. Un test qui touche le store travaille sur un fichier temporaire (`mkdtemp`), jamais sur `data/wishlist.json`.
+- App mobile : jest-expo + Testing Library dans `mobile/__tests__/`. La base locale y est une base SQLite en mémoire (`__tests__/helpers/memory-db.ts`), le serveur un faux `fetch` (`__tests__/helpers/fetch.ts`).
 - Chaque règle métier et chaque cas limite (validation, erreur, limite, droit d'accès) a un test de domaine.
 - Il n'y a pas de test e2e : un parcours utilisateur se vérifie à la main sur la base de démo, décrit dans le `quickstart.md` de la feature (principe IV : une tranche n'est faite que si un parcours réel la confirme).
 

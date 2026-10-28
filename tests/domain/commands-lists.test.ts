@@ -25,6 +25,10 @@ test("mes listes : seulement celles dont je suis membre", async () => {
       [["w", "owner", 2]],
     );
     assert.equal(alex.lists[0]!.readUrl, "https://ohyoushouldnt.example.test/l/rt");
+    // Depuis 1.1.0 : de quoi dessiner la carte de « Mes listes » comme sur le site.
+    assert.equal(alex.lists[0]!.subtitle, null);
+    assert.equal(alex.lists[0]!.coverImageUrl, null);
+    assert.deepEqual(alex.lists[0]!.theme, doc.wishlists[0]!.theme);
     const camille = await listMine(ctx(doc.users[1]!));
     assert.deepEqual(camille.ok && camille.lists.map((entry) => entry.id).sort(), ["w", "w2"]);
   });

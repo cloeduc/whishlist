@@ -1,0 +1,48 @@
+{
+  "loading": "Chargement…",
+  "back": "Retour",
+  "retry": "Réessayer",
+  "session": {
+    "expired": "Votre connexion a expiré. Connectez-vous de nouveau."
+  },
+  "upgrade": {
+    "title": "Mettez l'application à jour",
+    "body": "Cette version de l'application n'est plus prise en charge par le serveur. Installez la dernière version pour continuer."
+  },
+  "lists": {
+    "itemCount_one": "{{count}} idée",
+    "itemCount_other": "{{count}} idées",
+    "missing": "Cette liste n'existe plus, ou vous n'en êtes plus membre.",
+    "notSentYet": "Cette liste n'a pas encore été envoyée. Ce sera possible dès que le réseau sera revenu."
+  },
+  "offline": {
+    "needsNetwork": "Cette action demande une connexion. Réessayez quand le réseau sera revenu.",
+    "unreachable": "Le serveur est injoignable. Vérifiez votre connexion, puis réessayez.",
+    "banner": "Hors ligne · dernière mise à jour à {{time}}",
+    "bannerNoDate": "Hors ligne",
+    "pendingCount_one": "{{count}} changement en attente d'envoi.",
+    "pendingCount_other": "{{count}} changements en attente d'envoi.",
+    "pending": "En attente",
+    "rejected": "Ce changement n'a pas été enregistré.",
+    "fix": "Corriger",
+    "discard": "Abandonner",
+    "savedOffline": "Enregistré sur le téléphone. Ce sera envoyé dès que le réseau sera revenu.",
+    "logoutTitle": "Se déconnecter quand même ?",
+    "logoutWarning_one": "{{count}} changement n'a pas encore été envoyé. Il sera perdu si vous vous déconnectez.",
+    "logoutWarning_other": "{{count}} changements n'ont pas encore été envoyés. Ils seront perdus si vous vous déconnectez.",
+    "logoutConfirm": "Se déconnecter et perdre les changements",
+    "logoutKeep": "Rester connecté"
+  },
+  "share": {
+    "qrLabel": "QR code du lien de la liste",
+    "qrHint": "Faites scanner ce code par un autre téléphone pour ouvrir la liste.",
+    "share": "Partager",
+    "message": "{{title}} — {{url}}",
+    "passwordNotice": "Cette liste est protégée par un mot de passe. Communiquez-le à vos proches en plus du lien.",
+    "manageOnSite": "Gérer le partage sur le site",
+    "pendingList": "Cette liste n'a pas encore été envoyée. Son lien sera disponible dès que le réseau sera revenu."
+  },
+  "settings": {
+    "offline": "Les réglages de la liste demandent une connexion. Réessayez quand le réseau sera revenu."
+  }
+}

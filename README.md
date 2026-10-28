@@ -194,13 +194,33 @@ ailleurs en production.
 
 ## API
 
-L’app expose les mêmes parcours que le site sous `/api/v1`, en JSON, pour une future app mobile. Elle applique les mêmes règles et les mêmes droits que le site.
+L’app expose les mêmes parcours que le site sous `/api/v1`, en JSON, pour l’app mobile (`mobile/`). Elle applique les mêmes règles et les mêmes droits que le site.
 
 - Contrat : [`specs/004-mobile-api/contracts/openapi.yaml`](specs/004-mobile-api/contracts/openapi.yaml) (OpenAPI 3.1).
 - Connexion : `POST /api/v1/auth/login` rend un jeton, à envoyer ensuite dans `Authorization: Bearer <jeton>` (30 jours, révoqué par `POST /api/v1/auth/logout` ou un changement de mot de passe).
 - Sans compte : lecture et réservation par le lien de lecture (`/api/v1/public/lists/<token>`).
 - L’API n’utilise aucun cookie. Une page web ne peut l’appeler que depuis le site ou une origine de `API_ALLOWED_ORIGINS`.
+- Un client peut choisir l’identifiant de ce qu’il crée (`id` sur `POST /lists` et `POST /lists/{id}/items`, version 1.1.0) : un renvoi ne crée pas de doublon.
 - Vérification à la main : [`specs/004-mobile-api/quickstart.md`](specs/004-mobile-api/quickstart.md).
+
+---
+
+## App mobile
+
+App Expo (iOS et Android) dans `mobile/`, cliente de l’API : connexion, listes, idées, partage par QR code, et mode hors ligne (copie locale + changements envoyés au retour du réseau). Son design reprend celui du site écran par écran ; ses textes sont lus dans `locales/`.
+
+Elle a son propre `package.json` et ne fait partie ni du build Next, ni de l’image Docker. Elle se lance avec un client de développement (pas Expo Go) :
+
+```bash
+npm --prefix mobile ci
+# Serveur du site sur la base de démo (voir plus haut), joignable depuis le simulateur
+EXPO_PUBLIC_API_URL=http://localhost:3010 npm --prefix mobile run ios       # ou : run android
+```
+
+- `EXPO_PUBLIC_API_URL` : adresse du site, fixée au build. Sur l’émulateur Android, `localhost` du Mac est `http://10.0.2.2:<port>`.
+- Profils EAS (`mobile/eas.json`) : `development` (client de dev), `preview` (distribution interne), `production`.
+- Vérifications : `npm --prefix mobile run lint`, `typecheck`, `test` ; parcours à la main dans [`specs/005-mobile-list-app/quickstart.md`](specs/005-mobile-list-app/quickstart.md).
+- Captures du site en largeur de téléphone (référence de design) : `DEMO_BASE_URL=http://localhost:3010 npm run demo:capture -- --mobile`.
 
 ---
 
@@ -209,6 +229,7 @@ L’app expose les mêmes parcours que le site sous `/api/v1`, en JSON, pour une
 ```
 app/                  # pages Next
 app/api/v1/           # API JSON (adaptateurs, sans règle métier)
+mobile/               # app Expo (package séparé)
 components/site/      # UI métier
 src/domain/           # règles métier (testées)
 src/server/commands/  # orchestration partagée par les server actions et l’API

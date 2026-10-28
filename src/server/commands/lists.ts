@@ -1,4 +1,5 @@
 import { findMembership } from "../../domain/access";
+import { idTaken, isClientId } from "../../domain/client-ids";
 import { createWishlist } from "../../domain/import";
 import { addPerson, addType } from "../../domain/items";
 import { updateWishlistSettings } from "../../domain/membership";
@@ -42,30 +43,44 @@ export async function memberListView(
   return { ok: true, list: toMemberListView(doc, wishlist, membership.role, ctx.locale, ctx.origin) };
 }
 
-/** Une liste naît avec sa première catégorie et son premier « qui ». */
+/**
+ * Une liste naît avec sa première catégorie et son premier « qui ».
+ * Le client peut choisir leurs identifiants : un renvoi du même `id` par un membre
+ * rend la liste existante (`replayed`) au lieu d'en créer une seconde.
+ */
 export async function createList(
   ctx: CommandContext,
-  input: { title: string; category: string; person: string },
-): Promise<CommandResult<{ list: MemberListView }>> {
+  input: { title: string; category: string; person: string; id?: string; categoryId?: string; personId?: string },
+): Promise<CommandResult<{ list: MemberListView; replayed: boolean }>> {
   const active = activeUser(ctx);
   if (!active.ok) return active;
+  const ids = [input.id, input.categoryId, input.personId].filter((id) => id !== undefined);
+  if (!ids.every(isClientId)) return { ok: false, error: "idInvalid" };
   const category = input.category.trim();
   const person = input.person.trim();
   if (!category) return { ok: false, error: "listNeedsCategory" };
   if (!person) return { ok: false, error: "listNeedsPerson" };
   const actorId = active.user.id;
-  const created = await updateDocument<CommandResult<{ wishlistId: string }>>((doc) => {
-    const list = createWishlist(doc, { ownerId: actorId, title: input.title, importTemplate: false });
+  // Renvoi reconnu dans la même écriture que la création : deux envois simultanés ne font qu'une liste.
+  const created = await updateDocument<CommandResult<{ wishlistId: string; replayed: boolean }>>((doc) => {
+    const { id } = input;
+    if (id && doc.wishlists.some((list) => list.id === id)) {
+      const replayed = findMembership(doc, id, actorId) !== null;
+      return { doc, result: replayed ? { ok: true, wishlistId: id, replayed } : { ok: false, error: "idConflict" } };
+    }
+    if (ids.some((taken) => idTaken(doc, taken))) return { doc, result: { ok: false, error: "idConflict" } };
+    const list = createWishlist(doc, { ownerId: actorId, title: input.title, importTemplate: false, id });
     if (!list.ok) return { doc, result: list };
     const wishlistId = list.wishlist.id;
-    const withType = addType(list.doc, { wishlistId, actorId, label: category });
+    const withType = addType(list.doc, { wishlistId, actorId, label: category, id: input.categoryId });
     if (!withType.ok) return { doc, result: withType };
-    const withPerson = addPerson(withType.doc, { wishlistId, actorId, label: person });
+    const withPerson = addPerson(withType.doc, { wishlistId, actorId, label: person, id: input.personId });
     if (!withPerson.ok) return { doc, result: withPerson };
-    return { doc: withPerson.doc, result: { ok: true, wishlistId } };
+    return { doc: withPerson.doc, result: { ok: true, wishlistId, replayed: false } };
   });
   if (!created.ok) return created;
-  return memberListView(ctx, created.wishlistId, actorId);
+  const view = await memberListView(ctx, created.wishlistId, actorId);
+  return view.ok ? { ...view, replayed: created.replayed } : view;
 }
 
 /** Réglages de la liste ; un champ absent reste tel quel. */

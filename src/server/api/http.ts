@@ -138,6 +138,11 @@ export function text(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
+/** Champ facultatif : absent → `undefined` ; présent mais pas une chaîne → `""` (refusé par la commande). */
+export function optionalText(value: unknown): string | undefined {
+  return value === undefined ? undefined : text(value);
+}
+
 /** L'origine du site est celle des liens (`APP_ORIGIN`, sinon déduite de la requête comme le site). */
 async function decide(req: NextRequest): Promise<{ decision: OriginDecision; cors: Cors }> {
   const origin = req.headers.get("origin");

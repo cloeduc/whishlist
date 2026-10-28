@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Oh, You Shouldn't! API
-  version: "1.0.0"
+  version: "1.1.0"
   description: |
     Accès aux listes pour un client autre que le site (app mobile, script).
 
@@ -11,6 +11,9 @@ info:
     - L'API n'utilise aucun cookie. Une demande venant d'un navigateur (en-tête `Origin`)
       n'est acceptée que depuis le site ou une origine de `API_ALLOWED_ORIGINS`.
     - Une version retirée répond `410` avec le code `apiVersionUnsupported`.
+    - 1.1.0 : le client peut choisir l'identifiant de ce qu'il crée (`id` sur `POST /lists` et
+      `POST /lists/{listId}/items`) ; un renvoi répond `200` sans rien créer. Champs facultatifs.
+      `ListSummary` gagne `subtitle`, `coverImageUrl` et `theme` (carte de « Mes listes »).
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -52,7 +55,7 @@ paths:
                 type: object
                 required: [apiVersion, enrich, mail]
                 properties:
-                  apiVersion: { type: string, example: "1.0.0" }
+                  apiVersion: { type: string, example: "1.1.0" }
                   enrich:
                     type: boolean
                     description: Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page).
@@ -362,15 +365,28 @@ paths:
                 title: { type: string }
                 category: { type: string }
                 person: { type: string }
+                id: { $ref: "#/components/schemas/ClientId" }
+                categoryId: { $ref: "#/components/schemas/ClientId" }
+                personId: { $ref: "#/components/schemas/ClientId" }
       responses:
         "201":
           description: Créée
           content:
             application/json:
               schema: { $ref: "#/components/schemas/MemberList" }
+        "200":
+          description: Renvoi — une liste avec cet `id` existe et le compte en est membre ; rien n'est créé.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberList" }
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/Error" }
+        "409":
+          description: Identifiant déjà utilisé ailleurs (`idConflict`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
 
   /lists/{listId}:
     parameters:
@@ -429,15 +445,30 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: "#/components/schemas/ItemInput" }
+            schema:
+              allOf:
+                - { $ref: "#/components/schemas/ItemInput" }
+                - type: object
+                  properties:
+                    id: { $ref: "#/components/schemas/ClientId" }
       responses:
         "201":
           description: Créée
           content:
             application/json:
               schema: { $ref: "#/components/schemas/MemberItem" }
+        "200":
+          description: Renvoi — une idée avec cet `id` existe dans cette liste ; rien n'est créé ni modifié.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberItem" }
         "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
+        "409":
+          description: L'`id` est déjà utilisé ailleurs (`idConflict`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
 
   /lists/{listId}/items/{itemId}:
     parameters:
@@ -875,14 +906,21 @@ components:
 
     ListSummary:
       type: object
-      required: [id, title, role, itemCount, readUrl]
+      required: [id, title, subtitle, coverImageUrl, theme, role, itemCount, readUrl]
       properties:
         id: { type: string }
         title: { type: string }
+        subtitle: { type: [string, "null"], description: Depuis 1.1.0. }
+        coverImageUrl: { type: [string, "null"], description: Depuis 1.1.0. }
+        theme: { $ref: "#/components/schemas/Theme" }
         role: { enum: [owner, member] }
         itemCount: { type: integer }
         readUrl: { type: string }
 
+    ClientId:
+      type: string
+      pattern: "^[A-Za-z0-9_-]{16,32}$"
+      description: Identifiant choisi par le client (hors format → `idInvalid`).
     ItemInput:
       type: object
       required: [name, typeId, personId]

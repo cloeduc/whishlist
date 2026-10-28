@@ -1,0 +1,50 @@
+import NetInfo, { NetInfoStateType } from "@react-native-community/netinfo";
+import { fireEvent, render, screen } from "@testing-library/react-native";
+
+import Login from "../../app/(auth)/login";
+import { getSession } from "@/auth/session";
+import { i18n } from "@/i18n";
+import { watchNetwork } from "@/network";
+
+import { fakeFetch, json, me } from "../helpers/fetch";
+import { freshDb } from "../helpers/memory-db";
+
+jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
+jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
+
+beforeEach(async () => {
+  await freshDb();
+  await i18n.changeLanguage("fr");
+});
+
+async function fill(email: string, password: string) {
+  await fireEvent.changeText(screen.getByLabelText("Adresse e-mail"), email);
+  await fireEvent.changeText(screen.getByLabelText("Mot de passe"), password);
+  await fireEvent.press(screen.getByRole("button", { name: "Se connecter" }));
+}
+
+test("wrong credentials: the errors:invalidCredentials message shows and the e-mail stays", async () => {
+  fakeFetch({ "POST /auth/login": () => json(401, { error: { code: "invalidCredentials", message: "x" } }) });
+  await render(<Login />);
+  await fill("alex@example.test", "wrong-password");
+  expect(await screen.findByText("E-mail ou mot de passe incorrect.")).toBeOnTheScreen();
+  expect(screen.getByLabelText("Adresse e-mail").props.value).toBe("alex@example.test");
+});
+
+test("success: the session is stored", async () => {
+  fakeFetch({ "POST /auth/login": () => json(200, { token: "secret-token", expiresAt: "2099-01-01T00:00:00.000Z", user: me }) });
+  await render(<Login />);
+  await fill("alex@example.test", "demo-password-1");
+  await screen.findByRole("button", { name: "Se connecter" });
+  expect(getSession()).toEqual({ status: "signedIn", user: me });
+});
+
+test("offline: the button is disabled and explains why", async () => {
+  watchNetwork();
+  const listener = jest.mocked(NetInfo.addEventListener).mock.calls[0][0];
+  await render(<Login />);
+  await screen.findByLabelText("Adresse e-mail");
+  listener({ isConnected: false, isInternetReachable: false, type: NetInfoStateType.none, details: null, isWifiEnabled: false });
+  expect(await screen.findByText(i18n.t("mobile:offline.needsNetwork"))).toBeOnTheScreen();
+  expect(screen.getByRole("button", { name: "Se connecter" })).toBeDisabled();
+});
