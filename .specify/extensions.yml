@@ -1,0 +1,12 @@
+installed:
+- bug
+settings:
+  auto_execute_hooks: true
+hooks:
+  after_implement:
+    - extension: wishlist
+      command: wishlist.feature-review
+      description: Revue du code de toute la feature (conventions, i18n, duplication, règles métier, constitution et sécurité)
+      prompt: Lancer la revue de code de la feature ?
+      optional: false
+      enabled: true

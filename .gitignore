@@ -21,10 +21,11 @@ Thumbs.db
 .vscode/
 .idea/
 .agents/
-.claude/
+.claude/*
+!.claude/skills/
 .cursor/
 .devin/
-skills/
+/skills/
 skills-lock.json
 tsconfig.tsbuildinfo
 

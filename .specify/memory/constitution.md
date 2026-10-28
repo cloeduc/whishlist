@@ -1,5 +1,12 @@
 <!--
 Sync Impact Report
+- Version change: 2.0.0 → 2.1.0
+- Modified sections: Hébergement PlanetHoster → Hébergement Docker
+  (Mac mini + Cloudflare ; e-mail et services externes optionnels)
+- Follow-up TODOs: principe V (« pas de prix scrapés ») et Governance
+  (« envoi d'e-mail ») ne décrivent plus l'app actuelle, à trancher par Cloé.
+
+Previous report
 - Version change: 1.0.0 → 2.0.0
 - Modified principles:
   - I. Fidélité au document source → I. Fidélité du modèle importé
@@ -54,26 +61,23 @@ La priorité est un texte optionnel affiché tel quel. On n'ajoute un mécanisme
 que s'il sert à créer, partager ou lire une liste, ou à tenir sur l'hébergement
 mutualisé.
 
-## Hébergement PlanetHoster
+## Hébergement Docker
 
-L'application doit tourner sur PlanetHoster N0C avec Phusion Passenger,
-sans service annexe (pas de base managée, pas de plateforme qui impose son
-propre process manager).
+L'application tourne dans un conteneur Docker (image Next.js `standalone`)
+sur le Mac mini de prod, derrière un tunnel Cloudflare, sans service annexe
+obligatoire (pas de base managée).
 
-- Node.js 20 ou plus.
-- Fichier de démarrage : `app.js` à la racine, qui écoute `process.env.PORT`.
-  Ne jamais fixer `PORT` à la main : Passenger l'injecte.
-- `package.json` : `"start": "node app.js"` et `"engines": { "node": ">=20" }`.
-- Secrets dans `.env` sur le serveur (`chmod 600`), jamais dans git.
-  Le formulaire de création N0C n'a pas de champ de variables d'environnement.
+- Node.js 20 ou plus en dev ; l'image part de `node:22`.
+- L'image se construit avec `docker build` à partir du dépôt ; le conteneur
+  écoute `PORT` (3000 dans l'image) et `deploy/compose.prod.yml` publie le
+  port hôte.
+- Secrets passés en variables d'environnement (fichier env hôte préfixé
+  `WHISHLIST_*`), jamais dans git. Une nouvelle variable est documentée dans
+  le README, `.env.example` et `deploy/compose.prod.yml`.
 - Les comptes, les listes et les réservations survivent à un redémarrage du
-  process. Les dossiers écrits par l'app (`data/` au minimum) sont créés sur
-  l'hôte et ne sont pas versionnés.
-- Pas de workflow pensé uniquement pour un hébergeur qui build à la place
-  du serveur. Build et `npm install` se font en SSH dans l'app Node N0C.
-- Pas d'envoi d'e-mail dans cette version : l'hébergement ne fournit pas une
-  boîte d'envoi fiable sans service annexe. L'invitation à une liste commune
-  est un lien à copier, pas un courrier.
+  conteneur : ils vivent dans le volume `/data`, pas dans l'image ni dans git.
+- Les services externes (Resend, Gemini / OpenAI, Umami) sont optionnels :
+  sans leur configuration, l'application fonctionne et le mécanisme est absent.
 
 ## Workflow
 
@@ -97,4 +101,4 @@ principes et contre la section hébergement. Une complexité en plus (paiement,
 synchro Coda, annuaire public, envoi d'e-mail) doit être justifiée par une
 amendment ou une spec explicite. Décision d'amendment : Cloé.
 
-**Version**: 2.0.0 | **Ratified**: 2026-10-18 | **Last Amended**: 2026-10-18
+**Version**: 2.1.0 | **Ratified**: 2026-10-18 | **Last Amended**: 2026-10-28
