@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { availableItems, reserveItem } from "../../src/domain/reserve";
+import { availableItems, MAX_FROM_NAME, MAX_NOTE, reserveItem } from "../../src/domain/reserve";
 import { emptyDatabase, type Database } from "../../src/domain/types";
 import { readDocument, updateDocument } from "../../src/store/db";
 
@@ -108,4 +108,31 @@ test("deux confirmations simultanées sous lock", async () => {
     delete process.env.WISHLIST_DATA_PATH;
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test("nom et petit mot : longueur maximale", () => {
+  const long = reserveItem(doc(), { wishlistId: "w", itemId: "gang", fromName: "x".repeat(MAX_FROM_NAME + 1) });
+  assert.deepEqual(long, { ok: false, error: "fieldTooLong" });
+  const note = reserveItem(doc(), { wishlistId: "w", itemId: "gang", note: "x".repeat(MAX_NOTE + 1) });
+  assert.deepEqual(note, { ok: false, error: "fieldTooLong" });
+  const exact = reserveItem(doc(), {
+    wishlistId: "w",
+    itemId: "gang",
+    fromName: "x".repeat(MAX_FROM_NAME),
+    note: "x".repeat(MAX_NOTE),
+  });
+  assert.equal(exact.ok, true);
+});
+
+test("une idée déjà réservée dit « déjà réservée », une idée archivée « pas dans la liste »", () => {
+  const first = reserveItem(doc(), { wishlistId: "w", itemId: "gang" });
+  assert.equal(first.ok, true);
+  if (!first.ok) return;
+  assert.deepEqual(reserveItem(first.doc, { wishlistId: "w", itemId: "gang" }), {
+    ok: false,
+    error: "itemAlreadyReserved",
+  });
+  const archived = doc();
+  archived.items[1]!.archived = true;
+  assert.deepEqual(reserveItem(archived, { wishlistId: "w", itemId: "book" }), { ok: false, error: "itemNotInList" });
 });

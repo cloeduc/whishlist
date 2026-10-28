@@ -1,11 +1,15 @@
 /** Origine canonique pour liens mails / partage — jamais dérivée des headers si `APP_ORIGIN` est set. */
 
-export function normalizeAppOrigin(raw: string): string | null {
+export function normalizeAppOrigin(
+  raw: string,
+  protocols: readonly string[] = ["http:", "https:"],
+): string | null {
   const trimmed = raw.trim().replace(/\/+$/, "");
   if (!trimmed) return null;
   try {
     const url = new URL(trimmed);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (!protocols.includes(url.protocol)) return null;
+    if (!url.host) return null;
     if (url.username || url.password) return null;
     if (url.pathname !== "/" && url.pathname !== "") return null;
     if (url.search || url.hash) return null;

@@ -48,12 +48,13 @@ export async function clientIp(): Promise<string | null> {
   });
 }
 
-export async function rateLimitOrThrow(
+/** Même règle que `rateLimitOrThrow`, avec une IP déjà lue (commandes partagées site / API). */
+export function rateLimitForIp(
   scope: string,
+  ip: string | null,
   limit: number,
   windowMs: number,
-): Promise<void> {
-  const ip = await clientIp();
+): void {
   if (!ip) {
     if (missingIpPolicy() === "deny") throw new RateLimitError(scope);
     return;
@@ -61,6 +62,14 @@ export async function rateLimitOrThrow(
   if (!takeToken(`${scope}:${ip}`, limit, windowMs)) {
     throw new RateLimitError(scope);
   }
+}
+
+export async function rateLimitOrThrow(
+  scope: string,
+  limit: number,
+  windowMs: number,
+): Promise<void> {
+  rateLimitForIp(scope, await clientIp(), limit, windowMs);
 }
 
 export class RateLimitError extends Error {

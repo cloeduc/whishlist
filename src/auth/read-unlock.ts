@@ -23,14 +23,40 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(left, right);
 }
 
-/** Cookie unlock = `iat.mac` lié au hash courant (invalide si le MDP change). */
+/** Durée d'un déverrouillage, cookie du site comme jeton de l'API. */
+export const READ_UNLOCK_TTL_SEC = TTL_SEC;
+
+/** Preuve de déverrouillage `iat.mac`, liée au hash courant (invalide si le MDP change). */
+export function signReadUnlock(list: Wishlist, secret: string, nowMs = Date.now()): string {
+  const iat = Math.floor(nowMs / 1000);
+  return `${iat}.${macUnlock(list.readToken, list.readPasswordHash ?? "", secret)}`;
+}
+
+export function verifyReadUnlock(
+  list: Wishlist,
+  raw: string | null | undefined,
+  secret: string,
+  nowMs = Date.now(),
+): boolean {
+  if (!list.readPasswordHash) return true;
+  if (!raw) return false;
+  const dot = raw.indexOf(".");
+  if (dot <= 0) return false;
+  const iatStr = raw.slice(0, dot);
+  const mac = raw.slice(dot + 1);
+  if (!/^\d+$/.test(iatStr) || !mac) return false;
+  const iat = Number(iatStr);
+  const now = Math.floor(nowMs / 1000);
+  if (iat > now + 60 || now - iat > TTL_SEC) return false;
+  const expected = macUnlock(list.readToken, list.readPasswordHash, secret);
+  return safeEqual(mac, expected);
+}
+
 export async function grantReadUnlock(list: Wishlist): Promise<void> {
   const secret = sessionSecret();
   if (!secret || !list.readPasswordHash) return;
-  const iat = Math.floor(Date.now() / 1000);
-  const mac = macUnlock(list.readToken, list.readPasswordHash, secret);
   const jar = await cookies();
-  jar.set(cookieName(list.readToken), `${iat}.${mac}`, {
+  jar.set(cookieName(list.readToken), signReadUnlock(list, secret), {
     httpOnly: true,
     sameSite: "lax",
     secure: cookieSecure(),
@@ -49,16 +75,5 @@ export async function hasReadUnlock(list: Wishlist): Promise<boolean> {
   const secret = sessionSecret();
   if (!secret) return false;
   const jar = await cookies();
-  const raw = jar.get(cookieName(list.readToken))?.value;
-  if (!raw) return false;
-  const dot = raw.indexOf(".");
-  if (dot <= 0) return false;
-  const iatStr = raw.slice(0, dot);
-  const mac = raw.slice(dot + 1);
-  if (!/^\d+$/.test(iatStr) || !mac) return false;
-  const iat = Number(iatStr);
-  const now = Math.floor(Date.now() / 1000);
-  if (iat > now + 60 || now - iat > TTL_SEC) return false;
-  const expected = macUnlock(list.readToken, list.readPasswordHash, secret);
-  return safeEqual(mac, expected);
+  return verifyReadUnlock(list, jar.get(cookieName(list.readToken))?.value, secret);
 }

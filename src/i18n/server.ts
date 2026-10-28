@@ -37,16 +37,27 @@ export const getLocale = cache(async (): Promise<Locale> => {
   return defaultLocale;
 });
 
-export async function getTranslations(ns: Namespace | Namespace[] = "common"): Promise<TFunction> {
-  const locale = await getLocale();
+/** Traductions d'une langue donnée (API, commandes) — sans lire la requête. */
+export async function getTranslationsFor(
+  locale: Locale,
+  ns: Namespace | Namespace[] = "common",
+): Promise<TFunction> {
   const instance = await i18nFor(locale);
   return instance.getFixedT(locale, ns);
 }
 
-export async function translateError(code: string): Promise<string> {
-  const t = await getTranslations("errors");
+export async function getTranslations(ns: Namespace | Namespace[] = "common"): Promise<TFunction> {
+  return getTranslationsFor(await getLocale(), ns);
+}
+
+export async function translateErrorFor(locale: Locale, code: string): Promise<string> {
+  const t = await getTranslationsFor(locale, "errors");
   const translated = t(code, { defaultValue: "" });
   return translated || code;
+}
+
+export async function translateError(code: string): Promise<string> {
+  return translateErrorFor(await getLocale(), code);
 }
 
 /** Client-friendly: error codes from domain/actions → localized string. */

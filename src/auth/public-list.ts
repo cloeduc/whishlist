@@ -3,13 +3,23 @@ import { hasReadPassword } from "../domain/read-password";
 import type { Database, User, Wishlist } from "../domain/types";
 import { hasReadUnlock } from "./read-unlock";
 
-/** Accès page publique : pas de MDP, ou cookie unlock, ou membre connecté. */
+/** Accès page publique : pas de MDP, ou déverrouillage prouvé, ou membre connecté. */
+export async function canAccessPublicListWith(
+  doc: Database,
+  list: Wishlist,
+  user: User | null,
+  isUnlocked: (list: Wishlist) => boolean | Promise<boolean>,
+): Promise<boolean> {
+  if (!hasReadPassword(list)) return true;
+  if (user && findMembership(doc, list.id, user.id)) return true;
+  return isUnlocked(list);
+}
+
+/** Version site : le déverrouillage vient du cookie. */
 export async function canAccessPublicList(
   doc: Database,
   list: Wishlist,
   user: User | null,
 ): Promise<boolean> {
-  if (!hasReadPassword(list)) return true;
-  if (user && findMembership(doc, list.id, user.id)) return true;
-  return hasReadUnlock(list);
+  return canAccessPublicListWith(doc, list, user, hasReadUnlock);
 }

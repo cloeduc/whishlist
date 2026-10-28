@@ -1,15 +1,10 @@
-import { createHash, randomBytes } from "node:crypto";
 import { clone } from "./access";
 import { hashPassword, passwordPolicyError } from "./passwords";
-import { newId } from "./tokens";
+import { hashSecretToken, newId, newSecretToken } from "./tokens";
 import { normalizeEmail } from "./users";
 import type { Database } from "./types";
 
 const TTL_MS = 60 * 60 * 1000;
-
-function hashToken(token: string): string {
-  return createHash("sha256").update(token).digest("base64url");
-}
 
 export function createPasswordReset(
   doc: Database,
@@ -24,13 +19,13 @@ export function createPasswordReset(
     return { ok: true, doc, token: null, email: null };
   }
   const now = input.now ?? new Date();
-  const token = randomBytes(32).toString("base64url");
+  const token = newSecretToken();
   const next = clone(doc);
   next.passwordResets = next.passwordResets.filter((entry) => entry.userId !== user.id);
   next.passwordResets.push({
     id: newId(),
     userId: user.id,
-    tokenHash: hashToken(token),
+    tokenHash: hashSecretToken(token),
     expiresAt: new Date(now.getTime() + TTL_MS).toISOString(),
     createdAt: now.toISOString(),
   });
@@ -47,7 +42,7 @@ export async function resetPasswordWithToken(
   const token = input.token.trim();
   if (!token) return { ok: false, error: "resetLinkInvalid" };
   const now = input.now ?? new Date();
-  const tokenHash = hashToken(token);
+  const tokenHash = hashSecretToken(token);
   const reset = doc.passwordResets.find((entry) => entry.tokenHash === tokenHash);
   if (!reset) return { ok: false, error: "resetLinkInvalid" };
   if (Date.parse(reset.expiresAt) <= now.getTime()) {
@@ -68,7 +63,7 @@ export function findValidPasswordReset(
   token: string,
   now = new Date(),
 ): boolean {
-  const tokenHash = hashToken(token.trim());
+  const tokenHash = hashSecretToken(token.trim());
   const reset = doc.passwordResets.find((entry) => entry.tokenHash === tokenHash);
   if (!reset) return false;
   return Date.parse(reset.expiresAt) > now.getTime();

@@ -1,0 +1,950 @@
+openapi: 3.1.0
+info:
+  title: Oh, You Shouldn't! API
+  version: "1.0.0"
+  description: |
+    Accès aux listes pour un client autre que le site (app mobile, script).
+
+    - Langue des messages : en-tête `Accept-Language` (`fr` par défaut, `en`).
+    - Corps : JSON (`Content-Type: application/json`), 64 Ko au plus.
+    - Toutes les réponses portent `Cache-Control: private, no-store`.
+    - L'API n'utilise aucun cookie. Une demande venant d'un navigateur (en-tête `Origin`)
+      n'est acceptée que depuis le site ou une origine de `API_ALLOWED_ORIGINS`.
+    - Une version retirée répond `410` avec le code `apiVersionUnsupported`.
+
+    Preuves à garder côté client :
+    - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
+    - `unlockToken` (liste protégée) → `X-Read-Unlock`, 14 jours.
+    - `claim` (réservation sans compte) → `X-Reservation-Claims`, séparés par des virgules, 90 jours.
+servers:
+  - url: /api/v1
+
+tags:
+  - name: meta
+  - name: public
+    description: Sans compte, par le lien de lecture (User Story 1).
+  - name: auth
+    description: Connexion et compte (User Stories 2 et 6).
+  - name: lists
+    description: Listes du membre (User Stories 2 et 4).
+  - name: items
+    description: Idées (User Story 3).
+  - name: labels
+    description: Catégories et « qui » (User Story 4).
+  - name: sharing
+    description: Partage et membres (User Story 5).
+
+security:
+  - bearer: []
+
+paths:
+  /capabilities:
+    get:
+      tags: [meta]
+      summary: Version et services optionnels configurés
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [apiVersion, enrich, mail]
+                properties:
+                  apiVersion: { type: string, example: "1.0.0" }
+                  enrich:
+                    type: boolean
+                    description: Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page).
+                  mail: { type: boolean, description: Envoi d'e-mails configuré. }
+
+  # ---------- Public (sans compte) ----------
+
+  /public/lists/{readToken}:
+    get:
+      tags: [public]
+      summary: Lire une liste par son lien
+      description: |
+        Même contenu que la page publique : idées libres, plus celles réservées par ce client
+        (claims ou compte connecté), marquées `mine`. Un bearer optionnel compte comme
+        membre (pas besoin d'unlock) et pour `mine`.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readToken"
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicList" }
+        "404": { $ref: "#/components/responses/Error" }
+        "423":
+          description: Mot de passe de lecture nécessaire (`readPasswordRequired`). Le corps contient aussi `title`.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - type: object
+                    properties:
+                      title: { type: string }
+
+  /public/lists/{readToken}/unlock:
+    post:
+      tags: [public]
+      summary: Déverrouiller une liste protégée
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/readToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [unlockToken, expiresAt]
+                properties:
+                  unlockToken: { type: [string, "null"], description: null si la liste n'a pas de mot de passe. }
+                  expiresAt: { type: [string, "null"], format: date-time }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/lists/{readToken}/reservations:
+    post:
+      tags: [public]
+      summary: Réserver une idée
+      description: Sans compte possible. Avec un bearer, la réservation est liée au compte.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readToken"
+        - $ref: "#/components/parameters/readUnlock"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [itemId]
+              properties:
+                itemId: { type: string }
+                typeId: { type: string, description: Optionnel, vérifie que l'idée est dans cette catégorie. }
+                fromName: { type: string, maxLength: 200 }
+                note: { type: string, maxLength: 2000 }
+      responses:
+        "201":
+          description: Réservée
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reservationId, claim]
+                properties:
+                  reservationId: { type: string }
+                  claim: { type: [string, "null"], description: À renvoyer dans `X-Reservation-Claims`. }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409":
+          $ref: "#/components/responses/Error"
+        "423": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/lists/{readToken}/reservations/{reservationId}:
+    delete:
+      tags: [public]
+      summary: Annuler sa propre réservation
+      description: Autorisé si la réservation est liée au compte connecté, ou si un claim valide est fourni.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readToken"
+        - $ref: "#/components/parameters/reservationId"
+        - $ref: "#/components/parameters/reservationClaims"
+      responses:
+        "204": { description: Annulée }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  # ---------- Auth et compte ----------
+
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Créer un compte
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, displayName]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+                displayName: { type: string }
+      responses:
+        "201":
+          description: Compte créé, client connecté
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "202":
+          description: E-mail déjà inscrit. Un e-mail est envoyé à cette adresse ; pas de connexion.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { const: checkEmail }
+        "400": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Se connecter
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: Connecté. Si `user.mustChangePassword`, seules /me, /me/password et /auth/logout répondent.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "401":
+          description: E-mail ou mot de passe faux (`invalidCredentials`), sans dire lequel.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Se déconnecter (le jeton ne vaut plus rien)
+      responses:
+        "204": { description: Déconnecté }
+        "401": { $ref: "#/components/responses/Error" }
+
+  /auth/password-reset:
+    post:
+      tags: [auth]
+      summary: Demander un lien de réinitialisation
+      description: Même réponse que l'e-mail existe ou non. Le lien envoyé ouvre le site.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string }
+      responses:
+        "202":
+          description: |
+            Demande prise en compte. Sans e-mail configuré, le lien est écrit dans le journal du
+            serveur, comme sur le site ; il n'est jamais rendu dans la réponse.
+        "429": { $ref: "#/components/responses/Error" }
+
+  /me:
+    get:
+      tags: [auth]
+      summary: Compte connecté
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
+        "401": { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [auth]
+      summary: Changer son nom affiché
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [displayName]
+              properties:
+                displayName: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Me" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+
+  /me/password:
+    post:
+      tags: [auth]
+      summary: Changer son mot de passe
+      description: |
+        Invalide toutes les autres connexions (site et appareils). Rend un nouveau jeton pour ce client.
+        `currentPassword` n'est pas demandé si `mustChangePassword`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                currentPassword: { type: string }
+                password: { type: string }
+      responses:
+        "200":
+          description: Changé
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+
+  # ---------- Listes ----------
+
+  /lists:
+    get:
+      tags: [lists]
+      summary: Mes listes
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [lists]
+                properties:
+                  lists:
+                    type: array
+                    items: { $ref: "#/components/schemas/ListSummary" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [lists]
+      summary: Créer une liste (avec sa première catégorie et son premier « qui »)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, category, person]
+              properties:
+                title: { type: string }
+                category: { type: string }
+                person: { type: string }
+      responses:
+        "201":
+          description: Créée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberList" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    get:
+      tags: [lists]
+      summary: Vue membre d'une liste
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberList" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [lists]
+      summary: Réglages (titre, sous-titre, image, thème)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                subtitle: { type: string }
+                coverImageUrl: { type: string }
+                theme: { $ref: "#/components/schemas/Theme" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberList" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [lists]
+      summary: Supprimer la liste (créateur seulement)
+      responses:
+        "204": { description: Supprimée }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  # ---------- Idées ----------
+
+  /lists/{listId}/items:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    post:
+      tags: [items]
+      summary: Ajouter une idée
+      description: Sans `imageUrl`, l'image est cherchée sur la page du lien, comme sur le site.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ItemInput" }
+      responses:
+        "201":
+          description: Créée
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberItem" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/items/{itemId}:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+      - $ref: "#/components/parameters/itemId"
+    put:
+      tags: [items]
+      summary: Modifier une idée (tous les champs)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ItemInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberItem" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    patch:
+      tags: [items]
+      summary: Archiver, désarchiver ou changer de catégorie
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              minProperties: 1
+              properties:
+                archived: { type: boolean }
+                typeId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberItem" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [items]
+      summary: Supprimer une idée
+      responses:
+        "204": { description: Supprimée }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/enrich:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    post:
+      tags: [items]
+      summary: Préremplir une idée depuis un lien produit (ne crée rien)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string, format: uri }
+      responses:
+        "200":
+          description: Champs proposés
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [name, price, imageUrl, typeId, usedLlm]
+                properties:
+                  name: { type: string }
+                  price: { type: string, description: Prix saisi tel quel, à renvoyer dans ItemInput.price. }
+                  imageUrl: { type: string }
+                  typeId: { type: string }
+                  usedLlm: { type: boolean }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "422":
+          description: Page illisible ou rien trouvé (`pageLoadFailed`, `enrichEmpty`, `enrichEmptyNoLlm`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  # ---------- Catégories et « qui » ----------
+
+  /lists/{listId}/types:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    post:
+      tags: [labels]
+      summary: Ajouter une catégorie
+      requestBody: { $ref: "#/components/requestBodies/Label" }
+      responses:
+        "201": { $ref: "#/components/responses/Label" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/types/order:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    put:
+      tags: [labels]
+      summary: Réordonner les catégories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [typeIds]
+              properties:
+                typeIds: { type: array, items: { type: string } }
+      responses:
+        "204": { description: OK }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/types/{typeId}:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+      - { name: typeId, in: path, required: true, schema: { type: string } }
+    patch:
+      tags: [labels]
+      summary: Renommer une catégorie
+      requestBody: { $ref: "#/components/requestBodies/Label" }
+      responses:
+        "200": { $ref: "#/components/responses/Label" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [labels]
+      summary: Retirer une catégorie (refusé si des idées l'utilisent)
+      responses:
+        "204": { description: Retirée }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/people:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    post:
+      tags: [labels]
+      summary: Ajouter un « qui »
+      requestBody: { $ref: "#/components/requestBodies/Label" }
+      responses:
+        "201": { $ref: "#/components/responses/Label" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/people/{personId}:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+      - { name: personId, in: path, required: true, schema: { type: string } }
+    patch:
+      tags: [labels]
+      summary: Renommer un « qui »
+      requestBody: { $ref: "#/components/requestBodies/Label" }
+      responses:
+        "200": { $ref: "#/components/responses/Label" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [labels]
+      summary: Retirer un « qui » (refusé si des idées l'utilisent)
+      responses:
+        "204": { description: Retiré }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  # ---------- Partage ----------
+
+  /lists/{listId}/reservations/{reservationId}:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+      - $ref: "#/components/parameters/reservationId"
+    delete:
+      tags: [sharing]
+      summary: Annuler une réservation de sa liste (membre)
+      responses:
+        "204": { description: Annulée }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/invite-link:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    post:
+      tags: [sharing]
+      summary: Régénérer le lien d'invitation (l'ancien ne marche plus)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [inviteUrl, inviteToken]
+                properties:
+                  inviteUrl: { type: string }
+                  inviteToken: { type: string }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/invitations:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    post:
+      tags: [sharing]
+      summary: Inviter par e-mail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        "202": { description: Invitation envoyée }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+        "502":
+          description: L'envoi a échoué (`inviteSendFailed`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "503":
+          description: E-mail non configuré (`mailNotConfigured`).
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /lists/{listId}/read-password:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    put:
+      tags: [sharing]
+      summary: Poser ou changer le mot de passe de lecture
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string }
+      responses:
+        "204": { description: OK }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [sharing]
+      summary: Retirer le mot de passe de lecture
+      responses:
+        "204": { description: OK }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/members/{userId}:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+      - { name: userId, in: path, required: true, schema: { type: string } }
+    delete:
+      tags: [sharing]
+      summary: Retirer un membre
+      responses:
+        "204": { description: Retiré }
+        "400": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/leave:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    post:
+      tags: [sharing]
+      summary: Quitter la liste
+      responses:
+        "204": { description: Quittée }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /invitations/{inviteToken}/accept:
+    post:
+      tags: [sharing]
+      summary: Rejoindre une liste avec un lien d'invitation
+      parameters:
+        - { name: inviteToken, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Membre de la liste
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberList" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: Jeton opaque rendu par /auth/login, /auth/register ou /me/password.
+
+  parameters:
+    readToken: { name: readToken, in: path, required: true, schema: { type: string } }
+    listId: { name: listId, in: path, required: true, schema: { type: string } }
+    itemId: { name: itemId, in: path, required: true, schema: { type: string } }
+    reservationId: { name: reservationId, in: path, required: true, schema: { type: string } }
+    readUnlock:
+      name: X-Read-Unlock
+      in: header
+      required: false
+      schema: { type: string }
+      description: unlockToken de cette liste.
+    reservationClaims:
+      name: X-Reservation-Claims
+      in: header
+      required: false
+      schema: { type: string }
+      description: Claims de cette liste, séparés par des virgules (50 au plus).
+
+  requestBodies:
+    Label:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [label]
+            properties:
+              label: { type: string }
+
+  responses:
+    Error:
+      description: Erreur. `code` stable, `message` traduit selon Accept-Language.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Label:
+      description: OK
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Label" }
+
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: |
+                Codes de `locales/*/errors.json`, plus : unauthorized, invalidCredentials,
+                mustChangePassword, readPasswordRequired, invalidJson, payloadTooLarge,
+                unsupportedMediaType, originNotAllowed, apiVersionUnsupported, notFound.
+              example: itemAlreadyReserved
+            message: { type: string }
+
+    Session:
+      type: object
+      required: [token, expiresAt, user]
+      properties:
+        token: { type: string, description: Rendu une seule fois. }
+        expiresAt: { type: string, format: date-time }
+        user: { $ref: "#/components/schemas/Me" }
+
+    Me:
+      type: object
+      required: [id, email, displayName, mustChangePassword]
+      properties:
+        id: { type: string }
+        email: { type: string }
+        displayName: { type: string }
+        mustChangePassword: { type: boolean }
+
+    Theme:
+      type: object
+      properties:
+        primary: { type: string, example: "#b4235a" }
+        accent: { type: string }
+        highlight: { type: string }
+        background: { type: string }
+
+    Label:
+      type: object
+      required: [id, label]
+      properties:
+        id: { type: string }
+        label: { type: string }
+
+    Category:
+      allOf:
+        - $ref: "#/components/schemas/Label"
+        - type: object
+          required: [sortOrder]
+          properties:
+            sortOrder: { type: integer }
+
+    PublicItem:
+      type: object
+      required: [id, name, typeId, personId, url, imageUrl, priceCents, priceLabel, priority, mine, reservationId]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        typeId: { type: string }
+        personId: { type: string }
+        url: { type: [string, "null"] }
+        imageUrl: { type: [string, "null"] }
+        priceCents: { type: [integer, "null"] }
+        priceLabel: { type: [string, "null"], description: Formaté selon Accept-Language. }
+        priority: { type: [string, "null"] }
+        mine: { type: boolean, description: Réservée par ce client. }
+        reservationId: { type: [string, "null"], description: Seulement si `mine`. }
+
+    PublicList:
+      type: object
+      required: [title, subtitle, coverImageUrl, theme, categories, people, items]
+      properties:
+        title: { type: string }
+        subtitle: { type: [string, "null"] }
+        coverImageUrl: { type: [string, "null"] }
+        theme: { $ref: "#/components/schemas/Theme" }
+        categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
+        people: { type: array, items: { $ref: "#/components/schemas/Label" } }
+        items: { type: array, items: { $ref: "#/components/schemas/PublicItem" } }
+
+    ListSummary:
+      type: object
+      required: [id, title, role, itemCount, readUrl]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        role: { enum: [owner, member] }
+        itemCount: { type: integer }
+        readUrl: { type: string }
+
+    ItemInput:
+      type: object
+      required: [name, typeId, personId]
+      properties:
+        name: { type: string }
+        typeId: { type: string }
+        personId: { type: string }
+        url: { type: string, description: Vide ou absent = pas de lien. }
+        imageUrl: { type: string }
+        price: { type: string, description: Comme saisi sur le site (« 12,50 »). Invalide → priceInvalid. }
+        priority: { type: string }
+
+    MemberItem:
+      type: object
+      required: [id, name, typeId, personId, url, imageUrl, priceCents, priceLabel, priority, archived, sortOrder]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        typeId: { type: string }
+        personId: { type: string }
+        url: { type: [string, "null"] }
+        imageUrl: { type: [string, "null"] }
+        priceCents: { type: [integer, "null"] }
+        priceLabel: { type: [string, "null"] }
+        priority: { type: [string, "null"] }
+        archived: { type: boolean }
+        sortOrder: { type: integer }
+
+    MemberReservation:
+      type: object
+      required: [id, itemId, itemName, fromName, note, createdAt]
+      properties:
+        id: { type: string }
+        itemId: { type: string }
+        itemName: { type: string }
+        fromName: { type: [string, "null"] }
+        note: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+
+    Member:
+      type: object
+      required: [userId, displayName, role]
+      properties:
+        userId: { type: string }
+        displayName: { type: string }
+        role: { enum: [owner, member] }
+
+    MemberList:
+      type: object
+      required: [id, title, subtitle, coverImageUrl, theme, role, readUrl, inviteUrl, hasReadPassword, categories, people, items, reservations, members]
+      properties:
+        id: { type: string }
+        title: { type: string }
+        subtitle: { type: [string, "null"] }
+        coverImageUrl: { type: [string, "null"] }
+        theme: { $ref: "#/components/schemas/Theme" }
+        role: { enum: [owner, member], description: Rôle du compte connecté. }
+        readUrl: { type: string }
+        inviteUrl: { type: string }
+        hasReadPassword: { type: boolean }
+        categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
+        people: { type: array, items: { $ref: "#/components/schemas/Label" } }
+        items: { type: array, items: { $ref: "#/components/schemas/MemberItem" }, description: Archivées comprises. }
+        reservations: { type: array, items: { $ref: "#/components/schemas/MemberReservation" } }
+        members: { type: array, items: { $ref: "#/components/schemas/Member" } }

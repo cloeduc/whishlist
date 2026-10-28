@@ -24,6 +24,7 @@ services:
       OPENAI_API_KEY: ${WHISHLIST_OPENAI_API_KEY:-}
       UMAMI_WEBSITE_ID: ${WHISHLIST_UMAMI_WEBSITE_ID:-}
       UMAMI_URL: ${WHISHLIST_UMAMI_URL:-}
+      API_ALLOWED_ORIGINS: ${WHISHLIST_API_ALLOWED_ORIGINS:-}
     volumes:
       - ${WHISHLIST_DATA_DIR:-./data-prod}:/data
     healthcheck:

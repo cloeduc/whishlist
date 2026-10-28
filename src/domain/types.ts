@@ -98,6 +98,17 @@ export interface PasswordReset {
   createdAt: string;
 }
 
+/** Connexion d'un client d'API (app mobile). Le jeton n'est stocké que haché. */
+export interface ApiSession {
+  id: string;
+  userId: string;
+  tokenHash: string;
+  /** `user.sessionVersion` à l'émission : un changement de mot de passe la périme. */
+  sessionVersion: number;
+  createdAt: string;
+  expiresAt: string;
+}
+
 export interface Database {
   users: User[];
   wishlists: Wishlist[];
@@ -108,6 +119,7 @@ export interface Database {
   items: Item[];
   reservations: Reservation[];
   passwordResets: PasswordReset[];
+  apiSessions: ApiSession[];
 }
 
 export interface SeedFile {
@@ -146,5 +158,6 @@ export function emptyDatabase(): Database {
     items: [],
     reservations: [],
     passwordResets: [],
+    apiSessions: [],
   };
 }

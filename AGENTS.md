@@ -27,7 +27,9 @@ La revue de code les ignore :
 - **Couches** :
   - `src/domain/` : règles métier en fonctions pures sur `Database`, testées.
   - `src/store/db.ts` : seul accès au fichier JSON. Une écriture passe par `updateDocument` (verrou fichier), jamais par un `writeFile` direct.
-  - `src/server/actions.ts` : server actions. Chacune vérifie l'utilisateur (`requireUser` / `currentUser`), l'appartenance à la liste (`findMembership`) ou l'accès public (`canAccessPublicList`), et limite le débit des actions sensibles (`rateLimitOrThrow`).
+  - `src/server/commands/` : orchestration partagée par les server actions et l'API, sans dépendance à Next (ni `cookies()`, ni `headers()`, ni `redirect()`). Chaque commande reçoit un `CommandContext` (compte, IP, langue, origine), vérifie le compte (`activeUser`), l'appartenance à la liste (`findMembership`) ou l'accès public (`canAccessPublicListWith`), limite le débit des actions sensibles (`rateLimitForIp`), et rend `{ ok, … } | { ok: false, error }`.
+  - `src/server/actions.ts` : server actions, adaptateurs du site : FormData → commande → redirection et cookies.
+  - `app/api/v1/` et `src/server/api/` : API JSON, adaptateurs : `withApi` → corps JSON → commande → `apiJson` / `apiError`. Une route se décrit d'abord dans le contrat `specs/004-mobile-api/contracts/openapi.yaml` ; `tests/domain/api-contract.test.ts` vérifie que chaque opération a sa route.
   - `src/auth/` : session, cookies, accès aux listes publiques.
   - `app/` : pages App Router, sans règle métier.
 - **HTTP sortant** : toujours via `safeHttpGet` / `assertSafeFetchUrl` (`src/domain/safe-http.ts`), jamais un `fetch` direct sur une URL fournie par l'utilisateur.
@@ -52,6 +54,16 @@ La revue de code les ignore :
 
 - Fonctionnalités : `/speckit-specify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-implement` → revue de code (`wishlist-feature-review`, lancée par le hook `after_implement`).
 - Bugs : `/speckit-bug-assess` → `/speckit-bug-fix` → `/speckit-bug-test` (rapports dans `.specify/bugs/<slug>/`).
-- `.specify/feature.json` et le `review.md` de la feature sont commités avec le code.
+- Le `review.md` de la feature est commité avec le code ; `.specify/feature.json` reste local (ignoré par Spec Kit).
 
 Hooks Spec Kit (`.specify/extensions.yml`) : lancer `wishlist.feature-review` (le skill `wishlist-feature-review`) sans demander, car il ne fait que rapporter et ne change rien avant que l'utilisateur choisisse les points à corriger. Ne lancer aucun autre hook sans l'accord explicite de l'utilisateur : montrer la commande exacte et attendre un oui. Cette règle prime sur les skills speckit, qui demandent de lancer les hooks obligatoires automatiquement.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

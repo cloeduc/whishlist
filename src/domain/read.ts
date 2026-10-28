@@ -23,8 +23,12 @@ export interface PublicWishlist {
   views: View[];
 }
 
-function sortItems(items: Item[]): Item[] {
+export function sortItems(items: Item[]): Item[] {
   return [...items].sort((a, b) => a.sortOrder - b.sortOrder || a.id.localeCompare(b.id));
+}
+
+export function findWishlistByReadToken(doc: Database, readToken: string): Wishlist | null {
+  return doc.wishlists.find((w) => w.readToken === readToken) ?? null;
 }
 
 export function listItems(doc: Database, wishlistId: string): Item[] {
@@ -106,7 +110,7 @@ export function getPublicWishlist(
   locale = "fr-FR",
   mineReservationIds: ReadonlySet<string> = new Set(),
 ): PublicWishlist | null {
-  const wishlist = doc.wishlists.find((w) => w.readToken === readToken);
+  const wishlist = findWishlistByReadToken(doc, readToken);
   if (!wishlist) return null;
   const items = listPublicVisibleItems(doc, wishlist.id, mineReservationIds).map((item) =>
     toPublicItem(doc, item, locale, mineReservationIds),

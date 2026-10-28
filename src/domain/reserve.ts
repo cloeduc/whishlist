@@ -2,6 +2,10 @@ import { clone } from "./access";
 import { newId } from "./tokens";
 import type { Database, Reservation } from "./types";
 
+/** Longueurs maximales du nom de l'offreur et du petit mot. */
+export const MAX_FROM_NAME = 200;
+export const MAX_NOTE = 2000;
+
 function blank(value: string | null | undefined): string | null {
   const trimmed = (value ?? "").trim();
   return trimmed ? trimmed : null;
@@ -29,13 +33,17 @@ export function reserveItem(
   },
 ): { ok: true; doc: Database; reservation: Reservation } | { ok: false; error: string } {
   if (!input.itemId) return { ok: false, error: "chooseItem" };
+  if ((input.fromName ?? "").length > MAX_FROM_NAME || (input.note ?? "").length > MAX_NOTE) {
+    return { ok: false, error: "fieldTooLong" };
+  }
   const item = doc.items.find((i) => i.id === input.itemId && i.wishlistId === input.wishlistId);
+  // Une idée réservée est archivée : on dit pourquoi elle n'est plus proposable.
+  if (item && doc.reservations.some((r) => r.itemId === item.id)) {
+    return { ok: false, error: "itemAlreadyReserved" };
+  }
   if (!item || item.archived) return { ok: false, error: "itemNotInList" };
   if (input.typeId && item.typeId !== input.typeId) {
     return { ok: false, error: "itemWrongType" };
-  }
-  if (doc.reservations.some((r) => r.itemId === item.id)) {
-    return { ok: false, error: "itemAlreadyReserved" };
   }
   const reservation: Reservation = {
     id: input.id ?? newId(),

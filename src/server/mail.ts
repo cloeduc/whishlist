@@ -1,6 +1,7 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import path from "node:path";
-import { getTranslations } from "../i18n/server";
+import type { Locale } from "../i18n/config";
+import { getTranslations, getTranslationsFor } from "../i18n/server";
 
 export function mailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY && process.env.MAIL_FROM);
@@ -44,8 +45,9 @@ async function sendMail(input: {
 export async function sendPasswordResetMail(input: {
   to: string;
   resetUrl: string;
+  locale?: Locale;
 }): Promise<{ sent: boolean }> {
-  const t = await getTranslations("mail");
+  const t = await mailTranslations(input.locale);
   const subject = t("reset.subject");
   const text = [t("reset.intro"), "", t("reset.openLink"), input.resetUrl, "", t("reset.ignore")].join("\n");
   const html = `<p>${escapeHtml(t("reset.intro"))}</p>
@@ -65,8 +67,9 @@ export async function sendPasswordResetMail(input: {
 export async function sendAlreadyRegisteredMail(input: {
   to: string;
   loginUrl: string;
+  locale?: Locale;
 }): Promise<{ sent: boolean }> {
-  const t = await getTranslations("mail");
+  const t = await mailTranslations(input.locale);
   const subject = t("already.subject");
   const text = [t("already.intro"), "", t("already.openLink"), input.loginUrl, "", t("already.ignore")].join(
     "\n",
@@ -88,8 +91,9 @@ export async function sendInviteMail(input: {
   inviteUrl: string;
   listTitle: string;
   fromName: string;
+  locale?: Locale;
 }): Promise<{ sent: boolean }> {
-  const t = await getTranslations("mail");
+  const t = await mailTranslations(input.locale);
   const vars = { fromName: input.fromName, listTitle: input.listTitle };
   const subject = t("invite.subject", vars);
   const text = [
@@ -112,6 +116,11 @@ export async function sendInviteMail(input: {
     html,
     logTag: "invite",
   });
+}
+
+/** Langue donnée par l'appelant (API), sinon celle de la requête du site. */
+function mailTranslations(locale: Locale | undefined) {
+  return locale ? getTranslationsFor(locale, "mail") : getTranslations("mail");
 }
 
 function escapeHtml(value: string): string {

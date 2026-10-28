@@ -76,6 +76,7 @@ Les PNG sont écrits dans `public/guide/fr` et `public/guide/en`.
 | `GEMINI_API_KEY` | non | Enrichissement URL (prioritaire si les deux clés sont set) |
 | `OPENAI_API_KEY` | non | Enrichissement URL (fallback) |
 | `GEMINI_MODEL` / `OPENAI_MODEL` | non | Override modèles |
+| `API_ALLOWED_ORIGINS` | non | Origines web autorisées à appeler l’API (`/api/v1`), séparées par des virgules, ex. `capacitor://localhost,https://localhost`. Sans elle : seuls le site et les clients natifs appellent l’API |
 
 En Docker / compose, les mêmes valeurs sont souvent préfixées `WHISHLIST_*` dans le fichier env hôte (voir `deploy/compose.prod.yml`).
 
@@ -187,6 +188,19 @@ ailleurs en production.
 | Admin | Kanban par catégorie, archives, réservations, partage, réglages |
 | Enrichissement | Scraping OG/JSON-LD + LLM (nom, prix, image, type) |
 | Auth | Compte, reset MDP, force changement MDP 1ʳᵉ connexion, invitations |
+| API | `/api/v1`, pour une app mobile ou un script (voir ci-dessous) |
+
+---
+
+## API
+
+L’app expose les mêmes parcours que le site sous `/api/v1`, en JSON, pour une future app mobile. Elle applique les mêmes règles et les mêmes droits que le site.
+
+- Contrat : [`specs/004-mobile-api/contracts/openapi.yaml`](specs/004-mobile-api/contracts/openapi.yaml) (OpenAPI 3.1).
+- Connexion : `POST /api/v1/auth/login` rend un jeton, à envoyer ensuite dans `Authorization: Bearer <jeton>` (30 jours, révoqué par `POST /api/v1/auth/logout` ou un changement de mot de passe).
+- Sans compte : lecture et réservation par le lien de lecture (`/api/v1/public/lists/<token>`).
+- L’API n’utilise aucun cookie. Une page web ne peut l’appeler que depuis le site ou une origine de `API_ALLOWED_ORIGINS`.
+- Vérification à la main : [`specs/004-mobile-api/quickstart.md`](specs/004-mobile-api/quickstart.md).
 
 ---
 
@@ -194,8 +208,10 @@ ailleurs en production.
 
 ```
 app/                  # pages Next
+app/api/v1/           # API JSON (adaptateurs, sans règle métier)
 components/site/      # UI métier
 src/domain/           # règles métier (testées)
+src/server/commands/  # orchestration partagée par les server actions et l’API
 src/store/            # JSON + lock fichier
 locales/{fr,en}/      # i18n
 deploy/               # compose, bootstrap, Runtipi

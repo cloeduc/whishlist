@@ -21,19 +21,51 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(left, right);
 }
 
-function parseClaims(raw: string | undefined, readToken: string, secret: string): string[] {
+function parseClaims(raw: string | undefined, readToken: string, secret: string, nowMs = Date.now()): string[] {
   if (!raw) return [];
   const parts = raw.split(".");
   if (parts.length !== 3) return [];
   const [iatStr, idsCsv, mac] = parts;
   if (!iatStr || mac === undefined || !/^\d+$/.test(iatStr)) return [];
   const iat = Number(iatStr);
-  const now = Math.floor(Date.now() / 1000);
+  const now = Math.floor(nowMs / 1000);
   if (iat > now + 60 || now - iat > TTL_SEC) return [];
   const expected = macClaims(readToken, iat, idsCsv ?? "", secret);
   if (!safeEqual(mac, expected)) return [];
   if (!idsCsv) return [];
   return idsCsv.split(",").filter(Boolean);
+}
+
+/** Claims lus par requête au plus (en-tête `X-Reservation-Claims` de l'API). */
+const MAX_CLAIMS = 50;
+
+/**
+ * Preuve d'une réservation pour un client sans cookie : `iat.reservationId.mac`.
+ * Même format et même durée que le cookie, avec un seul id.
+ */
+export function signReservationClaim(
+  readToken: string,
+  reservationId: string,
+  secret: string,
+  nowMs = Date.now(),
+): string {
+  const iat = Math.floor(nowMs / 1000);
+  return `${iat}.${reservationId}.${macClaims(readToken, iat, reservationId, secret)}`;
+}
+
+/** Ids des réservations prouvées par ces claims (les autres sont ignorés). */
+export function verifyReservationClaims(
+  readToken: string,
+  claims: readonly string[],
+  secret: string,
+  nowMs = Date.now(),
+): Set<string> {
+  const ids = new Set<string>();
+  for (const claim of claims.slice(0, MAX_CLAIMS)) {
+    const parsed = parseClaims(claim, readToken, secret, nowMs);
+    if (parsed.length === 1) ids.add(parsed[0]!);
+  }
+  return ids;
 }
 
 /** Enregistre une réservation comme « mienne » dans ce navigateur. */

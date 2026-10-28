@@ -29,6 +29,7 @@ async function ensureFile(file: string): Promise<void> {
 
 function normalizeDocument(doc: Database): Database {
   if (!doc.passwordResets) doc.passwordResets = [];
+  if (!doc.apiSessions) doc.apiSessions = [];
   for (const user of doc.users) {
     if (user.mustChangePassword === undefined) user.mustChangePassword = false;
     if (typeof user.sessionVersion !== "number") user.sessionVersion = 0;

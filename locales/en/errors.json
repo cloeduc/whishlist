@@ -59,5 +59,18 @@
   "emailRequired": "Enter a valid email address.",
   "inviteSendFailed": "We couldn’t send the invitation. Try again.",
   "mailNotConfigured": "Email sending isn’t configured on this server.",
-  "accessDenied": "You don’t have permission to edit this list."
+  "accessDenied": "You don’t have permission to edit this list.",
+  "unauthorized": "Log in to continue.",
+  "invalidCredentials": "Incorrect email or password.",
+  "mustChangePassword": "Change your password before continuing.",
+  "readPasswordRequired": "This list is protected by a password.",
+  "badPassword": "The password is incorrect.",
+  "fieldTooLong": "This text is too long.",
+  "invalidJson": "The request is not valid JSON.",
+  "payloadTooLarge": "The request is too large.",
+  "unsupportedMediaType": "The request must be sent as JSON.",
+  "originNotAllowed": "This origin is not allowed to call the API.",
+  "apiVersionUnsupported": "This API version is no longer supported. Update the app.",
+  "notFound": "This address does not exist.",
+  "serverError": "Something went wrong. Try again later."
 }

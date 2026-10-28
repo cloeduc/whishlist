@@ -59,5 +59,18 @@
   "emailRequired": "Saisissez une adresse e-mail valide.",
   "inviteSendFailed": "L'invitation n'a pas pu être envoyée. Réessayez.",
   "mailNotConfigured": "Envoi d'e-mail non configuré sur ce serveur.",
-  "accessDenied": "Vous n'avez pas accès à la modification de cette liste."
+  "accessDenied": "Vous n'avez pas accès à la modification de cette liste.",
+  "unauthorized": "Connectez-vous pour continuer.",
+  "invalidCredentials": "E-mail ou mot de passe incorrect.",
+  "mustChangePassword": "Changez votre mot de passe avant de continuer.",
+  "readPasswordRequired": "Cette liste est protégée par un mot de passe.",
+  "badPassword": "Le mot de passe est incorrect.",
+  "fieldTooLong": "Ce texte est trop long.",
+  "invalidJson": "La demande n'est pas un JSON valide.",
+  "payloadTooLarge": "La demande est trop volumineuse.",
+  "unsupportedMediaType": "La demande doit être envoyée en JSON.",
+  "originNotAllowed": "Cette origine n'est pas autorisée à appeler l'API.",
+  "apiVersionUnsupported": "Cette version de l'API n'est plus prise en charge. Mettez l'application à jour.",
+  "notFound": "Cette adresse n'existe pas.",
+  "serverError": "Une erreur est survenue. Réessayez plus tard."
 }

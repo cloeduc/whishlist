@@ -21,7 +21,7 @@ function withLocaleCookie(response: NextResponse, request: NextRequest, locale: 
   });
 }
 
-/** L'adresse porte la langue. Le français n'a pas de préfixe, l'anglais est sous `/en`. */
+/** L'adresse porte la langue (pas pour `/api/`, qui suit `Accept-Language`). Le français n'a pas de préfixe, l'anglais est sous `/en`. */
 export function proxy(request: NextRequest) {
   const { requestHeaders, value } = cspHeaders(request);
   const moved = legacyHostRedirect(
@@ -72,7 +72,7 @@ export function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     {
-      source: "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+      source: "/((?!api/|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },
