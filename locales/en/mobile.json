@@ -31,7 +31,9 @@
     "logoutWarning_one": "{{count}} change has not been sent yet. It will be lost if you log out.",
     "logoutWarning_other": "{{count}} changes have not been sent yet. They will be lost if you log out.",
     "logoutConfirm": "Log out and lose the changes",
-    "logoutKeep": "Stay logged in"
+    "logoutKeep": "Stay logged in",
+    "deletePending_one": "{{count}} change never sent will be lost.",
+    "deletePending_other": "{{count}} changes never sent will be lost."
   },
   "share": {
     "qrLabel": "QR code of the list link",
@@ -44,5 +46,16 @@
   },
   "settings": {
     "offline": "List settings need a connection. Try again once you are back online."
+  },
+  "account": {
+    "version": "Version {{version}}",
+    "licenses": "Licenses",
+    "contact": "Write to us"
+  },
+  "legal": {
+    "viewOnSite": "View on the site",
+    "licensesEyebrow": "Legal information",
+    "licensesTitle": "Licenses",
+    "licensesIntro": "The app is built with this open-source software. Tap a name to read its license."
   }
 }

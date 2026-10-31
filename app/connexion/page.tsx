@@ -23,7 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ConnexionPage({
   searchParams,
 }: {
-  searchParams: Promise<{ e?: string; next?: string }>;
+  searchParams: Promise<{ e?: string; next?: string; deleted?: string }>;
 }) {
   const query = await searchParams;
   const t = await getTranslations("auth");
@@ -39,6 +39,11 @@ export default async function ConnexionPage({
           <form action={loginAction}>
             <FieldGroup>
               <input type="hidden" name="next" value={next} />
+              {query.deleted === "1" ? (
+                <Alert>
+                  <AlertDescription>{t("account.deleted")}</AlertDescription>
+                </Alert>
+              ) : null}
               {query.e ? (
                 <Alert variant="destructive">
                   <AlertDescription>

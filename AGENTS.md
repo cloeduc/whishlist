@@ -12,7 +12,7 @@
 - Build prod : `npm run build`
 - Données de démo : `npm run demo:data -- tmp/demo-wishlist.json` puis `WISHLIST_DATA_PATH=tmp/demo-wishlist.json npm run dev` (`DEMO_PASSWORD` obligatoire)
 - Captures du guide : `DEMO_BASE_URL=http://localhost:3010 npm run demo:capture` (écrit `public/guide/{fr,en}`) ; `-- --mobile` écrit les captures en largeur de téléphone dans `specs/005-mobile-list-app/design/web-mobile/`
-- App mobile (`mobile/`, package séparé) : `npm --prefix mobile ci`, puis `npm --prefix mobile run lint|typecheck|test` ; simulateur : `EXPO_PUBLIC_API_URL=http://localhost:3010 npm --prefix mobile run ios` (ou `android`) ; types de l'API : `npm --prefix mobile run api:types` après un changement du contrat
+- App mobile (`mobile/`, package séparé) : `npm --prefix mobile ci`, puis `npm --prefix mobile run lint|typecheck|test` ; simulateur : `EXPO_PUBLIC_API_URL=http://localhost:3010 npm --prefix mobile run ios` (ou `android`) ; types de l'API : `npm --prefix mobile run api:types` après un changement du contrat ; licences affichées par l'app : `npm --prefix mobile run licenses` après un changement de ses dépendances
 - Image Docker : `docker build -t whishlist:local .` (déploiement : `README.md` et `deploy/DEPLOY-RUNTIPI.md`)
 
 ## Fichiers générés
@@ -22,7 +22,7 @@ La revue de code les ignore :
 - `next-env.d.ts`, `package-lock.json`, `.next/`
 - `public/guide/**` (captures produites par `demo:capture`)
 - `.claude/skills/speckit-*`, `.specify/scripts/`, `.specify/templates/`, `.specify/extensions/` (installés par Spec Kit)
-- `mobile/package-lock.json`, `mobile/src/api/schema.d.ts` (généré depuis le contrat par `api:types`), `mobile/ios/`, `mobile/android/` (générés par Expo, non versionnés)
+- `mobile/package-lock.json`, `mobile/src/api/schema.d.ts` (généré depuis le contrat par `api:types`), `mobile/src/legal/licenses.json` (généré par `licenses`), `mobile/ios/`, `mobile/android/` (générés par Expo, non versionnés)
 
 ## Conventions
 

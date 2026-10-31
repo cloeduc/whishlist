@@ -19,6 +19,7 @@ export function SiteFooter({
   faq,
   guide,
   legal,
+  privacy,
   locale,
   analytics,
 }: {
@@ -31,6 +32,7 @@ export function SiteFooter({
   faq: string;
   guide: string;
   legal: string;
+  privacy: string;
   locale: Locale;
   analytics: { offLabel: string; onLabel: string } | null;
 }) {
@@ -51,6 +53,12 @@ export function SiteFooter({
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           {legal}
+        </Link>
+        <Link
+          href={withLocale(locale, "/donnees-personnelles")}
+          className="font-medium text-foreground underline-offset-4 hover:underline"
+        >
+          {privacy}
         </Link>
       </nav>
       <p className="mt-4 text-pretty">{tagline}</p>

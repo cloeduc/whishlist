@@ -1,8 +1,10 @@
 import NetInfo, { NetInfoStateType } from "@react-native-community/netinfo";
 import { fireEvent, render, screen } from "@testing-library/react-native";
+import { router } from "expo-router";
 
 import Login from "../../app/(auth)/login";
-import { getSession } from "@/auth/session";
+import Register from "../../app/(auth)/register";
+import { deleteAccount, getSession, signIn } from "@/auth/session";
 import { i18n } from "@/i18n";
 import { watchNetwork } from "@/network";
 
@@ -47,4 +49,23 @@ test("offline: the button is disabled and explains why", async () => {
   listener({ isConnected: false, isInternetReachable: false, type: NetInfoStateType.none, details: null, isWifiEnabled: false });
   expect(await screen.findByText(i18n.t("mobile:offline.needsNetwork"))).toBeOnTheScreen();
   expect(screen.getByRole("button", { name: "Se connecter" })).toBeDisabled();
+});
+
+test("after deleting the account: the message shows above the form (FR-015)", async () => {
+  fakeFetch({});
+  await signIn({ token: "secret-token", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
+  fakeFetch({ "POST /me/deletion": () => new Response(null, { status: 204 }) });
+  await deleteAccount("demo-password-1");
+  await render(<Login />);
+  expect(await screen.findByText(i18n.t("auth:account.deleted"))).toBeOnTheScreen();
+});
+
+test.each([
+  ["login", Login],
+  ["register", Register],
+])("%s: the legal links open the two pages (FR-002)", async (_name, Screen) => {
+  await render(<Screen />);
+  await fireEvent.press(await screen.findByRole("link", { name: "Mentions légales" }));
+  await fireEvent.press(screen.getByRole("link", { name: "Données personnelles" }));
+  expect(jest.mocked(router.push).mock.calls.slice(-2)).toEqual([["/legal/mentions"], ["/legal/privacy"]]);
 });

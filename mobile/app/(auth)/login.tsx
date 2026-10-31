@@ -33,6 +33,7 @@ export default function Login() {
       below={<Button title={t("auth:login.createAccount")} variant="link" onPress={() => router.push("/register")} />}
     >
       {session.status === "signedOut" && session.expired ? <Alert>{t("mobile:session.expired")}</Alert> : null}
+      {session.status === "signedOut" && session.deleted ? <Alert>{t("auth:account.deleted")}</Alert> : null}
       <Field label={t("auth:login.email")}>
         <Input
           accessibilityLabel={t("auth:login.email")}

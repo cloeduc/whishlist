@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Image, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import { enrich, useCapabilities, type ItemInput } from "@/data/items";
+import { useCapabilities } from "@/data/capabilities";
+import { enrich, type ItemInput } from "@/data/items";
 import { errorText } from "@/features/errors";
 import { translateError } from "@/i18n";
 import { useOnline } from "@/network";

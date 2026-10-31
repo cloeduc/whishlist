@@ -1,6 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react-native";
 
-import { deleteItem, saveItem, useCapabilities } from "@/data/items";
+import { useCapabilities } from "@/data/capabilities";
+import { deleteItem, saveItem } from "@/data/items";
 import { apiTransport, resetStore } from "@/data/store";
 import { i18n, translateError } from "@/i18n";
 import { listChanges } from "@/offline/outbox";

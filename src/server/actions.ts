@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect as navigationRedirect } from "next/navigation";
-import { cookieSecure, currentUser, origin } from "../auth/current";
+import { cookieSecure, currentUser } from "../auth/current";
 import {
   grantReservationClaim,
   listClaimedReservationIds,
@@ -12,8 +12,9 @@ import { grantReadUnlock, hasReadUnlock } from "../auth/read-unlock";
 import { SESSION_COOKIE, SESSION_TTL_SEC, sessionSecret, signSession } from "../auth/session";
 import { resetPasswordWithToken } from "../domain/password-reset";
 import { mailConfigured } from "./mail";
-import { clientIp, isRateLimitError } from "./rate-limit";
-import type { CommandContext } from "./commands/context";
+import { isRateLimitError } from "./rate-limit";
+import { actionContext } from "./action-context";
+import { deleteOwnAccount } from "./commands/account";
 import {
   changeOwnPassword,
   checkCredentials,
@@ -48,11 +49,6 @@ import { withLocale } from "../i18n/locale-path";
 import { getLocale } from "../i18n/server";
 import { updateDocument } from "../store/db";
 
-/** Contexte des commandes partagées avec l'API, lu depuis la requête du site. */
-async function actionContext(): Promise<CommandContext> {
-  const [user, ip, locale, base] = await Promise.all([currentUser(), clientIp(), getLocale(), origin()]);
-  return { user, ip, locale, origin: base };
-}
 
 const ADMIN_ONGLETS = new Set(["idees", "archives", "reservations", "partage", "reglages"]);
 
@@ -176,6 +172,24 @@ export async function changePasswordAction(formData: FormData) {
   }
   await openSession(user.id, result.user.sessionVersion ?? 0);
   return localeRedirect(user.mustChangePassword ? "/" : "/compte?ok=1");
+}
+
+export async function deleteAccountAction(formData: FormData) {
+  const password = String(formData.get("password") ?? "");
+  let result: Awaited<ReturnType<typeof deleteOwnAccount>>;
+  try {
+    result = await deleteOwnAccount(await actionContext(), { password });
+  } catch (error) {
+    if (isRateLimitError(error)) return localeRedirect("/compte?d=rateLimited#supprimer");
+    throw error;
+  }
+  if (!result.ok) {
+    if (result.error === "unauthorized") return localeRedirect("/connexion");
+    return localeRedirect(`/compte?d=${result.error}#supprimer`);
+  }
+  const jar = await cookies();
+  jar.delete(SESSION_COOKIE);
+  return localeRedirect("/connexion?deleted=1");
 }
 
 export async function logoutAction() {

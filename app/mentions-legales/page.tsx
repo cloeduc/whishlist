@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ContentPage, ContentSection } from "@/components/site/content-page";
-import { llmConfigured } from "@/src/domain/product-llm";
-import { getTranslations } from "@/src/i18n/server";
-import { analyticsConfigured } from "@/src/server/analytics";
-import { mailConfigured } from "@/src/server/mail";
+import { withLocale } from "@/src/i18n/locale-path";
+import { getLocale, getTranslations } from "@/src/i18n/server";
+import { CONTACT_EMAIL } from "@/src/site/contact";
 import { publicPageMetadata } from "@/src/site/seo";
+
+const LINK = "font-medium text-foreground underline underline-offset-4 hover:no-underline";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("content");
@@ -16,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function LegalPage() {
-  const t = await getTranslations("content");
+  const [t, locale] = await Promise.all([getTranslations("content"), getLocale()]);
   return (
     <ContentPage
       eyebrow={t("legal.eyebrow")}
@@ -41,12 +43,7 @@ export default async function LegalPage() {
           <div>
             <dt className="sr-only">{t("legal.hostWebsiteLabel")}</dt>
             <dd>
-              <a
-                href="https://www.planethoster.com"
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
-              >
+              <a href="https://www.cloudflare.com" target="_blank" rel="noreferrer" className={LINK}>
                 {t("legal.hostWebsite")}
               </a>
             </dd>
@@ -55,17 +52,14 @@ export default async function LegalPage() {
       </ContentSection>
       <ContentSection title={t("legal.privacyTitle")}>
         <div className="flex flex-col gap-3">
-          <p>{t("legal.privacyBody")}</p>
-          <p>{t("legal.cookiesBody")}</p>
-          {analyticsConfigured() ? <p>{t("legal.audienceBody")}</p> : null}
-          {mailConfigured() ? <p>{t("legal.mailBody")}</p> : null}
-          {llmConfigured() ? <p>{t("legal.aiBody")}</p> : null}
           <p>
-            <a
-              href="mailto:contact@ohyoushouldnt.app"
-              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
-            >
-              {t("legal.contact")}
+            <Link href={withLocale(locale, "/donnees-personnelles")} className={LINK}>
+              {t("legal.privacyLink")}
+            </Link>
+          </p>
+          <p>
+            <a href={`mailto:${CONTACT_EMAIL}`} className={LINK}>
+              {t("legal.contact", { email: CONTACT_EMAIL })}
             </a>
           </p>
         </div>

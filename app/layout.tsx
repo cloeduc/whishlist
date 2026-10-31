@@ -88,10 +88,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               faq={tContent("nav.faq")}
               guide={tContent("nav.guide")}
               legal={tContent("nav.legal")}
+              privacy={tContent("privacy.title")}
               locale={locale}
               analytics={
                 analytics
-                  ? { offLabel: tContent("legal.optOut"), onLabel: tContent("legal.optOutOn") }
+                  ? { offLabel: tContent("privacy.optOut"), onLabel: tContent("privacy.optOutOn") }
                   : null
               }
             />

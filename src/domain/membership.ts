@@ -1,7 +1,7 @@
 import { clone, findMembership } from "./access";
 import { parseThemeForm, resolveTheme, type WishlistTheme } from "./theme";
 import { newToken } from "./tokens";
-import type { Database, Wishlist } from "./types";
+import type { Database, Membership, Wishlist } from "./types";
 
 const SUBTITLE_MAX = 280;
 
@@ -63,7 +63,8 @@ export function updateWishlistSettings(
   return { ok: true, doc: next, wishlist: target };
 }
 
-function wipeWishlist(doc: Database, wishlistId: string): void {
+/** Efface une liste et tout ce qui lui appartient (sur un document déjà cloné). */
+export function wipeWishlist(doc: Database, wishlistId: string): void {
   doc.wishlists = doc.wishlists.filter((w) => w.id !== wishlistId);
   doc.memberships = doc.memberships.filter((m) => m.wishlistId !== wishlistId);
   doc.types = doc.types.filter((t) => t.wishlistId !== wishlistId);
@@ -136,24 +137,27 @@ export function removeMember(
   return { ok: true, doc: next };
 }
 
+/** Membre qui reprend la liste quand `leavingUserId` part : le plus ancien (`joinedAt`, puis `userId`). */
+export function pickHeir(doc: Database, wishlistId: string, leavingUserId: string): Membership | null {
+  const others = doc.memberships
+    .filter((m) => m.wishlistId === wishlistId && m.userId !== leavingUserId)
+    .sort((a, b) => a.joinedAt.localeCompare(b.joinedAt) || a.userId.localeCompare(b.userId));
+  return others[0] ?? null;
+}
+
 export function leaveWishlist(
   doc: Database,
   input: { wishlistId: string; actorId: string },
 ): { ok: true; doc: Database } | { ok: false; error: string } {
   const actor = findMembership(doc, input.wishlistId, input.actorId);
   if (!actor) return { ok: false, error: "notMember" };
-  const others = doc.memberships
-    .filter((m) => m.wishlistId === input.wishlistId && m.userId !== input.actorId)
-    .sort((a, b) => a.joinedAt.localeCompare(b.joinedAt) || a.userId.localeCompare(b.userId));
-  if (others.length === 0) {
+  const heir = pickHeir(doc, input.wishlistId, input.actorId);
+  if (!heir) {
     return { ok: false, error: "aloneMustDelete" };
   }
   const next = clone(doc);
   if (actor.role === "owner") {
-    const heir = next.memberships.find(
-      (m) => m.wishlistId === input.wishlistId && m.userId === others[0].userId,
-    )!;
-    heir.role = "owner";
+    findMembership(next, input.wishlistId, heir.userId)!.role = "owner";
   }
   next.memberships = next.memberships.filter(
     (m) => !(m.wishlistId === input.wishlistId && m.userId === input.actorId),

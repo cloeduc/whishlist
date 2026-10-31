@@ -44,10 +44,15 @@ export function configureClient(next: Partial<ClientHooks>): void {
   Object.assign(hooks, next);
 }
 
-export function apiBaseUrl(): string {
+/** Adresse du site, fixée au build (`EXPO_PUBLIC_API_URL`). */
+export function siteOrigin(): string {
   const configured = Constants.expoConfig?.extra?.apiUrl;
   const origin = typeof configured === "string" && configured ? configured : "http://localhost:3000";
-  return `${origin.replace(/\/$/, "")}/api/v1`;
+  return origin.replace(/\/$/, "");
+}
+
+export function apiBaseUrl(): string {
+  return `${siteOrigin()}/api/v1`;
 }
 
 async function send(request: Request): Promise<Response> {

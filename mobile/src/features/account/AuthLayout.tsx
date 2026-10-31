@@ -6,7 +6,12 @@ import { BrandHeader } from "@/ui/BrandHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import { Screen } from "@/ui/Screen";
 
-/** Écrans sans connexion (`02-connexion.png`, `03-inscription.png`) : en-tête du site, puis une carte-formulaire. */
+import { LegalLinks } from "./LegalLinks";
+
+/**
+ * Écrans sans connexion (`02-connexion.png`, `03-inscription.png`) : en-tête du site, une carte-formulaire,
+ * puis les liens vers les mentions légales et les données personnelles (FR-002).
+ */
 export function AuthLayout({
   title,
   description,
@@ -31,6 +36,7 @@ export function AuthLayout({
       </Card>
       {/* Centré, comme le lien « Créer un compte » sous la carte du site. */}
       {below ? <View style={{ flexDirection: "row", justifyContent: "center", gap: tokens.space[3] }}>{below}</View> : null}
+      <LegalLinks />
     </Screen>
   );
 }

@@ -1,9 +1,6 @@
-import { useEffect, useState } from "react";
-
-import { api, NetworkError, ok, type Schemas } from "@/api/client";
+import { api, ok, type Schemas } from "@/api/client";
 import { newClientId } from "@/offline/ids";
 import type { ChangePayloads } from "@/offline/outbox";
-import { getSnapshot, putSnapshot } from "@/offline/snapshot";
 
 import { parsePrice } from "../../../src/domain/price";
 import { write, type WriteResult } from "./write";
@@ -58,32 +55,6 @@ export async function enrich(listId: string, url: string): Promise<Enriched> {
     api.POST("/lists/{listId}/enrich", { params: { path: { listId } }, body: { url } }),
   );
   return { name, price, imageUrl, typeId, usedLlm };
-}
-
-type Capabilities = { apiVersion: string; enrich: boolean; mail: boolean };
-const CAPABILITIES = "capabilities";
-
-/** Services optionnels du serveur ; la dernière réponse connue sert hors ligne. */
-export function useCapabilities(): Capabilities | null {
-  const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
-  useEffect(() => {
-    let active = true;
-    void (async () => {
-      const cached = await getSnapshot<Capabilities>(CAPABILITIES);
-      if (active && cached) setCapabilities(cached.body);
-      try {
-        const fresh = await ok(api.GET("/capabilities"));
-        await putSnapshot(CAPABILITIES, fresh);
-        if (active) setCapabilities(fresh);
-      } catch (error) {
-        if (!(error instanceof NetworkError)) throw error;
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
-  return capabilities;
 }
 
 export type MemberItem = Schemas["MemberItem"];

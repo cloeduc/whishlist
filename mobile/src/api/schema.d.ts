@@ -28,12 +28,14 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @example 1.1.0 */
+                            /** @example 1.2.0 */
                             apiVersion: string;
                             /** @description Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page). */
                             enrich: boolean;
                             /** @description Envoi d'e-mails configuré. */
                             mail: boolean;
+                            /** @description Mesure d'audience configurée sur le site. Depuis 1.2.0. */
+                            analytics: boolean;
                         };
                     };
                 };
@@ -570,6 +572,123 @@ export interface paths {
                 401: components["responses"]["Error"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/deletion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Ce que supprimerait la suppression du compte
+         * @description Ne modifie rien. Depuis 1.2.0.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountDeletionPreview"];
+                    };
+                };
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+            };
+        };
+        put?: never;
+        /**
+         * Supprimer son compte
+         * @description Exige le mot de passe actuel. Supprime le compte, ses connexions (site et appareils),
+         *     les listes dont il est le seul membre ; transmet les autres ; garde ses réservations
+         *     sans lien au compte. Le jeton utilisé ne vaut plus rien ensuite. Depuis 1.2.0.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        password: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Supprimé */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["Error"];
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Télécharger ses données
+         * @description Document JSON sans aucun secret, 5 demandes par heure. Depuis 1.2.0.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        "Content-Disposition"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["AccountExport"];
+                    };
+                };
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1717,6 +1836,92 @@ export interface components {
             items: components["schemas"]["MemberItem"][];
             reservations: components["schemas"]["MemberReservation"][];
             members: components["schemas"]["Member"][];
+        };
+        AccountDeletionPreview: {
+            /** @description Listes dont le compte est le seul membre, effacées. */
+            deletedLists: {
+                id: string;
+                title: string;
+            }[];
+            /** @description Listes qui restent aux autres membres. */
+            transferredLists: {
+                id: string;
+                title: string;
+                /** @description Nouveau propriétaire */
+                newOwnerName: string | null;
+            }[];
+            reservationsKept: number;
+        };
+        AccountExport: {
+            /** @constant */
+            format: "ohyoushouldnt-export";
+            /** @constant */
+            version: 1;
+            /** Format: date-time */
+            exportedAt: string;
+            account: {
+                email: string;
+                displayName: string;
+                /** Format: date-time */
+                createdAt: string;
+            };
+            lists: components["schemas"]["ExportedList"][];
+            /** @description Réservations faites connecté sur des listes dont le compte n'est pas membre. */
+            myReservations: {
+                listTitle: string;
+                item: string | null;
+                fromName: string | null;
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+            }[];
+        };
+        ExportedList: {
+            title: string;
+            subtitle: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** @enum {unknown} */
+            role: "owner" | "member";
+            /** Format: date-time */
+            joinedAt: string;
+            theme: components["schemas"]["Theme"];
+            coverImageUrl: string | null;
+            publicUrl: string;
+            readPasswordProtected: boolean;
+            members: {
+                displayName: string;
+                /** @enum {unknown} */
+                role: "owner" | "member";
+                /** Format: date-time */
+                joinedAt: string;
+            }[];
+            categories: {
+                label: string;
+                sortOrder: number;
+            }[];
+            people: {
+                label: string;
+            }[];
+            items: {
+                name: string;
+                category: string | null;
+                person: string | null;
+                priceCents: number | null;
+                url: string | null;
+                imageUrl: string | null;
+                priority: string | null;
+                archived: boolean;
+            }[];
+            reservations: {
+                item: string | null;
+                fromName: string | null;
+                note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+                /** @description Réservation faite par ce compte. */
+                byMe: boolean;
+            }[];
         };
     };
     responses: {

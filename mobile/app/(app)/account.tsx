@@ -1,9 +1,13 @@
+import Constants from "expo-constants";
+import { router } from "expo-router";
 import { useCallback, useState } from "react";
+import { Linking, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { api, ok } from "@/api/client";
 import { signOut, updateMe, useSession } from "@/auth/session";
 import { usePendingCount } from "@/data/store";
+import { exportData } from "@/features/account/exportData";
 import { PasswordForm } from "@/features/account/PasswordForm";
 import { useServerAction } from "@/features/errors";
 import { useOnline } from "@/network";
@@ -18,14 +22,19 @@ import { Input } from "@/ui/Input";
 import { NetworkNote } from "@/ui/NetworkNote";
 import { PageTitle } from "@/ui/PageTitle";
 import { Screen } from "@/ui/Screen";
+import { Separator } from "@/ui/Separator";
+import { Text } from "@/ui/Text";
+
+import { CONTACT_EMAIL } from "../../../src/site/contact";
 
 /**
  * Mon compte, d'après `11-compte.png`, ouvert par le bouton du haut de « Mes listes » :
- * nom affiché, mot de passe, déconnexion (FR-003, FR-007).
- * Hors ligne, seul le nom se lit.
+ * nom affiché, mot de passe, puis tout en bas (FR-001 de la 006) : données et informations,
+ * déconnexion, et suppression du compte en dernier.
+ * Hors ligne, seuls le nom, les pages légales et la déconnexion restent utilisables.
  */
 export default function Account() {
-  const { t } = useTranslation(["auth", "common", "mobile"]);
+  const { t } = useTranslation(["auth", "common", "content", "mobile"]);
   const session = useSession();
   const online = useOnline();
   const pendingCount = usePendingCount();
@@ -40,6 +49,12 @@ export default function Account() {
       await updateMe(await ok(api.PATCH("/me", { body: { displayName: displayName.trim() } })));
       setNameSaved(true);
     }, [displayName]),
+  );
+
+  const download = useServerAction(
+    useCallback(async () => {
+      await exportData(t("auth:account.exportAction"));
+    }, [t]),
   );
 
   function logout() {
@@ -79,13 +94,56 @@ export default function Account() {
       <Card>
         <CardHeader>
           <CardTitle>{t("auth:changePassword.title")}</CardTitle>
-          <CardDescription>{t("auth:changePassword.description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <PasswordForm />
         </CardContent>
       </Card>
-      <Button title={t("common:nav.logout")} variant="neutral" fullWidth onPress={logout} style={{ marginBottom: tokens.space[2] }} />
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("auth:account.dataTitle")}</CardTitle>
+          <CardDescription>{t("auth:account.dataHint")}</CardDescription>
+        </CardHeader>
+        <CardContent style={{ alignItems: "flex-start" }}>
+          <Button title={t("content:legal.title")} variant="link" onPress={() => router.push("/legal/mentions")} />
+          <Button title={t("content:privacy.title")} variant="link" onPress={() => router.push("/legal/privacy")} />
+          <View style={{ gap: tokens.space[1] }}>
+            <Button
+              title={t("auth:account.exportAction")}
+              variant="link"
+              disabled={!online || download.busy}
+              onPress={() => void download.run()}
+            />
+            <Text size="sm" color={tokens.colors.mutedForeground}>
+              {t("auth:account.exportHint")}
+            </Text>
+            {download.error ? <Alert variant="destructive">{download.error}</Alert> : null}
+            <NetworkNote />
+          </View>
+          <Button title={t("mobile:account.licenses")} variant="link" onPress={() => router.push("/legal/licenses")} />
+          <Button
+            title={t("mobile:account.contact")}
+            variant="link"
+            onPress={() => void Linking.openURL(`mailto:${CONTACT_EMAIL}`)}
+          />
+          <Text size="sm" color={tokens.colors.mutedForeground}>
+            {t("mobile:account.version", { version: Constants.expoConfig?.version ?? "" })}
+          </Text>
+        </CardContent>
+      </Card>
+      <Button title={t("common:nav.logout")} variant="neutral" fullWidth onPress={logout} />
+      <Separator />
+      <View style={{ gap: tokens.space[2], marginBottom: tokens.space[2] }}>
+        <Button
+          title={t("auth:account.deleteAction")}
+          variant="destructive"
+          fullWidth
+          disabled={!online}
+          onPress={() => router.push("/delete-account")}
+          testID="delete-account"
+        />
+        <NetworkNote />
+      </View>
       <ConfirmDialog
         visible={confirmLogout}
         title={t("mobile:offline.logoutTitle")}

@@ -31,7 +31,9 @@
     "logoutWarning_one": "{{count}} changement n'a pas encore été envoyé. Il sera perdu si vous vous déconnectez.",
     "logoutWarning_other": "{{count}} changements n'ont pas encore été envoyés. Ils seront perdus si vous vous déconnectez.",
     "logoutConfirm": "Se déconnecter et perdre les changements",
-    "logoutKeep": "Rester connecté"
+    "logoutKeep": "Rester connecté",
+    "deletePending_one": "{{count}} changement jamais envoyé sera perdu.",
+    "deletePending_other": "{{count}} changements jamais envoyés seront perdus."
   },
   "share": {
     "qrLabel": "QR code du lien de la liste",
@@ -44,5 +46,16 @@
   },
   "settings": {
     "offline": "Les réglages de la liste demandent une connexion. Réessayez quand le réseau sera revenu."
+  },
+  "account": {
+    "version": "Version {{version}}",
+    "licenses": "Licences",
+    "contact": "Nous écrire"
+  },
+  "legal": {
+    "viewOnSite": "Voir sur le site",
+    "licensesEyebrow": "Informations légales",
+    "licensesTitle": "Licences",
+    "licensesIntro": "L’app est construite avec ces logiciels libres. Touchez un nom pour lire sa licence."
   }
 }

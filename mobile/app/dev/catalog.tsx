@@ -10,6 +10,8 @@ import { Badge } from "@/ui/Badge";
 import { BrandHeader } from "@/ui/BrandHeader";
 import { Button } from "@/ui/Button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/ui/Card";
+import { ContentPage } from "@/ui/ContentPage";
+import { ContentSection, ContentText } from "@/ui/ContentSection";
 import { Empty } from "@/ui/Empty";
 import { Field } from "@/ui/Field";
 import { GiftMark } from "@/ui/GiftMark";
@@ -17,6 +19,7 @@ import { Input } from "@/ui/Input";
 import { PillTabs } from "@/ui/PillTabs";
 import { Screen } from "@/ui/Screen";
 import { Select } from "@/ui/Select";
+import { Separator } from "@/ui/Separator";
 import { StarPicker, Stars } from "@/ui/Stars";
 import { Text } from "@/ui/Text";
 
@@ -127,6 +130,14 @@ function Components() {
           }
         />
         <Empty title="Aucune liste" description="Créez votre première liste." />
+      </Section>
+      <Section title="Page de contenu">
+        <ContentPage eyebrow="Informations légales" title="Mentions légales" intro="Qui publie le site, comment il est hébergé, et où écrire.">
+          <ContentSection title="Éditeur">
+            <ContentText>Ce site est édité à titre non professionnel, par un particulier.</ContentText>
+          </ContentSection>
+        </ContentPage>
+        <Separator />
       </Section>
       <Section title="Cadeau">
         <View style={{ flexDirection: "row", gap: tokens.space[4], alignItems: "center" }}>

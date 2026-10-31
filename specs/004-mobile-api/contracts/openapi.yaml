@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Oh, You Shouldn't! API
-  version: "1.1.0"
+  version: "1.2.0"
   description: |
     Accès aux listes pour un client autre que le site (app mobile, script).
 
@@ -14,6 +14,8 @@ info:
     - 1.1.0 : le client peut choisir l'identifiant de ce qu'il crée (`id` sur `POST /lists` et
       `POST /lists/{listId}/items`) ; un renvoi répond `200` sans rien créer. Champs facultatifs.
       `ListSummary` gagne `subtitle`, `coverImageUrl` et `theme` (carte de « Mes listes »).
+    - 1.2.0 : suppression du compte (`GET`/`POST /me/deletion`), export de ses données
+      (`GET /me/export`), `analytics` dans `/capabilities`.
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -53,13 +55,14 @@ paths:
             application/json:
               schema:
                 type: object
-                required: [apiVersion, enrich, mail]
+                required: [apiVersion, enrich, mail, analytics]
                 properties:
-                  apiVersion: { type: string, example: "1.1.0" }
+                  apiVersion: { type: string, example: "1.2.0" }
                   enrich:
                     type: boolean
                     description: Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page).
                   mail: { type: boolean, description: Envoi d'e-mails configuré. }
+                  analytics: { type: boolean, description: Mesure d'audience configurée sur le site. Depuis 1.2.0. }
 
   # ---------- Public (sans compte) ----------
 
@@ -330,6 +333,60 @@ paths:
               schema: { $ref: "#/components/schemas/Session" }
         "400": { $ref: "#/components/responses/Error" }
         "401": { $ref: "#/components/responses/Error" }
+
+  /me/deletion:
+    get:
+      tags: [auth]
+      summary: Ce que supprimerait la suppression du compte
+      description: Ne modifie rien. Depuis 1.2.0.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountDeletionPreview" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+    post:
+      tags: [auth]
+      summary: Supprimer son compte
+      description: |
+        Exige le mot de passe actuel. Supprime le compte, ses connexions (site et appareils),
+        les listes dont il est le seul membre ; transmet les autres ; garde ses réservations
+        sans lien au compte. Le jeton utilisé ne vaut plus rien ensuite. Depuis 1.2.0.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string }
+      responses:
+        "204": { description: Supprimé }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /me/export:
+    get:
+      tags: [auth]
+      summary: Télécharger ses données
+      description: Document JSON sans aucun secret, 5 demandes par heure. Depuis 1.2.0.
+      responses:
+        "200":
+          description: OK
+          headers:
+            Content-Disposition:
+              schema: { type: string, example: 'attachment; filename="ohyoushouldnt-donnees-2026-10-28.json"' }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AccountExport" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
 
   # ---------- Listes ----------
 
@@ -986,3 +1043,130 @@ components:
         items: { type: array, items: { $ref: "#/components/schemas/MemberItem" }, description: Archivées comprises. }
         reservations: { type: array, items: { $ref: "#/components/schemas/MemberReservation" } }
         members: { type: array, items: { $ref: "#/components/schemas/Member" } }
+
+    AccountDeletionPreview:
+      type: object
+      required: [deletedLists, transferredLists, reservationsKept]
+      properties:
+        deletedLists:
+          type: array
+          description: Listes dont le compte est le seul membre, effacées.
+          items:
+            type: object
+            required: [id, title]
+            properties:
+              id: { type: string }
+              title: { type: string }
+        transferredLists:
+          type: array
+          description: Listes qui restent aux autres membres.
+          items:
+            type: object
+            required: [id, title, newOwnerName]
+            properties:
+              id: { type: string }
+              title: { type: string }
+              newOwnerName: { type: [string, "null"], description: Nouveau propriétaire, si le compte l'était. }
+        reservationsKept: { type: integer, minimum: 0 }
+
+    AccountExport:
+      type: object
+      additionalProperties: false
+      required: [format, version, exportedAt, account, lists, myReservations]
+      properties:
+        format: { const: ohyoushouldnt-export }
+        version: { const: 1 }
+        exportedAt: { type: string, format: date-time }
+        account:
+          type: object
+          additionalProperties: false
+          required: [email, displayName, createdAt]
+          properties:
+            email: { type: string }
+            displayName: { type: string }
+            createdAt: { type: string, format: date-time }
+        lists:
+          type: array
+          items: { $ref: "#/components/schemas/ExportedList" }
+        myReservations:
+          type: array
+          description: Réservations faites connecté sur des listes dont le compte n'est pas membre.
+          items:
+            type: object
+            additionalProperties: false
+            required: [listTitle, item, fromName, note, createdAt]
+            properties:
+              listTitle: { type: string }
+              item: { type: [string, "null"] }
+              fromName: { type: [string, "null"] }
+              note: { type: [string, "null"] }
+              createdAt: { type: string, format: date-time }
+
+    ExportedList:
+      type: object
+      additionalProperties: false
+      required: [title, subtitle, createdAt, role, joinedAt, theme, coverImageUrl, publicUrl, readPasswordProtected, members, categories, people, items, reservations]
+      properties:
+        title: { type: string }
+        subtitle: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        role: { enum: [owner, member] }
+        joinedAt: { type: string, format: date-time }
+        theme: { $ref: "#/components/schemas/Theme" }
+        coverImageUrl: { type: [string, "null"] }
+        publicUrl: { type: string }
+        readPasswordProtected: { type: boolean }
+        members:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [displayName, role, joinedAt]
+            properties:
+              displayName: { type: string }
+              role: { enum: [owner, member] }
+              joinedAt: { type: string, format: date-time }
+        categories:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [label, sortOrder]
+            properties:
+              label: { type: string }
+              sortOrder: { type: integer }
+        people:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [label]
+            properties:
+              label: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [name, category, person, priceCents, url, imageUrl, priority, archived]
+            properties:
+              name: { type: string }
+              category: { type: [string, "null"] }
+              person: { type: [string, "null"] }
+              priceCents: { type: [integer, "null"] }
+              url: { type: [string, "null"] }
+              imageUrl: { type: [string, "null"] }
+              priority: { type: [string, "null"] }
+              archived: { type: boolean }
+        reservations:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [item, fromName, note, createdAt, byMe]
+            properties:
+              item: { type: [string, "null"] }
+              fromName: { type: [string, "null"] }
+              note: { type: [string, "null"] }
+              createdAt: { type: string, format: date-time }
+              byMe: { type: boolean, description: Réservation faite par ce compte. }

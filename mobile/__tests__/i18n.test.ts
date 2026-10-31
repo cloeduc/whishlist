@@ -34,3 +34,15 @@ test("the mobile namespace has the same keys in French and English", () => {
   const en = JSON.parse(readFileSync(join(locales, "en/mobile.json"), "utf8"));
   expect(keys(en).sort()).toEqual(keys(fr).sort());
 });
+
+test("the legal texts shown by the app exist in French and in English", () => {
+  for (const ns of ["content", "auth"]) {
+    const fr = JSON.parse(readFileSync(join(locales, `fr/${ns}.json`), "utf8"));
+    const en = JSON.parse(readFileSync(join(locales, `en/${ns}.json`), "utf8"));
+    expect(keys(en).sort()).toEqual(keys(fr).sort());
+  }
+  for (const key of ["legal.publisherLaw", "legal.hostAddress", "privacy.cloudflareBody", "privacy.rightsBody"]) {
+    expect(i18n.t(`content:${key}`, { lng: "fr" })).not.toBe(key);
+    expect(i18n.t(`content:${key}`, { lng: "en" })).not.toBe(i18n.t(`content:${key}`, { lng: "fr" }));
+  }
+});

@@ -1,17 +1,20 @@
 import { requireUser } from "../../src/auth/guard";
 import { listMyOffers } from "../../src/domain/offrir";
+import { previewAccountDeletion } from "../../src/domain/account";
 import { changePasswordAction, updateDisplayNameAction } from "../../src/server/actions";
 import { getDocument } from "../../src/store/db";
+import { DeleteAccountDialog } from "@/components/site/delete-account-dialog";
 import { LinkButton } from "@/components/site/link-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { intlLocale } from "@/src/i18n/config";
+import { withLocale } from "@/src/i18n/locale-path";
 import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +22,8 @@ export const dynamic = "force-dynamic";
 export default async function ComptePage({
   searchParams,
 }: {
-  searchParams: Promise<{ e?: string; ok?: string }>;
+  /** `e` / `ok` : profil et mot de passe ; `x` : export ; `d` : suppression du compte. */
+  searchParams: Promise<{ e?: string; ok?: string; x?: string; d?: string }>;
 }) {
   const user = await requireUser({ allowMustChangePassword: true });
   const query = await searchParams;
@@ -46,6 +50,9 @@ export default async function ComptePage({
       ? await translateError(query.e)
       : null;
   const profileOk = query.ok === "name";
+  const exportError = query.x ? await translateError(query.x) : null;
+  const deleteError = query.d ? await translateError(query.d) : null;
+  const deletion = forced ? null : previewAccountDeletion(doc, user.id);
   const passwordOk = query.ok === "1";
 
   return (
@@ -157,9 +164,6 @@ export default async function ComptePage({
       <Card>
         <CardHeader>
           <CardTitle>{forced ? t("changePassword.titleForced") : t("changePassword.title")}</CardTitle>
-          {!forced ? (
-            <CardDescription>{t("changePassword.description", { email: user.email })}</CardDescription>
-          ) : null}
         </CardHeader>
         <CardContent>
           <form action={changePasswordAction}>
@@ -216,6 +220,42 @@ export default async function ComptePage({
           </form>
         </CardContent>
       </Card>
+
+      {deletion ? (
+        <>
+          <Card id="donnees">
+            <CardHeader>
+              <CardTitle>{t("account.dataTitle")}</CardTitle>
+              <CardDescription>{t("account.exportHint")}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3">
+              {exportError ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{exportError}</AlertDescription>
+                </Alert>
+              ) : null}
+              <a href={withLocale(locale, "/compte/export")} download className={buttonVariants({ variant: "outline" })}>
+                {t("account.exportAction")}
+              </a>
+            </CardContent>
+          </Card>
+
+          <Card id="supprimer">
+            <CardHeader>
+              <CardTitle>{t("account.deleteTitle")}</CardTitle>
+              <CardDescription>{t("account.deleteHint")}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3">
+              {deleteError ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{deleteError}</AlertDescription>
+                </Alert>
+              ) : null}
+              <DeleteAccountDialog preview={deletion} />
+            </CardContent>
+          </Card>
+        </>
+      ) : null}
     </main>
   );
 }

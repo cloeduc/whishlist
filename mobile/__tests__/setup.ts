@@ -25,3 +25,28 @@ jest.mock("expo-constants", () => ({
   __esModule: true,
   default: { expoConfig: { extra: { apiUrl: "https://api.example.test" } } },
 }));
+
+// Cache de l'app : de faux fichiers, par nom (`__cache`).
+jest.mock("expo-file-system", () => {
+  const cache = new Map<string, string>();
+  class File {
+    name: string;
+    uri: string;
+    constructor(_dir: unknown, name: string) {
+      this.name = name;
+      this.uri = `file:///cache/${name}`;
+    }
+    create() {
+      cache.set(this.name, "");
+    }
+    async write(content: string) {
+      cache.set(this.name, content);
+    }
+    delete() {
+      cache.delete(this.name);
+    }
+  }
+  return { File, Paths: { cache: { list: () => [...cache.keys()].map((name) => new File(null, name)) } }, __cache: cache };
+});
+
+jest.mock("expo-sharing", () => ({ shareAsync: jest.fn(async () => undefined) }));

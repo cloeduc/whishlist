@@ -1,9 +1,16 @@
 import type { ReactNode } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { FlatList, RefreshControl, ScrollView, View, type ListRenderItem } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
 
 import { useTheme } from "@/theme/ListTheme";
 import { tokens } from "@/theme/tokens";
+
+const contentStyle = {
+  padding: tokens.space[4],
+  // Place pour l'ombre décalée des derniers blocs.
+  paddingBottom: tokens.space[6] + tokens.shadowOffset,
+  gap: tokens.space[6],
+};
 
 /**
  * Fond du site (ou du thème de liste), marges latérales 16, défilement.
@@ -33,18 +40,40 @@ export function Screen({
         keyboardDismissMode="on-drag"
         // Le contenu défile au-dessus du clavier : le bouton d'envoi reste atteignable.
         automaticallyAdjustKeyboardInsets
-        contentContainerStyle={{
-          padding: tokens.space[4],
-          // Place pour l'ombre décalée des derniers blocs.
-          paddingBottom: tokens.space[6] + tokens.shadowOffset,
-          gap: tokens.space[6],
-        }}
+        contentContainerStyle={contentStyle}
         refreshControl={
           onRefresh ? <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.main} colors={[palette.main]} /> : undefined
         }
       >
         {children}
       </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+/** Même écran que `Screen`, pour une longue liste : seules les lignes visibles sont dessinées. */
+export function ScreenList<T>({
+  header,
+  data,
+  renderItem,
+  keyExtractor,
+}: {
+  /** Au-dessus des lignes, et qui défile avec elles. */
+  header: ReactNode;
+  data: readonly T[];
+  renderItem: ListRenderItem<T>;
+  keyExtractor: (item: T) => string;
+}) {
+  const palette = useTheme();
+  return (
+    <SafeAreaView edges={["top", "left", "right"]} style={{ flex: 1, backgroundColor: palette.background }}>
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        ListHeaderComponent={<View style={{ gap: tokens.space[6] }}>{header}</View>}
+        contentContainerStyle={contentStyle}
+      />
     </SafeAreaView>
   );
 }

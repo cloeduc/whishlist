@@ -23,7 +23,9 @@ export const tokens = {
   giftFrameRatio: 24 / 116,
   fontSize: { xs: 12, sm: 14, base: 16, lg: 20, "2xl": 24, title: 30 },
   fontWeight: { base: 500, heading: 700 },
-  space: { 1: 4, 2: 8, 3: 12, 4: 16, 6: 24 },
+  /** Interligne des paragraphes de contenu (`leading-7`). */
+  lineHeight: { relaxed: 28 },
+  space: { 1: 4, 2: 8, 3: 12, 4: 16, 5: 20, 6: 24 },
   /** Hauteurs des boutons du site : xs 32, sm 36, default 40, lg 44. */
   controlHeight: { xs: 32, sm: 36, default: 40, lg: 44 },
   /** Cible tactile minimale (accessibilité). */

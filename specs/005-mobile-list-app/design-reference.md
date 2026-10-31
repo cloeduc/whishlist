@@ -87,8 +87,11 @@ Le site affiche en haut : cadeau encadré + « Oh, mais fallait pas ! » (EN : �
 | Liste – Réservations | `08-liste-reservations.png` | réservations avec offreur et petit mot |
 | Liste – Partage | `09-liste-partage.png` | carte « Partager avec vos proches » avec champ lien + copier ; **ajout de l'app** : QR code et bouton de partage du téléphone dans cette carte, au même style |
 | Liste – Réglages | `10-liste-reglages.png` | catégories et « qui » en pastilles éditables |
-| Mon compte | `11-compte.png` | cartes nom affiché et mot de passe |
+| Mon compte | `11-compte.png` | cartes nom affiché et mot de passe ; en bas (feature 006), carte « Vos données et informations », « Se déconnecter », puis « Supprimer mon compte » en rouge |
+| Supprimer mon compte (feature 006) | `11-compte.png` | mêmes cartes, champ mot de passe et bouton rouge pleine largeur que la carte « Supprimer mon compte » du site |
 | Page publique (ouverte par le lien partagé) | `12-liste-publique.png` | reste sur le site ; sert de référence pour le thème de liste |
+| Mentions légales (feature 006) | page `/mentions-legales` du site (pas de capture) | sur-titre bleu en majuscules, grand titre, intro grise, une carte blanche à bordure et ombre par section |
+| Données personnelles (feature 006) | page `/donnees-personnelles` du site (pas de capture) | même en-tête et mêmes cartes ; les paragraphes des prestataires optionnels suivent le serveur |
 
 Éléments propres à l'app, sans équivalent sur le site, à dessiner **avec les mêmes composants** (carte, badge, bouton, alerte) :
 

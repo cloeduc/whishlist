@@ -1,8 +1,9 @@
 import * as SecureStore from "expo-secure-store";
 import { useSyncExternalStore } from "react";
 
-import { api, configureClient, NetworkError, ok, type Schemas } from "@/api/client";
+import { api, configureClient, done, NetworkError, ok, type Schemas } from "@/api/client";
 import { resetStore } from "@/data/store";
+import { removeExportFiles } from "@/features/account/exportData";
 import { currentLocale } from "@/i18n";
 import { clearAll, ensureUser, getSnapshot, putSnapshot } from "@/offline/snapshot";
 
@@ -10,7 +11,7 @@ type Me = Schemas["Me"];
 
 export type SessionState =
   | { status: "loading" }
-  | { status: "signedOut"; expired: boolean }
+  | { status: "signedOut"; expired: boolean; deleted?: boolean }
   | { status: "mustChangePassword"; user: Me }
   | { status: "signedIn"; user: Me | null };
 
@@ -114,6 +115,15 @@ export async function updateMe(me: Me): Promise<void> {
   setState(stateFor(me));
 }
 
+/** Oublie tout sur le téléphone : jeton, copie locale, fichiers d'export du cache. */
+async function forgetEverything(next: SessionState): Promise<void> {
+  await forgetToken();
+  await clearAll();
+  removeExportFiles();
+  resetStore();
+  setState(next);
+}
+
 /** Invalide la connexion côté serveur si possible (FR-003), puis oublie tout sur le téléphone. */
 export async function signOut(): Promise<void> {
   try {
@@ -121,8 +131,15 @@ export async function signOut(): Promise<void> {
   } catch {
     // Hors ligne : le jeton expirera de lui-même ; on l'oublie quand même.
   }
-  await forgetToken();
-  await clearAll();
-  resetStore();
-  setState({ status: "signedOut", expired: false });
+  await forgetEverything({ status: "signedOut", expired: false });
+}
+
+/**
+ * Supprime le compte sur le serveur (mot de passe exigé), puis efface tout sur le téléphone,
+ * comme `signOut` mais sans `/auth/logout` : le jeton ne vaut déjà plus rien (R9).
+ * Une erreur (mot de passe faux, réseau…) remonte et ne change rien.
+ */
+export async function deleteAccount(password: string): Promise<void> {
+  await done(api.POST("/me/deletion", { body: { password } }));
+  await forgetEverything({ status: "signedOut", expired: false, deleted: true });
 }
