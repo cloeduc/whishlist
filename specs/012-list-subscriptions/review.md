@@ -32,6 +32,7 @@ e32f4609bef6f541406c200c133dd9eb0c088530  mobile/app/(app)/shared/follow.tsx
 0b5c21399e1afe91274a93a71abc08ddca4b3cba  mobile/src/data/subscriptions.ts
 5518e4d2227ec343c8d1dc413501f19309fe51b6  mobile/src/offline/snapshot.ts
 46ce878672f99092f8fd78a53ffafc82a4266fe8  mobile/src/ui/ConfirmDialog.tsx
+7f8e881d8b639546d1a77301394d332114e1c623  scripts/create-demo-data.mjs
 2b0a169e1548ea6c995cf9a5e0d3e98617dbb38d  specs/004-mobile-api/contracts/openapi.yaml
 c07502f4b145f17218532397050b2c9ebfe0f502  src/auth/public-list.ts
 9d4c951f393b0283881a9c5c176a7723751ceb1a  src/domain/account.ts
@@ -48,8 +49,8 @@ ef6bdb85c2d650b8cc758421e25f4b13ca84fc03  src/store/legacy-json.ts
 776a779bf957692367713bd79303c77d60f8433a  src/store/schema.ts
 e7347b42c0f4908e2b9da1499a9955dc88a764c2  tests/domain/account-deletion.test.ts
 71c28c5eeda859792f7f949dc0f5635bfac8c203  tests/domain/account-export.test.ts
-89b083066eedda6e6f298fef8a003f6f47120b8a  tests/domain/commands-subscription.test.ts
-52cebba012ef07e31439daa6667050882a5bbe91  tests/domain/helpers/account-fixtures.ts
+3d101433a351e10cfad8f851412578b100bdbe2d  tests/domain/commands-subscription.test.ts
+81372889e063b9b23421dc09d3b0e09d82eeee89  tests/domain/helpers/account-fixtures.ts
 15b654d57d7f7e149043d1b59c2cdd86005b5e52  tests/domain/store-import.test.ts
 cdd2333de0b37f6f53954639292ab41d35b1188c  tests/domain/subscription.test.ts
 ```

@@ -11,7 +11,7 @@ import {
 } from "../../src/server/commands/public-list";
 import { joinInvite, setReadPassword as setReadPasswordCmd } from "../../src/server/commands/sharing";
 import { isRateLimitError } from "../../src/server/rate-limit";
-import { apiDoc, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtures";
+import { apiDocWithSecondList, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtures";
 
 const noUnlock = () => false;
 const none = new Set<string>();
@@ -19,10 +19,7 @@ const none = new Set<string>();
 before(ensurePasswordHash);
 
 function subDoc() {
-  const doc = apiDoc();
-  doc.wishlists[0]!.readToken = "rt-alex-1234";
-  doc.wishlists[0]!.inviteToken = "it-alex-1234";
-  return doc;
+  return apiDocWithSecondList();
 }
 
 async function protectedSubDoc() {
@@ -61,13 +58,26 @@ test("s'abonner par URL ou jeton, retrouver la liste dans listMine et lire ses �
     assert.equal(replay.ok, true);
     if (replay.ok) assert.equal(replay.replayed, true);
 
-    // listMine retourne la liste dans subscriptions
+    // listMine retourne la liste de Camille dans lists et celle d'Alex dans subscriptions
     const mine = await listMine(ctx(camille));
     assert.equal(mine.ok, true);
     if (mine.ok) {
-      assert.equal(mine.lists.length, 0);
+      assert.deepEqual(mine.lists.map((l) => l.id), ["w-camille"]);
       assert.equal(mine.subscriptions.length, 1);
       assert.equal(mine.subscriptions[0]!.title, "Liste d'Alex");
+    }
+
+    // Alex peut aussi s'abonner à la liste de Camille (qui n'est pas la sienne)
+    const subAlex = await subscribeToList(ctx(alex), {
+      urlOrToken: "https://ohyoushouldnt.example.test/l/rt-camille-1234",
+      isUnlocked: noUnlock,
+    });
+    assert.equal(subAlex.ok, true);
+    const mineAlex = await listMine(ctx(alex));
+    assert.equal(mineAlex.ok, true);
+    if (mineAlex.ok) {
+      assert.deepEqual(mineAlex.lists.map((l) => l.id), ["w"]);
+      assert.deepEqual(mineAlex.subscriptions.map((s) => s.id), ["w-camille"]);
     }
 
     // readPublicList indique subscribed: true pour Camille et isMember: true pour Alex
@@ -271,7 +281,7 @@ test("se désabonner retire l'abonnement mais conserve les réservations, et rej
     const mineMember = await listMine(ctx(camille));
     assert.equal(mineMember.ok, true);
     if (mineMember.ok) {
-      assert.equal(mineMember.lists.length, 1);
+      assert.deepEqual(mineMember.lists.map((l) => l.id).sort(), ["w", "w-camille"]);
       assert.equal(mineMember.subscriptions.length, 0);
     }
   });
