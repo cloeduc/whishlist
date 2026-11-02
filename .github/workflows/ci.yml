@@ -10,14 +10,16 @@ on:
 permissions:
   contents: read
 
+# Une PR : seul le dernier push compte. main : chaque fusion garde son propre résultat.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   site:
     name: Site (lint, types, tests)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,6 +34,7 @@ jobs:
   mobile:
     name: Mobile app (API types, lint, types, tests)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -49,7 +52,7 @@ jobs:
         run: |
           npm --prefix mobile run api:types
           if ! git diff --quiet -- mobile/src/api/schema.d.ts; then
-            echo "::error file=mobile/src/api/schema.d.ts::specs/004-mobile-api/contracts/openapi.yaml changed but the mobile API types were not regenerated. Run 'npm --prefix mobile run api:types' and commit mobile/src/api/schema.d.ts."
+            echo "::error file=mobile/src/api/schema.d.ts::mobile/src/api/schema.d.ts does not match the API contract (specs/004-mobile-api/contracts/openapi.yaml). Run 'npm --prefix mobile run api:types' and commit mobile/src/api/schema.d.ts."
             git diff --stat -- mobile/src/api/schema.d.ts
             exit 1
           fi
@@ -60,6 +63,7 @@ jobs:
   docker:
     name: Docker image builds
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t whishlist:ci .
