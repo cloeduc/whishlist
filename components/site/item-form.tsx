@@ -256,15 +256,11 @@ export function ItemForm({
               value={draft.priority}
               onChange={(next) => setField("priority", next)}
             />
-            {/* La piste `auto` de cette colonne se dimensionne sur son contenu le plus large, et
-                c'était cette phrase et non les étoiles : la colonne prenait 379 px des 700 px de la
-                grille et écrasait les deux listes déroulantes à 91 px. Largeur nulle à la mesure,
-                puis toute la place une fois la piste calculée sur les étoiles — l'aide reste donc
-                sous les étoiles et aucune largeur n'est écrite en dur. En style en ligne parce que
-                les utilitaires de largeur de Tailwind ne sont pas émis pour ce fichier. */}
-            <FieldDescription style={{ width: 0, minWidth: "100%" }}>
-              {t("form.priorityHint")}
-            </FieldDescription>
+            {/* La piste `auto` se dimensionne sur son contenu le plus large : sans `contain`, cette
+                phrase passait devant les étoiles et prenait 379 px des 700 px de la grille.
+                `contain-inline-size` la retire de ce calcul ; elle occupe ensuite la largeur de la
+                colonne (`*:w-full` de `Field`). */}
+            <FieldDescription className="contain-inline-size">{t("form.priorityHint")}</FieldDescription>
           </Field>
         </div>
         <Field>
