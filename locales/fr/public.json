@@ -81,5 +81,16 @@
     "join": "Rejoindre la liste",
     "alreadyMember": "Vous faites déjà partie de cette liste."
   },
-  "secondHandBadge": "Occasion OK"
+  "secondHandBadge": "Occasion OK",
+  "subscription": {
+    "follow": "Suivre cette liste",
+    "following": "Liste suivie",
+    "unfollow": "Ne plus suivre",
+    "unfollowTitle": "Ne plus suivre cette liste ?",
+    "unfollowBody": "Elle sera retirée de vos listes suivies. Vos réservations sur cette liste resteront actives.",
+    "unfollowConfirm": "Ne plus suivre",
+    "unfollowKeep": "Continuer à suivre",
+    "followedTitle": "Liste ajoutée à vos listes suivies",
+    "followedBody": "Vous la retrouverez à tout moment dans « Mes listes »."
+  }
 }

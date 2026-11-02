@@ -1,0 +1,52 @@
+# 012 US2 : s'abonner à une liste en collant son lien depuis « Mes listes », consulter ses idées et réserver un cadeau.
+appId: app.ohyoushouldnt.mobile
+name: "012 US2 — Suivre une liste par son lien et réserver un cadeau"
+tags:
+  - 012-us2
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runScript: ../scripts/unique.js
+
+# Compte neuf (non membre de la liste de démo).
+- runFlow: ../subflows/register.yaml
+- assertVisible:
+    id: lists.subscriptions-section
+- tapOn:
+    id: lists.follow-open
+- assertVisible:
+    id: follow.screen
+- tapOn:
+    id: follow.link
+- inputText: demo-list-lecture
+- tapOn:
+    id: follow.submit
+- extendedWaitUntil:
+    visible:
+      id: shared.screen
+    timeout: 10000
+- assertVisible: Nos envies toute l’année
+
+# Réserver une idée sur la liste suivie.
+- scrollUntilVisible:
+    element:
+      id: shared.offer-demo-list:lampe
+- tapOn:
+    id: shared.offer-demo-list:lampe
+- extendedWaitUntil:
+    visible:
+      id: shared.reserve-submit
+    timeout: 10000
+- tapOn:
+    id: shared.reserve-submit
+- extendedWaitUntil:
+    visible: ${output.t.public.reservation.mine}
+    timeout: 10000
+
+# Retour à « Mes listes » : la liste figure dans « Listes suivies ».
+- tapOn:
+    id: back-link.back
+- extendedWaitUntil:
+    visible:
+      id: lists.shared-card-demo-list-lecture
+    timeout: 10000

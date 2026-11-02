@@ -7,20 +7,37 @@ import { updateWishlistSettings } from "../../domain/membership";
 import type { WishlistTheme } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import { getTranslationsFor } from "../../i18n/server";
-import { toListSummary, toMemberListView, type ListSummaryView, type MemberListView } from "../api/views";
+import {
+  toListSummary,
+  toMemberListView,
+  toSubscribedListSummary,
+  type ListSummaryView,
+  type MemberListView,
+  type SubscribedListSummaryView,
+} from "../api/views";
 import { activeUser, verifiedUser, type CommandContext, type CommandResult } from "./context";
 
-export async function listMine(ctx: CommandContext): Promise<CommandResult<{ lists: ListSummaryView[] }>> {
+export async function listMine(
+  ctx: CommandContext,
+): Promise<CommandResult<{ lists: ListSummaryView[]; subscriptions: SubscribedListSummaryView[] }>> {
   const active = activeUser(ctx);
   if (!active.ok) return active;
   const doc = await readDocument();
+  const memberIds = new Set<string>();
   const lists = doc.memberships
     .filter((membership) => membership.userId === active.user.id)
     .flatMap((membership) => {
+      memberIds.add(membership.wishlistId);
       const wishlist = doc.wishlists.find((entry) => entry.id === membership.wishlistId);
       return wishlist ? [toListSummary(doc, wishlist, membership.role, ctx.locale, ctx.origin)] : [];
     });
-  return { ok: true, lists };
+  const subscriptions = (doc.subscriptions ?? [])
+    .filter((subscription) => subscription.userId === active.user.id && !memberIds.has(subscription.wishlistId))
+    .flatMap((subscription) => {
+      const wishlist = doc.wishlists.find((entry) => entry.id === subscription.wishlistId);
+      return wishlist ? [toSubscribedListSummary(doc, wishlist, subscription, ctx.locale, ctx.origin)] : [];
+    });
+  return { ok: true, lists, subscriptions };
 }
 
 export async function readMemberList(

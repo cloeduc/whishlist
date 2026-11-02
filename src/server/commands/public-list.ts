@@ -2,15 +2,28 @@ import { canAccessPublicListWith } from "../../auth/public-list";
 import { READ_UNLOCK_TTL_SEC, signReadUnlock } from "../../auth/read-unlock";
 import { signReservationClaim } from "../../auth/reservation-claim";
 import { sessionSecret } from "../../auth/session";
+import { findMembership } from "../../domain/access";
 import { cancelOwnReservation } from "../../domain/items";
 import { findWishlistByReadToken, mineReservationIdsFor } from "../../domain/read";
-import { verifyReadPassword } from "../../domain/read-password";
+import { hasReadPassword, verifyReadPassword } from "../../domain/read-password";
 import { reserveItem } from "../../domain/reserve";
-import type { Reservation, Wishlist } from "../../domain/types";
+import {
+  extractReadToken,
+  findSubscription,
+  subscribeWishlist,
+  syncSubscriptionUnlock,
+  unsubscribeWishlist,
+} from "../../domain/subscription";
+import type { Reservation, Subscription, Wishlist } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
-import { toPublicListView, type PublicListView } from "../api/views";
+import {
+  toPublicListView,
+  toSubscribedListSummary,
+  type PublicListView,
+  type SubscribedListSummaryView,
+} from "../api/views";
 import { rateLimitForIp } from "../rate-limit";
-import { publicAccount, type CommandContext, type CommandResult } from "./context";
+import { activeUser, publicAccount, type CommandContext, type CommandResult } from "./context";
 
 /** Le déverrouillage vient du cookie (site) ou de l'en-tête `X-Read-Unlock` (API). */
 type IsUnlocked = (list: Wishlist) => boolean | Promise<boolean>;
@@ -27,7 +40,7 @@ export async function readPublicList(
     return { ok: false, error: "readPasswordRequired", title: wishlist.title };
   }
   const mineIds = mineReservationIdsFor(doc, wishlist.id, account?.id ?? null, input.claimedIds);
-  return { ok: true, list: toPublicListView(doc, wishlist, ctx.locale, mineIds) };
+  return { ok: true, list: toPublicListView(doc, wishlist, ctx.locale, mineIds, account?.id ?? null) };
 }
 
 export async function unlockPublicList(
@@ -39,6 +52,13 @@ export async function unlockPublicList(
   const wishlist = findWishlistByReadToken(doc, input.readToken);
   if (!wishlist) return { ok: false, error: "listMissing" };
   if (!(await verifyReadPassword(wishlist, input.password))) return { ok: false, error: "badPassword" };
+  const account = publicAccount(ctx);
+  if (account && findSubscription(doc, wishlist.id, account.id)) {
+    await updateDocument((current) => ({
+      doc: syncSubscriptionUnlock(current, { wishlistId: wishlist.id, userId: account.id }),
+      result: undefined,
+    }));
+  }
   const secret = sessionSecret();
   if (!secret || !wishlist.readPasswordHash) return { ok: true, wishlist, unlockToken: null, expiresAt: null };
   const now = Date.now();
@@ -48,6 +68,88 @@ export async function unlockPublicList(
     unlockToken: signReadUnlock(wishlist, secret, now),
     expiresAt: new Date(now + READ_UNLOCK_TTL_SEC * 1000).toISOString(),
   };
+}
+
+export async function subscribeToList(
+  ctx: CommandContext,
+  input: {
+    urlOrToken: string;
+    password?: string;
+    isUnlocked?: IsUnlocked;
+  },
+): Promise<
+  | CommandResult<{ subscription: SubscribedListSummaryView; wishlist: Wishlist; replayed: boolean; unlockedWithPassword: boolean }>
+  | { ok: false; error: "readPasswordRequired"; title: string; readToken: string }
+> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  rateLimitForIp(`subscribe:${active.user.id}`, ctx.ip, 30, 15 * 60 * 1000);
+
+  const readToken = extractReadToken(input.urlOrToken);
+  if (!readToken) return { ok: false, error: "subscriptionLinkInvalid" };
+
+  const doc = await readDocument();
+  const wishlist = findWishlistByReadToken(doc, readToken);
+  if (!wishlist) return { ok: false, error: "listMissing" };
+  if (findMembership(doc, wishlist.id, active.user.id)) {
+    return { ok: false, error: "alreadyMember" };
+  }
+
+  let unlockedWithPassword = false;
+  if (hasReadPassword(wishlist)) {
+    const alreadyUnlocked = input.isUnlocked
+      ? await canAccessPublicListWith(doc, wishlist, active.user, input.isUnlocked)
+      : false;
+    if (!alreadyUnlocked) {
+      if (!input.password) {
+        return { ok: false, error: "readPasswordRequired", title: wishlist.title, readToken: wishlist.readToken };
+      }
+      rateLimitForIp(`read-unlock:${wishlist.readToken.slice(0, 12)}`, ctx.ip, 20, 15 * 60 * 1000);
+      if (!(await verifyReadPassword(wishlist, input.password))) {
+        return { ok: false, error: "badPassword" };
+      }
+      unlockedWithPassword = true;
+    }
+  }
+
+  type Saved =
+    | { ok: true; subscription: Subscription; replayed: boolean }
+    | { ok: false; error: string };
+  const saved = await updateDocument<Saved>((current) => {
+    const result = subscribeWishlist(current, { wishlistId: wishlist.id, userId: active.user.id });
+    if (!result.ok) return { doc: current, result };
+    return {
+      doc: result.doc,
+      result: { ok: true, subscription: result.subscription, replayed: result.replayed },
+    };
+  });
+  if (!saved.ok) return saved;
+  const freshDoc = await readDocument();
+  const freshList = freshDoc.wishlists.find((entry) => entry.id === wishlist.id) ?? wishlist;
+  return {
+    ok: true,
+    wishlist: freshList,
+    replayed: saved.replayed,
+    unlockedWithPassword,
+    subscription: toSubscribedListSummary(freshDoc, freshList, saved.subscription, ctx.locale, ctx.origin),
+  };
+}
+
+export async function unsubscribeFromList(
+  ctx: CommandContext,
+  input: { readToken: string },
+): Promise<CommandResult<{ wishlist: Wishlist }>> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  const doc = await readDocument();
+  const wishlist = findWishlistByReadToken(doc, input.readToken);
+  if (!wishlist) return { ok: false, error: "listMissing" };
+  const result = await updateDocument<CommandResult>((current) => {
+    const saved = unsubscribeWishlist(current, { wishlistId: wishlist.id, userId: active.user.id });
+    return saved.ok ? { doc: saved.doc, result: { ok: true } } : { doc: current, result: saved };
+  });
+  if (!result.ok) return result;
+  return { ok: true, wishlist };
 }
 
 export async function reserve(

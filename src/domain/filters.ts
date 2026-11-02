@@ -66,13 +66,30 @@ export function applyBudget(items: Item[], budget: BudgetId | null): Item[] {
   return items.filter((item) => matchesBudget(item.priceCents, budget));
 }
 
-function matchesBudget(cents: number | null, budget: BudgetId): boolean {
+export function matchesBudget(cents: number | null, budget: BudgetId): boolean {
   if (budget === "none") return cents === null;
   if (cents === null) return false;
   if (budget === "under-20") return cents < 2000;
   if (budget === "20-50") return cents >= 2000 && cents < 5000;
   if (budget === "50-100") return cents >= 5000 && cents <= 10000;
   return cents > 10000;
+}
+
+/** Filtre et tri d'une liste d'idées publiques (site et app mobile). */
+export function filterAndSortPublicItems<
+  T extends { id: string; name: string; personId: string; priceCents: number | null; priority: string | null },
+>(items: readonly T[], personId: string | null, budget: BudgetId | null): T[] {
+  return items
+    .filter(
+      (item) =>
+        (!personId || item.personId === personId) &&
+        (!budget || matchesBudget(item.priceCents, budget)),
+    )
+    .sort((a, b) => {
+      const pa = parsePriority(a.priority) ?? 0;
+      const pb = parsePriority(b.priority) ?? 0;
+      return pb - pa || a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
+    });
 }
 
 export function applyPerson(items: Item[], personId: string | null): Item[] {

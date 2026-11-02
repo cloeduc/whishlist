@@ -81,5 +81,16 @@
     "join": "Join list",
     "alreadyMember": "You’re already a member of this list."
   },
-  "secondHandBadge": "Second-hand OK"
+  "secondHandBadge": "Second-hand OK",
+  "subscription": {
+    "follow": "Follow this list",
+    "following": "Following",
+    "unfollow": "Unfollow",
+    "unfollowTitle": "Stop following this list?",
+    "unfollowBody": "It will be removed from your followed lists. Any gifts you reserved on this list will stay reserved.",
+    "unfollowConfirm": "Unfollow",
+    "unfollowKeep": "Keep following",
+    "followedTitle": "Added to your followed lists",
+    "followedBody": "You can find it anytime under “My wish lists”."
+  }
 }

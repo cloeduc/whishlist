@@ -63,6 +63,7 @@ export function deleteAccount(
   for (const reservation of next.reservations) {
     if (reservation.userId === userId) reservation.userId = null;
   }
+  next.subscriptions = next.subscriptions.filter((s) => s.userId !== userId);
   next.apiSessions = next.apiSessions.filter((s) => s.userId !== userId);
   next.passwordResets = next.passwordResets.filter((r) => r.userId !== userId);
   next.emailConfirmations = next.emailConfirmations.filter((c) => c.userId !== userId);
@@ -98,6 +99,13 @@ export type ExportedList = {
   reservations: { item: string | null; fromName: string | null; note: string | null; createdAt: string; byMe: boolean }[];
 };
 
+export type ExportedSubscription = {
+  title: string;
+  subtitle: string | null;
+  publicUrl: string;
+  subscribedAt: string;
+};
+
 export type AccountExport = {
   format: "ohyoushouldnt-export";
   version: 1;
@@ -110,6 +118,7 @@ export type AccountExport = {
     pendingEmail: string | null;
   };
   lists: ExportedList[];
+  subscriptions: ExportedSubscription[];
   myReservations: {
     listTitle: string;
     item: string | null;
@@ -204,6 +213,21 @@ export function exportAccount(
       createdAt: r.createdAt,
     }));
 
+  const subscriptions: ExportedSubscription[] = (doc.subscriptions ?? [])
+    .filter((s) => s.userId === userId && !memberOf.has(s.wishlistId))
+    .flatMap((s) => {
+      const wishlist = doc.wishlists.find((w) => w.id === s.wishlistId);
+      if (!wishlist) return [];
+      return [
+        {
+          title: wishlist.title,
+          subtitle: wishlist.subtitle,
+          publicUrl: `${site.origin}${withLocale(site.locale, `/l/${wishlist.readToken}`)}`,
+          subscribedAt: s.createdAt,
+        },
+      ];
+    });
+
   return {
     format: "ohyoushouldnt-export",
     version: 1,
@@ -216,6 +240,7 @@ export function exportAccount(
       pendingEmail: pendingEmailChange(doc, user.id, now),
     },
     lists,
+    subscriptions,
     myReservations,
   };
 }

@@ -75,5 +75,33 @@
     "confirming": "Confirmation de votre adresse…",
     "passwordSaved": "Votre mot de passe est enregistré. Connectez-vous avec votre nouveau mot de passe.",
     "inviteChecking": "Ouverture de l'invitation…"
+  },
+  "shared": {
+    "followButton": "Suivre une liste",
+    "followTitle": "Suivre une liste",
+    "followDescription": "Collez le lien d'une liste partagée par un proche pour la retrouver dans vos listes suivies.",
+    "linkLabel": "Lien de la liste",
+    "linkPlaceholder": "https://…/l/…",
+    "passwordLabel": "Mot de passe de la liste",
+    "passwordHint": "Cette liste est protégée par un mot de passe. Demandez-le à la personne qui vous a partagé le lien.",
+    "submitFollow": "Suivre cette liste",
+    "unlockTitle": "Cette liste est protégée",
+    "unlockDescription": "Saisissez le mot de passe de la liste pour consulter ses idées.",
+    "unlockSubmit": "Accéder à la liste",
+    "filterWho": "Pour qui ?",
+    "everyone": "Tout le monde",
+    "filterBudget": "Budget",
+    "allPrices": "Tous les budgets",
+    "offerTitle": "Réserver « {{name}} »",
+    "fromName": "Votre nom (facultatif)",
+    "note": "Message (facultatif)",
+    "privacyHint": "Les personnes qui gèrent cette liste peuvent voir votre nom et votre message.",
+    "noPurchaseHint": "La réservation ne passe aucune commande. L'achat se fait séparément.",
+    "confirmReserve": "Confirmer la réservation",
+    "unfollow": "Ne plus suivre cette liste",
+    "unfollowTitle": "Ne plus suivre cette liste ?",
+    "unfollowBody": "Elle sera retirée de vos listes suivies. Vos réservations sur cette liste resteront actives.",
+    "unfollowConfirm": "Ne plus suivre",
+    "unfollowKeep": "Continuer à suivre"
   }
 }

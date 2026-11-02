@@ -1,0 +1,44 @@
+# 012 US3 : se désabonner d'une liste suivie depuis l'app mobile ; la liste disparaît de « Listes suivies ».
+appId: app.ohyoushouldnt.mobile
+name: "012 US3 — Se désabonner d'une liste suivie"
+tags:
+  - 012-us3
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runScript: ../scripts/unique.js
+
+# Compte neuf qui suit la liste de démo.
+- runFlow: ../subflows/register.yaml
+- tapOn:
+    id: lists.follow-open
+- tapOn:
+    id: follow.link
+- inputText: demo-list-lecture
+- tapOn:
+    id: follow.submit
+- extendedWaitUntil:
+    visible:
+      id: shared.screen
+    timeout: 10000
+
+# Se désabonner avec confirmation.
+- scrollUntilVisible:
+    element:
+      id: shared.unfollow
+- tapOn:
+    id: shared.unfollow
+- extendedWaitUntil:
+    visible:
+      id: shared.unfollow-confirm
+    timeout: 10000
+- tapOn:
+    id: shared.unfollow-confirm
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 10000
+- assertNotVisible:
+    id: lists.shared-card-demo-list-lecture
+- assertVisible:
+    id: lists.subscriptions-empty
