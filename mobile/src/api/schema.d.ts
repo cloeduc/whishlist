@@ -28,7 +28,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @example 1.5.0 */
+                            /** @example 1.7.0 */
                             apiVersion: string;
                             /** @description Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page). */
                             enrich: boolean;
@@ -2364,9 +2364,9 @@ export interface components {
             subtitle: string | null;
             coverImageUrl: string | null;
             theme: components["schemas"]["Theme"];
-            /** @description Depuis 1.5.0. */
+            /** @description Depuis 1.7.0. */
             subscribed: boolean;
-            /** @description Depuis 1.5.0. */
+            /** @description Depuis 1.7.0. */
             isMember: boolean;
             categories: components["schemas"]["Category"][];
             people: components["schemas"]["Label"][];
@@ -2512,7 +2512,7 @@ export interface components {
                 pendingEmail: string | null;
             };
             lists: components["schemas"]["ExportedList"][];
-            /** @description Listes publiques suivies par ce compte. Depuis 1.5.0. */
+            /** @description Listes publiques suivies par ce compte. Depuis 1.7.0. */
             subscriptions: {
                 title: string;
                 subtitle: string | null;

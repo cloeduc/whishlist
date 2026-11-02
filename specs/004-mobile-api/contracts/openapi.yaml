@@ -73,7 +73,7 @@ paths:
                 type: object
                 required: [apiVersion, enrich, mail, analytics]
                 properties:
-                  apiVersion: { type: string, example: "1.5.0" }
+                  apiVersion: { type: string, example: "1.7.0" }
                   enrich:
                     type: boolean
                     description: Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page).
@@ -1337,8 +1337,8 @@ components:
         subtitle: { type: [string, "null"] }
         coverImageUrl: { type: [string, "null"] }
         theme: { $ref: "#/components/schemas/Theme" }
-        subscribed: { type: boolean, description: Depuis 1.5.0. }
-        isMember: { type: boolean, description: Depuis 1.5.0. }
+        subscribed: { type: boolean, description: Depuis 1.7.0. }
+        isMember: { type: boolean, description: Depuis 1.7.0. }
         categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
         people: { type: array, items: { $ref: "#/components/schemas/Label" } }
         items: { type: array, items: { $ref: "#/components/schemas/PublicItem" } }
@@ -1511,7 +1511,7 @@ components:
           items: { $ref: "#/components/schemas/ExportedList" }
         subscriptions:
           type: array
-          description: Listes publiques suivies par ce compte. Depuis 1.5.0.
+          description: Listes publiques suivies par ce compte. Depuis 1.7.0.
           items:
             type: object
             additionalProperties: false

@@ -127,6 +127,8 @@ export function apiDocWithSecondList(): Database {
       personId: "p-camille",
       sortOrder: 0,
       archived: false,
+      secondHandOk: false,
+      description: null,
     },
     {
       id: "camille-lamp",
@@ -140,6 +142,8 @@ export function apiDocWithSecondList(): Database {
       personId: "p-camille",
       sortOrder: 1,
       archived: false,
+      secondHandOk: false,
+      description: null,
     },
   );
   return data;
