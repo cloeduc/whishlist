@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 
 import { AppState } from "react-native";
 
 import { api, ApiError, done, NetworkError, ok, type Schemas } from "@/api/client";
-import { forgetUnlock, unlockTokenFor } from "@/features/guest/storage";
 import { currentLocale, intlLocale } from "@/i18n";
 import { viewList, viewLists, type ViewList, type ViewListSummary } from "@/offline/optimistic";
 import { createListBody, listChanges, onOutboxChange, resetSending, type Change } from "@/offline/outbox";
@@ -10,7 +9,6 @@ import {
   getSnapshot,
   listKey,
   listsKey,
-  publicListKey,
   putSnapshot,
   removeSnapshot,
   subscriptionsKey,
@@ -22,19 +20,14 @@ import { onNetworkChange, getOnline } from "@/network";
 type ListsBody = Schemas["ListSummary"][];
 type SubscriptionsBody = Schemas["SubscribedListSummary"][];
 type ListBody = Schemas["MemberList"];
-type PublicListBody = Schemas["PublicList"];
 
 /** Ce que les écrans lisent : copies du serveur et file de changements (en mémoire, rechargées de SQLite). */
 type State = {
   lists: Snapshot<ListsBody> | null;
   subscriptions: Snapshot<SubscriptionsBody> | null;
   list: Record<string, Snapshot<ListBody> | null>;
-  publicList: Record<string, Snapshot<PublicListBody> | null>;
-  /** Listes publiques verrouillées par un mot de passe de lecture (`readToken` → titre de la liste). */
-  publicLocked: Record<string, string>;
   /** Listes supprimées côté serveur ou dont la personne n'est plus membre (404). */
   missing: Record<string, true>;
-  publicMissing: Record<string, true>;
   changes: Change[];
   /** La file a été lue au moins une fois depuis SQLite. */
   changesLoaded: boolean;
@@ -44,10 +37,7 @@ const empty: State = {
   lists: null,
   subscriptions: null,
   list: {},
-  publicList: {},
-  publicLocked: {},
   missing: {},
-  publicMissing: {},
   changes: [],
   changesLoaded: false,
 };
@@ -89,12 +79,6 @@ async function loadList(listId: string) {
   update({ list: { ...state.list, [listId]: await getSnapshot<ListBody>(listKey(listId)) } });
 }
 
-async function loadPublicList(readToken: string) {
-  update({
-    publicList: { ...state.publicList, [readToken]: await getSnapshot<PublicListBody>(publicListKey(readToken)) },
-  });
-}
-
 /** Relit « Mes listes » et les listes suivies sur le serveur ; sans réseau, garde la copie. */
 export async function refreshLists(): Promise<void> {
   try {
@@ -104,62 +88,6 @@ export async function refreshLists(): Promise<void> {
     await putSnapshot(subscriptionsKey, body.subscriptions ?? [], fetchedAt);
     await loadLists();
   } catch (error) {
-    if (!(error instanceof NetworkError || error instanceof ApiError)) throw error;
-  }
-}
-
-/**
- * Preuve de déverrouillage gardée après `POST /public/lists/{readToken}/unlock` (même stockage que la vue invité) :
- * elle donne l'accès même quand le serveur n'a pas d'abonnement à mettre à jour (liste qu'on ne suit plus).
- */
-export async function readUnlockHeader(readToken: string): Promise<{ "X-Read-Unlock"?: string }> {
-  const token = await unlockTokenFor(readToken);
-  return token ? { "X-Read-Unlock": token } : {};
-}
-
-/** Oublie la copie d'une liste suivie, sur le disque et en mémoire (après « Ne plus suivre »). */
-export async function forgetPublicList(readToken: string): Promise<void> {
-  await removeSnapshot(publicListKey(readToken));
-  const without = <T,>(record: Record<string, T>) =>
-    Object.fromEntries(Object.entries(record).filter(([token]) => token !== readToken));
-  update({
-    publicList: without(state.publicList),
-    publicLocked: without(state.publicLocked),
-    publicMissing: without(state.publicMissing),
-  });
-}
-
-/** Relit une liste suivie publique ; un 404 la retire de la copie, un 423 la marque verrouillée. */
-export async function refreshPublicList(readToken: string): Promise<void> {
-  try {
-    const list = await ok(
-      api.GET("/public/lists/{readToken}", {
-        params: { path: { readToken }, header: await readUnlockHeader(readToken) },
-      }),
-    );
-    await putSnapshot(publicListKey(readToken), list);
-    update({
-      publicMissing: Object.fromEntries(Object.entries(state.publicMissing).filter(([token]) => token !== readToken)),
-      publicLocked: Object.fromEntries(Object.entries(state.publicLocked).filter(([token]) => token !== readToken)),
-    });
-    await loadPublicList(readToken);
-  } catch (error) {
-    if (error instanceof ApiError && error.status === 404) {
-      await removeSnapshot(publicListKey(readToken));
-      update({
-        publicMissing: { ...state.publicMissing, [readToken]: true },
-        publicList: { ...state.publicList, [readToken]: null },
-      });
-      return;
-    }
-    if (error instanceof ApiError && error.status === 423) {
-      await Promise.all([removeSnapshot(publicListKey(readToken)), forgetUnlock(readToken)]);
-      update({
-        publicLocked: { ...state.publicLocked, [readToken]: readToken },
-        publicList: { ...state.publicList, [readToken]: null },
-      });
-      return;
-    }
     if (!(error instanceof NetworkError || error instanceof ApiError)) throw error;
   }
 }
@@ -299,32 +227,16 @@ export function useMyLists(): {
   };
 }
 
-export function useSharedList(readToken: string): {
-  list: PublicListBody | null;
-  loaded: boolean;
-  missing: boolean;
-  locked: boolean;
-  fetchedAt: string | null;
-  refreshing: boolean;
-  settled: boolean;
-  refresh: () => Promise<void>;
-} {
+/**
+ * La liste de ce lien est dans « Listes suivies » (copie locale de `GET /lists`). Sert quand la liste
+ * elle-même ne se lit pas (mot de passe changé) : on peut quand même ne plus la suivre.
+ */
+export function useIsFollowed(readToken: string): boolean {
   const store = useStore();
-  const refresh = useCallback(async () => {
-    if (state.publicList[readToken] === undefined) await loadPublicList(readToken);
-    await refreshPublicList(readToken);
-  }, [readToken]);
-  const refreshing = useRefreshing(refresh);
-  const snapshot = store.publicList[readToken] ?? null;
-  const loaded = store.publicList[readToken] !== undefined;
-  return {
-    list: snapshot?.body ?? null,
-    loaded,
-    missing: store.publicMissing[readToken] === true,
-    locked: Boolean(store.publicLocked[readToken]),
-    fetchedAt: snapshot?.fetchedAt ?? null,
-    ...refreshing,
-  };
+  useEffect(() => {
+    if (!state.subscriptions) void loadLists();
+  }, []);
+  return store.subscriptions?.body.some((subscription) => subscription.readToken === readToken) ?? false;
 }
 
 export function useMemberList(listId: string): {

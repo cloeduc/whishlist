@@ -1,4 +1,4 @@
-import { router } from "expo-router";
+import { router, type Href } from "expo-router";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -45,7 +45,7 @@ export default function FollowSharedList() {
         setError(translateError(result.error));
         return;
       }
-      router.replace(`/shared/${result.subscription.readToken}`);
+      router.replace(`/guest/${result.subscription.readToken}` as Href);
     } catch (caught) {
       setError(errorText(caught));
     } finally {

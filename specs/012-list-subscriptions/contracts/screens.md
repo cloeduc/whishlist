@@ -25,21 +25,25 @@
 ### 2.1 Écran « Mes listes » (`mobile/app/(app)/index.tsx`)
 - Sous la liste des listes personnelles (ou sous l'état vide si l'utilisateur n'a créé aucune liste), affiche la section **« Listes suivies »** (`testID="lists.subscriptions-section"`).
 - Bouton « Suivre une liste » (`testID="lists.follow-open"`) qui ouvre l'écran d'ajout `mobile/app/(app)/shared/follow.tsx`.
-- Chaque liste suivie est affichée dans une `Card` (`testID="lists.shared-card-<readToken>"`) avec `ListCover`, `title`, `subtitle` (et une mention si la liste est verrouillée par un nouveau mot de passe), qui navigue vers `/shared/[readToken]`.
+- Chaque liste suivie est affichée dans une `Card` (`testID="lists.shared-card-<readToken>"`) avec `ListCover`, `title`, `subtitle` (et une mention si la liste est verrouillée par un nouveau mot de passe), qui navigue vers la vue de la liste `/guest/[readToken]` (§ 2.3).
 
 ### 2.2 Écran « Suivre une liste » (`mobile/app/(app)/shared/follow.tsx`)
 - Champ `Field` + `Input` pour coller le lien ou le jeton (`testID="follow.link"`).
 - Si l'API répond `423 readPasswordRequired`, affiche le titre de la liste et un champ mot de passe de lecture (`testID="follow.password"`).
-- Bouton de validation (`testID="follow.submit"`) → redirige vers `/shared/[readToken]`.
+- Bouton de validation (`testID="follow.submit"`) → redirige vers `/guest/[readToken]`.
 
-### 2.3 Écran d'une liste suivie (`mobile/app/(app)/shared/[readToken].tsx`)
-- En-tête : `BackLink` (retour à « Mes listes »), `ListCover`, titre, sous-titre.
-- Si la liste est verrouillée (`423 readPasswordRequired`), formulaire de déverrouillage (`testID="shared.unlock-password"`, `testID="shared.unlock-submit"`).
-- Filtres (lorsque la liste a des idées) :
-  - Filtre « Pour qui ? » (si plusieurs personnes) et filtre « Budget » en pastilles.
-- Catégories en accordéon animé (`@/ui/Accordion`, `testID="shared.category-<typeId>"`).
-- Cartes d'idées publiques (`testID="shared.item-<itemId>"`) :
-  - Nom, étoiles de priorité (`Stars`), badges personne et prix (`Badge`), bouton « Voir le site » si `url` présent.
-  - Si non réservée : bouton « Réserver ce cadeau » (`testID="shared.offer-<itemId>"`) qui ouvre la modale/écran de réservation (nom optionnel `testID="shared.reserve-name"`, petit mot optionnel `testID="shared.reserve-note"`, confirmation `testID="shared.reserve-submit"`).
-  - Si réservée par ce compte (`mine: true`) : badge « Réservé par vous » et bouton « Annuler la réservation » (`testID="shared.cancel-<itemId>"`) avec `ConfirmDialog`.
-- En bas de l'écran : bouton « Ne plus suivre cette liste » (`testID="shared.unfollow"`) avec `ConfirmDialog` (`testID="shared.unfollow-confirm"`).
+### 2.3 Vue d'une liste (`mobile/app/guest/[readToken]/index.tsx`)
+Une liste suivie s'ouvre sur la même vue que son lien public (feature 011, vue invité) : un seul écran pour une
+liste publique, comme la page `/l/[readToken]` du site. La 012 y ajoute :
+- **Suivre / Ne plus suivre** (`@/features/guest/GuestFollow`), avec un compte et hors membre de la liste
+  (`PublicList.subscribed`, `PublicList.isMember`) : « Suivre cette liste » (`testID="guest.follow"`) ou
+  « Ne plus suivre » (`testID="guest.unfollow"`, confirmation `testID="guest.unfollow-confirm"`). Les textes sont
+  ceux de la page publique du site (`public:subscription.*`).
+- **Filtres** « Pour qui ? » (si plusieurs personnes) et « Budget », en plus des catégories ; idées triées par
+  envie puis dans l'ordre du propriétaire (`filterAndSortPublicItems`), comme sur le site.
+- **Hors ligne** : une liste suivie garde sa dernière lecture (snapshot `publicList:<readToken>`) et s'affiche
+  avec le bandeau hors ligne. Une liste seulement ouverte par son lien ne garde rien. Réserver reste en ligne.
+- **Liste suivie verrouillée** (mot de passe changé) : le formulaire de déverrouillage propose aussi
+  « Ne plus suivre », d'après « Listes suivies » (copie locale de `GET /lists`).
+- Réserver passe par l'écran « Réserver un cadeau » de la vue invité (`/guest/[readToken]/reserve`), qui revient
+  à la liste (relue au retour).

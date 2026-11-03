@@ -84,24 +84,6 @@
     "linkPlaceholder": "https://…/l/…",
     "passwordLabel": "List password",
     "passwordHint": "This list is password-protected. Ask the person who shared the link with you.",
-    "submitFollow": "Follow this list",
-    "unlockTitle": "This wish list is password-protected",
-    "unlockDescription": "Enter the list password to view its gift ideas.",
-    "unlockSubmit": "View wish list",
-    "filterWho": "Gift recipient",
-    "everyone": "Everyone",
-    "filterBudget": "Budget",
-    "allPrices": "All budgets",
-    "offerTitle": "Reserve “{{name}}”",
-    "fromName": "Your name (optional)",
-    "note": "Message (optional)",
-    "privacyHint": "People who manage this list can see your name and message.",
-    "noPurchaseHint": "Reserving a gift doesn’t place an order. You’ll need to purchase it separately.",
-    "confirmReserve": "Confirm reservation",
-    "unfollow": "Stop following this list",
-    "unfollowTitle": "Stop following this list?",
-    "unfollowBody": "It will be removed from your followed lists. Any gifts you reserved on this list will stay reserved.",
-    "unfollowConfirm": "Unfollow",
-    "unfollowKeep": "Keep following"
+    "submitFollow": "Follow this list"
   }
 }

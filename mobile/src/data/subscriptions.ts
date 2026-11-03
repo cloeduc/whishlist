@@ -1,7 +1,8 @@
 import { api, ApiError, done, ok, type Schemas } from "@/api/client";
-import { saveUnlock } from "@/features/guest/storage";
+import { unlockTokenFor } from "@/features/guest/storage";
+import { publicListKey, removeSnapshot } from "@/offline/snapshot";
 
-import { forgetPublicList, readUnlockHeader, refreshLists, refreshPublicList } from "./store";
+import { refreshLists } from "./store";
 
 export type FollowResult =
   | { ok: true; subscription: Schemas["SubscribedListSummary"] }
@@ -9,15 +10,23 @@ export type FollowResult =
   | { ok: false; error: string };
 
 /**
- * S'abonne à une liste publique par son lien ou son jeton.
- * Si la liste est protégée par mot de passe et non déverrouillée, retourne `readPasswordRequired` avec son titre.
+ * S'abonne à une liste publique par son lien ou son jeton. Une liste protégée déjà déverrouillée sur ce
+ * téléphone (vue de la liste) passe par sa preuve `X-Read-Unlock` ; sinon le serveur répond `423` avec le
+ * titre de la liste, et l'écran demande le mot de passe.
  */
-export async function followList(input: { urlOrToken: string; password?: string }): Promise<FollowResult> {
+export async function followList(input: {
+  urlOrToken: string;
+  password?: string;
+  /** Jeton de la liste, quand on le connaît : sa preuve de déverrouillage accompagne la demande. */
+  readToken?: string;
+}): Promise<FollowResult> {
   const urlOrToken = input.urlOrToken.trim();
   if (!urlOrToken) return { ok: false, error: "subscriptionLinkInvalid" };
+  const unlock = input.readToken ? await unlockTokenFor(input.readToken) : null;
   try {
     const subscription = await ok(
       api.POST("/subscriptions", {
+        params: { header: unlock ? { "X-Read-Unlock": unlock } : {} },
         body: { urlOrToken, ...(input.password ? { password: input.password } : {}) },
       }),
     );
@@ -32,73 +41,11 @@ export async function followList(input: { urlOrToken: string; password?: string 
   }
 }
 
-/** Déverrouille une liste suivie protégée par mot de passe et met à jour l'abonnement côté serveur. */
-export async function unlockSharedList(readToken: string, password: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (!password) return { ok: false, error: "passwordRequired" };
-  try {
-    const answer = await ok(
-      api.POST("/public/lists/{readToken}/unlock", {
-        params: { path: { readToken } },
-        body: { password },
-      }),
-    );
-    if (answer.unlockToken && answer.expiresAt) await saveUnlock(readToken, answer.unlockToken, answer.expiresAt);
-    await Promise.all([refreshPublicList(readToken), refreshLists()]);
-    return { ok: true };
-  } catch (error) {
-    if (error instanceof ApiError) return { ok: false, error: error.code };
-    throw error;
-  }
-}
-
-/** Réserve une idée sur une liste suivie. */
-export async function reserveSharedItem(
-  readToken: string,
-  input: { itemId: string; fromName?: string; note?: string },
-): Promise<{ ok: true } | { ok: false; error: string }> {
-  try {
-    await ok(
-      api.POST("/public/lists/{readToken}/reservations", {
-        params: { path: { readToken }, header: await readUnlockHeader(readToken) },
-        body: {
-          itemId: input.itemId,
-          ...(input.fromName?.trim() ? { fromName: input.fromName.trim() } : {}),
-          ...(input.note?.trim() ? { note: input.note.trim() } : {}),
-        },
-      }),
-    );
-    await refreshPublicList(readToken);
-    return { ok: true };
-  } catch (error) {
-    if (error instanceof ApiError) return { ok: false, error: error.code };
-    throw error;
-  }
-}
-
-/** Annule sa propre réservation sur une liste suivie. */
-export async function cancelSharedReservation(
-  readToken: string,
-  reservationId: string,
-): Promise<{ ok: true } | { ok: false; error: string }> {
-  try {
-    await done(
-      api.DELETE("/public/lists/{readToken}/reservations/{reservationId}", {
-        params: { path: { readToken, reservationId } },
-      }),
-    );
-    await refreshPublicList(readToken);
-    return { ok: true };
-  } catch (error) {
-    if (error instanceof ApiError) return { ok: false, error: error.code };
-    throw error;
-  }
-}
-
-/** Se désabonne d'une liste suivie et retire sa copie locale. */
+/** Ne plus suivre une liste : sa copie hors ligne part avec l'abonnement. */
 export async function unfollowList(readToken: string): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     await done(api.DELETE("/subscriptions/{readToken}", { params: { path: { readToken } } }));
-    await forgetPublicList(readToken);
+    await removeSnapshot(publicListKey(readToken));
     await refreshLists();
     return { ok: true };
   } catch (error) {

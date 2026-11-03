@@ -19,21 +19,26 @@ tags:
     id: follow.submit
 - extendedWaitUntil:
     visible:
-      id: shared.screen
+      id: guest.screen
     timeout: 10000
 
-# Se désabonner avec confirmation.
-- scrollUntilVisible:
-    element:
-      id: shared.unfollow
+# Ne plus suivre, avec confirmation : la vue de la liste propose de nouveau « Suivre cette liste ».
 - tapOn:
-    id: shared.unfollow
+    id: guest.unfollow
 - extendedWaitUntil:
     visible:
-      id: shared.unfollow-confirm
+      id: guest.unfollow-confirm
     timeout: 10000
 - tapOn:
-    id: shared.unfollow-confirm
+    id: guest.unfollow-confirm
+- extendedWaitUntil:
+    visible:
+      id: guest.follow
+    timeout: 10000
+
+# Retour à « Mes listes » : la liste n'est plus dans « Listes suivies ».
+- tapOn:
+    id: back-link.back
 - extendedWaitUntil:
     visible:
       id: lists.screen
