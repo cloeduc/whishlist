@@ -4,10 +4,12 @@ import { acceptInvite, deleteWishlist } from "../../src/domain/membership";
 import {
   extractReadToken,
   findSubscription,
+  followedListsOf,
   isSubscriptionUnlocked,
   subscribeWishlist,
   syncSubscriptionUnlock,
   unsubscribeWishlist,
+  viewerRelation,
 } from "../../src/domain/subscription";
 import { accountDoc } from "./helpers/account-fixtures";
 
@@ -150,4 +152,25 @@ test("deleteWishlist supprime les abonnements de la liste", () => {
   const res = deleteWishlist(doc, { wishlistId: "solo", actorId: "lou" });
   assert.ok(res.ok);
   assert.equal(findSubscription(res.doc, "solo", "camille"), null);
+});
+
+test("followedListsOf ne garde que les listes suivies dont on n'est pas membre", () => {
+  const doc = accountDoc();
+  // Lou suit "other" ; on lui ajoute un abonnement à "solo", dont elle est membre.
+  doc.subscriptions.push({ wishlistId: "solo", userId: "lou", readPasswordHash: null, createdAt: "2026-04-05T00:00:00.000Z" });
+  assert.deepEqual(
+    followedListsOf(doc, "lou").map(({ wishlist }) => wishlist.id),
+    ["other"],
+  );
+  // Un abonnement dont la liste a disparu est ignoré.
+  doc.wishlists = doc.wishlists.filter((w) => w.id !== "other");
+  assert.deepEqual(followedListsOf(doc, "lou"), []);
+});
+
+test("viewerRelation distingue membre, abonné et visiteur", () => {
+  const doc = accountDoc();
+  assert.deepEqual(viewerRelation(doc, "other", "lou"), { isMember: false, subscribed: true });
+  assert.deepEqual(viewerRelation(doc, "solo", "lou"), { isMember: true, subscribed: false });
+  assert.deepEqual(viewerRelation(doc, "other", "alex"), { isMember: false, subscribed: false });
+  assert.deepEqual(viewerRelation(doc, "other", null), { isMember: false, subscribed: false });
 });

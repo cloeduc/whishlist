@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "../src/auth/current";
-import { isSubscriptionUnlocked } from "../src/domain/subscription";
+import { followedListsOf, isSubscriptionUnlocked } from "../src/domain/subscription";
 import { resolveTheme } from "../src/domain/theme";
 import { subscribeByLinkAction, unsubscribeAction } from "../src/server/actions";
 import { getDocument } from "../src/store/db";
@@ -72,20 +72,14 @@ export default async function HomePage({
     );
   }
   const doc = await getDocument();
-  const memberIds = new Set<string>();
   const mine = doc.memberships
     .filter((membership) => membership.userId === user.id)
-    .map((membership) => {
-      memberIds.add(membership.wishlistId);
-      return doc.wishlists.find((list) => list.id === membership.wishlistId);
-    })
+    .map((membership) => doc.wishlists.find((list) => list.id === membership.wishlistId))
     .filter((list) => list !== undefined);
-  const followed = (doc.subscriptions ?? [])
-    .filter((subscription) => subscription.userId === user.id && !memberIds.has(subscription.wishlistId))
-    .flatMap((subscription) => {
-      const list = doc.wishlists.find((entry) => entry.id === subscription.wishlistId);
-      return list ? [{ list, locked: !isSubscriptionUnlocked(list, subscription) }] : [];
-    });
+  const followed = followedListsOf(doc, user.id).map(({ wishlist, subscription }) => ({
+    list: wishlist,
+    locked: !isSubscriptionUnlocked(wishlist, subscription),
+  }));
   const followError = query.fe ? await translateError(query.fe) : null;
   return (
     <main className="flex flex-col gap-8">

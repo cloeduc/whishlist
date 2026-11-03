@@ -1,9 +1,8 @@
-import { findMembership } from "../../domain/access";
 import { mustConfirmEmail } from "../../domain/email-confirmation";
 import { listPublicVisibleItems, mineReservationIdsFor, sortItems } from "../../domain/read";
 import { formatPrice } from "../../domain/price";
 import { hasReadPassword } from "../../domain/read-password";
-import { findSubscription, isSubscriptionUnlocked } from "../../domain/subscription";
+import { isSubscriptionUnlocked, viewerRelation } from "../../domain/subscription";
 import type { Database, Item, Role, Subscription, User, WishlistTheme, Wishlist } from "../../domain/types";
 import { intlLocale, type Locale } from "../../i18n/config";
 import { withLocale } from "../../i18n/locale-path";
@@ -87,8 +86,7 @@ export function toPublicListView(
     const mine = Boolean(reservationId && mineIds.has(reservationId));
     return { ...itemBase(item, locale), mine, reservationId: mine ? reservationId : null };
   });
-  const isMember = viewerId !== null && findMembership(doc, wishlist.id, viewerId) !== null;
-  const subscribed = viewerId !== null && !isMember && findSubscription(doc, wishlist.id, viewerId) !== null;
+  const { isMember, subscribed } = viewerRelation(doc, wishlist.id, viewerId);
   return {
     title: wishlist.title,
     subtitle: wishlist.subtitle,

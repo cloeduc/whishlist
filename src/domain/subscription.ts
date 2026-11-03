@@ -40,6 +40,32 @@ export function extractReadToken(raw: string): string | null {
   return match ? match[1] : null;
 }
 
+/**
+ * Listes que `userId` suit sans en être membre, avec leur abonnement. Devenir membre l'emporte :
+ * une liste dont on est membre n'est jamais une liste suivie (« Mes listes », export, suppression du compte).
+ */
+export function followedListsOf(
+  doc: Database,
+  userId: string,
+): { wishlist: Wishlist; subscription: Subscription }[] {
+  return doc.subscriptions.flatMap((subscription) => {
+    if (subscription.userId !== userId || findMembership(doc, subscription.wishlistId, userId)) return [];
+    const wishlist = doc.wishlists.find((entry) => entry.id === subscription.wishlistId);
+    return wishlist ? [{ wishlist, subscription }] : [];
+  });
+}
+
+/** Lien d'un visiteur avec une liste publique : membre, ou abonné sans en être membre. */
+export function viewerRelation(
+  doc: Database,
+  wishlistId: string,
+  userId: string | null,
+): { isMember: boolean; subscribed: boolean } {
+  if (userId === null) return { isMember: false, subscribed: false };
+  const isMember = findMembership(doc, wishlistId, userId) !== null;
+  return { isMember, subscribed: !isMember && findSubscription(doc, wishlistId, userId) !== null };
+}
+
 export function findSubscription(
   doc: Database,
   wishlistId: string,

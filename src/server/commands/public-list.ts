@@ -85,7 +85,7 @@ export async function subscribeToList(
     isUnlocked?: IsUnlocked;
   },
 ): Promise<
-  | CommandResult<{ subscription: SubscribedListSummaryView; wishlist: Wishlist; replayed: boolean; unlockedWithPassword: boolean }>
+  | CommandResult<{ subscription: SubscribedListSummaryView; replayed: boolean }>
   | { ok: false; error: "readPasswordRequired"; title: string; readToken: string }
 > {
   const active = activeUser(ctx);
@@ -102,7 +102,6 @@ export async function subscribeToList(
     return { ok: false, error: "alreadyMember" };
   }
 
-  let unlockedWithPassword = false;
   if (hasReadPassword(wishlist)) {
     const alreadyUnlocked = input.isUnlocked
       ? await canAccessPublicListWith(doc, wishlist, active.user, input.isUnlocked)
@@ -115,12 +114,11 @@ export async function subscribeToList(
       if (!(await verifyReadPassword(wishlist, input.password))) {
         return { ok: false, error: "badPassword" };
       }
-      unlockedWithPassword = true;
     }
   }
 
   type Saved =
-    | { ok: true; wishlist: Wishlist; subscription: SubscribedListSummaryView; replayed: boolean }
+    | { ok: true; subscription: SubscribedListSummaryView; replayed: boolean }
     | { ok: false; error: string };
   const saved = await updateDocument<Saved>((current) => {
     // L'accès a été vérifié contre `wishlist.readPasswordHash` : le domaine refuse si elle a changé depuis.
@@ -135,7 +133,6 @@ export async function subscribeToList(
       doc: result.doc,
       result: {
         ok: true,
-        wishlist: freshList,
         replayed: result.replayed,
         subscription: toSubscribedListSummary(result.doc, freshList, result.subscription, ctx.locale, ctx.origin),
       },
@@ -147,7 +144,7 @@ export async function subscribeToList(
     }
     return saved;
   }
-  return { ...saved, unlockedWithPassword };
+  return saved;
 }
 
 export async function unsubscribeFromList(

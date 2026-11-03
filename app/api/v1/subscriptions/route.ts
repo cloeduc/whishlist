@@ -1,4 +1,3 @@
-import { extractReadToken } from "@/src/domain/subscription";
 import { guestProofs } from "@/src/server/api/auth";
 import { commandContext } from "@/src/server/api/context";
 import { apiError, apiJson, apiPreflight, optionalText, readJsonBody, text, withApi } from "@/src/server/api/http";
@@ -12,12 +11,11 @@ export const POST = withApi(async (api) => {
   if (!body.ok) return apiError(body.error, api.locale, api.cors);
   const urlOrToken = text(body.body.urlOrToken);
   const password = optionalText(body.body.password);
-  const readToken = extractReadToken(urlOrToken);
-  const { isUnlocked } = readToken ? guestProofs(api.req, readToken) : { isUnlocked: undefined };
+  // Le jeton de la liste est extrait par la commande : la preuve `X-Read-Unlock` se vérifie sur la liste trouvée.
   const result = await subscribeToList(await commandContext(api), {
     urlOrToken,
     password,
-    isUnlocked,
+    isUnlocked: (list) => guestProofs(api.req, list.readToken).isUnlocked(list),
   });
   if (!result.ok) {
     const extra =

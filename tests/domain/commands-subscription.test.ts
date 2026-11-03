@@ -192,7 +192,6 @@ test("liste protégée par mot de passe : exigé à l'abonnement, accès mainten
     });
     assert.equal(sub.ok, true);
     if (!sub.ok) return;
-    assert.equal(sub.unlockedWithPassword, true);
     assert.equal(sub.subscription.locked, false);
 
     // L'abonnée accède ensuite à la liste sans preuve externe (isUnlocked: noUnlock)

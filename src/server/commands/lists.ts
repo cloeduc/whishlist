@@ -4,6 +4,7 @@ import { createWishlist } from "../../domain/import";
 import { listDefaults, memberListTitles, numberedTitle } from "../../domain/list-defaults";
 import { addPerson, addType, splitLabels } from "../../domain/items";
 import { updateWishlistSettings } from "../../domain/membership";
+import { followedListsOf } from "../../domain/subscription";
 import type { WishlistTheme } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import { getTranslationsFor } from "../../i18n/server";
@@ -23,20 +24,15 @@ export async function listMine(
   const active = activeUser(ctx);
   if (!active.ok) return active;
   const doc = await readDocument();
-  const memberIds = new Set<string>();
   const lists = doc.memberships
     .filter((membership) => membership.userId === active.user.id)
     .flatMap((membership) => {
-      memberIds.add(membership.wishlistId);
       const wishlist = doc.wishlists.find((entry) => entry.id === membership.wishlistId);
       return wishlist ? [toListSummary(doc, wishlist, membership.role, ctx.locale, ctx.origin)] : [];
     });
-  const subscriptions = (doc.subscriptions ?? [])
-    .filter((subscription) => subscription.userId === active.user.id && !memberIds.has(subscription.wishlistId))
-    .flatMap((subscription) => {
-      const wishlist = doc.wishlists.find((entry) => entry.id === subscription.wishlistId);
-      return wishlist ? [toSubscribedListSummary(doc, wishlist, subscription, ctx.locale, ctx.origin)] : [];
-    });
+  const subscriptions = followedListsOf(doc, active.user.id).map(({ wishlist, subscription }) =>
+    toSubscribedListSummary(doc, wishlist, subscription, ctx.locale, ctx.origin),
+  );
   return { ok: true, lists, subscriptions };
 }
 

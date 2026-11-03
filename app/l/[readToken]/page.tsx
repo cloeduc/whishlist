@@ -16,8 +16,7 @@ import {
   mineReservationIdsFor,
   toPublicItem,
 } from "../../../src/domain/read";
-import { findMembership } from "../../../src/domain/access";
-import { findSubscription } from "../../../src/domain/subscription";
+import { viewerRelation } from "../../../src/domain/subscription";
 import { resolveTheme, themeToCssVars } from "../../../src/domain/theme";
 import { subscribeAction, unsubscribeAction } from "../../../src/server/actions";
 import { getDocument } from "../../../src/store/db";
@@ -117,9 +116,7 @@ export default async function ReadPage({
   const pageError = query.e ? await translateError(query.e) : null;
   const mineIds = mineReservationIdsFor(doc, list.id, user?.id ?? null, claimedIds);
   const activeAccount = user && !user.mustChangePassword ? user : null;
-  const isMember = activeAccount !== null && findMembership(doc, list.id, activeAccount.id) !== null;
-  const isSubscribed =
-    activeAccount !== null && !isMember && findSubscription(doc, list.id, activeAccount.id) !== null;
+  const { isMember, subscribed: isSubscribed } = viewerRelation(doc, list.id, activeAccount?.id ?? null);
   const types = doc.types.filter((type) => type.wishlistId === list.id);
   const people = doc.people.filter((person) => person.wishlistId === list.id);
   const qui = people.some((person) => person.id === query.qui) ? query.qui! : null;

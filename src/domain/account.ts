@@ -3,6 +3,7 @@ import type { Locale } from "../i18n/config";
 import { clone } from "./access";
 import { pendingEmailChange } from "./email-confirmation";
 import { leaveWishlist, pickHeir, wipeWishlist } from "./membership";
+import { followedListsOf } from "./subscription";
 import type { Database, Role, WishlistTheme } from "./types";
 
 export type AccountDeletionPreview = {
@@ -43,11 +44,7 @@ export function previewAccountDeletion(doc: Database, userId: string): AccountDe
   preview.reservationsKept = doc.reservations.filter(
     (r) => r.userId === userId && !wiped.has(r.wishlistId),
   ).length;
-  for (const subscription of doc.subscriptions.filter((s) => s.userId === userId)) {
-    if (doc.memberships.some((m) => m.wishlistId === subscription.wishlistId && m.userId === userId)) continue;
-    const wishlist = doc.wishlists.find((w) => w.id === subscription.wishlistId);
-    if (wishlist) preview.followedLists.push({ id: wishlist.id, title: wishlist.title });
-  }
+  preview.followedLists = followedListsOf(doc, userId).map(({ wishlist }) => ({ id: wishlist.id, title: wishlist.title }));
   return preview;
 }
 
@@ -225,20 +222,12 @@ export function exportAccount(
       createdAt: r.createdAt,
     }));
 
-  const subscriptions: ExportedSubscription[] = (doc.subscriptions ?? [])
-    .filter((s) => s.userId === userId && !memberOf.has(s.wishlistId))
-    .flatMap((s) => {
-      const wishlist = doc.wishlists.find((w) => w.id === s.wishlistId);
-      if (!wishlist) return [];
-      return [
-        {
-          title: wishlist.title,
-          subtitle: wishlist.subtitle,
-          publicUrl: `${site.origin}${withLocale(site.locale, `/l/${wishlist.readToken}`)}`,
-          subscribedAt: s.createdAt,
-        },
-      ];
-    });
+  const subscriptions: ExportedSubscription[] = followedListsOf(doc, userId).map(({ wishlist, subscription }) => ({
+    title: wishlist.title,
+    subtitle: wishlist.subtitle,
+    publicUrl: `${site.origin}${withLocale(site.locale, `/l/${wishlist.readToken}`)}`,
+    subscribedAt: subscription.createdAt,
+  }));
 
   return {
     format: "ohyoushouldnt-export",
