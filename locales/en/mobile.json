@@ -84,6 +84,13 @@
     "linkPlaceholder": "https://…/l/…",
     "passwordLabel": "List password",
     "passwordHint": "This list is password-protected. Ask the person who shared the link with you.",
-    "submitFollow": "Follow this list"
+    "submitFollow": "Follow this list",
+    "scanButton": "Scan a QR code",
+    "scanHint": "Point the camera at the QR code on the list's “Share” screen.",
+    "scanStop": "Stop scanning",
+    "scanInvalid": "This QR code isn't a wish list link.",
+    "cameraDenied": "The app can't use the camera. Allow it in your phone's settings, or paste the list link.",
+    "openSettings": "Open settings",
+    "cameraUsage": "The camera is used to scan the QR code of a list you want to follow."
   }
 }

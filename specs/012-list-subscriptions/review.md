@@ -105,4 +105,6 @@ Aucun point.
 
 - [x] mobile/app/(app)/shared/[readToken].tsx — L'écran « liste suivie » refaisait la vue invité (lecture, déverrouillage, réservation, annulation, cartes, textes) et divergeait déjà d'elle ; un lien `/l/<token>` vers une liste suivie ouvrait la vue invité, sans « Ne plus suivre ». Un seul écran reste, la vue de la liste (`/guest/[readToken]`), qui gagne « Suivre / Ne plus suivre » (`GuestFollow`, d'après `subscribed` et `isMember`), les filtres « Pour qui ? » et budget, le tri par envie, et une copie hors ligne pour les listes suivies seulement. « Mes listes » et « Suivre une liste » y mènent ; la mécanique `publicList` du store et les textes `mobile:shared.*` de l'ancien écran sont retirés. Après une réservation, l'écran revient à la liste (relue au retour) au lieu de l'empiler une seconde fois.
 
+Ajouté après la revue, à la demande : US4 (scanner le QR code d'une liste depuis « Suivre une liste »), spec, quickstart et tâches T033–T037.
+
 Reste ouvert : un seul commit pour les trois stories (sans objet, la PR est squashée).

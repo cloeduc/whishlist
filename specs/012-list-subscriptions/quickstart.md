@@ -48,9 +48,9 @@ Comptes et listes de démo disponibles :
 2. Se connecter avec `alex@example.test` (ou `sam@example.test`).
 3. Sur l'écran **« Mes listes »**, toucher **« Suivre une liste »** dans la section **« Listes suivies »**.
 4. Coller le lien public complet `http://localhost:3000/l/demo-other-lecture` (ou `http://localhost:3000/l/demo-list-lecture` si connecté avec Sam) et valider :
-   - L'écran de la liste suivie s'ouvre avec ses catégories et ses idées disponibles.
-5. Déplier une catégorie, filtrer par personne ou budget, puis toucher **« Réserver ce cadeau »** sur une idée :
-   - Saisir un petit mot et confirmer : l'idée affiche le badge **« Réservé par vous »** et le bouton **« Annuler la réservation »**.
+   - La vue de la liste s'ouvre (la même que pour son lien public) avec ses idées disponibles et le bouton **« Ne plus suivre »**.
+5. Choisir une catégorie, filtrer par personne ou budget, puis toucher **« Réserver ce cadeau »** sur une idée :
+   - Saisir un petit mot et confirmer : de retour sur la liste, l'idée affiche le badge **« Réservé par vous »** et le bouton **« Annuler la réservation »**.
 6. Revenir sur **« Mes listes »** : la liste figure dans **« Listes suivies »**.
 7. **Mode hors ligne (US2 scénario 4)** : couper le réseau (mode avion sur Android), rouvrir la liste suivie depuis **« Listes suivies »** :
    - Le bandeau hors ligne s'affiche et les idées de la dernière copie synchronisée restent consultables ; les boutons de réservation et de désabonnement sont désactivés.
@@ -64,6 +64,16 @@ Comptes et listes de démo disponibles :
    - La liste disparaît de la section **« Listes suivies »** d'Alex (ou de Sam).
 2. Rouvrir `/l/demo-other-lecture` avec le compte d'Alex (ou vérifier côté Sam dans l'onglet « Réservations ») :
    - Le cadeau réservé à l'étape précédente est toujours réservé.
+
+## Parcours 4 — Suivre une liste en scannant son QR code (US4)
+
+Sur deux téléphones réels (la caméra n'existe pas dans le simulateur) :
+
+1. Téléphone A, connecté avec `alex@example.test` : ouvrir la liste, puis **« Partager »** : le QR code du lien public s'affiche.
+2. Téléphone B, connecté avec `sam@example.test` : **« Mes listes »** → **« Suivre une liste »** → **« Scanner un QR code »**, autoriser la caméra, viser le QR code du téléphone A :
+   - La vue de la liste s'ouvre avec **« Ne plus suivre »**, et la liste figure dans **« Listes suivies »**.
+3. Scanner un autre QR code (un site web quelconque) : le message « Ce QR code n'est pas le lien d'une liste. » s'affiche et le scan continue.
+4. Refuser l'accès à la caméra (Réglages → l'app → Caméra) puis toucher **« Scanner un QR code »** : un message renvoie vers les réglages, et coller le lien reste possible.
 
 ## Parcours Maestro (app mobile)
 

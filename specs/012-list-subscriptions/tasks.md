@@ -132,6 +132,25 @@ Chaque phase de user story se termine par une tâche **« Commit de la story »*
 
 ---
 
+## Phase 7: User Story 4 - Suivre une liste en scannant son QR code (App mobile) (Priority: P3)
+
+**Goal**: Depuis « Suivre une liste », scanner le QR code du lien public d'une liste (écran « Partager » d'un proche) au lieu de coller le lien.
+
+**Independent Test**: [quickstart.md § Parcours 4](quickstart.md#parcours-4--suivre-une-liste-en-scannant-son-qr-code-us4) ; exclu de Maestro (pas de caméra dans le simulateur), couvert par un test d'écran avec caméra simulée.
+
+### Tests for User Story 4
+
+- [X] T033 [P] [US4] Dans `mobile/__tests__/screens/followed-lists.test.tsx`, avec `expo-camera` simulé : un QR code de liste suit la liste et ouvre sa vue ; un QR code étranger affiche « Ce QR code n'est pas le lien d'une liste » sans appel au serveur ; une liste protégée demande son mot de passe ; caméra refusée → message et lien vers les réglages
+- [X] T034 [P] [US4] Ajouter la ligne `012-us4` dans `mobile/.maestro/exclusions.md` (caméra absente du simulateur, renvoi au Parcours 4)
+
+### Implementation for User Story 4
+
+- [X] T035 [US4] Ajouter `expo-camera` (`npx expo install`), son plugin dans `mobile/app.config.ts` (texte `NSCameraUsageDescription` traduit par langue, sans micro) et la permission Android `CAMERA` ; régénérer les licences (`npm --prefix mobile run licenses`)
+- [X] T036 [US4] Ajouter le bouton « Scanner un QR code » et la vue caméra (`CameraView`, codes QR seulement) sur `mobile/app/(app)/shared/follow.tsx` : `extractReadToken` (`src/domain/subscription.ts`) filtre le contenu scanné, puis même suivi qu'un lien collé ; textes `mobile:shared.scan*` en FR/EN
+- [X] T037 [US4] Commit de la story : lint, types et tests (site et app) verts
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

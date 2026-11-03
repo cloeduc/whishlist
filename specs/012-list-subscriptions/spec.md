@@ -66,6 +66,23 @@ Une personne qui ne souhaite plus suivre une liste peut choisir « Ne plus suivr
 
 ---
 
+### User Story 4 - Suivre une liste en scannant son QR code (App mobile) (Priority: P3)
+
+Une personne à côté d'un proche qui lui montre l'écran « Partager » de sa liste (QR code du lien public) peut, depuis « Suivre une liste » dans l'app, scanner ce QR code au lieu de recopier le lien. La liste est suivie comme si le lien avait été collé : mot de passe demandé si la liste est protégée, puis ouverture de la liste.
+
+**Why this priority**: Le QR code existe déjà côté propriétaire (écran « Partager » de l'app) ; le scanner depuis l'app évite de faire transiter le lien par une messagerie quand les deux personnes sont côte à côte.
+
+**Independent Test**: Sur un téléphone réel, scanner le QR code de l'écran « Partager » d'une liste depuis « Suivre une liste » : la liste s'ouvre et figure dans « Listes suivies ». La caméra n'existe pas dans le simulateur : le parcours est exclu de Maestro et vérifié par un test d'écran (caméra simulée) et à la main ([quickstart.md § Parcours 4](quickstart.md#parcours-4--suivre-une-liste-en-scannant-son-qr-code-us4)).
+
+**Acceptance Scenarios**:
+
+1. **Given** une personne connectée sur « Suivre une liste », **When** elle scanne le QR code du lien public d'une liste, **Then** elle suit la liste et arrive sur sa vue, comme après avoir collé le lien.
+2. **Given** un QR code qui n'est pas le lien d'une liste, **When** il est scanné, **Then** un message l'indique et le scan reprend, sans rien envoyer au serveur.
+3. **Given** une liste protégée par un mot de passe de lecture, **When** son QR code est scanné, **Then** le titre de la liste et le champ mot de passe s'affichent, comme pour un lien collé.
+4. **Given** une personne qui a refusé l'accès à la caméra, **When** elle choisit de scanner, **Then** un message explique comment l'autoriser dans les réglages, et coller le lien reste possible.
+
+---
+
 ### Edge Cases
 
 - **Confidentialité absolue vis-à-vis des membres** : les membres et le propriétaire d'une liste ne voient jamais qui suit leur liste ni combien de personnes la suivent (ni dans l'interface, ni dans l'API, ni dans l'export de leurs données).
@@ -92,6 +109,7 @@ Une personne qui ne souhaite plus suivre une liste peut choisir « Ne plus suivr
 - **FR-008**: L'abonnement MUST être strictement privé : aucune vue membre, route d'API ou export de données d'un membre de la liste ne doit révéler l'existence, le nombre ou l'identité des abonnés.
 - **FR-009**: Lorsqu'un utilisateur rejoint une liste comme membre éditeur, tout abonnement existant de cet utilisateur à cette liste MUST être supprimé automatiquement dans la même opération.
 - **FR-010**: La suppression d'une liste ou d'un compte utilisateur MUST supprimer en cascade les abonnements associés ; le fichier d'export des données personnelles du compte (`Télécharger mes données`) MUST inclure la liste des abonnements de l'utilisateur (titre de la liste, date d'abonnement, adresse publique).
+- **FR-012**: Dans l'app mobile, l'écran « Suivre une liste » MUST permettre de scanner le QR code d'un lien public de liste avec la caméra, en plus de coller le lien. La caméra n'est demandée qu'au moment du scan ; un QR code qui n'est pas le lien d'une liste est refusé sur le téléphone. L'accès à la caméra est la seule permission ajoutée par la feature (Android : `CAMERA`, iOS : `NSCameraUsageDescription`, texte traduit).
 - **FR-011**: Toutes les chaînes visibles nouvelles ou modifiées MUST être présentes dans les catalogues français (`locales/fr/`) et anglais (`locales/en/`), en respectant le vouvoiement et le lexique du produit.
 
 ### Key Entities

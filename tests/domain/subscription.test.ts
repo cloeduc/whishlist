@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { acceptInvite, deleteWishlist } from "../../src/domain/membership";
+import { extractReadToken } from "../../src/domain/read-link";
 import {
-  extractReadToken,
   findSubscription,
   followedListsOf,
   isSubscriptionUnlocked,

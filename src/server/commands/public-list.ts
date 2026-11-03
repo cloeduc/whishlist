@@ -7,8 +7,8 @@ import { cancelOwnReservation } from "../../domain/items";
 import { findWishlistByReadToken, mineReservationIdsFor } from "../../domain/read";
 import { hasReadPassword, verifyReadPassword } from "../../domain/read-password";
 import { reserveItem } from "../../domain/reserve";
+import { extractReadToken } from "../../domain/read-link";
 import {
-  extractReadToken,
   findSubscription,
   subscribeWishlist,
   syncSubscriptionUnlock,
