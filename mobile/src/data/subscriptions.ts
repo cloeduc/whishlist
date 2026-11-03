@@ -1,7 +1,7 @@
 import { api, ApiError, done, ok, type Schemas } from "@/api/client";
-import { publicListKey, removeSnapshot } from "@/offline/snapshot";
+import { saveUnlock } from "@/features/guest/storage";
 
-import { refreshLists, refreshPublicList } from "./store";
+import { forgetPublicList, readUnlockHeader, refreshLists, refreshPublicList } from "./store";
 
 export type FollowResult =
   | { ok: true; subscription: Schemas["SubscribedListSummary"] }
@@ -36,12 +36,13 @@ export async function followList(input: { urlOrToken: string; password?: string 
 export async function unlockSharedList(readToken: string, password: string): Promise<{ ok: true } | { ok: false; error: string }> {
   if (!password) return { ok: false, error: "passwordRequired" };
   try {
-    await ok(
+    const answer = await ok(
       api.POST("/public/lists/{readToken}/unlock", {
         params: { path: { readToken } },
         body: { password },
       }),
     );
+    if (answer.unlockToken && answer.expiresAt) await saveUnlock(readToken, answer.unlockToken, answer.expiresAt);
     await Promise.all([refreshPublicList(readToken), refreshLists()]);
     return { ok: true };
   } catch (error) {
@@ -58,7 +59,7 @@ export async function reserveSharedItem(
   try {
     await ok(
       api.POST("/public/lists/{readToken}/reservations", {
-        params: { path: { readToken } },
+        params: { path: { readToken }, header: await readUnlockHeader(readToken) },
         body: {
           itemId: input.itemId,
           ...(input.fromName?.trim() ? { fromName: input.fromName.trim() } : {}),
@@ -97,7 +98,7 @@ export async function cancelSharedReservation(
 export async function unfollowList(readToken: string): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     await done(api.DELETE("/subscriptions/{readToken}", { params: { path: { readToken } } }));
-    await removeSnapshot(publicListKey(readToken));
+    await forgetPublicList(readToken);
     await refreshLists();
     return { ok: true };
   } catch (error) {

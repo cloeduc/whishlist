@@ -12,6 +12,8 @@ export type AccountDeletionPreview = {
   transferredLists: { id: string; title: string; newOwnerName: string | null }[];
   /** Ses réservations sur des listes qui restent : gardées, sans lien au compte. */
   reservationsKept: number;
+  /** Listes publiques qu'elle suit sans en être membre : elle ne les suivra plus. */
+  followedLists: { id: string; title: string }[];
 };
 
 function isAlone(doc: Database, wishlistId: string): boolean {
@@ -19,7 +21,12 @@ function isAlone(doc: Database, wishlistId: string): boolean {
 }
 
 export function previewAccountDeletion(doc: Database, userId: string): AccountDeletionPreview {
-  const preview: AccountDeletionPreview = { deletedLists: [], transferredLists: [], reservationsKept: 0 };
+  const preview: AccountDeletionPreview = {
+    deletedLists: [],
+    transferredLists: [],
+    reservationsKept: 0,
+    followedLists: [],
+  };
   const wiped = new Set<string>();
   for (const membership of doc.memberships.filter((m) => m.userId === userId)) {
     const wishlist = doc.wishlists.find((w) => w.id === membership.wishlistId);
@@ -36,6 +43,11 @@ export function previewAccountDeletion(doc: Database, userId: string): AccountDe
   preview.reservationsKept = doc.reservations.filter(
     (r) => r.userId === userId && !wiped.has(r.wishlistId),
   ).length;
+  for (const subscription of doc.subscriptions.filter((s) => s.userId === userId)) {
+    if (doc.memberships.some((m) => m.wishlistId === subscription.wishlistId && m.userId === userId)) continue;
+    const wishlist = doc.wishlists.find((w) => w.id === subscription.wishlistId);
+    if (wishlist) preview.followedLists.push({ id: wishlist.id, title: wishlist.title });
+  }
   return preview;
 }
 

@@ -87,3 +87,16 @@ Aucun point.
 ## i18n
 
 Aucun point.
+
+## Deuxième revue (après rebase sur main, 2026-11-03)
+
+- [x] src/server/commands/public-list.ts — Le mot de passe était vérifié contre la liste lue avant la transaction, mais l'abonnement mémorisait l'empreinte relue dans la transaction : un changement de mot de passe pendant la vérification donnait l'accès avec le nouveau mot de passe sans le connaître. `subscribeWishlist` et `syncSubscriptionUnlock` reçoivent l'empreinte vérifiée et refusent (`readPasswordChanged`) si elle a changé. Le résumé est construit dans la transaction (plus de relecture complète de la base), et `unlockPublicList` n'ouvre plus de transaction quand l'abonnement est déjà à jour.
+- [x] src/server/actions.ts — Après un déverrouillage réussi, `subscribeToList` était hors du `try/catch` : une limite de débit menait à la page d'erreur de Next. Elle redirige maintenant vers la liste déverrouillée avec `?e=rateLimited`.
+- [x] src/server/actions.ts — `subscribeAction` perdait l'intention de suivre quand le déverrouillage avait expiré, sans message. Redirection vers `?e=readPasswordRequired&subscribe=1` et message `public:unlock.passwordRequiredToFollow`.
+- [x] mobile/src/data/subscriptions.ts — `unlockSharedList` jetait le `unlockToken` : une liste qu'on ne suit plus restait sur le formulaire après le bon mot de passe. Le jeton est gardé (même stockage que la vue invité) et envoyé en `X-Read-Unlock` à la lecture et à la réservation ; un 423 l'oublie.
+- [x] mobile/app/(app)/shared/[readToken].tsx — Le bouton d'achat ouvrait toute adresse ; seuls les liens http(s) s'ouvrent (`webUrl` de la vue invité).
+- [x] src/domain/account.ts — L'aperçu de suppression du compte ne citait pas les listes suivies. `followedLists` (API 1.7.0, facultatif) est affiché sur le site et dans l'app.
+- [x] src/domain/subscription.ts — `extractReadToken` refusait des liens valides : sans schéma, schéma en majuscules, schéma de l'app, sous-pages de la liste.
+- [x] mobile/src/data/subscriptions.ts — « Ne plus suivre » effaçait la copie SQLite mais pas celle en mémoire (`forgetPublicList`).
+
+Restent ouverts : ordre des idées à priorité égale différent du site, clavier sur la fenêtre de réservation (iOS), écran « liste suivie » en doublon de la vue invité, logique « abonnements hors listes dont on est membre » écrite trois fois, champs `subscribed` / `isMember` / `unlockedWithPassword` non lus, un seul commit pour les trois stories.

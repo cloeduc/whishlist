@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 
 import { AppState } from "react-native";
 
 import { api, ApiError, done, NetworkError, ok, type Schemas } from "@/api/client";
+import { forgetUnlock, unlockTokenFor } from "@/features/guest/storage";
 import { currentLocale, intlLocale } from "@/i18n";
 import { viewList, viewLists, type ViewList, type ViewListSummary } from "@/offline/optimistic";
 import { createListBody, listChanges, onOutboxChange, resetSending, type Change } from "@/offline/outbox";
@@ -107,10 +108,35 @@ export async function refreshLists(): Promise<void> {
   }
 }
 
+/**
+ * Preuve de déverrouillage gardée après `POST /public/lists/{readToken}/unlock` (même stockage que la vue invité) :
+ * elle donne l'accès même quand le serveur n'a pas d'abonnement à mettre à jour (liste qu'on ne suit plus).
+ */
+export async function readUnlockHeader(readToken: string): Promise<{ "X-Read-Unlock"?: string }> {
+  const token = await unlockTokenFor(readToken);
+  return token ? { "X-Read-Unlock": token } : {};
+}
+
+/** Oublie la copie d'une liste suivie, sur le disque et en mémoire (après « Ne plus suivre »). */
+export async function forgetPublicList(readToken: string): Promise<void> {
+  await removeSnapshot(publicListKey(readToken));
+  const without = <T,>(record: Record<string, T>) =>
+    Object.fromEntries(Object.entries(record).filter(([token]) => token !== readToken));
+  update({
+    publicList: without(state.publicList),
+    publicLocked: without(state.publicLocked),
+    publicMissing: without(state.publicMissing),
+  });
+}
+
 /** Relit une liste suivie publique ; un 404 la retire de la copie, un 423 la marque verrouillée. */
 export async function refreshPublicList(readToken: string): Promise<void> {
   try {
-    const list = await ok(api.GET("/public/lists/{readToken}", { params: { path: { readToken } } }));
+    const list = await ok(
+      api.GET("/public/lists/{readToken}", {
+        params: { path: { readToken }, header: await readUnlockHeader(readToken) },
+      }),
+    );
     await putSnapshot(publicListKey(readToken), list);
     update({
       publicMissing: Object.fromEntries(Object.entries(state.publicMissing).filter(([token]) => token !== readToken)),
@@ -127,7 +153,7 @@ export async function refreshPublicList(readToken: string): Promise<void> {
       return;
     }
     if (error instanceof ApiError && error.status === 423) {
-      await removeSnapshot(publicListKey(readToken));
+      await Promise.all([removeSnapshot(publicListKey(readToken)), forgetUnlock(readToken)]);
       update({
         publicLocked: { ...state.publicLocked, [readToken]: readToken },
         publicList: { ...state.publicList, [readToken]: null },

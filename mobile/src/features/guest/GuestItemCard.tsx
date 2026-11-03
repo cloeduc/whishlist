@@ -18,7 +18,7 @@ import { Text } from "@/ui/Text";
 import { cancelGuestReservation } from "./api";
 
 /** Seuls les liens web s'ouvrent : l'adresse d'une idée vient de la liste, pas de ce téléphone (011). */
-function webUrl(url: string | null): string | null {
+export function webUrl(url: string | null): string | null {
   return url && /^https?:\/\//i.test(url) ? url : null;
 }
 

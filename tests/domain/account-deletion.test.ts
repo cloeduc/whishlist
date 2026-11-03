@@ -98,6 +98,8 @@ test("l'aperçu annonce ce que fait la suppression", () => {
       { id: "alexs", title: "Envies d'Alex", newOwnerName: null },
     ],
     reservationsKept: 2,
+    // "solo" est aussi dans ses abonnements, mais elle en est membre : seule "other" est annoncée.
+    followedLists: [{ id: "other", title: "Liste de Camille" }],
   });
   const after = deleted(doc);
   assert.equal(after.reservations.filter((r) => ["r-alexs", "r-other"].includes(r.id)).length, 2);

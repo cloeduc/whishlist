@@ -590,10 +590,17 @@ export async function unlockPublicListAction(formData: FormData) {
   if (wantSubscribe) {
     const user = await currentUser();
     if (user && !user.mustChangePassword) {
-      const subscribed = await subscribeToList(await actionContext(), {
-        urlOrToken: readToken,
-        isUnlocked: () => true,
-      });
+      let subscribed: Awaited<ReturnType<typeof subscribeToList>>;
+      try {
+        subscribed = await subscribeToList(await actionContext(), {
+          urlOrToken: readToken,
+          isUnlocked: () => true,
+        });
+      } catch (error) {
+        // La liste est déverrouillée : seul l'abonnement a échoué, on l'affiche sans repasser par le formulaire.
+        if (isRateLimitError(error)) return localeRedirect(`/l/${readToken}?e=rateLimited`);
+        throw error;
+      }
       if (subscribed.ok) return localeRedirect(`/l/${readToken}?followed=1`);
     }
   }
@@ -734,6 +741,10 @@ export async function subscribeAction(formData: FormData) {
   }
   if (!result.ok) {
     if (result.error === "listMissing") return localeRedirect("/");
+    // Déverrouillage expiré ou mot de passe changé : le formulaire garde l'intention de suivre la liste.
+    if (result.error === "readPasswordRequired") {
+      return localeRedirect(`/l/${readToken}?e=readPasswordRequired&subscribe=1`);
+    }
     return localeRedirect(`/l/${readToken}?e=${encodeURIComponent(result.error)}`);
   }
   return localeRedirect(`/l/${readToken}?followed=1`);

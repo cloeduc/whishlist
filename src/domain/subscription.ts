@@ -1,12 +1,19 @@
+import { stripLocalePrefix } from "../i18n/locale-path";
+import { APP_SCHEME } from "../site/app-links";
 import { clone, findMembership } from "./access";
 import { hasReadPassword } from "./read-password";
 import type { Database, Subscription, Wishlist } from "./types";
 
 const RAW_TOKEN_PATTERN = /^[A-Za-z0-9_-]{8,128}$/;
+const APP_SCHEME_PREFIX = `${APP_SCHEME}://`;
+/** Un nom d'hôte (avec un point, ou `localhost`) suivi d'un chemin : lien collé sans `https://`. */
+const HOST_FIRST_PATTERN = /^(?:localhost|[a-z0-9-]+(?:\.[a-z0-9-]+)+)(?::\d+)?\//i;
 
 /**
- * Extrait un `readToken` depuis un lien public complet (`https://.../l/<token>`,
- * `https://.../en/l/<token>`), un chemin (`/l/<token>`) ou un jeton brut.
+ * Extrait un `readToken` de ce qu'une personne colle : lien complet (`https://.../l/<token>`,
+ * `https://.../en/l/<token>`, schéma en majuscules), lien sans schéma (`ohyoushouldnt.app/l/<token>`),
+ * lien de l'app (`ohyoushouldnt://l/<token>`), chemin (`/l/<token>`), sous-page de la liste
+ * (`/l/<token>/reserver?…`) ou jeton brut.
  * Retourne `null` si l'entrée ne correspond pas à un lien de lecture de liste.
  */
 export function extractReadToken(raw: string): string | null {
@@ -14,23 +21,23 @@ export function extractReadToken(raw: string): string | null {
   if (!trimmed) return null;
   if (RAW_TOKEN_PATTERN.test(trimmed)) return trimmed;
 
-  let pathname = trimmed;
-  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+  let pathname: string;
+  if (trimmed.toLowerCase().startsWith(APP_SCHEME_PREFIX)) {
+    // `ohyoushouldnt://l/<token>` : pour `URL`, `l` serait l'hôte ; les chemins sont ceux du site.
+    pathname = `/${trimmed.slice(APP_SCHEME_PREFIX.length)}`;
+  } else if (/^https?:\/\//i.test(trimmed) || HOST_FIRST_PATTERN.test(trimmed)) {
     try {
-      pathname = new URL(trimmed).pathname;
+      pathname = new URL(/^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`).pathname;
     } catch {
       return null;
     }
   } else {
-    const q = pathname.indexOf("?");
-    if (q >= 0) pathname = pathname.slice(0, q);
-    const h = pathname.indexOf("#");
-    if (h >= 0) pathname = pathname.slice(0, h);
+    pathname = trimmed;
   }
 
-  const match = /^(?:\/(?:fr|en))?\/l\/([A-Za-z0-9_-]{8,128})\/?$/.exec(pathname);
-  if (!match) return null;
-  return match[1];
+  const { path } = stripLocalePrefix(pathname.split(/[?#]/)[0]);
+  const match = /^\/l\/([A-Za-z0-9_-]{8,128})(?:\/.*)?$/.exec(path);
+  return match ? match[1] : null;
 }
 
 export function findSubscription(
@@ -56,15 +63,18 @@ export function isSubscriptionUnlocked(wishlist: Wishlist, subscription: Subscri
 
 /**
  * Abonne `userId` à `wishlistId`.
+ * - `verifiedHash` : empreinte du mot de passe de lecture contre laquelle l'appelant a vérifié l'accès
+ *   (`null` pour une liste sans mot de passe). Si la liste a changé de mot de passe entre-temps,
+ *   refuse `readPasswordChanged` : l'abonnement ne doit jamais mémoriser une empreinte non vérifiée.
  * - Refuse `alreadyMember` si l'utilisateur est déjà membre de la liste.
  * - Idempotent : si l'abonnement existe déjà, met à jour `readPasswordHash` et retourne `replayed: true`.
  */
 export function subscribeWishlist(
   doc: Database,
-  input: { wishlistId: string; userId: string; now?: Date },
+  input: { wishlistId: string; userId: string; verifiedHash: string | null; now?: Date },
 ):
   | { ok: true; doc: Database; subscription: Subscription; replayed: boolean }
-  | { ok: false; error: "listMissing" | "accountMissing" | "alreadyMember" } {
+  | { ok: false; error: "listMissing" | "accountMissing" | "alreadyMember" | "readPasswordChanged" } {
   const wishlist = doc.wishlists.find((entry) => entry.id === input.wishlistId);
   if (!wishlist) return { ok: false, error: "listMissing" };
   if (!doc.users.some((entry) => entry.id === input.userId)) {
@@ -72,6 +82,9 @@ export function subscribeWishlist(
   }
   if (findMembership(doc, wishlist.id, input.userId)) {
     return { ok: false, error: "alreadyMember" };
+  }
+  if (wishlist.readPasswordHash !== input.verifiedHash) {
+    return { ok: false, error: "readPasswordChanged" };
   }
   const existing = findSubscription(doc, wishlist.id, input.userId);
   if (existing) {
@@ -96,16 +109,17 @@ export function subscribeWishlist(
 
 /**
  * Met à jour `readPasswordHash` d'un abonnement existant après déverrouillage de la liste.
+ * `verifiedHash` est l'empreinte contre laquelle le mot de passe saisi a été vérifié : si la liste
+ * a changé de mot de passe entre-temps, rien n'est mis à jour.
  */
 export function syncSubscriptionUnlock(
   doc: Database,
-  input: { wishlistId: string; userId: string },
+  input: { wishlistId: string; userId: string; verifiedHash: string | null },
 ): Database {
   const wishlist = doc.wishlists.find((entry) => entry.id === input.wishlistId);
   const existing = findSubscription(doc, input.wishlistId, input.userId);
-  if (!wishlist || !existing || existing.readPasswordHash === wishlist.readPasswordHash) {
-    return doc;
-  }
+  if (!wishlist || !existing || wishlist.readPasswordHash !== input.verifiedHash) return doc;
+  if (existing.readPasswordHash === wishlist.readPasswordHash) return doc;
   const next = clone(doc);
   const target = findSubscription(next, input.wishlistId, input.userId)!;
   target.readPasswordHash = wishlist.readPasswordHash;

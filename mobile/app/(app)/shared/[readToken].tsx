@@ -13,6 +13,7 @@ import {
   unlockSharedList,
 } from "@/data/subscriptions";
 import { errorText } from "@/features/errors";
+import { webUrl } from "@/features/guest/GuestItemCard";
 import { translateError } from "@/i18n";
 import { useOnline } from "@/network";
 import { ListThemeProvider, useTheme } from "@/theme/ListTheme";
@@ -94,6 +95,7 @@ function SharedCategorySection({
       >
         {items.map((item) => {
           const person = people.find((entry) => entry.id === item.personId)?.label ?? "";
+          const buyUrl = webUrl(item.url);
           return (
             <Shadow
               key={item.id}
@@ -108,13 +110,13 @@ function SharedCategorySection({
                 {item.mine ? <Badge>{t("reservation.mine")}</Badge> : null}
               </View>
               <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: tokens.space[2] }}>
-                {item.url ? (
+                {buyUrl ? (
                   <Button
                     title={t("buyLink")}
                     accessibilityLabel={t("buyLinkAria", { name: item.name })}
                     variant="neutral"
                     size="sm"
-                    onPress={() => void Linking.openURL(item.url!)}
+                    onPress={() => void Linking.openURL(buyUrl)}
                     testID={`shared.buy-${item.id}`}
                   />
                 ) : null}

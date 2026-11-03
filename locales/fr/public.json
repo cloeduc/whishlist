@@ -8,7 +8,8 @@
     "passwordHint": "Demandez-le à la personne qui vous a partagé le lien.",
     "submit": "Accéder à la liste",
     "badPassword": "Le mot de passe est incorrect.",
-    "rateLimited": "Trop de tentatives. Réessayez dans quelques minutes."
+    "rateLimited": "Trop de tentatives. Réessayez dans quelques minutes.",
+    "passwordRequiredToFollow": "Saisissez de nouveau le mot de passe de la liste pour la suivre."
   },
   "clickCategory": "Sélectionnez une catégorie pour y descendre.",
   "categoriesNav": "Catégories",

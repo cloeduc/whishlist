@@ -6,6 +6,7 @@ import SharedListScreen from "../../app/(app)/shared/[readToken]";
 import FollowSharedList from "../../app/(app)/shared/follow";
 import { signIn } from "@/auth/session";
 import { resetStore } from "@/data/store";
+import { clearGuestAccess } from "@/features/guest/storage";
 import { i18n } from "@/i18n";
 import { putSnapshot } from "@/offline/snapshot";
 
@@ -63,6 +64,7 @@ const publicListBody = {
 
 beforeEach(async () => {
   await freshDb();
+  await clearGuestAccess();
   resetStore();
   await i18n.changeLanguage("fr");
   jest.clearAllMocks();
@@ -276,4 +278,36 @@ test("SharedListScreen filters items by recipient and budget, and unlocks or unf
   await fireEvent.press(screen.getByTestId("tab-under-20"));
   expect(screen.queryByText("Roman graphique")).toBeNull();
   expect(screen.getByText("Tasse artisanale")).toBeOnTheScreen();
+});
+
+test("SharedListScreen keeps the unlock token: a list no longer followed opens with the right password", async () => {
+  // Sans abonnement à mettre à jour, seul le jeton `X-Read-Unlock` rendu par le déverrouillage ouvre la liste.
+  fakeFetch({
+    "GET /public/lists/demo-list-lecture": (request) =>
+      request.headers.get("X-Read-Unlock") === "tok"
+        ? json(200, { ...publicListBody, subscribed: false })
+        : json(423, { error: { code: "readPasswordRequired", message: "Protégée" }, title: "Liste de Camille" }),
+    "POST /public/lists/demo-list-lecture/unlock": () =>
+      json(200, { unlockToken: "tok", expiresAt: "2099-01-01T00:00:00.000Z" }),
+    "GET /lists": () => json(200, { lists: [], subscriptions: [] }),
+  });
+
+  await render(<SharedListScreen />);
+  expect(await screen.findByTestId("shared.unlock-screen")).toBeOnTheScreen();
+  await fireEvent.changeText(screen.getByTestId("shared.unlock-password"), "secret-1234");
+  await fireEvent.press(screen.getByTestId("shared.unlock-submit"));
+
+  expect(await screen.findByText("Roman graphique")).toBeOnTheScreen();
+});
+
+test("SharedListScreen only opens web links", async () => {
+  const body = {
+    ...publicListBody,
+    items: [{ ...publicListBody.items[0], url: "tel:+33100000000" }],
+  };
+  fakeFetch({ "GET /public/lists/demo-list-lecture": () => json(200, body) });
+
+  await render(<SharedListScreen />);
+  expect(await screen.findByText("Roman graphique")).toBeOnTheScreen();
+  expect(screen.queryByTestId("shared.buy-item-1")).toBeNull();
 });

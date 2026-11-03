@@ -31,7 +31,8 @@ info:
       et dans la réponse de `POST /lists/{listId}/enrich`.
     - 1.6.0 : déplacer ou copier une idée (`POST /lists/{listId}/items/{itemId}/move` et `/copy`).
     - 1.7.0 : abonnements aux listes publiques (`POST /subscriptions`, `DELETE /subscriptions/{readToken}`,
-      `subscriptions` dans `GET /lists`, `subscribed` et `isMember` dans `PublicList`).
+      `subscriptions` dans `GET /lists`, `subscribed` et `isMember` dans `PublicList`,
+      `followedLists` dans `AccountDeletionPreview`).
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -1482,6 +1483,15 @@ components:
               title: { type: string }
               newOwnerName: { type: [string, "null"], description: Nouveau propriétaire, si le compte l'était. }
         reservationsKept: { type: integer, minimum: 0 }
+        followedLists:
+          type: array
+          description: Depuis 1.7.0. Listes publiques suivies sans en être membre, qui ne seront plus suivies.
+          items:
+            type: object
+            required: [id, title]
+            properties:
+              id: { type: string }
+              title: { type: string }
 
     AccountExport:
       type: object

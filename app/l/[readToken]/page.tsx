@@ -42,6 +42,7 @@ function unlockErrorMessage(
 ): string | null {
   if (e === "bad" || e === "badPassword") return t("unlock.badPassword");
   if (e === "rate" || e === "rateLimited") return t("unlock.rateLimited");
+  if (e === "readPasswordRequired") return t("unlock.passwordRequiredToFollow");
   return null;
 }
 

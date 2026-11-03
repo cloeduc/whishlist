@@ -21,6 +21,16 @@ test("extractReadToken accepte un jeton brut, un chemin /l/ ou /en/l/, et une UR
     extractReadToken("https://ohyoushouldnt.app/en/l/read-other-123456?budget=20-50#c"),
     "read-other-123456",
   );
+  assert.equal(extractReadToken("HTTPS://ohyoushouldnt.app/l/read-other-123456"), "read-other-123456");
+  assert.equal(extractReadToken("ohyoushouldnt.app/en/l/read-other-123456"), "read-other-123456");
+  assert.equal(extractReadToken("localhost:3000/l/read-other-123456"), "read-other-123456");
+  assert.equal(extractReadToken("ohyoushouldnt://l/read-other-123456"), "read-other-123456");
+  assert.equal(
+    extractReadToken("https://ohyoushouldnt.app/l/read-other-123456/reserver?itemId=i1"),
+    "read-other-123456",
+  );
+  assert.equal(extractReadToken("/l/read-other-123456/types"), "read-other-123456");
+  assert.equal(extractReadToken("ohyoushouldnt.app/listes/read-other-123456"), null);
   assert.equal(extractReadToken(""), null);
   assert.equal(extractReadToken("   "), null);
   assert.equal(extractReadToken("court"), null);
@@ -32,7 +42,7 @@ test("extractReadToken accepte un jeton brut, un chemin /l/ ou /en/l/, et une UR
 test("subscribeWishlist crée un abonnement et reste idempotent", () => {
   const doc = accountDoc();
   const now = new Date("2026-11-02T10:00:00.000Z");
-  const created = subscribeWishlist(doc, { wishlistId: "other", userId: "alex", now });
+  const created = subscribeWishlist(doc, { wishlistId: "other", userId: "alex", verifiedHash: null, now });
   assert.ok(created.ok);
   assert.equal(created.replayed, false);
   assert.deepEqual(created.subscription, {
@@ -42,7 +52,7 @@ test("subscribeWishlist crée un abonnement et reste idempotent", () => {
     createdAt: "2026-11-02T10:00:00.000Z",
   });
 
-  const again = subscribeWishlist(created.doc, { wishlistId: "other", userId: "alex" });
+  const again = subscribeWishlist(created.doc, { wishlistId: "other", userId: "alex", verifiedHash: null });
   assert.ok(again.ok);
   assert.equal(again.replayed, true);
   assert.equal(
@@ -53,27 +63,41 @@ test("subscribeWishlist crée un abonnement et reste idempotent", () => {
 
 test("subscribeWishlist refuse alreadyMember, listMissing et accountMissing", () => {
   const doc = accountDoc();
-  assert.deepEqual(subscribeWishlist(doc, { wishlistId: "shared", userId: "lou" }), {
+  assert.deepEqual(subscribeWishlist(doc, { wishlistId: "shared", userId: "lou", verifiedHash: null }), {
     ok: false,
     error: "alreadyMember",
   });
-  assert.deepEqual(subscribeWishlist(doc, { wishlistId: "shared", userId: "alex" }), {
+  assert.deepEqual(subscribeWishlist(doc, { wishlistId: "shared", userId: "alex", verifiedHash: null }), {
     ok: false,
     error: "alreadyMember",
   });
-  assert.deepEqual(subscribeWishlist(doc, { wishlistId: "unknown", userId: "lou" }), {
+  assert.deepEqual(subscribeWishlist(doc, { wishlistId: "unknown", userId: "lou", verifiedHash: null }), {
     ok: false,
     error: "listMissing",
   });
-  assert.deepEqual(subscribeWishlist(doc, { wishlistId: "other", userId: "ghost" }), {
+  assert.deepEqual(subscribeWishlist(doc, { wishlistId: "other", userId: "ghost", verifiedHash: null }), {
     ok: false,
     error: "accountMissing",
   });
 });
 
+test("subscribeWishlist refuse une empreinte qui n'est plus celle de la liste", () => {
+  const doc = accountDoc();
+  // Accès vérifié contre l'ancien mot de passe, changé par le propriétaire pendant la vérification.
+  assert.deepEqual(
+    subscribeWishlist(doc, { wishlistId: "alexs", userId: "camille", verifiedHash: "scrypt$old-secret" }),
+    { ok: false, error: "readPasswordChanged" },
+  );
+  // Liste sans mot de passe à la vérification, protégée depuis.
+  assert.deepEqual(
+    subscribeWishlist(doc, { wishlistId: "alexs", userId: "camille", verifiedHash: null }),
+    { ok: false, error: "readPasswordChanged" },
+  );
+});
+
 test("isSubscriptionUnlocked et syncSubscriptionUnlock suivent le mot de passe de lecture", () => {
   const doc = accountDoc();
-  const sub = subscribeWishlist(doc, { wishlistId: "alexs", userId: "camille" });
+  const sub = subscribeWishlist(doc, { wishlistId: "alexs", userId: "camille", verifiedHash: "scrypt$read-secret" });
   assert.ok(sub.ok);
   const list = sub.doc.wishlists.find((w) => w.id === "alexs")!;
   assert.equal(isSubscriptionUnlocked(list, sub.subscription), true);
@@ -82,8 +106,20 @@ test("isSubscriptionUnlocked et syncSubscriptionUnlock suivent le mot de passe d
   list.readPasswordHash = "scrypt$new-secret";
   assert.equal(isSubscriptionUnlocked(list, sub.subscription), false);
 
-  // Après déverrouillage, syncSubscriptionUnlock met à jour l'empreinte.
-  const synced = syncSubscriptionUnlock(sub.doc, { wishlistId: "alexs", userId: "camille" });
+  // Un déverrouillage vérifié contre l'ancienne empreinte ne met rien à jour.
+  const stale = syncSubscriptionUnlock(sub.doc, {
+    wishlistId: "alexs",
+    userId: "camille",
+    verifiedHash: "scrypt$read-secret",
+  });
+  assert.equal(isSubscriptionUnlocked(list, findSubscription(stale, "alexs", "camille")!), false);
+
+  // Après déverrouillage avec le nouveau mot de passe, syncSubscriptionUnlock met à jour l'empreinte.
+  const synced = syncSubscriptionUnlock(sub.doc, {
+    wishlistId: "alexs",
+    userId: "camille",
+    verifiedHash: "scrypt$new-secret",
+  });
   const updatedSub = findSubscription(synced, "alexs", "camille")!;
   assert.equal(isSubscriptionUnlocked(list, updatedSub), true);
 });

@@ -14,7 +14,7 @@ import {
   syncSubscriptionUnlock,
   unsubscribeWishlist,
 } from "../../domain/subscription";
-import type { Reservation, Subscription, Wishlist } from "../../domain/types";
+import type { Reservation, Wishlist } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import {
   toPublicListView,
@@ -53,9 +53,16 @@ export async function unlockPublicList(
   if (!wishlist) return { ok: false, error: "listMissing" };
   if (!(await verifyReadPassword(wishlist, input.password))) return { ok: false, error: "badPassword" };
   const account = publicAccount(ctx);
-  if (account && findSubscription(doc, wishlist.id, account.id)) {
+  const subscription = account ? findSubscription(doc, wishlist.id, account.id) : null;
+  if (account && subscription && subscription.readPasswordHash !== wishlist.readPasswordHash) {
+    // L'empreinte vérifiée est celle de `wishlist` : si le mot de passe change pendant la vérification,
+    // l'abonnement ne mémorise pas la nouvelle empreinte.
     await updateDocument((current) => ({
-      doc: syncSubscriptionUnlock(current, { wishlistId: wishlist.id, userId: account.id }),
+      doc: syncSubscriptionUnlock(current, {
+        wishlistId: wishlist.id,
+        userId: account.id,
+        verifiedHash: wishlist.readPasswordHash,
+      }),
       result: undefined,
     }));
   }
@@ -113,26 +120,34 @@ export async function subscribeToList(
   }
 
   type Saved =
-    | { ok: true; subscription: Subscription; replayed: boolean }
+    | { ok: true; wishlist: Wishlist; subscription: SubscribedListSummaryView; replayed: boolean }
     | { ok: false; error: string };
   const saved = await updateDocument<Saved>((current) => {
-    const result = subscribeWishlist(current, { wishlistId: wishlist.id, userId: active.user.id });
+    // L'accès a été vérifié contre `wishlist.readPasswordHash` : le domaine refuse si elle a changé depuis.
+    const result = subscribeWishlist(current, {
+      wishlistId: wishlist.id,
+      userId: active.user.id,
+      verifiedHash: wishlist.readPasswordHash,
+    });
     if (!result.ok) return { doc: current, result };
+    const freshList = result.doc.wishlists.find((entry) => entry.id === wishlist.id)!;
     return {
       doc: result.doc,
-      result: { ok: true, subscription: result.subscription, replayed: result.replayed },
+      result: {
+        ok: true,
+        wishlist: freshList,
+        replayed: result.replayed,
+        subscription: toSubscribedListSummary(result.doc, freshList, result.subscription, ctx.locale, ctx.origin),
+      },
     };
   });
-  if (!saved.ok) return saved;
-  const freshDoc = await readDocument();
-  const freshList = freshDoc.wishlists.find((entry) => entry.id === wishlist.id) ?? wishlist;
-  return {
-    ok: true,
-    wishlist: freshList,
-    replayed: saved.replayed,
-    unlockedWithPassword,
-    subscription: toSubscribedListSummary(freshDoc, freshList, saved.subscription, ctx.locale, ctx.origin),
-  };
+  if (!saved.ok) {
+    if (saved.error === "readPasswordChanged") {
+      return { ok: false, error: "readPasswordRequired", title: wishlist.title, readToken: wishlist.readToken };
+    }
+    return saved;
+  }
+  return { ...saved, unlockedWithPassword };
 }
 
 export async function unsubscribeFromList(

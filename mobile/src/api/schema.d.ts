@@ -2490,6 +2490,11 @@ export interface components {
                 newOwnerName: string | null;
             }[];
             reservationsKept: number;
+            /** @description Depuis 1.7.0. Listes publiques suivies sans en être membre, qui ne seront plus suivies. */
+            followedLists?: {
+                id: string;
+                title: string;
+            }[];
         };
         AccountExport: {
             /** @constant */
