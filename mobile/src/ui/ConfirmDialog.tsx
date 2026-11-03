@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import { Modal, Pressable, View } from "react-native";
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from "react-native";
 
 import { tokens } from "@/theme/tokens";
 
 import { Button } from "./Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./Card";
 
-/** Boîte de dialogue modale centrée sur fond assombri. */
+/** Boîte de dialogue modale centrée sur fond assombri ; avec des champs, elle reste visible au-dessus du clavier. */
 export function ModalCard({
   visible,
   title,
@@ -24,23 +24,30 @@ export function ModalCard({
 }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
-      <View style={{ flex: 1, justifyContent: "center", padding: tokens.space[4] }}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={dismissLabel}
-          onPress={onDismiss}
-          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.35)" }}
-        />
-        <View accessibilityViewIsModal>
-          <Card>
-            <CardHeader>
-              <CardTitle>{title}</CardTitle>
-              {description ? <CardDescription>{description}</CardDescription> : null}
-            </CardHeader>
-            <CardContent>{children}</CardContent>
-          </Card>
-        </View>
-      </View>
+      {/* Avec des champs (réservation), le clavier ne doit pas couvrir la carte : elle remonte (iOS) et défile. */}
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
+        <ScrollView
+          style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: tokens.space[4] }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={dismissLabel}
+            onPress={onDismiss}
+            style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+          />
+          <View accessibilityViewIsModal>
+            <Card>
+              <CardHeader>
+                <CardTitle>{title}</CardTitle>
+                {description ? <CardDescription>{description}</CardDescription> : null}
+              </CardHeader>
+              <CardContent>{children}</CardContent>
+            </Card>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

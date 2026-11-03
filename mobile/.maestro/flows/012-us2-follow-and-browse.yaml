@@ -37,6 +37,10 @@ tags:
     visible:
       id: shared.reserve-submit
     timeout: 10000
+# Clavier ouvert sur le message : le bouton de confirmation doit rester visible au-dessus.
+- tapOn:
+    id: shared.reserve-note
+- inputText: "Pour Noël"
 - tapOn:
     id: shared.reserve-submit
 - extendedWaitUntil:

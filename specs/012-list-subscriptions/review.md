@@ -99,4 +99,8 @@ Aucun point.
 - [x] src/domain/subscription.ts — `extractReadToken` refusait des liens valides : sans schéma, schéma en majuscules, schéma de l'app, sous-pages de la liste.
 - [x] mobile/src/data/subscriptions.ts — « Ne plus suivre » effaçait la copie SQLite mais pas celle en mémoire (`forgetPublicList`).
 
-Restent ouverts : ordre des idées à priorité égale différent du site, clavier sur la fenêtre de réservation (iOS), écran « liste suivie » en doublon de la vue invité, logique « abonnements hors listes dont on est membre » écrite trois fois, champs `subscribed` / `isMember` / `unlockedWithPassword` non lus, un seul commit pour les trois stories.
+- [x] src/domain/filters.ts — À priorité égale, l'app triait par nom alors que le site garde l'ordre du propriétaire. `filterAndSortPublicItems` ne compare plus que la priorité (tri stable sur l'ordre rendu par l'API).
+- [x] mobile/src/ui/ConfirmDialog.tsx — Sur iOS, le clavier couvrait le message et le bouton de la fenêtre de réservation. `ModalCard` remonte avec le clavier et défile ; le parcours Maestro 012-us2 saisit un message avant de confirmer.
+- [x] Nettoyage : `followedListsOf` remplace quatre copies (accueil, `GET /lists`, export, aperçu de suppression), `viewerRelation` est partagé par la page publique et l'API, `POST /subscriptions` n'extrait plus le jeton deux fois, `subscribeToList` ne rend plus de champs que personne ne lit.
+
+Restent ouverts : écran « liste suivie » en doublon de la vue invité (`subscribed` et `isMember` de `PublicList` lui serviront), un seul commit pour les trois stories.

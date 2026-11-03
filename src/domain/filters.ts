@@ -75,9 +75,13 @@ export function matchesBudget(cents: number | null, budget: BudgetId): boolean {
   return cents > 10000;
 }
 
-/** Filtre et tri d'une liste d'idées publiques (site et app mobile). */
+/**
+ * Filtre et tri des idées d'une liste publique telles que l'API les rend (app mobile).
+ * L'API les rend déjà dans l'ordre du propriétaire (`sortOrder`) : le tri, stable, ne compare que la
+ * priorité, pour garder cet ordre à priorité égale comme `sortByPriority` sur le site.
+ */
 export function filterAndSortPublicItems<
-  T extends { id: string; name: string; personId: string; priceCents: number | null; priority: string | null },
+  T extends { personId: string; priceCents: number | null; priority: string | null },
 >(items: readonly T[], personId: string | null, budget: BudgetId | null): T[] {
   return items
     .filter(
@@ -85,11 +89,7 @@ export function filterAndSortPublicItems<
         (!personId || item.personId === personId) &&
         (!budget || matchesBudget(item.priceCents, budget)),
     )
-    .sort((a, b) => {
-      const pa = parsePriority(a.priority) ?? 0;
-      const pb = parsePriority(b.priority) ?? 0;
-      return pb - pa || a.name.localeCompare(b.name) || a.id.localeCompare(b.id);
-    });
+    .sort((a, b) => (parsePriority(b.priority) ?? 0) - (parsePriority(a.priority) ?? 0));
 }
 
 export function applyPerson(items: Item[], personId: string | null): Item[] {
