@@ -74,6 +74,7 @@ export function deleteAccount(
   }
   next.subscriptions = next.subscriptions.filter((s) => s.userId !== userId);
   next.apiSessions = next.apiSessions.filter((s) => s.userId !== userId);
+  next.apiKeys = next.apiKeys.filter((k) => k.userId !== userId);
   next.passwordResets = next.passwordResets.filter((r) => r.userId !== userId);
   next.emailConfirmations = next.emailConfirmations.filter((c) => c.userId !== userId);
   next.users = next.users.filter((u) => u.id !== userId);
@@ -140,6 +141,7 @@ export type AccountExport = {
 /**
  * Données du compte, champ par champ (liste blanche) : un champ ajouté plus tard au store
  * ne part pas sans être nommé ici. Ni secret, ni e-mail ou identifiant d'un autre compte.
+ * Les accès (sessions de l'app, clés d'API) n'en font pas partie : ils se voient et se révoquent sur la page Compte.
  */
 export function exportAccount(
   doc: Database,

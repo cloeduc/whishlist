@@ -5,8 +5,10 @@ import { origin as siteOrigin } from "../../auth/current";
 import { normalizeAppOrigin } from "../../auth/origin";
 import { clientIp, isRateLimitError } from "../rate-limit";
 import { apiStatusFor, publicErrorCode } from "./errors";
+import { usesApiKey } from "./auth";
 
-const MAX_BODY_BYTES = 64 * 1024;
+/** Taille maximale d'un corps de requête (API et serveur MCP). */
+export const MAX_BODY_BYTES = 64 * 1024;
 
 const ALLOWED_METHODS = "GET, POST, PUT, PATCH, DELETE, OPTIONS";
 const ALLOWED_HEADERS = "Authorization, Content-Type, Accept-Language, X-Read-Unlock, X-Reservation-Claims";
@@ -82,6 +84,7 @@ export async function apiError(
   const message = await translateErrorFor(locale, publicCode);
   return apiJson({ error: { code: publicCode, message }, ...extra }, apiStatusFor(publicCode), cors);
 }
+
 
 export type JsonBody = Record<string, unknown>;
 
@@ -166,11 +169,15 @@ export function withApi<P = Record<string, never>>(
 ): (req: NextRequest, ctx: HandlerContext<P>) => Promise<Response> {
   return async (req, ctx) => {
     const locale = apiLocaleFrom(req.headers.get("accept-language"));
+    // Une clé d'API n'ouvre que le serveur MCP (`/api/mcp`) : l'API JSON reste aux jetons de session de l'app,
+    // pour qu'une route ajoutée plus tard ne soit jamais ouverte à une clé par oubli.
+    if (usesApiKey(req)) return apiError("apiKeyNotAllowed", locale);
     const { decision, cors } = await decide(req);
     if (decision === "deny") return apiError("originNotAllowed", locale);
     try {
       const params = await ctx.params;
-      return await handler({ req, locale, ip: await clientIp(), cors }, params);
+      const api = { req, locale, ip: await clientIp(), cors };
+      return await handler(api, params);
     } catch (error) {
       if (isRateLimitError(error)) return apiError("rateLimited", locale, cors);
       console.error("API error", req.method, redactedApiPath(req.nextUrl.pathname), error);
