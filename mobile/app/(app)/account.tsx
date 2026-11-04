@@ -30,10 +30,10 @@ import { Text } from "@/ui/Text";
 import { CONTACT_EMAIL } from "../../../src/site/contact";
 
 /**
- * Mon compte, d'après `11-compte.png`, ouvert par le bouton du haut de « Mes listes » :
- * nom affiché, mot de passe, puis tout en bas (FR-001 de la 006) : données et informations,
- * déconnexion, et suppression du compte en dernier. Profil, mot de passe et données s'ouvrent repliés (009).
- * Hors ligne, seuls le nom, les pages légales et la déconnexion restent utilisables.
+ * My account, from `11-compte.png`, opened by the top button of « Mes listes »:
+ * display name, password, then at the very bottom (FR-001 of 006): data and information,
+ * sign-out, and account deletion last. Profile, password and data open collapsed (009).
+ * Offline, only the name, the legal pages and sign-out remain usable.
  */
 export default function Account() {
   const { t } = useTranslation(["auth", "common", "content", "mobile"]);
@@ -60,7 +60,7 @@ export default function Account() {
   );
 
   function logout() {
-    // Des changements jamais envoyés seraient perdus : on demande d'abord (FR-029c).
+    // Changes never sent would be lost: ask first (FR-029c).
     if (pendingCount > 0) setConfirmLogout(true);
     else void signOut();
   }

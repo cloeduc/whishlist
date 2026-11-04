@@ -2,9 +2,9 @@ import { sql } from "drizzle-orm";
 import { check, index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 import type { Role, ViewKind, WishlistTheme } from "../domain/types";
 
-// Une table par collection de `Database`, mêmes noms de champs (colonnes en snake_case).
-// Pas de ON DELETE CASCADE : le domaine supprime lui-même les lignes liées, une clé étrangère
-// qui échoue au COMMIT révèle un oubli au lieu de le réparer en silence.
+// One table per `Database` collection, same field names (columns in snake_case).
+// No ON DELETE CASCADE: the domain deletes the linked rows itself, a foreign key
+// that fails at COMMIT reveals an oversight instead of silently fixing it.
 
 export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
@@ -144,7 +144,7 @@ export const reservations = sqliteTable(
     wishlistId: text("wishlist_id")
       .notNull()
       .references(() => wishlists.id),
-    // Unique : deux personnes ne peuvent pas confirmer la même idée (principe III).
+    // Unique: two people cannot confirm the same idea (principle III).
     itemId: text("item_id")
       .notNull()
       .unique()
@@ -222,7 +222,7 @@ export const apiKeys = sqliteTable(
   (table) => [index("api_keys_user_id").on(table.userId)],
 );
 
-/** Clés techniques : `legacy_import` = `imported:<ISO>` ou `none`. */
+/** Technical keys: `legacy_import` = `imported:<ISO>` or `none`. */
 export const meta = sqliteTable("meta", {
   key: text("key").primaryKey(),
   value: text("value").notNull(),

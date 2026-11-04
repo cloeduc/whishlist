@@ -15,7 +15,7 @@ import { PendingBadge } from "@/ui/PendingBadge";
 import { RejectedAlert } from "@/ui/RejectedAlert";
 import { Text } from "@/ui/Text";
 
-/** Onglet Archives, d'après `07-liste-archives.png` : remettre dans la liste, supprimer définitivement (FR-013). */
+/** Archives tab, from `07-liste-archives.png`: put back in the list, delete permanently (FR-013). */
 export default function Archives() {
   const { t } = useTranslation("list");
   const [toDelete, setToDelete] = useState<ViewItem | null>(null);

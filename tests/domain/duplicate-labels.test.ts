@@ -8,7 +8,7 @@ import { ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtures";
 
 before(ensurePasswordHash);
 
-/** Deux listes d'Alex : « Nathan » et « Livres » dans w1, rien dans w2. */
+/** Two of Alex's lists: « Nathan » and « Livres » in w1, nothing in w2. */
 function lists(): Database {
   let doc = emptyDatabase();
   doc.users.push({ id: "alex", email: "alex@example.test", passwordHash: "x", displayName: "Alex", createdAt: "2026-01-01T00:00:00.000Z", emailVerifiedAt: "2026-01-01T00:00:00.000Z", mustChangePassword: false });
@@ -24,7 +24,7 @@ function lists(): Database {
 
 const inW1 = { wishlistId: "w1", actorId: "alex" };
 
-test("ajouter un « qui » ou une catégorie déjà là : refusé, sans tenir compte de la casse ni des blancs", () => {
+test("adding a « qui » or a category already there: refused, ignoring case and whitespace", () => {
   const doc = lists();
   for (const label of ["Nathan", "nathan", "  NATHAN "]) {
     assert.deepEqual(addPerson(doc, { ...inW1, label }), { ok: false, error: "personExists" });
@@ -34,16 +34,16 @@ test("ajouter un « qui » ou une catégorie déjà là : refusé, sans tenir co
   }
 });
 
-test("le même nom dans une autre liste, ou un nom proche, reste permis", () => {
+test("the same name in another list, or a similar name, is still allowed", () => {
   const doc = lists();
   assert.ok(addPerson(doc, { wishlistId: "w2", actorId: "alex", label: "Nathan" }).ok);
   assert.ok(addType(doc, { wishlistId: "w2", actorId: "alex", label: "Livres" }).ok);
   assert.ok(addPerson(doc, { ...inW1, label: "Nathan et Wilh" }).ok);
-  // Une catégorie et un « qui » peuvent porter le même nom : ce ne sont pas les mêmes menus.
+  // A category and a « qui » can have the same name: they are not the same menus.
   assert.ok(addType(doc, { ...inW1, label: "Nathan" }).ok);
 });
 
-test("renommer vers un nom déjà pris : refusé ; changer la casse de son propre nom : permis", () => {
+test("renaming to a taken name: refused; changing the case of one's own name: allowed", () => {
   const doc = lists();
   assert.deepEqual(renamePerson(doc, { ...inW1, personId: "wilh", label: "nathan" }), { ok: false, error: "personExists" });
   assert.deepEqual(renameType(doc, { ...inW1, typeId: "games", label: "LIVRES" }), { ok: false, error: "typeExists" });
@@ -54,13 +54,13 @@ test("renommer vers un nom déjà pris : refusé ; changer la casse de son propr
   assert.ok(renameType(doc, { ...inW1, typeId: "books", label: "livres" }).ok);
 });
 
-test("renommer une entrée absente vers un nom pris : l'absence est signalée d'abord", () => {
+test("renaming a missing entry to a taken name: the missing entry is reported first", () => {
   const doc = lists();
   assert.deepEqual(renamePerson(doc, { ...inW1, personId: "absent", label: "Nathan" }), { ok: false, error: "personMissing" });
   assert.deepEqual(renameType(doc, { ...inW1, typeId: "absent", label: "Livres" }), { ok: false, error: "typeMissing" });
 });
 
-test("la comparaison ne dépend pas de la langue du serveur : « I » et « i » se valent", () => {
+test("the comparison does not depend on the server's language: « I » and « i » are equal", () => {
   const doc = lists();
   const added = addPerson(doc, { ...inW1, label: "Iris" });
   assert.ok(added.ok);
@@ -68,7 +68,7 @@ test("la comparaison ne dépend pas de la langue du serveur : « I » et « i »
   assert.deepEqual(addPerson(added.doc, { ...inW1, label: "iris" }), { ok: false, error: "personExists" });
 });
 
-test("commande (site et API) : le refus est rendu tel quel, rien n'est ajouté", async () => {
+test("command (site and API): the refusal is returned as is, nothing is added", async () => {
   const doc = lists();
   await withStore(doc, async () => {
     const alex = ctx(doc.users[0]!);

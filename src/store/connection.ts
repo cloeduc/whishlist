@@ -11,21 +11,21 @@ import * as schema from "./schema";
 
 export interface Store {
   file: string;
-  /** Connexion des écritures : une transaction à la fois, par la file `queue`. */
+  /** Write connection: one transaction at a time, through the `queue`. */
   writer: Database.Database;
   db: StoreDb;
-  /** Connexion des lectures : jamais l'état non validé d'une écriture en cours. */
+  /** Read connection: never the uncommitted state of a write in progress. */
   reader: Database.Database;
   readDb: StoreDb;
   queue: Promise<unknown>;
 }
 
-/** Chemin de l'ancien fichier JSON (`WISHLIST_DATA_PATH`, défaut `data/wishlist.json`). */
+/** Path of the old JSON file (`WISHLIST_DATA_PATH`, default `data/wishlist.json`). */
 export function dataFilePath(): string {
   return process.env.WISHLIST_DATA_PATH ?? path.join(process.cwd(), "data", "wishlist.json");
 }
 
-/** La base est à côté de l'ancien fichier, en `.db` ; un chemin en `.db` est pris tel quel. */
+/** The database sits next to the old file, as `.db`; a `.db` path is taken as is. */
 export function databaseFilePath(dataPath = dataFilePath()): string {
   if (dataPath.endsWith(".db")) return dataPath;
   return dataPath.endsWith(".json") ? `${dataPath.slice(0, -".json".length)}.db` : `${dataPath}.db`;
@@ -35,7 +35,7 @@ function legacyFilePath(dataPath: string): string | null {
   return dataPath.endsWith(".db") ? null : dataPath;
 }
 
-// Résolu au chargement du module : certains tests changent ensuite de dossier courant (`withStore`).
+// Resolved when the module loads: some tests change the current directory afterwards (`withStore`).
 const MIGRATIONS_FOLDER = path.join(/*turbopackIgnore: true*/ process.cwd(), "drizzle");
 
 function migrationsFolder(): string {
@@ -50,7 +50,7 @@ function restrictModes(file: string): void {
     try {
       chmodSync(`${file}${suffix}`, 0o600);
     } catch {
-      // fichier absent, Windows / FS sans chmod — ignore
+      // file missing, Windows / FS without chmod — ignore
     }
   }
 }
@@ -62,8 +62,8 @@ function removeDatabaseFiles(file: string): void {
 const BUSY_TIMEOUT_MS = 5000;
 
 /**
- * Passage en WAL. Sur une base neuve qu'un autre processus est en train d'ouvrir, SQLite répond
- * SQLITE_BUSY sans passer par `busy_timeout` : on réessaie donc nous-mêmes, jusqu'au même délai.
+ * Switch to WAL. On a new database that another process is opening, SQLite answers
+ * SQLITE_BUSY without going through `busy_timeout`: so we retry ourselves, up to the same delay.
  */
 function enableWal(connection: Database.Database): void {
   const deadline = Date.now() + BUSY_TIMEOUT_MS;
@@ -81,7 +81,7 @@ function enableWal(connection: Database.Database): void {
 
 function connect(file: string): Database.Database {
   const connection = new Database(file);
-  // En premier : un autre processus peut tenir la base (passage en WAL, migration, import).
+  // First: another process may be holding the database (WAL switch, migration, import).
   connection.pragma(`busy_timeout = ${BUSY_TIMEOUT_MS}`);
   enableWal(connection);
   connection.pragma("synchronous = NORMAL");
@@ -90,9 +90,9 @@ function connect(file: string): Database.Database {
 }
 
 /**
- * Migrations puis import de l'ancien fichier, dans une seule transaction BEGIN IMMEDIATE :
- * un seul processus applique une migration ou importe ; l'import est tout ou rien.
- * (Même table de suivi que le migrateur de Drizzle, qui lit son état hors transaction.)
+ * Migrations then import of the old file, in a single BEGIN IMMEDIATE transaction:
+ * only one process applies a migration or imports; the import is all or nothing.
+ * (Same tracking table as Drizzle's migrator, which reads its state outside a transaction.)
  */
 function migrateAndImport(connection: Database.Database, db: StoreDb, legacyFile: string | null): void {
   const migrations = readMigrationFiles({ migrationsFolder: migrationsFolder() });
@@ -127,8 +127,8 @@ function migrateAndImport(connection: Database.Database, db: StoreDb, legacyFile
     connection.exec("COMMIT");
     if (imported) {
       console.info(
-        `[store] ancien fichier importé : ${imported.users.length} comptes, ${imported.wishlists.length} listes, ` +
-          `${imported.items.length} idées, ${imported.reservations.length} réservations`,
+        `[store] old file imported: ${imported.users.length} accounts, ${imported.wishlists.length} lists, ` +
+          `${imported.items.length} ideas, ${imported.reservations.length} reservations`,
       );
     }
   } catch (error) {
@@ -138,10 +138,10 @@ function migrateAndImport(connection: Database.Database, db: StoreDb, legacyFile
 }
 
 /**
- * Ouvre la base une fois par chemin et par processus (cache sur globalThis pour `next dev`) :
- * pragmas, migrations de `drizzle/`, import de l'ancien fichier si ce n'est pas déjà fait.
- * Lève `LegacyImportError` si l'ancien fichier est illisible ou incohérent ; une base créée par
- * cet appel est alors supprimée.
+ * Opens the database once per path and per process (cached on globalThis for `next dev`):
+ * pragmas, `drizzle/` migrations, import of the old file if not done yet.
+ * Throws `LegacyImportError` if the old file is unreadable or inconsistent; a database created by
+ * this call is then deleted.
  */
 export function openStore(dataPath = dataFilePath()): Store {
   const file = databaseFilePath(dataPath);
@@ -171,7 +171,7 @@ export function openStore(dataPath = dataFilePath()): Store {
   }
 }
 
-/** Ferme les connexions (tests, fin de script). Sans argument : toutes les bases ouvertes. */
+/** Closes the connections (tests, end of script). Without argument: all open databases. */
 export function closeStore(dataPath?: string): void {
   const files = dataPath === undefined ? [...stores.keys()] : [databaseFilePath(dataPath)];
   for (const file of files) {
@@ -183,7 +183,7 @@ export function closeStore(dataPath?: string): void {
   }
 }
 
-/** Une transaction d'écriture à la fois par base, dans l'ordre d'appel. */
+/** One write transaction at a time per database, in call order. */
 export function enqueue<T>(store: Store, run: () => Promise<T>): Promise<T> {
   const next = store.queue.then(run, run);
   store.queue = next.catch(() => undefined);
@@ -191,9 +191,9 @@ export function enqueue<T>(store: Store, run: () => Promise<T>): Promise<T> {
 }
 
 /**
- * BEGIN IMMEDIATE (attend un autre processus jusqu'à `busy_timeout`), clés étrangères vérifiées au COMMIT,
- * ROLLBACK si `run` lève. `run` peut être asynchrone : la file garantit que personne d'autre n'utilise
- * la connexion d'écriture pendant ce temps.
+ * BEGIN IMMEDIATE (waits for another process up to `busy_timeout`), foreign keys checked at COMMIT,
+ * ROLLBACK if `run` throws. `run` can be async: the queue ensures nobody else uses
+ * the write connection meanwhile.
  */
 export function writeTransaction<T>(store: Store, run: (db: StoreDb) => Promise<T>): Promise<T> {
   return enqueue(store, async () => {
@@ -210,7 +210,7 @@ export function writeTransaction<T>(store: Store, run: (db: StoreDb) => Promise<
   });
 }
 
-/** Instantané cohérent sur la connexion de lecture, en un seul tour synchrone. */
+/** Consistent snapshot on the read connection, in a single synchronous pass. */
 export function readTransaction<T>(store: Store, run: (db: StoreDb) => T): T {
   store.reader.exec("BEGIN");
   try {
@@ -220,7 +220,7 @@ export function readTransaction<T>(store: Store, run: (db: StoreDb) => T): T {
   }
 }
 
-/** Lecture seule d'un fichier de base, sans migration ni import (contrôle, sauvegarde, outils). */
+/** Read-only access to a database file, without migration or import (check, backup, tools). */
 export function readDatabaseFile(file: string): Doc {
   const connection = new Database(file, { readonly: true, fileMustExist: true });
   try {

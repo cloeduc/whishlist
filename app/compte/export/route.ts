@@ -8,7 +8,7 @@ import { isRateLimitError } from "@/src/server/rate-limit";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Même document que `GET /api/v1/me/export`, avec le cookie de session du site. */
+/** Same document as `GET /api/v1/me/export`, with the site's session cookie. */
 export async function GET() {
   const ctx = await actionContext();
   const back = (path: string) => NextResponse.redirect(new URL(withLocale(ctx.locale, path), ctx.origin), 303);

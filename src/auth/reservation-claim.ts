@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { cookieSecure } from "./current";
 import { sessionSecret } from "./session";
 
-const TTL_SEC = 60 * 60 * 24 * 90; // 90 jours
+const TTL_SEC = 60 * 60 * 24 * 90; // 90 days
 
 function cookieName(readToken: string): string {
   const digest = createHmac("sha256", "wl-res-claim").update(readToken).digest("base64url").slice(0, 16);
@@ -36,12 +36,12 @@ function parseClaims(raw: string | undefined, readToken: string, secret: string,
   return idsCsv.split(",").filter(Boolean);
 }
 
-/** Claims lus par requête au plus (en-tête `X-Reservation-Claims` de l'API). */
+/** Maximum claims read per request (API `X-Reservation-Claims` header). */
 const MAX_CLAIMS = 50;
 
 /**
- * Preuve d'une réservation pour un client sans cookie : `iat.reservationId.mac`.
- * Même format et même durée que le cookie, avec un seul id.
+ * Proof of a reservation for a client without cookies: `iat.reservationId.mac`.
+ * Same format and same lifetime as the cookie, with a single id.
  */
 export function signReservationClaim(
   readToken: string,
@@ -53,7 +53,7 @@ export function signReservationClaim(
   return `${iat}.${reservationId}.${macClaims(readToken, iat, reservationId, secret)}`;
 }
 
-/** Ids des réservations prouvées par ces claims (les autres sont ignorés). */
+/** Ids of the reservations proven by these claims (the others are ignored). */
 export function verifyReservationClaims(
   readToken: string,
   claims: readonly string[],
@@ -68,7 +68,7 @@ export function verifyReservationClaims(
   return ids;
 }
 
-/** Enregistre une réservation comme « mienne » dans ce navigateur. */
+/** Records a reservation as mine in this browser. */
 export async function grantReservationClaim(readToken: string, reservationId: string): Promise<void> {
   const secret = sessionSecret();
   if (!secret || !reservationId) return;

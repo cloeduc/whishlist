@@ -5,14 +5,14 @@ import { deleteOwnAccount, previewOwnDeletion } from "@/src/server/commands/acco
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Ce que ferait la suppression du compte, sans rien changer. */
+/** What deleting the account would do, without changing anything. */
 export const GET = withApi(async (api) => {
   const result = await previewOwnDeletion(await commandContext(api));
   if (!result.ok) return apiError(result.error, api.locale, api.cors);
   return apiJson(result.preview, 200, api.cors);
 });
 
-/** Supprime le compte connecté ; le jeton de cette requête ne vaut plus rien ensuite. */
+/** Deletes the signed-in account; this request's token is worthless afterwards. */
 export const POST = withApi(async (api) => {
   const body = await readJsonBody(api.req);
   if (!body.ok) return apiError(body.error, api.locale, api.cors);

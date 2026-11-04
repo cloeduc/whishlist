@@ -16,9 +16,9 @@ import { NetworkNote } from "@/ui/NetworkNote";
 const DEAD_LINK = new Set(["resetLinkInvalid", "resetLinkExpired"]);
 
 /**
- * Lien de réinitialisation ouvert dans l'app (011, R7) : même formulaire que `/reinitialiser/{token}`.
- * Sans personne de connecté, le serveur ouvre aussi une session et l'app va aux listes ; connecté à un
- * autre compte, la session de l'app ne change pas. La règle de longueur est celle du serveur.
+ * Reset link opened in the app (011, R7): same form as `/reinitialiser/{token}`.
+ * With nobody signed in, the server also opens a session and the app goes to the lists; signed in to
+ * another account, the app's session does not change. The length rule is the server's.
  */
 export default function ResetPasswordLink() {
   const { t } = useTranslation(["auth", "mobile"]);

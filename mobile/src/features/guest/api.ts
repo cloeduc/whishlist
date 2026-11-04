@@ -3,9 +3,9 @@ import { api, ApiError, done, ok, type Schemas } from "@/api/client";
 import { claimsFor, forgetReservation, forgetUnlock, saveClaim, saveUnlock, unlockTokenFor } from "./storage";
 
 /**
- * Routes publiques d'une liste pour la vue invité (011, US4), comme la page publique du site.
- * Toujours en ligne : une réservation ne passe jamais par la file hors ligne (FR-010b, principe III).
- * Le bearer, s'il y a une session, est ajouté par le client : la réservation est alors liée au compte.
+ * Public routes of a list for the guest view (011, US4), like the site public page.
+ * Always online: a reservation never goes through the offline write queue (FR-010b, principle III).
+ * The bearer, if there is a session, is added by the client: the reservation is then tied to the account.
  */
 async function proofHeaders(readToken: string, withClaims: boolean) {
   const [unlock, claims] = await Promise.all([unlockTokenFor(readToken), withClaims ? claimsFor(readToken) : []]);
@@ -23,7 +23,7 @@ export async function readGuestList(readToken: string): Promise<Schemas["PublicL
       }),
     );
   } catch (error) {
-    // Jeton refusé (mot de passe changé depuis) : on l'oublie, la liste redemande le mot de passe.
+    // Token refused (password changed since): forget it, the list asks for the password again.
     if (error instanceof ApiError && error.code === "readPasswordRequired") await forgetUnlock(readToken);
     throw error;
   }

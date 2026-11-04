@@ -26,7 +26,7 @@ async function submit(password: string) {
   await fireEvent.press(screen.getByTestId("reset-password.submit"));
 }
 
-test("sans session : le nouveau mot de passe connecte et ouvre les listes", async () => {
+test("without a session: the new password signs in and opens the lists", async () => {
   let body: Record<string, unknown> = {};
   fakeFetch({
     "POST /auth/password-reset/confirm": async (request) => {
@@ -42,7 +42,7 @@ test("sans session : le nouveau mot de passe connecte et ouvre les listes", asyn
   expect(router.replace).toHaveBeenCalledWith("/");
 });
 
-test("connectée à un autre compte : pas de session demandée, la session de l'app reste", async () => {
+test("signed in to another account: no session requested, the app's session stays", async () => {
   await signIn({ token: "mine", expiresAt: "2099-01-01T00:00:00.000Z", user: { ...me, id: "sam" } });
   let body: Record<string, unknown> = {};
   fakeFetch({
@@ -59,7 +59,7 @@ test("connectée à un autre compte : pas de session demandée, la session de l'
   expect(session.status === "signedIn" && session.user?.id).toBe("sam");
 });
 
-test("mot de passe trop court : le message du serveur, le formulaire reste", async () => {
+test("password too short: the server's message, the form stays", async () => {
   fakeFetch({
     "POST /auth/password-reset/confirm": () => json(400, { error: { code: "passwordTooShort", message: "x" } }),
   });
@@ -69,7 +69,7 @@ test("mot de passe trop court : le message du serveur, le formulaire reste", asy
   expect(screen.queryByTestId("reset-password.new-link")).toBeNull();
 });
 
-test("lien plus valide : le message, et « Demander un nouveau lien »", async () => {
+test("link no longer valid: the message, and « Demander un nouveau lien »", async () => {
   fakeFetch({
     "POST /auth/password-reset/confirm": () => json(400, { error: { code: "resetLinkExpired", message: "x" } }),
   });

@@ -14,7 +14,7 @@ function owners(doc: Database, wishlistId: string): string[] {
   return doc.memberships.filter((m) => m.wishlistId === wishlistId && m.role === "owner").map((m) => m.userId);
 }
 
-test("une liste dont elle est la seule membre disparaît avec tout son contenu", () => {
+test("a list whose only member is the deleted account disappears with all its content", () => {
   const doc = deleted();
   assert.equal(doc.wishlists.some((w) => w.id === "solo"), false);
   for (const key of ["memberships", "subscriptions", "types", "people", "views", "items", "reservations"] as const) {
@@ -26,14 +26,14 @@ test("une liste dont elle est la seule membre disparaît avec tout son contenu",
   }
 });
 
-test("une liste partagée dont elle est propriétaire passe au membre le plus ancien", () => {
+test("a shared list the account owns passes to the oldest member", () => {
   const doc = deleted();
   assert.ok(doc.wishlists.some((w) => w.id === "shared"));
   assert.deepEqual(owners(doc, "shared"), ["alex"]);
   assert.equal(doc.memberships.find((m) => m.wishlistId === "shared" && m.userId === "camille")?.role, "member");
 });
 
-test("à date d'arrivée égale, l'héritier est départagé par son identifiant", () => {
+test("with equal join dates, the heir is chosen by its identifier", () => {
   const doc = accountDoc();
   for (const m of doc.memberships) {
     if (m.wishlistId === "shared" && m.userId !== "lou") m.joinedAt = "2026-02-01T00:00:00.000Z";
@@ -41,7 +41,7 @@ test("à date d'arrivée égale, l'héritier est départagé par son identifiant
   assert.deepEqual(owners(deleted(doc), "shared"), ["alex"]);
 });
 
-test("une liste partagée dont elle est membre perd seulement son adhésion", () => {
+test("a shared list the account is a member of only loses its membership", () => {
   const doc = deleted();
   assert.deepEqual(
     doc.memberships.filter((m) => m.wishlistId === "alexs").map((m) => [m.userId, m.role]),
@@ -49,7 +49,7 @@ test("une liste partagée dont elle est membre perd seulement son adhésion", ()
   );
 });
 
-test("ses réservations sur les listes qui restent sont gardées, sans lien au compte", () => {
+test("the account's reservations on remaining lists are kept, unlinked from the account", () => {
   const doc = deleted();
   for (const id of ["r-alexs", "r-other"]) {
     const reservation = doc.reservations.find((r) => r.id === id);
@@ -61,13 +61,13 @@ test("ses réservations sur les listes qui restent sont gardées, sans lien au c
   assert.equal(doc.reservations.find((r) => r.id === "r-shared")?.userId, "camille");
 });
 
-test("ses connexions et liens de réinitialisation disparaissent, pas ceux des autres", () => {
+test("the account's sessions and reset links disappear, not those of others", () => {
   const doc = deleted();
   assert.deepEqual(doc.apiSessions.map((s) => s.userId), ["alex"]);
   assert.deepEqual(doc.passwordResets.map((r) => r.userId), ["alex"]);
 });
 
-test("plus rien ne référence le compte, et chaque liste restante a un seul propriétaire", () => {
+test("nothing references the account any more, and each remaining list has a single owner", () => {
   const doc = deleted();
   assert.equal(doc.users.some((u) => u.id === "lou"), false);
   assert.equal(JSON.stringify(doc).includes('"lou"'), false);
@@ -77,19 +77,19 @@ test("plus rien ne référence le compte, et chaque liste restante a un seul pro
   assert.deepEqual(doc.wishlists.map((w) => w.id), ["shared", "alexs", "other"]);
 });
 
-test("le document d'entrée n'est pas modifié", () => {
+test("the input document is not modified", () => {
   const doc = accountDoc();
   const before = JSON.stringify(doc);
   deleted(doc);
   assert.equal(JSON.stringify(doc), before);
 });
 
-test("un compte inexistant : accountMissing", () => {
+test("a missing account: accountMissing", () => {
   const doc = accountDoc();
   assert.deepEqual(deleteAccount(doc, { userId: "ghost" }), { ok: false, error: "accountMissing" });
 });
 
-test("l'aperçu annonce ce que fait la suppression", () => {
+test("the preview announces what the deletion does", () => {
   const doc = accountDoc();
   assert.deepEqual(previewAccountDeletion(doc, "lou"), {
     deletedLists: [{ id: "solo", title: "Anniversaire Lou" }],
@@ -98,14 +98,14 @@ test("l'aperçu annonce ce que fait la suppression", () => {
       { id: "alexs", title: "Envies d'Alex", newOwnerName: null },
     ],
     reservationsKept: 2,
-    // Seules les listes suivies sans en être membre sont annoncées.
+    // Only lists followed without being a member are announced.
     followedLists: [{ id: "other", title: "Liste de Camille" }],
   });
   const after = deleted(doc);
   assert.equal(after.reservations.filter((r) => ["r-alexs", "r-other"].includes(r.id)).length, 2);
 });
 
-test("l'aperçu ne compte pas une réservation sur une liste qui sera effacée", () => {
+test("the preview does not count a reservation on a list that will be erased", () => {
   const doc = accountDoc();
   doc.reservations.push({
     id: "r-own",
@@ -119,7 +119,7 @@ test("l'aperçu ne compte pas une réservation sur une liste qui sera effacée",
   assert.equal(previewAccountDeletion(doc, "lou").reservationsKept, 2);
 });
 
-test("ses demandes de confirmation d'adresse disparaissent avec le compte", () => {
+test("the account's email confirmation requests disappear with it", () => {
   const doc = accountDoc();
   for (const purpose of ["verify", "change"] as const) {
     doc.emailConfirmations.push({

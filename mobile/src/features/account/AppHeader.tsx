@@ -8,8 +8,8 @@ import { BrandHeader } from "@/ui/BrandHeader";
 import { Button } from "@/ui/Button";
 
 /**
- * Barre du haut de l'écran principal : l'en-tête du site (cadeau + nom du produit) et, à droite,
- * un bouton carré au style des boutons du site qui ouvre « Mon compte ».
+ * Top bar of the main screen: the site header (gift + product name) and, on the right,
+ * a square button styled like the site buttons that opens « Mon compte ».
  */
 export function AppHeader() {
   const { t } = useTranslation("common");

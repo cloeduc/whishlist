@@ -38,7 +38,7 @@ test("createItem sends a generated id and the price as typed", async () => {
 });
 
 test("a priceInvalid refusal comes back with its translated message", async () => {
-  // Le prix « 24,90 » passe le contrôle local ; on simule un refus du serveur.
+  // The price « 24,90 » passes the local check; we simulate a server rejection.
   fakeFetch({ "POST /lists/w/items": () => json(400, { error: { code: "priceInvalid", message: "x" } }), "GET /lists": () => json(200, { lists: [] }) });
   const result = await saveItem("w", input);
   expect(result).toMatchObject({ ok: false, error: "priceInvalid" });

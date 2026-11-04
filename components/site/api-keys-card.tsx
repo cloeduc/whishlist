@@ -17,8 +17,8 @@ import { createApiKeyAction, revokeApiKeyFormAction } from "@/src/server/actions
 export type ApiKeyRow = { id: string; name: string; hint: string; created: string; lastUsed: string | null };
 
 /**
- * Page Compte, « Clés d'API et assistants IA » : créer une clé (affichée une seule fois), voir et révoquer les
- * siennes, et l'adresse du serveur MCP à donner à un assistant.
+ * Account page, « Clés d'API et assistants IA »: create a key (shown only once), see and revoke one's
+ * own keys, and the MCP server address to give an assistant.
  */
 export function ApiKeysCard({ keys, mcpUrl, notice }: { keys: ApiKeyRow[]; mcpUrl: string; notice: string | null }) {
   const { t } = useTranslation(["auth", "errors"]);
@@ -26,8 +26,8 @@ export function ApiKeysCard({ keys, mcpUrl, notice }: { keys: ApiKeyRow[]; mcpUr
   const pathname = usePathname();
   const [name, setName] = useState("");
   const [created, setCreated] = useState<{ token: string; keyId: string; keysThen: ApiKeyRow[] } | null>(null);
-  // La clé créée reste affichée tant qu'elle existe : avant le rafraîchissement de la liste (`keysThen`), ou
-  // tant que sa ligne y est. Révoquée, elle disparaît avec sa ligne.
+  // The created key stays shown while it exists: before the list refresh (`keysThen`), or
+  // as long as its row is there. Once revoked, it disappears with its row.
   const token =
     created && (keys === created.keysThen || keys.some((key) => key.id === created.keyId)) ? created.token : null;
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export function ApiKeysCard({ keys, mcpUrl, notice }: { keys: ApiKeyRow[]; mcpUr
       }
       setCreated({ token: result.token, keyId: result.keyId, keysThen: keys });
       setName("");
-      // Un avis d'une action précédente (« clé révoquée ») ne vaut plus : on le retire de l'adresse.
+      // A notice from a previous action (« clé révoquée ») no longer applies: remove it from the URL.
       if (notice) router.replace(pathname, { scroll: false });
       else router.refresh();
     });

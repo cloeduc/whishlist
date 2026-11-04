@@ -1,9 +1,9 @@
 import { stripLocalePrefix } from "@/src/i18n/locale-path";
 
-/** Choix local du visiteur. Pas un cookie. */
+/** The visitor's local choice. Not a cookie. */
 export const ANALYTICS_OPTOUT_KEY = "wishlist-analytics-optout";
 
-/** Chemins dont l'adresse est une capacité ou une session. Jamais envoyés. */
+/** Paths whose address is a capability or a session. Never sent. */
 const PRIVATE_PREFIXES = [
   "/l",
   "/listes",
@@ -18,7 +18,7 @@ const PRIVATE_PREFIXES = [
   "/u",
 ] as const;
 
-/** Accepte un chemin ou une URL absolue. La requête et le fragment sont ignorés. */
+/** Accepts a path or an absolute URL. The query and the fragment are ignored. */
 export function analyticsTargetAllowed(value: string): boolean {
   try {
     return analyticsCollectAllowed(new URL(value, "https://analytics.invalid").pathname);
@@ -33,7 +33,7 @@ export function analyticsCollectAllowed(pathname: string): boolean {
   return !PRIVATE_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 
-/** Script inline, sans donnée d'instance. En cas de doute, n'envoie rien. */
+/** Inline script, with no instance data. When in doubt, sends nothing. */
 export function analyticsBeforeSendSource(): string {
   const key = JSON.stringify(ANALYTICS_OPTOUT_KEY);
   const prefixes = JSON.stringify(PRIVATE_PREFIXES);

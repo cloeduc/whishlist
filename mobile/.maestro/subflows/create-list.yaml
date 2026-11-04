@@ -1,5 +1,5 @@
-# Depuis « Mes listes » : nouvelle liste TITLE, première catégorie « Livres », pour « Alex ».
-# Attend l'écran de la liste.
+# From « Mes listes »: new list TITLE, first category « Livres », for « Alex ».
+# Waits for the list screen.
 appId: app.ohyoushouldnt.mobile
 ---
 - runFlow: fill-new-list.yaml

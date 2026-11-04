@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Backup quotidien de la base SQLite Oh, You Shouldn't!.
-# - Copie cohérente à chaud, faite dans le conteneur (scripts/db-backup.mjs), sans arrêter le service
-# - Copie datée mode 600, chiffrée AES si WHISHLIST_BACKUP_PASSPHRASE est set (openssl)
-# - Conserve WHISHLIST_BACKUP_KEEP jours (défaut 14), anciens backups JSON compris
-# - Un échec envoie une notification ntfy (deploy/notify.sh, si WHISHLIST_NTFY_TOPIC est set)
+# Daily backup of the Oh, You Shouldn't! SQLite database.
+# - Consistent hot copy, made inside the container (scripts/db-backup.mjs), without stopping the service
+# - Dated copy with mode 600, AES-encrypted if WHISHLIST_BACKUP_PASSPHRASE is set (openssl)
+# - Keeps WHISHLIST_BACKUP_KEEP days (default 14), old JSON backups included
+# - A failure sends an ntfy notification (deploy/notify.sh, if WHISHLIST_NTFY_TOPIC is set)
 set -euo pipefail
 
 DATA_DIR="${WHISHLIST_DATA_DIR:-$HOME/webserver/data/whishlist}"
@@ -15,14 +15,14 @@ TMP_NAME=".backup-$STAMP.db"
 SRC="$DATA_DIR/$TMP_NAME"
 
 NOTIFY="$(cd "$(dirname "$0")" && pwd)/notify.sh"
-step="vérification de la base"
+step="database check"
 
 on_exit() {
   local status=$?
   rm -f "$SRC"
   if [[ $status -ne 0 ]]; then
-    bash "$NOTIFY" "Sauvegarde whishlist en échec" \
-      "Étape : $step (code $status), $(hostname) à $(date '+%d/%m %H:%M'). Détail dans le cron.log des sauvegardes." high
+    bash "$NOTIFY" "whishlist backup failed" \
+      "Step: $step (code $status), $(hostname) at $(date '+%d/%m %H:%M'). Details in the backups cron.log." high
   fi
   exit "$status"
 }
@@ -33,10 +33,10 @@ if [[ ! -f "$DATA_DIR/wishlist.db" ]]; then
   exit 1
 fi
 
-step="copie à chaud dans le conteneur $CONTAINER"
+step="hot copy in container $CONTAINER"
 docker exec "$CONTAINER" node scripts/db-backup.mjs "/data/$TMP_NAME"
 
-step="chiffrement et copie vers $BACKUP_ROOT"
+step="encryption and copy to $BACKUP_ROOT"
 
 mkdir -p "$BACKUP_ROOT"
 chmod 700 "$BACKUP_ROOT"
@@ -55,8 +55,8 @@ else
   echo "plain backup: $OUT (set WHISHLIST_BACKUP_PASSPHRASE to encrypt)"
 fi
 
-# Rétention
-step="rétention"
+# Retention
+step="retention"
 find "$BACKUP_ROOT" -type f \( -name 'wishlist-*.json' -o -name 'wishlist-*.json.enc' \
   -o -name 'wishlist-*.db' -o -name 'wishlist-*.db.enc' \) -mtime +"$KEEP" -delete
 

@@ -7,7 +7,7 @@ import { apiDoc, TEST_SECRET } from "./helpers/api-fixtures";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const NOW = Date.parse("2026-10-28T12:00:00.000Z");
 
-test("un claim de réservation est accepté pour sa liste seulement", () => {
+test("a reservation claim is accepted for its list only", () => {
   const claim = signReservationClaim("rt", "r1", TEST_SECRET, NOW);
   assert.match(claim, /^\d+\.r1\.[A-Za-z0-9_-]+$/);
   assert.deepEqual([...verifyReservationClaims("rt", [claim], TEST_SECRET, NOW)], ["r1"]);
@@ -15,7 +15,7 @@ test("un claim de réservation est accepté pour sa liste seulement", () => {
   assert.equal(verifyReservationClaims("rt", [claim], "un-autre-secret-un-autre-secret-0000", NOW).size, 0);
 });
 
-test("un claim falsifié, futur ou trop vieux est ignoré", () => {
+test("a forged, future or too old claim is ignored", () => {
   const claim = signReservationClaim("rt", "r1", TEST_SECRET, NOW);
   const [iat, , mac] = claim.split(".");
   assert.equal(verifyReservationClaims("rt", [`${iat}.r2.${mac}`], TEST_SECRET, NOW).size, 0);
@@ -26,7 +26,7 @@ test("un claim falsifié, futur ou trop vieux est ignoré", () => {
   assert.equal(verifyReservationClaims("rt", [claim], TEST_SECRET, NOW + 91 * DAY_MS).size, 0);
 });
 
-test("au plus 50 claims sont lus", () => {
+test("at most 50 claims are read", () => {
   const claims = Array.from({ length: 60 }, (_, i) => signReservationClaim("rt", `r${i}`, TEST_SECRET, NOW));
   const ids = verifyReservationClaims("rt", claims, TEST_SECRET, NOW);
   assert.equal(ids.size, 50);
@@ -34,7 +34,7 @@ test("au plus 50 claims sont lus", () => {
   assert.equal(ids.has("r50"), false);
 });
 
-test("un déverrouillage vaut 14 jours et tombe si le mot de passe change", () => {
+test("an unlock lasts 14 days and drops if the password changes", () => {
   const list = { ...apiDoc().wishlists[0]!, readPasswordHash: "hash-1" };
   const token = signReadUnlock(list, TEST_SECRET, NOW);
   assert.equal(verifyReadUnlock(list, token, TEST_SECRET, NOW), true);
@@ -45,7 +45,7 @@ test("un déverrouillage vaut 14 jours et tombe si le mot de passe change", () =
   assert.equal(verifyReadUnlock(list, "", TEST_SECRET, NOW), false);
 });
 
-test("une liste sans mot de passe n'a pas besoin de déverrouillage", () => {
+test("a list without a password needs no unlock", () => {
   const list = apiDoc().wishlists[0]!;
   assert.equal(verifyReadUnlock(list, null, TEST_SECRET, NOW), true);
 });

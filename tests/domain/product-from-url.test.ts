@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { extractProductHints, resolveTypeId } from "../../src/domain/product-from-url";
 
-test("extrait nom prix image depuis JSON-LD Product", () => {
+test("extracts name, price, image from JSON-LD Product", () => {
   const html = `
     <html><head>
       <script type="application/ld+json">
@@ -15,7 +15,7 @@ test("extrait nom prix image depuis JSON-LD Product", () => {
   assert.equal(hints.imageUrl, "https://shop.example.com/img/mug.jpg");
 });
 
-test("fallback og:title et product:price:amount", () => {
+test("og:title and product:price:amount fallback", () => {
   const html = `
     <meta property="og:title" content="Lampe &amp; co" />
     <meta property="product:price:amount" content="45" />
@@ -27,7 +27,7 @@ test("fallback og:title et product:price:amount", () => {
   assert.equal(hints.imageUrl, "https://cdn.example.com/lampe.jpg");
 });
 
-test("décode les entités HTML et lit un prix € visible", () => {
+test("decodes HTML entities and reads a visible € price", () => {
   const html = `
     <title>D&eacute;bardeur en laine m&eacute;rinos - Boutique</title>
     <meta property="og:image" content="https://shop.example.com/logo-big.webp" />
@@ -41,7 +41,7 @@ test("décode les entités HTML et lit un prix € visible", () => {
   assert.equal(hints.imageUrl, "https://shop.example.com/back/img_upload/product.jpg");
 });
 
-test("resolveTypeId mappe un label (casse ignorée)", () => {
+test("resolveTypeId maps a label (case ignored)", () => {
   const types = [
     { id: "t1", label: "Cuisine" },
     { id: "t2", label: "Livres" },

@@ -10,7 +10,7 @@ before(ensurePasswordHash);
 
 const CLIENT_ID = "copy-0123456789abcdef";
 
-/** Alex est membre de « Anniversaire » (w1) et « Noël » (w2), pas de « Autre » (w3). */
+/** Alex is a member of « Anniversaire » (w1) and « Noël » (w2), not of « Autre » (w3). */
 function lists(): Database {
   let doc = emptyDatabase();
   for (const id of ["alex", "sam"]) {
@@ -38,9 +38,9 @@ function reserve(doc: Database, itemId: string): Database {
   return doc;
 }
 
-// --- Déplacer ---
+// --- Move ---
 
-test("déplacer : l'idée change de liste, garde son identifiant et ses champs, prend la catégorie et le « qui » choisis", () => {
+test("moving: the idea changes list, keeps its id and fields, takes the chosen category and « qui »", () => {
   const moved = moveItem(lists(), toChristmas);
   assert.ok(moved.ok);
   if (!moved.ok) return;
@@ -52,13 +52,13 @@ test("déplacer : l'idée change de liste, garde son identifiant et ses champs, 
   assert.equal(moved.doc.items.filter((i) => i.wishlistId === "w1").length, 2);
 });
 
-test("déplacer une idée réservée : refusé, rien ne change", () => {
+test("moving a reserved idea: refused, nothing changes", () => {
   const doc = reserve(lists(), "liseuse");
   assert.deepEqual(moveItem(doc, toChristmas), { ok: false, error: "itemReservedCannotMove" });
   assert.equal(doc.items.find((i) => i.id === "liseuse")?.wishlistId, "w1");
 });
 
-test("droits : membre des deux listes ; catégorie et « qui » doivent être ceux de la liste d'arrivée", () => {
+test("rights: member of both lists; category and « qui » must belong to the target list", () => {
   const doc = lists();
   assert.deepEqual(moveItem(doc, { ...toChristmas, targetWishlistId: "w3", typeId: "w3-books", personId: "w3-alex" }), { ok: false, error: "notMember" });
   assert.deepEqual(moveItem(doc, { ...toChristmas, actorId: "sam" }), { ok: false, error: "notMember" });
@@ -70,7 +70,7 @@ test("droits : membre des deux listes ; catégorie et « qui » doivent être ce
   }
 });
 
-test("déplacer : l'idée arrive en fin de la liste d'arrivée", () => {
+test("moving: the idea lands at the end of the target list", () => {
   let doc = lists();
   const there = createItem(doc, { wishlistId: "w2", actorId: "alex", name: "Calendrier", typeId: "w2-books", personId: "w2-alex", id: "calendrier" });
   assert.ok(there.ok);
@@ -83,9 +83,9 @@ test("déplacer : l'idée arrive en fin de la liste d'arrivée", () => {
   assert.ok(order("liseuse") > order("calendrier"));
 });
 
-// --- Copier ---
+// --- Copy ---
 
-test("copier dans une autre liste : tous les champs, nouvel identifiant, l'original reste", () => {
+test("copying into another list: all fields, new id, the original stays", () => {
   const doc = lists();
   const copied = copyItem(doc, { ...toChristmas, typeId: "w2-misc" });
   assert.ok(copied.ok);
@@ -98,7 +98,7 @@ test("copier dans une autre liste : tous les champs, nouvel identifiant, l'origi
   assert.equal(copied.doc.items.find((i) => i.id === "liseuse")?.wishlistId, "w1");
 });
 
-test("copier un champ inconnu de la règle (ajouté plus tard) : il suit aussi", () => {
+test("copying a field unknown to the rule (added later): it is carried over too", () => {
   const doc = lists();
   (doc.items.find((i) => i.id === "liseuse") as unknown as Record<string, unknown>).futureField = "suit";
   const copied = copyItem(doc, toChristmas);
@@ -107,7 +107,7 @@ test("copier un champ inconnu de la règle (ajouté plus tard) : il suit aussi",
   assert.equal((copied.item as unknown as Record<string, unknown>).futureField, "suit");
 });
 
-test("copier une idée réservée : permis, la copie n'est pas réservée ; une idée archivée donne une copie visible", () => {
+test("copying a reserved idea: allowed, the copy is not reserved; an archived idea gives a visible copy", () => {
   const doc = reserve(lists(), "liseuse");
   doc.items.find((i) => i.id === "liseuse")!.archived = true;
   const copied = copyItem(doc, toChristmas);
@@ -118,7 +118,7 @@ test("copier une idée réservée : permis, la copie n'est pas réservée ; une 
   assert.equal(copied.doc.reservations.length, 1);
 });
 
-test("copier dans la même liste : la copie se place juste après l'original", () => {
+test("copying into the same list: the copy is placed right after the original", () => {
   const doc = lists();
   const copied = copyItem(doc, { ...toChristmas, itemId: "roman", targetWishlistId: "w1", typeId: "w1-books", personId: "w1-alex", id: "roman-2" });
   assert.ok(copied.ok);
@@ -127,9 +127,9 @@ test("copier dans la même liste : la copie se place juste après l'original", (
   assert.deepEqual(order, ["liseuse", "roman", "roman-2", "puzzle"]);
 });
 
-// --- Commandes (site et API) ---
+// --- Commands (site and API) ---
 
-test("commande copier : un renvoi avec le même identifiant ne crée pas de deuxième copie", async () => {
+test("copy command: a resend with the same id does not create a second copy", async () => {
   const doc = lists();
   await withStore(doc, async () => {
     const alex = ctx(doc.users[0]!);
@@ -145,7 +145,7 @@ test("commande copier : un renvoi avec le même identifiant ne crée pas de deux
   });
 });
 
-test("commande déplacer : un renvoi après réussite rend l'idée déjà déplacée ; un autre membre est refusé", async () => {
+test("move command: a resend after success returns the already moved idea; another member is refused", async () => {
   const doc = lists();
   await withStore(doc, async () => {
     const alex = ctx(doc.users[0]!);

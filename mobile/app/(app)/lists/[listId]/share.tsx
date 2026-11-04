@@ -15,17 +15,17 @@ import { Input } from "@/ui/Input";
 import { QrCard } from "@/ui/QrCard";
 import { Text } from "@/ui/Text";
 
-/** Page de partage de la liste sur le site (invitations, mot de passe, membres). */
+/** The list's sharing page on the site (invitations, password, members). */
 function adminShareUrl(readUrl: string, listId: string): string | null {
   const origin = /^https?:\/\/[^/]+/.exec(readUrl)?.[0];
   return origin ? origin + withLocale(currentLocale(), `/listes/${listId}?onglet=partage`) : null;
 }
 
 /**
- * Onglet Partage, d'après la carte « Partager avec vos proches » de `09-liste-partage.png`,
- * avec en plus le QR code et la feuille de partage du téléphone (FR-020 à FR-024).
- * Le lien partagé est toujours `readUrl`, jamais le lien d'invitation (FR-023). Marche hors ligne
- * pour une liste déjà envoyée : le lien est dans la copie locale.
+ * Share tab, from the « Partager avec vos proches » card of `09-liste-partage.png`,
+ * plus the QR code and the phone's share sheet (FR-020 to FR-024).
+ * The shared link is always `readUrl`, never the invite link (FR-023). Works offline
+ * for a list already sent: the link is in the local copy.
  */
 export default function ShareTab() {
   const { t } = useTranslation(["list", "mobile"]);
@@ -53,7 +53,7 @@ export default function ShareTab() {
                   testID="share.share"
                   title={t("mobile:share.share")}
                   fullWidth
-                  // Le lien est dans le message : `url` en plus le doublerait sur iOS.
+                  // The link is in the message: `url` as well would double it on iOS.
                   onPress={() => void Share.share({ title: list.title, message: t("mobile:share.message", { title: list.title, url: readUrl }) })}
                 />
                 <Field label={t("list:share.readLink")}>

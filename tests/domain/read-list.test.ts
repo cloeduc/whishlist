@@ -64,11 +64,11 @@ function sample(): Database {
   return doc;
 }
 
-test("token inconnu", () => {
+test("unknown token", () => {
   assert.equal(getPublicWishlist(sample(), "nope"), null);
 });
 
-test("tri, champs vides, réservé absent, sans user", () => {
+test("sorting, empty fields, reserved items absent, no user", () => {
   const pub = getPublicWishlist(sample(), "read");
   assert.ok(pub);
   assert.deepEqual(

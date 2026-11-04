@@ -46,13 +46,13 @@ test("GET /me answering 401: token forgotten, signed out (FR-004)", async () => 
   await storeToken();
   fakeFetch({ "GET /me": () => json(401, { error: { code: "unauthorized", message: "Sign in" } }) });
   await restore();
-  // L'effacement suit le rappel onUnauthorized.
+  // Clearing follows the onUnauthorized callback.
   await new Promise((resolve) => setTimeout(resolve, 0));
   expect(getSession()).toEqual({ status: "signedOut", expired: true });
   expect(await SecureStore.getItemAsync("session.token")).toBeNull();
 });
 
-test("session expirée : les claims des réservations faites en invité restent, pour pouvoir les annuler (011)", async () => {
+test("expired session: claims of guest reservations stay, so they can still be cancelled (011)", async () => {
   await storeToken();
   await saveClaim("rt", "r1", "claim-1");
   fakeFetch({ "GET /me": () => json(401, { error: { code: "unauthorized", message: "Sign in" } }) });
@@ -86,7 +86,7 @@ test("back to the foreground: the account is read again (address confirmed in th
   fakeFetch({});
   await signIn({ token: "secret-token", expiresAt: "2099-01-01T00:00:00.000Z", user: { ...me, emailVerified: false } });
   const { calls } = fakeFetch({ "GET /me": () => json(200, me) });
-  // AppState est un mock de jest-expo : on rejoue les écouteurs posés par les modules.
+  // AppState is a jest-expo mock: we replay the listeners the modules registered.
   const listeners = jest.mocked(AppState.addEventListener).mock.calls.map(([, listener]) => listener);
   for (const listener of listeners) listener("active");
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -94,7 +94,7 @@ test("back to the foreground: the account is read again (address confirmed in th
   expect(getSession()).toEqual({ status: "signedIn", user: me });
 });
 
-test("deleteAccount efface aussi l'accès invité du téléphone (011)", async () => {
+test("deleteAccount also clears the phone's guest access (011)", async () => {
   fakeFetch({});
   await signIn({ token: "secret-token", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
   await saveClaim("rt", "r1", "claim-1");

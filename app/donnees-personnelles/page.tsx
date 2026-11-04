@@ -16,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-/** Lien de politique de confidentialité donné aux stores. Même texte que l'écran de l'app. */
+/** Privacy policy link given to the stores. Same text as the app screen. */
 export default async function PrivacyPage() {
   const t = await getTranslations("content");
   return (

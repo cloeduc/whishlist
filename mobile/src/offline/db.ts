@@ -2,17 +2,17 @@ import * as SQLite from "expo-sqlite";
 
 export type SqlValue = string | number | null;
 
-/** Accès minimal à la base locale ; les tests le remplacent par une base en mémoire. */
+/** Minimal access to the local database; tests replace it with an in-memory database. */
 export interface Db {
   exec(sql: string): Promise<void>;
   run(sql: string, params?: SqlValue[]): Promise<{ lastInsertRowId: number; changes: number }>;
   all<T>(sql: string, params?: SqlValue[]): Promise<T[]>;
   first<T>(sql: string, params?: SqlValue[]): Promise<T | null>;
-  /** Exécute `work` dans une transaction exclusive. */
+  /** Runs `work` in an exclusive transaction. */
   transaction(work: () => Promise<void>): Promise<void>;
 }
 
-// Une entrée par version ; on n'en modifie jamais une déjà publiée (data-model.md).
+// One entry per version; an already published one is never changed (data-model.md).
 const MIGRATIONS = [
   `CREATE TABLE meta (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL);
    CREATE TABLE snapshot (key TEXT PRIMARY KEY NOT NULL, body TEXT NOT NULL, fetchedAt TEXT NOT NULL);
@@ -61,7 +61,7 @@ export function getDb(): Promise<Db> {
   return current;
 }
 
-/** Tests : remplace la base (déjà migrée par l'appelant ou non). */
+/** Tests: replaces the database (already migrated by the caller or not). */
 export async function replaceDb(db: Db): Promise<void> {
   await migrate(db);
   current = Promise.resolve(db);

@@ -8,7 +8,7 @@ import { i18n } from "@/i18n";
 import { fakeFetch, json, me } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
 
-// Faux cache de l'app, déclaré dans __tests__/setup.ts.
+// Fake app cache, declared in __tests__/setup.ts.
 const cache: Map<string, string> = jest.requireMock("expo-file-system").__cache;
 
 const document = {

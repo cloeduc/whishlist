@@ -37,9 +37,9 @@ const texts = {
 } as const;
 
 /**
- * Catégories ou « qui » en pastilles éditables, comme `components/site/label-chips.tsx` :
- * appuyer sur une pastille pour la renommer, la croix pour la retirer, un champ pour ajouter.
- * Un libellé encore utilisé est refusé par le serveur, avec son message (FR-016).
+ * Categories or « qui » as editable chips, like `components/site/label-chips.tsx`:
+ * tap a chip to rename it, the cross to remove it, a field to add one.
+ * A label still in use is refused by the server, with its message (FR-016).
  */
 export function LabelEditor({ listId, kind, labels, disabled }: { listId: string; kind: LabelKind; labels: Label[]; disabled: boolean }) {
   const { t } = useTranslation("list");

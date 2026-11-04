@@ -42,7 +42,7 @@ afterEach(() => stopSync());
 test("each field shows the value it gets if left empty, as on the site", async () => {
   fakeFetch({ "GET /lists": () => json(200, { lists: [summary("w", "Liste de Alex")] }) });
   await render(<NewList />);
-  // Une liste porte déjà le nom par défaut : le suivant est numéroté, comme le fera le serveur.
+  // A list already has the default name: the next one is numbered, as the server will do.
   await waitFor(() => expect(screen.getByTestId("new-list.title")).toHaveProp("placeholder", "Liste de Alex 2"));
   expect(screen.getByTestId("new-list.category")).toHaveProp("placeholder", "Cadeaux");
   expect(screen.getByTestId("new-list.person")).toHaveProp("placeholder", "Alex");

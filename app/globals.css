@@ -8,8 +8,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Palette cadeau néo-brutaliste : bleu / rouge / jaune / noir */
-  /* #1a56e8 : 5,2:1 sur #e8f0ff, 5,9:1 pour le blanc des boutons. */
+  /* Neo-brutalist gift palette: blue / red / yellow / black */
+  /* #1a56e8: 5.2:1 on #e8f0ff, 5.9:1 for the white of buttons. */
   --gift-blue: #1a56e8;
   --gift-red: #ff2d2d;
   --gift-yellow: #ffd700;
@@ -56,8 +56,8 @@
 }
 
 @theme inline {
-  /* Familles génériques en dernier : le menu d'un <select> dans Firefox est dessiné hors de la page,
-     sans les polices web (Geist et sa « Geist Fallback ») ; sans elles, il tombe sur la police par défaut (serif). */
+  /* Generic families last: in Firefox a <select> menu is drawn outside the page,
+     without the web fonts (Geist and its « Geist Fallback »); without them, it falls back to the default font (serif). */
   --font-heading: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -239,11 +239,11 @@
   animation: guest-bob 3.2s ease-in-out infinite;
 }
 /*
- * Sur Firefox, les traits noirs du cadeau grouillent quand il pivote pendant le balancement ;
- * Chrome reste net (Safari n'a pas été testé). La cause exacte n'est pas établie, probablement le
- * ré-échantillonnage d'une couche composée. Poser la rotation sur un groupe interne ou passer par
- * SMIL n'y change rien, donc Firefox monte et descend sans tourner. Placé avant le bloc
- * `prefers-reduced-motion`, qui doit continuer à primer.
+ * On Firefox, the gift's black strokes shimmer when it rotates during the wobble;
+ * Chrome stays sharp (Safari was not tested). The exact cause is not known, probably the
+ * resampling of a composited layer. Putting the rotation on an inner group or using
+ * SMIL changes nothing, so Firefox moves up and down without rotating. Placed before the
+ * `prefers-reduced-motion` block, which must still take precedence.
  */
 @supports (-moz-appearance: none) {
   .guest-hero__gift {
@@ -301,7 +301,7 @@
   }
 }
 
-/* Icône « l'app sur votre téléphone » (011, US3) : 5 sonneries d'une seconde, puis immobile (SC-004). */
+/* « l'app sur votre téléphone » icon (011, US3): 5 one-second rings, then still (SC-004). */
 .phone-ring {
   animation: phone-ring 1s ease-in-out 5;
   transform-origin: 50% 60%;

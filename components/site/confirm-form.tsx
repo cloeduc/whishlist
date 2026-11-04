@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-/** Bouton qui ouvre une confirmation avant de soumettre une server action. */
+/** Button that opens a confirmation before submitting a server action. */
 export function ConfirmForm({
   title,
   description,

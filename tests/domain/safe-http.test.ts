@@ -7,7 +7,7 @@ import {
   type DnsLookup,
 } from "../../src/domain/safe-http";
 
-test("bloque les IP privées / metadata / loopback", () => {
+test("blocks private / metadata / loopback IPs", () => {
   for (const ip of [
     "127.0.0.1",
     "10.0.0.5",
@@ -28,14 +28,14 @@ test("bloque les IP privées / metadata / loopback", () => {
   assert.equal(isBlockedIp("1.1.1.1"), false);
 });
 
-test("assertSafeFetchUrl refuse localhost et ports exotiques", async () => {
+test("assertSafeFetchUrl refuses localhost and unusual ports", async () => {
   await assert.rejects(() => assertSafeFetchUrl("http://localhost/x"), /urlHostBlocked|urlInvalid/);
   await assert.rejects(() => assertSafeFetchUrl("http://127.0.0.1/"), /urlHostBlocked/);
   await assert.rejects(() => assertSafeFetchUrl("http://example.com:8080/"), /urlPortBlocked/);
   await assert.rejects(() => assertSafeFetchUrl("file:///etc/passwd"), /urlInvalid/);
 });
 
-test("assertSafeFetchUrl refuse DNS vers IP privée", async () => {
+test("assertSafeFetchUrl refuses DNS to a private IP", async () => {
   const lookup: DnsLookup = async () => [{ address: "10.1.2.3", family: 4 }];
   await assert.rejects(
     () => assertSafeFetchUrl("https://evil.example/path", lookup),
@@ -43,13 +43,13 @@ test("assertSafeFetchUrl refuse DNS vers IP privée", async () => {
   );
 });
 
-test("assertSafeFetchUrl accepte un host public", async () => {
+test("assertSafeFetchUrl accepts a public host", async () => {
   const lookup: DnsLookup = async () => [{ address: "93.184.216.34", family: 4 }];
   const url = await assertSafeFetchUrl("https://example.com/item", lookup);
   assert.equal(url.hostname, "example.com");
 });
 
-test("safeHttpGet refuse un redirect vers IP privée", async () => {
+test("safeHttpGet refuses a redirect to a private IP", async () => {
   const lookup: DnsLookup = async (hostname) => {
     if (hostname === "shop.example") return [{ address: "93.184.216.34", family: 4 }];
     if (hostname === "internal.local") return [{ address: "10.0.0.9", family: 4 }];
@@ -69,7 +69,7 @@ test("safeHttpGet refuse un redirect vers IP privée", async () => {
   assert.equal(result, null);
 });
 
-test("safeHttpGet suit un redirect public", async () => {
+test("safeHttpGet follows a public redirect", async () => {
   const lookup: DnsLookup = async () => [{ address: "93.184.216.34", family: 4 }];
   let hits = 0;
   const fetchImpl: typeof fetch = async (input) => {

@@ -4,7 +4,7 @@ type Bucket = { count: number; resetAt: number };
 
 const buckets = new Map<string, Bucket>();
 
-/** In-memory (1 process). Suffisant pour l'instance Docker unique. */
+/** In-memory (1 process). Enough for the single Docker instance. */
 export function takeToken(key: string, limit: number, windowMs: number, now = Date.now()): boolean {
   const current = buckets.get(key);
   if (!current || current.resetAt <= now) {
@@ -16,7 +16,7 @@ export function takeToken(key: string, limit: number, windowMs: number, now = Da
   return true;
 }
 
-/** Vrai si le seau a déjà pris `limit` jetons dans sa fenêtre en cours, sans en prendre un. */
+/** True if the bucket has already taken `limit` tokens in its current window, without taking one. */
 export function bucketExhausted(key: string, limit: number, now = Date.now()): boolean {
   const current = buckets.get(key);
   return current !== undefined && current.resetAt > now && current.count >= limit;
@@ -30,9 +30,9 @@ function trustedIp(value: string | null | undefined): string | null {
 }
 
 /**
- * IP posée par le proxy (Cloudflare, puis X-Real-IP).
- * `X-Forwarded-For` n’est pas lu : le client peut l’inventer.
- * `null` s’il n’y a pas d’IP de confiance — jamais un seau partagé « unknown ».
+ * IP set by the proxy (Cloudflare, then X-Real-IP).
+ * `X-Forwarded-For` is not read: the client can make it up.
+ * `null` if there is no trusted IP — never a shared « unknown » bucket.
  */
 export function clientAddress(header: {
   cfConnectingIp?: string | null;
@@ -41,7 +41,7 @@ export function clientAddress(header: {
   return trustedIp(header.cfConnectingIp) ?? trustedIp(header.realIp);
 }
 
-/** Sans IP de confiance : en production on refuse, en dev on ne limite pas. */
+/** Without a trusted IP: refused in production, not limited in dev. */
 export function missingIpPolicy(nodeEnv = process.env.NODE_ENV): "skip" | "deny" {
   return nodeEnv === "production" ? "deny" : "skip";
 }
@@ -54,7 +54,7 @@ export async function clientIp(): Promise<string | null> {
   });
 }
 
-/** Même règle que `rateLimitOrThrow`, avec une IP déjà lue (commandes partagées site / API). */
+/** Same rule as `rateLimitOrThrow`, with an IP already read (commands shared by site / API). */
 export function rateLimitForIp(
   scope: string,
   ip: string | null,
@@ -90,7 +90,7 @@ export function isRateLimitError(error: unknown): error is RateLimitError {
   return error instanceof RateLimitError;
 }
 
-/** Test helper — vide les buckets. */
+/** Test helper — clears the buckets. */
 export function resetRateLimitsForTests(): void {
   buckets.clear();
 }

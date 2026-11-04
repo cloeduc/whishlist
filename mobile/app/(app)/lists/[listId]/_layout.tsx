@@ -9,7 +9,7 @@ function Themed({ children }: { children: ReactNode }) {
   return <ListThemeProvider theme={list?.theme}>{children}</ListThemeProvider>;
 }
 
-/** Les écrans d'une liste partagent ses données et prennent les couleurs de son thème (FR-031). */
+/** A list's screens share its data and take the colors of its theme (FR-031). */
 export default function ListLayout() {
   const { listId } = useLocalSearchParams<{ listId: string }>();
   return (

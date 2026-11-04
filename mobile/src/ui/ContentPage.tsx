@@ -7,8 +7,8 @@ import { tokens } from "@/theme/tokens";
 import { Text } from "./Text";
 
 /**
- * En-tête des pages de contenu du site (`components/site/content-page.tsx`) :
- * sur-titre en majuscules espacées, grand titre, introduction grise, puis les sections.
+ * Header of the site's content pages (`components/site/content-page.tsx`):
+ * spaced uppercase eyebrow, large title, grey introduction, then the sections.
  */
 export function ContentPage({
   eyebrow,

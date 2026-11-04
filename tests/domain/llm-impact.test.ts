@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { estimateLlmImpact } from "../../src/domain/llm-impact";
 
-test("estimateLlmImpact scale avec les tokens", () => {
+test("estimateLlmImpact scales with the tokens", () => {
   const zero = estimateLlmImpact(0);
   assert.equal(zero.totalTokens, 0);
   assert.equal(zero.co2Grams, 0);

@@ -18,14 +18,14 @@ const UA = {
   linux: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0 Safari/537.36",
 };
 
-test("téléphone : iPhone (Safari ou Chrome) → ios, Android avec Mobile → android", () => {
+test("phone: iPhone (Safari or Chrome) → ios, Android with Mobile → android", () => {
   assert.equal(phonePlatform(UA.iphoneSafari), "ios");
   assert.equal(phonePlatform(UA.iphoneChrome), "ios");
   assert.equal(phonePlatform(UA.androidPhone), "android");
   assert.equal(phonePlatform(UA.androidTablet, true), "android");
 });
 
-test("pas un téléphone : tablette Android, iPad (vu comme un Mac), ordinateurs", () => {
+test("not a phone: Android tablet, iPad (seen as a Mac), computers", () => {
   for (const ua of [UA.androidTablet, UA.ipad, UA.mac, UA.windows, UA.linux, ""]) {
     assert.equal(phonePlatform(ua), null, ua);
     assert.equal(phonePlatform(ua, false), null, ua);
@@ -33,7 +33,7 @@ test("pas un téléphone : tablette Android, iPad (vu comme un Mac), ordinateurs
   assert.equal(phonePlatform(UA.mac, true), null);
 });
 
-test("adresses des stores : https seulement, sinon pas de badge", async () => {
+test("store addresses: https only, otherwise no badge", async () => {
   await withEnv({ APP_STORE_URL: undefined, PLAY_STORE_URL: "  " }, () => {
     assert.equal(appStoreUrl(), null);
     assert.equal(playStoreUrl(), null);

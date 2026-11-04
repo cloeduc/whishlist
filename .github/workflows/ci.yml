@@ -1,5 +1,5 @@
-# Vérifications de chaque PR et de chaque push sur main : site, app mobile, image Docker.
-# `pull_request` (et non `pull_request_target`) : le code d'un fork tourne sans secret, avec un jeton en lecture seule.
+# Checks for each PR and each push to main: site, mobile app, Docker image.
+# `pull_request` (not `pull_request_target`): code from a fork runs without secrets, with a read-only token.
 name: CI
 
 on:
@@ -10,7 +10,7 @@ on:
 permissions:
   contents: read
 
-# Une PR : seul le dernier push compte. main : chaque fusion garde son propre résultat.
+# A PR: only the latest push counts. main: each merge keeps its own result.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -44,10 +44,10 @@ jobs:
           cache-dependency-path: |
             package-lock.json
             mobile/package-lock.json
-      # L'app reprend des modules du site (src/i18n, locales…) : il lui faut aussi les dépendances de la racine.
+      # The app reuses site modules (src/i18n, locales…): it also needs the root dependencies.
       - run: npm ci
       - run: npm --prefix mobile ci
-      # En premier, avec un message clair : c'est l'oubli le plus fréquent après un changement du contrat.
+      # First, with a clear message: this is the most common omission after a contract change.
       - name: API types match the contract
         run: |
           npm --prefix mobile run api:types

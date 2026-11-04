@@ -1,5 +1,5 @@
-# Ferme l'app et la rouvre sans effacer ses données, avec les mêmes réglages du dev client que launch-clean.
-# L'appelant attend l'écran voulu.
+# Closes the app and reopens it without clearing its data, with the same dev client settings as launch-clean.
+# The caller waits for the expected screen.
 appId: app.ohyoushouldnt.mobile
 ---
 - stopApp

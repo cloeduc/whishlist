@@ -6,7 +6,7 @@ import { parsePriority, PRIORITY_MAX } from "../../../src/domain/priority";
 import { useTheme } from "@/theme/ListTheme";
 import { tokens } from "@/theme/tokens";
 
-/** Niveau d'envie en lecture, comme `components/site/priority-stars.tsx`. */
+/** Read-only desire level, like `components/site/priority-stars.tsx`. */
 export function Stars({ value }: { value: string | null | undefined }) {
   const { t } = useTranslation("public");
   const palette = useTheme();
@@ -26,7 +26,7 @@ export function Stars({ value }: { value: string | null | undefined }) {
   );
 }
 
-/** Saisie du niveau d'envie, comme `components/site/priority-star-picker.tsx` : un 2e appui efface. */
+/** Desire level input, like `components/site/priority-star-picker.tsx`: a 2nd press clears it. */
 export function StarPicker({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   const { t } = useTranslation("list");
   const palette = useTheme();

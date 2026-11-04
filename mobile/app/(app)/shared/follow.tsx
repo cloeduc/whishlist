@@ -22,8 +22,8 @@ import { Screen } from "@/ui/Screen";
 import { Text } from "@/ui/Text";
 
 /**
- * Écran « Suivre une liste » : colle un lien public, ou scanne son QR code (écran « Partager » d'un proche,
- * US4), et saisit le mot de passe de lecture si `423`.
+ * « Suivre une liste » screen: paste a public link, or scan its QR code (a relative's « Partager » screen,
+ * US4), and enter the read password if `423`.
  */
 export default function FollowSharedList() {
   const { t } = useTranslation("mobile");
@@ -45,7 +45,7 @@ export default function FollowSharedList() {
     setScanning(granted);
   }
 
-  /** Un QR code qui n'est pas le lien d'une liste est refusé ici, sans appel au serveur ; le scan continue. */
+  /** A QR code that is not a list link is refused here, without calling the server; scanning goes on. */
   function onScanned(data: string) {
     if (busy) return;
     if (!extractReadToken(data)) {

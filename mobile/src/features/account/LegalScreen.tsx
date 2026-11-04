@@ -9,7 +9,7 @@ import { Button } from "@/ui/Button";
 import { ContentPage } from "@/ui/ContentPage";
 import { Screen } from "@/ui/Screen";
 
-/** Page de contenu de l'app, avec le lien vers la même page du site, dans la langue de l'app. */
+/** App content page, with the link to the same site page, in the app language. */
 export function LegalScreen({
   eyebrow,
   title,
@@ -21,7 +21,7 @@ export function LegalScreen({
   eyebrow: string;
   title: string;
   intro: string;
-  /** Page du site au même contenu ; aucune pour les licences de l'app. */
+  /** Site page with the same content; none for the app licenses. */
   sitePath?: string;
   children: ReactNode;
   testID?: string;

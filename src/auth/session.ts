@@ -2,7 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const SESSION_COOKIE = "wishlist_session";
 
-/** Durée de vie réelle du token signé (alignée sur maxAge cookie). */
+/** Actual lifetime of the signed token (aligned with the cookie maxAge). */
 export const SESSION_TTL_SEC = 60 * 60 * 24 * 30;
 
 const MIN_SESSION_SECRET_LENGTH = 32;
@@ -11,7 +11,7 @@ export function sessionSecret(): string | null {
   const secret = process.env.SESSION_SECRET;
   if (!secret) return null;
   if (process.env.NODE_ENV === "production" && secret.length < MIN_SESSION_SECRET_LENGTH) {
-    throw new Error("SESSION_SECRET trop court (32 caractères minimum)");
+    throw new Error("SESSION_SECRET too short (32 characters minimum)");
   }
   return secret;
 }
@@ -29,7 +29,7 @@ function safeEqualB64(a: string, b: string): boolean {
 
 export type SessionClaims = { userId: string; sessionVersion: number };
 
-/** Cookie = `userId.version.iat.exp.mac`. Les jetons à 4 segments (sans version) valent la version 0. */
+/** Cookie = `userId.version.iat.exp.mac`. 4-segment tokens (without version) count as version 0. */
 export function signSession(
   userId: string,
   secret: string,

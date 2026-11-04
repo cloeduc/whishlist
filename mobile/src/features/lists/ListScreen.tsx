@@ -47,8 +47,8 @@ function isTab(key: string): key is ListTab {
 }
 
 /**
- * Écran d'une liste, d'après `06-liste-idees.png` : cadeau encadré + titre, « Voir la liste partagée »,
- * onglets en pastilles avec leurs compteurs, puis le contenu de l'onglet. Rafraîchi en tirant (FR-017).
+ * List screen, based on `06-liste-idees.png`: framed gift + title, « Voir la liste partagée »,
+ * pill tabs with their counters, then the tab content. Refreshed by pulling (FR-017).
  */
 export function ListScreen({ tab, children }: { tab: ListTab; children: (list: ViewList) => ReactNode }) {
   const { t } = useTranslation(["list", "mobile", "home"]);
@@ -66,7 +66,7 @@ export function ListScreen({ tab, children }: { tab: ListTab; children: (list: V
     );
   }
   if (!list && loaded && settled && !refreshing) {
-    // Jamais ouverte sur ce téléphone, et le serveur ne répond pas.
+    // Never opened on this phone, and the server does not answer.
     return (
       <Screen onRefresh={() => void refresh()} refreshing={refreshing}>
         <BackLink />
@@ -111,8 +111,8 @@ export function ListScreen({ tab, children }: { tab: ListTab; children: (list: V
 }
 
 /**
- * « Voir comme un invité » : la vue invité de l'app (011), sans la redirection des membres vers leur liste.
- * Le lien public ouvrirait l'app elle-même (lien universel), qui ramènerait le membre ici.
+ * « Voir comme un invité »: the app guest view (011), without redirecting members to their list.
+ * The public link would open the app itself (universal link), which would bring the member back here.
  */
 function viewAsGuest(readUrl: string): void {
   const path = appPathForUrl(readUrl);

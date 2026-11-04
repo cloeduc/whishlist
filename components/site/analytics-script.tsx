@@ -4,7 +4,7 @@ import { analyticsBeforeSendSource } from "@/src/site/analytics-public";
 import { analyticsConfig } from "@/src/server/analytics";
 import { siteOrigin } from "@/src/site/seo";
 
-/** Absent tant que l'instance n'a pas configuré Umami. */
+/** Absent as long as the instance has not configured Umami. */
 export async function AnalyticsScript() {
   const config = analyticsConfig();
   if (!config) return null;
@@ -12,8 +12,8 @@ export async function AnalyticsScript() {
   const domain = new URL(siteOrigin()).hostname;
   return (
     <>
-      {/* Rendu par app/layout.tsx, la place exigée pour `beforeInteractive` en App Router : la règle
-          ne voit que ce fichier. */}
+      {/* Rendered by app/layout.tsx, the place required for `beforeInteractive` in App Router: the rule
+          only sees this file. */}
       {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
       <Script id="analytics-before" strategy="beforeInteractive" nonce={nonce}>
         {analyticsBeforeSendSource()}

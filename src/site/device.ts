@@ -1,9 +1,9 @@
-/** Système d'un téléphone (feature 011, US3) : l'icône de l'app ne s'affiche que sur un téléphone. */
+/** Phone operating system (feature 011, US3): the app icon is shown only on a phone. */
 export type PhonePlatform = "ios" | "android";
 
 /**
- * Plateforme d'après le navigateur : iPhone ou iPod → iOS ; Android avec « Mobile » (ou `userAgentData.mobile`)
- * → Android. Un iPad (qui se présente en Mac depuis iPadOS 13), une tablette Android et un ordinateur → `null`.
+ * Platform from the browser: iPhone or iPod → iOS; Android with « Mobile » (or `userAgentData.mobile`)
+ * → Android. An iPad (which presents itself as a Mac since iPadOS 13), an Android tablet and a computer → `null`.
  */
 export function phonePlatform(userAgent: string, uaDataMobile?: boolean): PhonePlatform | null {
   if (/\b(iPhone|iPod)\b/.test(userAgent)) return "ios";

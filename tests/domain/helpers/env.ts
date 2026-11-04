@@ -1,4 +1,4 @@
-/** Lance `run` avec ces variables d'environnement (`undefined` : retirée), puis remet les valeurs d'avant. */
+/** Runs `run` with these environment variables (`undefined`: removed), then restores the previous values. */
 export async function withEnv<T>(values: Record<string, string | undefined>, run: () => T | Promise<T>): Promise<T> {
   const env = process.env as Record<string, string | undefined>;
   const previous = Object.fromEntries(Object.keys(values).map((key) => [key, env[key]]));

@@ -18,7 +18,7 @@ const TTL_MS = SESSION_TTL_SEC * 1000;
 
 before(ensurePasswordHash);
 
-test("une session d'API ne garde que l'empreinte du jeton", () => {
+test("an API session keeps only the token's fingerprint", () => {
   const doc = apiDoc();
   const alex = doc.users[0]!;
   const issued = issueApiSession(doc, alex, NOW);
@@ -32,7 +32,7 @@ test("une session d'API ne garde que l'empreinte du jeton", () => {
   assert.equal(doc.apiSessions.length, 0, "le document d'origine n'est pas modifié");
 });
 
-test("un jeton vaut 30 jours, pour un compte qui existe et sans changement de mot de passe", () => {
+test("a token lasts 30 days, for an existing account and with no password change", () => {
   const issued = issueApiSession(apiDoc(), apiDoc().users[0]!, NOW);
   assert.equal(findApiSessionUser(issued.doc, issued.token, NOW)?.id, "alex");
   assert.equal(findApiSessionUser(issued.doc, issued.token, NOW + TTL_MS - 1000)?.id, "alex");
@@ -49,7 +49,7 @@ test("un jeton vaut 30 jours, pour un compte qui existe et sans changement de mo
   assert.equal(findApiSessionUser(deleted, issued.token, NOW), null);
 });
 
-test("révoquer supprime seulement ce jeton", () => {
+test("revoking deletes only this token", () => {
   const first = issueApiSession(apiDoc(), apiDoc().users[0]!, NOW);
   const second = issueApiSession(first.doc, apiDoc().users[0]!, NOW);
   const revoked = revokeApiSession(second.doc, first.token);
@@ -57,7 +57,7 @@ test("révoquer supprime seulement ce jeton", () => {
   assert.equal(findApiSessionUser(revoked, second.token, NOW)?.id, "alex");
 });
 
-test("la purge retire les sessions expirées et périmées", () => {
+test("the purge removes expired and stale sessions", () => {
   const old = issueApiSession(apiDoc(), apiDoc().users[0]!, NOW - TTL_MS - 1000);
   const stale = issueApiSession(old.doc, old.doc.users[1]!, NOW);
   const fresh = issueApiSession(stale.doc, stale.doc.users[0]!, NOW);
@@ -69,7 +69,7 @@ test("la purge retire les sessions expirées et périmées", () => {
   );
 });
 
-test("un wishlist.json sans apiSessions s'importe sans migration", async () => {
+test("a wishlist.json without apiSessions is imported without migration", async () => {
   const legacy: Record<string, unknown> = { ...apiDoc() };
   delete legacy.apiSessions;
   await withTempDataPath(async (dataPath) => {

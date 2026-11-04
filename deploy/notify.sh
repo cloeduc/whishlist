@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Notification ntfy des scripts d'exploitation Oh, You Shouldn't! : notify.sh <titre> <message> [priorité]
-# Optionnelle : sans WHISHLIST_NTFY_TOPIC, ne fait rien. Un échec d'envoi ne fait jamais échouer l'appelant.
-# Titre et options passés en paramètres d'URL (UTF-8 sûr, contrairement aux en-têtes HTTP).
+# ntfy notification for the Oh, You Shouldn't! ops scripts: notify.sh <title> <message> [priority]
+# Optional: without WHISHLIST_NTFY_TOPIC, does nothing. A send failure never makes the caller fail.
+# Title and options passed as URL parameters (UTF-8 safe, unlike HTTP headers).
 set -uo pipefail
 
 TOPIC="${WHISHLIST_NTFY_TOPIC:-}"
@@ -18,5 +18,5 @@ curl -fsS --max-time 10 ${auth[@]+"${auth[@]}"} \
   --url-query "title=🎁 ${1:-whishlist}" \
   --url-query "priority=${3:-default}" \
   --data-binary "${2:-}" \
-  "$URL/$TOPIC" >/dev/null || echo "ntfy: notification non envoyée ($URL/$TOPIC)" >&2
+  "$URL/$TOPIC" >/dev/null || echo "ntfy: notification not sent ($URL/$TOPIC)" >&2
 exit 0

@@ -18,9 +18,9 @@ import { Screen } from "@/ui/Screen";
 type Ids = { id: string; categoryId: string; personId: string };
 
 /**
- * Nouvelle liste, d'après `05-nouvelle-liste.png` (FR-011). Comme sur le site, aucun champ n'est obligatoire :
- * chacun montre en placeholder la valeur qu'il prendra s'il reste vide. Marche hors ligne : la liste est créée
- * sur le téléphone et envoyée plus tard (FR-026). `?retry=<seq>` : « Corriger » une création refusée.
+ * New list, from `05-nouvelle-liste.png` (FR-011). As on the site, no field is required:
+ * each one shows as placeholder the value it will take if left empty. Works offline: the list is created
+ * on the phone and sent later (FR-026). `?retry=<seq>`: « Corriger » a refused creation.
  */
 export default function NewList() {
   const { t } = useTranslation("home");
@@ -35,13 +35,13 @@ export default function NewList() {
   const session = useSession();
   const displayName = "user" in session ? (session.user?.displayName ?? "") : "";
   const { lists } = useMyLists();
-  // La liste reprise par « Corriger » ne compte pas : son propre nom par défaut ne doit pas la numéroter.
+  // The list taken up by « Corriger » does not count: its own default name must not number it.
   const defaults = useMemo(
     () => newListDefaults(displayName, lists.filter((list) => list.id !== ids?.id).map((list) => list.title), (key, vars) => t(key, vars)),
     [displayName, lists, ids?.id, t],
   );
 
-  // « Corriger » : le formulaire reprend ce qui avait été saisi, avec les mêmes identifiants.
+  // « Corriger »: the form takes back what had been entered, with the same identifiers.
   useEffect(() => {
     if (!retrySeq) return;
     void getChange(retrySeq).then((change) => {

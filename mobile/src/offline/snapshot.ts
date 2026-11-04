@@ -1,6 +1,6 @@
 import { getDb } from "./db";
 
-/** Dernière réponse du serveur pour `GET /lists` (`lists`) ou `GET /lists/{id}` (`list:<id>`). */
+/** Last server response for `GET /lists` (`lists`) or `GET /lists/{id}` (`list:<id>`). */
 export type Snapshot<T> = { body: T; fetchedAt: string };
 
 export const listsKey = "lists";
@@ -30,7 +30,7 @@ export async function removeSnapshot(key: string): Promise<void> {
   await db.run("DELETE FROM snapshot WHERE key = ?", [key]);
 }
 
-/** Vide la copie locale et les changements en attente. */
+/** Clears the local copy and the pending changes. */
 export async function clearAll(): Promise<void> {
   const db = await getDb();
   await db.transaction(async () => {
@@ -40,7 +40,7 @@ export async function clearAll(): Promise<void> {
   });
 }
 
-/** On ne montre jamais les listes d'un autre compte : tout est vidé si le compte change. */
+/** We never show the lists of another account: everything is cleared if the account changes. */
 export async function ensureUser(userId: string): Promise<void> {
   const db = await getDb();
   const row = await db.first<{ value: string }>("SELECT value FROM meta WHERE key = 'userId'");

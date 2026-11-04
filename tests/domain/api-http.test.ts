@@ -17,7 +17,7 @@ import { apiDoc, ctx, ensurePasswordHash, withMailDryRun, withStore } from "./he
 
 before(ensurePasswordHash);
 
-test("apiStatusFor : un statut par famille de codes", () => {
+test("apiStatusFor: one status per family of codes", () => {
   assert.equal(apiStatusFor("itemNeedsName"), 400);
   assert.equal(apiStatusFor("codeInconnu"), 400);
   assert.equal(apiStatusFor("unauthorized"), 401);
@@ -42,7 +42,7 @@ test("apiStatusFor : un statut par famille de codes", () => {
   assert.equal(apiStatusFor("mailNotConfigured"), 503);
 });
 
-test("liens ouverts dans l'app (011) : lien invalide ou expiré en 400, invitation cassée en 404", () => {
+test("links opened in the app (011): invalid or expired link as 400, broken invite as 404", () => {
   for (const code of [
     "confirmationLinkInvalid",
     "confirmationLinkExpired",
@@ -56,7 +56,7 @@ test("liens ouverts dans l'app (011) : lien invalide ou expiré en 400, invitati
   assert.equal(apiStatusFor("inviteLinkBroken"), 404);
 });
 
-test("GET /invitations/{inviteToken} (011) : 200 avec le titre, 401 sans compte, 404 pour un lien cassé", async () => {
+test("GET /invitations/{inviteToken} (011): 200 with the title, 401 without an account, 404 for a broken link", async () => {
   await withStore(apiDoc(), async () => {
     const camille = (await readDocument()).users[1]!;
     assert.deepEqual(await previewInvite(ctx(camille), { token: "it" }), { ok: true, title: "Liste d'Alex", listId: null });
@@ -70,16 +70,16 @@ test("GET /invitations/{inviteToken} (011) : 200 avec le titre, 401 sans compte,
   });
 });
 
-test("journal des erreurs d'API : les jetons d'invitation et de lien public sont masqués (011, FR-009)", () => {
+test("API error log: invite and public link tokens are masked (011, FR-009)", () => {
   assert.equal(redactedApiPath("/api/v1/invitations/secret-token/accept"), "/api/v1/invitations/…/accept");
   assert.equal(redactedApiPath("/api/v1/invitations/secret-token"), "/api/v1/invitations/…");
   assert.equal(redactedApiPath("/api/v1/public/lists/read-token/reservations/r1"), "/api/v1/public/lists/…/reservations/r1");
   assert.equal(redactedApiPath("/api/v1/lists/w/items"), "/api/v1/lists/w/items");
 });
 
-test("POST /auth/password-reset/confirm avec un lien inconnu : 400 resetLinkInvalid, avec son message (011)", async () => {
+test("POST /auth/password-reset/confirm with an unknown link: 400 resetLinkInvalid, with its message (011)", async () => {
   await withStore(apiDoc(), async () => {
-    // Même chaîne que la route : commande puis `apiError`.
+    // Same chain as the route: command then `apiError`.
     const result = await resetPasswordWithLink(ctx(), { token: "inconnu", password: "nouveau-mdp-solide", signIn: true });
     assert.ok(!result.ok);
     const response = await apiError(result.error, "en");
@@ -90,12 +90,12 @@ test("POST /auth/password-reset/confirm avec un lien inconnu : 400 resetLinkInva
   });
 });
 
-test("POST /lists d'un compte non confirmé : 403 emailNotVerified, avec son message (T021)", async () => {
+test("POST /lists from an unconfirmed account: 403 emailNotVerified, with its message (T021)", async () => {
   const doc = apiDoc();
   doc.users[1]!.emailVerifiedAt = null;
   await withMailDryRun(() =>
     withStore(doc, async () => {
-      // Même chaîne que la route (`withApi` lit les en-têtes de Next, absents hors requête) : commande puis `apiError`.
+      // Same chain as the route (`withApi` reads Next headers, missing outside a request): command then `apiError`.
       const camille = (await readDocument()).users[1]!;
       const result = await createList(ctx(camille), { title: "Ma liste", category: "Livres", person: "Moi" });
       assert.ok(!result.ok);
@@ -108,12 +108,12 @@ test("POST /lists d'un compte non confirmé : 403 emailNotVerified, avec son mes
   );
 });
 
-test("un non-membre ne distingue pas une liste qui existe", () => {
+test("a non-member cannot tell whether a list exists", () => {
   assert.equal(publicErrorCode("notMember"), "listMissing");
   assert.equal(publicErrorCode("priceInvalid"), "priceInvalid");
 });
 
-test("originDecision : site, clients natifs et origines déclarées", () => {
+test("originDecision: site, native clients and declared origins", () => {
   const siteOrigin = "https://ohyoushouldnt.app";
   const allowed = ["capacitor://localhost"];
   assert.equal(originDecision({ origin: null, siteOrigin, allowed }), "allow");
@@ -124,7 +124,7 @@ test("originDecision : site, clients natifs et origines déclarées", () => {
   assert.equal(originDecision({ origin: null, siteOrigin, allowed: [] }), "allow");
 });
 
-test("apiLocaleFrom : anglais si demandé en premier, sinon français", () => {
+test("apiLocaleFrom: English if requested first, otherwise French", () => {
   assert.equal(apiLocaleFrom("en-US,en;q=0.9"), "en");
   assert.equal(apiLocaleFrom("en"), "en");
   assert.equal(apiLocaleFrom("fr-FR,en;q=0.5"), "fr");
@@ -132,7 +132,7 @@ test("apiLocaleFrom : anglais si demandé en premier, sinon français", () => {
   assert.equal(apiLocaleFrom(null), "fr");
 });
 
-test("parseAllowedOrigins ignore les vides et les entrées invalides", () => {
+test("parseAllowedOrigins ignores empty and invalid entries", () => {
   assert.deepEqual(parseAllowedOrigins(" capacitor://localhost , https://localhost/ ,"), [
     "capacitor://localhost",
     "https://localhost",
@@ -150,7 +150,7 @@ function jsonRequest(body: BodyInit, contentType = "application/json"): Request 
   return new Request("http://localhost/api/v1/x", { method: "POST", headers: { "content-type": contentType }, body });
 }
 
-test("readJsonBody : JSON objet seulement, en JSON, 64 Ko au plus", async () => {
+test("readJsonBody: JSON object only, as JSON, 64 KB at most", async () => {
   assert.deepEqual(await readJsonBody(jsonRequest('{"a":1}')), { ok: true, body: { a: 1 } });
   assert.deepEqual(await readJsonBody(jsonRequest("a=1", "text/plain")), { ok: false, error: "unsupportedMediaType" });
   assert.deepEqual(await readJsonBody(jsonRequest("[1]")), { ok: false, error: "invalidJson" });
@@ -160,7 +160,7 @@ test("readJsonBody : JSON objet seulement, en JSON, 64 Ko au plus", async () => 
   assert.deepEqual(await readJsonBody(jsonRequest(big)), { ok: false, error: "payloadTooLarge" });
 });
 
-test("readJsonBody : un corps envoyé en morceaux, sans taille déclarée, est coupé à 64 Ko", async () => {
+test("readJsonBody: a body sent in chunks, without a declared size, is cut at 64 KB", async () => {
   let sent = 0;
   const stream = new ReadableStream<Uint8Array>({
     pull(controller) {
@@ -169,7 +169,7 @@ test("readJsonBody : un corps envoyé en morceaux, sans taille déclarée, est c
       if (sent > 1024 * 1024) controller.close();
     },
   });
-  // `duplex` est exigé par Node pour un corps en flux, absent des types DOM de RequestInit.
+  // `duplex` is required by Node for a streamed body, missing from the DOM types of RequestInit.
   const init: RequestInit & { duplex: "half" } = {
     method: "POST",
     headers: { "content-type": "application/json" },

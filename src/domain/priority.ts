@@ -1,6 +1,6 @@
 export const PRIORITY_MAX = 5;
 
-/** Priorité stockée : "1"…"5", ou null. */
+/** Stored priority: "1"…"5", or null. */
 export function parsePriority(value: string | null | undefined): number | null {
   const trimmed = (value ?? "").trim();
   if (!trimmed) return null;

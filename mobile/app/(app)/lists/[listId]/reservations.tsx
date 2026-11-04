@@ -19,8 +19,8 @@ import { Text } from "@/ui/Text";
 type Reservation = Schemas["MemberReservation"];
 
 /**
- * Onglet Réservations, d'après `08-liste-reservations.png` : idée, offreur, petit mot.
- * Annuler est une action de membre qui exige le serveur ; hors ligne, lecture seule.
+ * Reservations tab, from `08-liste-reservations.png`: idea, giver, note.
+ * Cancelling is a member action that requires the server; offline, read-only.
  */
 export default function Reservations() {
   const { t } = useTranslation("list");

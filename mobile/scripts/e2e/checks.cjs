@@ -1,13 +1,13 @@
-// Prérequis de la suite (FR-012), vérifiés avant le premier parcours.
-// Chaque vérification rend { ok: true, … } ou { ok: false, message } avec ce qu'il faut faire.
+// Prerequisites of the suite (FR-012), checked before the first flow.
+// Each check returns { ok: true, … } or { ok: false, message } with what to do.
 const { execFileSync } = require("node:child_process");
 
 const APP_ID = "app.ohyoushouldnt.mobile";
-// 10.0.2.2 n'est l'alias du Mac que vu de l'émulateur Android ; vu du Mac, où tourne le runner,
-// c'est une adresse du réseau local.
+// 10.0.2.2 is the Mac's alias only as seen from the Android emulator; as seen from the Mac, where the runner runs,
+// it is a local network address.
 const LOCAL_HOSTS = new Set(["localhost", "127.0.0.1"]);
 
-/** La suite ne vise jamais la production (R4). */
+/** The suite never targets production (R4). */
 function isLocalApiUrl(url) {
   try {
     const parsed = new URL(url);
@@ -31,10 +31,10 @@ function tryRun(command, args) {
 
 function findMaestro() {
   if (tryRun("maestro", ["--version"]) !== null) return { ok: true };
-  return { ok: false, message: "Maestro est introuvable : curl -Ls https://get.maestro.mobile.dev | bash" };
+  return { ok: false, message: "Maestro not found: curl -Ls https://get.maestro.mobile.dev | bash" };
 }
 
-/** Simulateurs iOS démarrés et appareils Android connectés. */
+/** Booted iOS simulators and connected Android devices. */
 function listDevices() {
   const devices = [];
   const simctl = tryRun("xcrun", ["simctl", "list", "devices", "booted", "-j"]);
@@ -61,16 +61,16 @@ function pickDevice(devices, platform) {
   if (candidates.length === 0) {
     const message =
       platform === "android"
-        ? "Aucun émulateur Android démarré."
+        ? "No Android emulator running."
         : platform === "ios"
-          ? "Aucun simulateur iOS démarré."
-          : "Aucun simulateur iOS ni émulateur Android démarré.";
+          ? "No iOS simulator booted."
+          : "No iOS simulator booted and no Android emulator running.";
     return { ok: false, message };
   }
   if (!platform && new Set(candidates.map((d) => d.platform)).size > 1) {
-    return { ok: false, message: "Plusieurs appareils : précisez --platform ios ou --platform android." };
+    return { ok: false, message: "Several devices: pass --platform ios or --platform android." };
   }
-  return { ok: false, message: `Plusieurs appareils ${candidates[0].platform} démarrés : n'en gardez qu'un.` };
+  return { ok: false, message: `Several ${candidates[0].platform} devices running: keep only one.` };
 }
 
 function isAppInstalled(device) {
@@ -83,7 +83,7 @@ function isAppInstalled(device) {
     device.platform === "ios"
       ? "(cd mobile && EXPO_PUBLIC_API_URL=http://localhost:3010 npx expo run:ios --configuration Release)"
       : "(cd mobile && EXPO_PUBLIC_API_URL=http://localhost:3010 npx expo run:android --variant release)";
-  return { ok: false, message: `L'app n'est pas installée sur ${device.name} : ${build}` };
+  return { ok: false, message: `The app is not installed on ${device.name}: ${build}` };
 }
 
 module.exports = { APP_ID, isLocalApiUrl, findMaestro, listDevices, pickDevice, isAppInstalled };

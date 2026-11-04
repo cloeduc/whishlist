@@ -14,9 +14,9 @@ import { NetworkNote } from "@/ui/NetworkNote";
 import { Text } from "@/ui/Text";
 
 /**
- * Carte « Adresse de connexion » de « Mon compte » (010, US3), comme celle du site : nouvelle adresse et
- * mot de passe actuel. Le serveur rend le compte : soit un changement en attente (lien envoyé à la nouvelle
- * adresse), soit l'adresse déjà changée (serveur sans envoi d'e-mail). Repliée par défaut, comme les autres (009).
+ * « Adresse de connexion » card of « Mon compte » (010, US3), like the site one: new address and
+ * current password. The server returns the account: either a pending change (link sent to the new
+ * address), or the address already changed (server without email sending). Collapsed by default, like the others (009).
  */
 export function EmailCard() {
   const { t } = useTranslation("auth");

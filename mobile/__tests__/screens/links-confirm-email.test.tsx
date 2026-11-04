@@ -27,7 +27,7 @@ beforeEach(async () => {
 const confirmed = (purpose: "verify" | "change", ownAccount = true) => () =>
   json(200, { purpose, ownAccount, suite: null });
 
-test("connectée, adresse non confirmée : le lien confirme dès l'ouverture et le compte est relu", async () => {
+test("signed in, address not confirmed: the link confirms on opening and the account is reloaded", async () => {
   await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user: { ...me, emailVerified: false } });
   const { calls } = fakeFetch({
     "POST /auth/email-confirmation": confirmed("verify"),
@@ -42,7 +42,7 @@ test("connectée, adresse non confirmée : le lien confirme dès l'ouverture et 
   expect(screen.getByTestId("confirm-email.next")).toHaveTextContent("Mes listes");
 });
 
-test("sans session : adresse confirmée, puis la connexion est proposée", async () => {
+test("without a session: address confirmed, then sign-in is offered", async () => {
   fakeFetch({ "POST /auth/email-confirmation": confirmed("verify", false) });
   await render(<ConfirmEmailLink />);
   await screen.findByTestId("confirm-email.status");
@@ -56,7 +56,7 @@ test("changement d'adresse de son propre compte : « Mon compte »", async () =>
   await render(<ConfirmEmailLink />);
   expect(await screen.findByTestId("confirm-email.status")).toHaveTextContent(/nouvelle adresse de connexion/);
   expect(screen.getByTestId("confirm-email.next")).toHaveTextContent("Mon compte");
-  // « Mon compte » relit le compte : la nouvelle adresse y est déjà (US1-4, FR-007).
+  // « Mon compte » reloads the account: the new address is already there (US1-4, FR-007).
   expect(calls).toContain("GET /me");
   await waitFor(() => {
     const session = getSession();
@@ -64,7 +64,7 @@ test("changement d'adresse de son propre compte : « Mon compte »", async () =>
   });
 });
 
-test("connectée à un autre compte que celui du lien (US1-8) : pas de « Mon compte », aucune adresse affichée", async () => {
+test("signed in to another account than the link's (US1-8): no « Mon compte », no address shown", async () => {
   await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
   fakeFetch({ "POST /auth/email-confirmation": confirmed("change", false), "GET /me": () => json(200, me) });
   await render(<ConfirmEmailLink />);
@@ -73,7 +73,7 @@ test("connectée à un autre compte que celui du lien (US1-8) : pas de « Mon co
   expect(screen.queryByText(/@example\.test/)).toBeNull();
 });
 
-test("lien expiré : le message du site, sans adresse affichée", async () => {
+test("expired link: the site's message, with no address shown", async () => {
   fakeFetch({
     "POST /auth/email-confirmation": () =>
       json(400, { error: { code: "confirmationLinkExpired", message: "x" } }),
@@ -82,11 +82,11 @@ test("lien expiré : le message du site, sans adresse affichée", async () => {
   expect(await screen.findByTestId("confirm-email.error")).toBeOnTheScreen();
   expect(screen.queryByText(/@example\.test/)).toBeNull();
   expect(screen.queryByTestId("confirm-email.retry")).toBeNull();
-  // Sans session : comment redemander un lien, comme la page du site.
+  // Without a session: how to ask for a link again, like the site's page.
   expect(screen.getByTestId("confirm-email.login-to-resend")).toBeOnTheScreen();
 });
 
-test("serveur injoignable : « Réessayer » relance la confirmation", async () => {
+test("server unreachable: « Réessayer » retries the confirmation", async () => {
   let attempts = 0;
   fakeFetch({
     "POST /auth/email-confirmation": () => {
@@ -102,7 +102,7 @@ test("serveur injoignable : « Réessayer » relance la confirmation", async () 
   expect(attempts).toBe(2);
 });
 
-test("inscription depuis une invitation : « Reprendre l'invitation » mène à l'écran de l'invitation", async () => {
+test("sign-up from an invitation: « Reprendre l'invitation » leads to the invitation screen", async () => {
   params.suite = "/inviter/it";
   fakeFetch({
     "POST /auth/email-confirmation": () => json(200, { purpose: "verify", ownAccount: false, suite: "/inviter/it" }),

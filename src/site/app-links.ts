@@ -1,13 +1,13 @@
 /**
- * Liens du site que l'app sait ouvrir (feature 011, contracts/links.md). Module pur, repris par l'app :
- * la même table donne les fichiers d'association du domaine (`/.well-known/…`), les filtres d'intention
- * Android de `mobile/app.config.ts` et l'écran de l'app pour une adresse reçue.
+ * Site links the app can open (feature 011, contracts/links.md). Pure module, reused by the app:
+ * the same table gives the domain association files (`/.well-known/…`), the Android intent
+ * filters of `mobile/app.config.ts` and the app screen for a received address.
  */
 
-/** Identifiant de l'app publiée (iOS et Android). La variante de développement n'est pas associée au domaine. */
+/** Identifier of the published app (iOS and Android). The development variant is not associated with the domain. */
 export const APP_BUNDLE_ID = "app.ohyoushouldnt.mobile";
 
-/** Schéma propre de l'app : mêmes chemins que le site (`ohyoushouldnt://confirmer-email/…`). */
+/** The app's own scheme: same paths as the site (`ohyoushouldnt://confirmer-email/…`). */
 export const APP_SCHEME = "ohyoushouldnt";
 
 import { internalPath, stripLocalePrefix } from "../i18n/locale-path";
@@ -16,19 +16,19 @@ import routes from "./app-link-routes.json";
 type Params = Record<string, string>;
 
 export interface AppLinkRoute {
-  /** Chemin du site sans préfixe de langue ; `:param` vaut un segment non vide, sans `/`. */
+  /** Site path without language prefix; `:param` matches a non-empty segment, without `/`. */
   sitePattern: string;
-  /** Chemin de l'écran de l'app, avec les mêmes `:param`. */
+  /** Path of the app screen, with the same `:param`. */
   appPattern: string;
-  /** Clés de requête transmises à l'écran ; les autres sont ignorées. */
+  /** Query keys passed to the screen; the others are ignored. */
   keepQuery: readonly string[];
 }
 
 /**
- * La table vit dans `app-link-routes.json` : `mobile/app.config.ts` la lit aussi, et le chargeur de config
- * d'Expo lit le JSON mais pas un module TypeScript hors de `mobile/`.
- * Pas de `/listes/:id` : l'app ouvre ces pages du site exprès (« Gérer le partage sur le site »),
- * et un lien revendiqué rouvrirait l'app au lieu du navigateur.
+ * The table lives in `app-link-routes.json`: `mobile/app.config.ts` reads it too, and Expo's config
+ * loader reads JSON but not a TypeScript module outside `mobile/`.
+ * No `/listes/:id`: the app opens these site pages on purpose (« Gérer le partage sur le site »),
+ * and a claimed link would reopen the app instead of the browser.
  */
 export const APP_LINK_ROUTES: readonly AppLinkRoute[] = routes.map((route) => ({
   sitePattern: route.site,
@@ -36,14 +36,14 @@ export const APP_LINK_ROUTES: readonly AppLinkRoute[] = routes.map((route) => ({
   keepQuery: route.keepQuery,
 }));
 
-/** `/links/invite/:token` + `{ token }` → `/links/invite/<token>` (paramètres déjà encodés). */
+/** `/links/invite/:token` + `{ token }` → `/links/invite/<token>` (parameters already encoded). */
 function fillPattern(pattern: string, params: Params): string {
   return pattern.replace(/:([A-Za-z]+)/g, (_match, name: string) => params[name] ?? "");
 }
 
 const EN_PREFIX = "/en";
 
-/** `/a/b` → `["a", "b"]` ; un segment vide (`/a//b`) reste vide et ne correspond à aucun motif. */
+/** `/a/b` → `["a", "b"]`; an empty segment (`/a//b`) stays empty and matches no pattern. */
 function segments(path: string): string[] {
   return path === "/" ? [] : path.split("/").slice(1);
 }
@@ -66,7 +66,7 @@ function parseQuery(search: string): Map<string, string> {
       const key = decodeURIComponent(rawKey.replace(/\+/g, " "));
       if (!query.has(key)) query.set(key, decodeURIComponent(rest.join("=").replace(/\+/g, " ")));
     } catch {
-      // Paire mal encodée : ignorée.
+      // Badly encoded pair: ignored.
     }
   }
   return query;
@@ -89,9 +89,9 @@ function matchRoute(route: AppLinkRoute, actual: string[]): Params | null {
 }
 
 /**
- * Chemin de l'écran de l'app pour une adresse du site, ou `null` si l'app ne la traite pas.
- * Formes acceptées : `http(s)://<apiHost>/…`, `<scheme>://…` (l'hôte est le premier segment),
- * `<scheme>:///…`, ou un chemin seul. Le préfixe `/en` est ignoré : l'app suit la langue du téléphone.
+ * Path of the app screen for a site address, or `null` if the app does not handle it.
+ * Accepted forms: `http(s)://<apiHost>/…`, `<scheme>://…` (the host is the first segment),
+ * `<scheme>:///…`, or a bare path. The `/en` prefix is ignored: the app follows the phone's language.
  */
 export function appPathForSiteUrl(url: string, options: { apiHost: string; scheme?: string }): string | null {
   const scheme = options.scheme ?? APP_SCHEME;
@@ -129,7 +129,7 @@ export function appPathForSiteUrl(url: string, options: { apiHost: string; schem
   return null;
 }
 
-/** Motif d'un chemin pour le fichier Apple : `:param` → `*`. */
+/** Path pattern for the Apple file: `:param` → `*`. */
 function applePattern(route: AppLinkRoute): string {
   return route.sitePattern.replace(/:[A-Za-z]+/g, "*");
 }
@@ -138,7 +138,7 @@ function withEnglish(paths: string[]): string[] {
   return [...new Set(paths.flatMap((path) => [path, `${EN_PREFIX}${path}`]))];
 }
 
-/** Contenu de `/.well-known/apple-app-site-association` (liens universels iOS). */
+/** Content of `/.well-known/apple-app-site-association` (iOS universal links). */
 export function appleAssociation(teamId: string) {
   return {
     applinks: {
@@ -154,7 +154,7 @@ export function appleAssociation(teamId: string) {
 
 const FINGERPRINT = /^([0-9A-F]{2}:){31}[0-9A-F]{2}$/;
 
-/** Contenu de `/.well-known/assetlinks.json` (App Links Android) ; les empreintes mal formées sont ignorées. */
+/** Content of `/.well-known/assetlinks.json` (Android App Links); malformed fingerprints are ignored. */
 export function androidAssociation(fingerprints: readonly string[]) {
   const valid = fingerprints.map((value) => value.trim().toUpperCase()).filter((value) => FINGERPRINT.test(value));
   return [
@@ -165,7 +165,7 @@ export function androidAssociation(fingerprints: readonly string[]) {
   ];
 }
 
-/** Préfixes des filtres d'intention Android : la partie fixe de chaque chemin, avec et sans `/en`. */
+/** Prefixes of the Android intent filters: the fixed part of each path, with and without `/en`. */
 export function androidPathPrefixes(): string[] {
   return withEnglish(APP_LINK_ROUTES.map((route) => route.sitePattern.split(":")[0]));
 }

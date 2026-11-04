@@ -38,7 +38,7 @@ function base(): Database {
   return created.doc;
 }
 
-test("invitation, membres, départ du créateur", () => {
+test("invitation, members, creator leaving", () => {
   const doc = base();
   const list = doc.wishlists[0]!;
   assert.notEqual(list.readToken, list.inviteToken);
@@ -82,7 +82,7 @@ test("invitation, membres, départ du créateur", () => {
   assert.equal(outsider.ok, false);
 });
 
-test("réglages : sous-titre, image et couleurs", () => {
+test("settings: subtitle, image and colors", () => {
   const doc = base();
   assert.equal(doc.wishlists[0]?.theme.primary, "#1e60ff");
   const updated = updateWishlistSettings(doc, {

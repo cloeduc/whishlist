@@ -1,8 +1,8 @@
 import { redirectSystemPath } from "../../app/+native-intent";
 
-// Le build de test vise https://api.example.test (__tests__/setup.ts).
-describe("réception d'un lien (011)", () => {
-  it("lien web du serveur de ce build, lien au schéma : écran de l'app", () => {
+// The test build targets https://api.example.test (__tests__/setup.ts).
+describe("receiving a link (011)", () => {
+  it("web link of this build's server, or scheme link: the app screen", () => {
     expect(redirectSystemPath({ path: "https://api.example.test/en/reinitialiser/tok", initial: true })).toBe(
       "/links/reset-password/tok",
     );
@@ -12,7 +12,7 @@ describe("réception d'un lien (011)", () => {
     );
   });
 
-  it("adresse inconnue, d'un autre serveur ou mal formée : l'accueil, sans lever", () => {
+  it("unknown, foreign-server or malformed address: the home screen, without throwing", () => {
     for (const path of [
       "ohyoushouldnt://guide",
       "https://evil.example/inviter/tok",

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { normalizePriority, parsePriority } from "../../src/domain/priority";
 
-test("priorité 1–5 ou vide", () => {
+test("priority 1–5 or empty", () => {
   assert.equal(parsePriority(null), null);
   assert.equal(parsePriority(""), null);
   assert.equal(parsePriority("3"), 3);

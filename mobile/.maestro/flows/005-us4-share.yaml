@@ -1,7 +1,7 @@
-# 005 US4 : QR code, lien public (jamais le lien d'invitation), copie confirmée, feuille de partage ouverte.
-# Scanner le QR code et ce que reçoit la feuille de partage restent manuels (exclusions.md).
+# 005 US4: QR code, public link (never the invite link), copy confirmed, share sheet opened.
+# Scanning the QR code and what the share sheet receives stay manual (exclusions.md).
 appId: app.ohyoushouldnt.mobile
-name: "005 US4 — Partager une liste publiquement"
+name: "005 US4 — Share a list publicly"
 tags:
   - 005-us4
 ---
@@ -31,13 +31,13 @@ tags:
       id: copy-link
 - tapOn:
     id: copy-link
-# Le message s'affiche sous le champ, parfois sous le bas de l'écran : on fait défiler jusqu'à lui.
+# The message shows under the field, sometimes below the bottom of the screen: scroll down to it.
 - scrollUntilVisible:
     element:
       id: share.copied
     timeout: 5000
 
-# La feuille de partage du système s'ouvre ; on la referme.
+# The system share sheet opens; we close it.
 - scrollUntilVisible:
     element:
       id: share.share

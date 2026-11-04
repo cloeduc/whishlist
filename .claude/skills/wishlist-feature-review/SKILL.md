@@ -59,7 +59,9 @@ Lis d'abord la section « Conventions » de AGENTS.md.
 
 Vérifie que le code suit ces règles : couches (règles métier dans src/domain, accès au JSON
 uniquement par src/store/db.ts et updateDocument, pas de règle métier dans app/),
-nommage en anglais, typage TypeScript strict (pas de `any` ni de cast pour faire taire le compilateur),
+langue du code (convention « Langue du code » d'AGENTS.md : signale tout identifiant, commentaire,
+description de test ou message technique en français, mais pas les textes du produit, les citations
+entre « » ni les exceptions de la convention), typage TypeScript strict (pas de `any` ni de cast pour faire taire le compilateur),
 gestion d'erreur (codes d'erreur traduits par translateError), composants Next.js
 (server / client, "use client" seulement si nécessaire).
 Une nouvelle variable d'environnement doit figurer dans README.md, .env.example et
@@ -82,7 +84,6 @@ Lis la partie i18n de la section « Conventions » de AGENTS.md, et src/i18n/con
 - Français : vouvoiement, lexique du produit (« J'offre », « qui », « idée », « liste »).
   Anglais : même sens que le français, pas une traduction mot à mot.
 - Liens internes : via withLocale, pas de chemin écrit sans la langue.
-Les commentaires en français sont acceptés : ne les signale pas.
 ```
 
 ### Contrôle 3 : duplication

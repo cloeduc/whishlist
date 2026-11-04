@@ -5,7 +5,7 @@ import { tokens } from "@/theme/tokens";
 import { ListCover } from "@/ui/ListCover";
 import { Text } from "@/ui/Text";
 
-/** Couverture, titre et sous-titre de la liste vue en invité, comme l'en-tête de la page publique du site. */
+/** Cover, title and subtitle of the list seen as a guest, like the header of the site public page. */
 export function GuestListHeader({ list }: { list: Schemas["PublicList"] }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.space[3] }}>

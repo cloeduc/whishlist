@@ -74,7 +74,7 @@ export function IdeasAccordion({
   types: TypeCol[];
   people: { id: string; label: string }[];
   items: AccordionIdea[];
-  /** Listes dont on est membre (celle-ci comprise), pour déplacer ou copier une idée. */
+  /** Lists the user is a member of (this one included), to move or copy an idea. */
   targets: TransferTarget[];
   llmEnabled?: boolean;
 }) {
@@ -102,7 +102,7 @@ export function IdeasAccordion({
   const [overTypeId, setOverTypeId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /** Message après un déplacement ou une copie, avec le lien vers la liste d'arrivée. */
+  /** Message after a move or a copy, with the link to the target list. */
   const [notice, setNotice] = useState<{ text: string; href: string | null } | null>(null);
   const [pending, startTransition] = useTransition();
   const [openValues, setOpenValues] = useState<string[]>([]);
@@ -398,11 +398,11 @@ export function IdeasAccordion({
       </Accordion>
 
       <Dialog open={editingItem !== null} onOpenChange={(open) => !open && setEditingId(null)}>
-        {/* Sur deux rangées le formulaire dépasse les 40rem du dialogue par défaut : un ascenseur
-            apparaissait et coupait le bouton de suppression. Ce plafond ignore la hauteur réellement
-            disponible — ici on lui laisse la fenêtre (`cn` est un tailwind-merge, la classe remplace
-            bien `max-h-[min(90vh,40rem)]`). En `dvh` et non en `vh` : sur mobile `vh` vaut la hauteur
-            barre d'adresse rétractée, et 90vh peut donc dépasser quand la barre est affichée. */}
+        {/* On two rows the form exceeds the dialog's default 40rem: a scrollbar
+            appeared and cut off the delete button. That cap ignores the height actually
+            available — here it gets the window (`cn` is a tailwind-merge, the class does replace
+            `max-h-[min(90vh,40rem)]`). In `dvh` and not `vh`: on mobile `vh` is the height with
+            the address bar collapsed, so 90vh can overflow when the bar is shown. */}
         <DialogContent className="max-h-[90dvh]">
           {editingItem ? (
             <>

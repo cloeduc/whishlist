@@ -1,26 +1,26 @@
 import type { SharePayload } from "expo-sharing";
 
-/** Ce qu'un partage propose pour une nouvelle idée : un lien, et le texte autour comme nom. */
+/** What a share offers for a new idea: a link, and the surrounding text as name. */
 export type SharedIdea = { url: string; name: string };
 
 const URL_PATTERN = /https?:\/\/[^\s<>"']+/i;
-/** Ponctuation collée au lien dans une phrase (« … ici : https://x.fr/a). ») : pas une partie de l'adresse. */
+/** Punctuation stuck to the link in a sentence (« … ici : https://x.fr/a). »): not part of the address. */
 const URL_TAIL = /[).,;:!?»”'"]+$/;
-/** Séparateurs laissés autour du nom une fois le lien retiré (« Lampe – https://… », « "Lampe" | Boutique »). */
+/** Separators left around the name once the link is removed (« Lampe – https://… », « "Lampe" | Boutique »). */
 const EDGES = /^[\s\-–—|:,;"'«“”»]+|[\s\-–—|:,;"'«“”»]+$/g;
 const MAX_NAME = 200;
-/** Au-delà, ce n'est plus l'adresse d'une page de cadeau (un lien de suivi, des données collées) : on l'ignore. */
+/** Beyond this, it is no longer the address of a gift page (a tracking link, pasted data): ignore it. */
 const MAX_URL = 2048;
 
-/** Le serveur n'accepte que `http://` et `https://` en minuscules : « HTTPS://… » est ramené à cette forme. */
+/** The server only accepts lowercase `http://` and `https://`: « HTTPS://… » is brought back to this form. */
 function normalizeScheme(url: string): string {
   return url.replace(/^https?/i, (scheme) => scheme.toLowerCase());
 }
 
 /**
- * Lit les contenus partagés : le premier lien http(s) (d'un partage d'URL ou trouvé dans un texte, schéma en
- * minuscules, ignoré au-delà de 2048 caractères),
- * et le reste du texte, nettoyé, comme nom proposé. Rend null s'il n'y a ni lien ni texte (image seule…).
+ * Reads the shared contents: the first http(s) link (from a URL share or found in a text, scheme in
+ * lowercase, ignored beyond 2048 characters),
+ * and the rest of the text, cleaned, as suggested name. Returns null if there is neither link nor text (image only…).
  */
 export function sharedIdea(payloads: readonly SharePayload[]): SharedIdea | null {
   let url = "";

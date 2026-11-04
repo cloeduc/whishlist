@@ -7,7 +7,7 @@ import { clientIp, isRateLimitError } from "../rate-limit";
 import { apiStatusFor, publicErrorCode } from "./errors";
 import { usesApiKey } from "./auth";
 
-/** Taille maximale d'un corps de requête (API et serveur MCP). */
+/** Maximum size of a request body (API and MCP server). */
 export const MAX_BODY_BYTES = 64 * 1024;
 
 const ALLOWED_METHODS = "GET, POST, PUT, PATCH, DELETE, OPTIONS";
@@ -15,7 +15,7 @@ const ALLOWED_HEADERS = "Authorization, Content-Type, Accept-Language, X-Read-Un
 
 export type OriginDecision = "allow" | "allow-cors" | "deny";
 
-/** Origine web à renvoyer dans `Access-Control-Allow-Origin`, ou null. */
+/** Web origin to return in `Access-Control-Allow-Origin`, or null. */
 type Cors = string | null;
 
 export type ApiRequestContext = {
@@ -25,7 +25,7 @@ export type ApiRequestContext = {
   cors: Cors;
 };
 
-/** Schémas acceptés pour une origine d'app : le web, et les WebView Capacitor / Ionic. */
+/** Schemes accepted for an app origin: the web, and Capacitor / Ionic WebViews. */
 const APP_PROTOCOLS = ["http:", "https:", "capacitor:", "ionic:"];
 
 export function parseAllowedOrigins(raw: string | undefined = process.env.API_ALLOWED_ORIGINS): string[] {
@@ -37,8 +37,8 @@ export function parseAllowedOrigins(raw: string | undefined = process.env.API_AL
 }
 
 /**
- * Sans `Origin` (app native, curl) : accepté. Depuis le site : accepté sans CORS.
- * Depuis une origine déclarée : accepté avec CORS. Sinon : refusé (FR-040).
+ * Without `Origin` (native app, curl): accepted. From the site: accepted without CORS.
+ * From a declared origin: accepted with CORS. Otherwise: refused (FR-040).
  */
 export function originDecision(input: {
   origin: string | null;
@@ -51,7 +51,7 @@ export function originDecision(input: {
   return "deny";
 }
 
-/** Langue des messages : la première langue demandée si c'est l'anglais, sinon le français. */
+/** Message language: the first requested language if it is English, otherwise French. */
 export function apiLocaleFrom(acceptLanguage: string | null): Locale {
   const first = acceptLanguage?.split(",")[0]?.trim().toLowerCase() ?? "";
   return first === "en" || first.startsWith("en-") ? "en" : defaultLocale;
@@ -88,7 +88,7 @@ export async function apiError(
 
 export type JsonBody = Record<string, unknown>;
 
-/** Lit au plus `MAX_BODY_BYTES` octets, même sans `Content-Length` (corps envoyé en morceaux). */
+/** Reads at most `MAX_BODY_BYTES` bytes, even without `Content-Length` (chunked body). */
 async function readLimited(req: Request): Promise<Uint8Array | null> {
   if (!req.body) return new Uint8Array();
   const reader = req.body.getReader();
@@ -113,7 +113,7 @@ async function readLimited(req: Request): Promise<Uint8Array | null> {
   return bytes;
 }
 
-/** Corps JSON objet ; chaque champ reste `unknown` jusqu'à ce que la route le vérifie. */
+/** Object JSON body; each field stays `unknown` until the route checks it. */
 export async function readJsonBody(
   req: Request,
 ): Promise<{ ok: true; body: JsonBody } | { ok: false; error: "unsupportedMediaType" | "payloadTooLarge" | "invalidJson" }> {
@@ -136,17 +136,17 @@ export function isJsonObject(value: unknown): value is JsonBody {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** Champ texte d'un corps JSON : une chaîne, sinon "". */
+/** Text field of a JSON body: a string, otherwise "". */
 export function text(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
-/** Champ facultatif : absent → `undefined` ; présent mais pas une chaîne → `""` (refusé par la commande). */
+/** Optional field: missing → `undefined`; present but not a string → `""` (refused by the command). */
 export function optionalText(value: unknown): string | undefined {
   return value === undefined ? undefined : text(value);
 }
 
-/** L'origine du site est celle des liens (`APP_ORIGIN`, sinon déduite de la requête comme le site). */
+/** The site origin is the links' origin (`APP_ORIGIN`, otherwise derived from the request like the site). */
 async function decide(req: NextRequest): Promise<{ decision: OriginDecision; cors: Cors }> {
   const origin = req.headers.get("origin");
   const decision = originDecision({ origin, siteOrigin: await siteOrigin(), allowed: parseAllowedOrigins() });
@@ -155,10 +155,10 @@ async function decide(req: NextRequest): Promise<{ decision: OriginDecision; cor
 
 type HandlerContext<P> = { params: Promise<P> };
 
-/** Enveloppe commune : origine, langue, IP, limites de débit et erreurs inattendues. */
+/** Common wrapper: origin, language, IP, rate limits and unexpected errors. */
 /**
- * Chemin d'API pour le journal, sans les jetons qu'il porte (invitation, lien public d'une liste) :
- * ils donnent accès à une liste et ne s'écrivent jamais en clair dans les journaux (011, FR-009).
+ * API path for the log, without the tokens it carries (invitation, public link of a list):
+ * they give access to a list and are never written in plain text in the logs (011, FR-009).
  */
 export function redactedApiPath(pathname: string): string {
   return pathname.replace(/\/(invitations|public\/lists)\/[^/]+/g, "/$1/…");
@@ -169,8 +169,8 @@ export function withApi<P = Record<string, never>>(
 ): (req: NextRequest, ctx: HandlerContext<P>) => Promise<Response> {
   return async (req, ctx) => {
     const locale = apiLocaleFrom(req.headers.get("accept-language"));
-    // Une clé d'API n'ouvre que le serveur MCP (`/api/mcp`) : l'API JSON reste aux jetons de session de l'app,
-    // pour qu'une route ajoutée plus tard ne soit jamais ouverte à une clé par oubli.
+    // An API key only opens the MCP server (`/api/mcp`): the JSON API stays for app session tokens,
+    // so that a route added later is never opened to a key by mistake.
     if (usesApiKey(req)) return apiError("apiKeyNotAllowed", locale);
     const { decision, cors } = await decide(req);
     if (decision === "deny") return apiError("originNotAllowed", locale);
@@ -186,7 +186,7 @@ export function withApi<P = Record<string, never>>(
   };
 }
 
-/** Réponse au préflight CORS, pour les origines déclarées seulement. */
+/** Response to the CORS preflight, for declared origins only. */
 export async function apiPreflight(req: NextRequest): Promise<Response> {
   const { decision, cors } = await decide(req);
   if (decision !== "allow-cors" || !cors) {

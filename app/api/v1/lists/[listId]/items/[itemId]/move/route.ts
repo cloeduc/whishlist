@@ -6,7 +6,7 @@ import { moveItem } from "@/src/server/commands/items";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** `{ targetListId, typeId, personId }` : l'idée change de liste et garde son identifiant. */
+/** `{ targetListId, typeId, personId }`: the idea changes list and keeps its id. */
 export const POST = withApi<{ listId: string; itemId: string }>(async (api, { listId, itemId }) => {
   const body = await readJsonBody(api.req);
   if (!body.ok) return apiError(body.error, api.locale, api.cors);

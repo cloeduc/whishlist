@@ -1,5 +1,5 @@
-# Après un partage reçu : choisit la liste demo-list sur « Ajouter à une liste », vérifie le lien prérempli,
-# nomme l'idée NAME, l'ajoute, puis vérifie que la liste s'ouvre avec l'idée (catégorie Livres, la première).
+# After a received share: picks the list demo-list on « Ajouter à une liste », checks the prefilled link,
+# names the idea NAME, adds it, then checks that the list opens with the idea (category Livres, the first one).
 appId: app.ohyoushouldnt.mobile
 ---
 - extendedWaitUntil:
@@ -18,7 +18,7 @@ appId: app.ohyoushouldnt.mobile
 - assertVisible:
     id: item-form.url
     text: ${URL}
-# « Remplir depuis le lien » part tout seul : on attend qu'il ait fini avant de saisir le nom.
+# « Remplir depuis le lien » starts on its own: wait for it to finish before typing the name.
 - extendedWaitUntil:
     visible:
       id: enrich
@@ -28,7 +28,7 @@ appId: app.ohyoushouldnt.mobile
     id: item-form.name
 - inputText: ${NAME}
 - runFlow: submit-item-form.yaml
-# L'idée enregistrée ouvre la liste (à froid, il n'y a pas d'écran derrière le formulaire).
+# The saved idea opens the list (on a cold start, there is no screen behind the form).
 - extendedWaitUntil:
     visible:
       id: list.screen

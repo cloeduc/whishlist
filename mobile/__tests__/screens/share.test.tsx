@@ -17,7 +17,7 @@ import { freshDb } from "../helpers/memory-db";
 jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
 jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
 jest.mock("expo-clipboard", () => ({ setStringAsync: jest.fn(async () => true) }));
-// Le QR code est remplacé par une vue qui expose la valeur encodée.
+// The QR code is replaced by a view that exposes the encoded value.
 jest.mock("react-native-qrcode-svg", () => {
   const { Text } = require("react-native");
   return ({ value }: { value: string }) => <Text testID="qr-value">{value}</Text>;
@@ -98,14 +98,14 @@ test("a list not sent yet shows neither QR code nor sharing, but the explanation
   expect(screen.queryByRole("button", { name: "Partager" })).toBeNull();
 });
 
-test("« Voir comme un invité » ouvre la vue invité de l'app, sans renvoyer le membre à sa liste (011)", async () => {
+test("« Voir comme un invité » opens the app's guest view, without sending the member back to their list (011)", async () => {
   await putSnapshot("list:w", { ...list, readUrl: "https://api.example.test/en/l/rt" });
   await renderShare("w", { ...list, readUrl: "https://api.example.test/en/l/rt" });
   await fireEvent.press(await screen.findByText(i18n.t("list:viewAsGuest")));
   expect(router.push).toHaveBeenCalledWith("/guest/rt?preview=1");
 });
 
-test("« Voir comme un invité » vers un autre serveur que celui de l'app : le navigateur", async () => {
+test("« Voir comme un invité » to another server than the app's: the browser", async () => {
   const openURL = jest.spyOn(Linking, "openURL").mockResolvedValue(undefined);
   await renderShare();
   await fireEvent.press(await screen.findByText(i18n.t("list:viewAsGuest")));

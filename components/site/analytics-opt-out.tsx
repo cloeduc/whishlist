@@ -13,7 +13,7 @@ function readOptOut(): boolean {
   }
 }
 
-/** Suit le choix enregistré, y compris depuis un autre onglet (`storage`). */
+/** Follows the saved choice, including from another tab (`storage`). */
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   window.addEventListener("storage", listener);
@@ -24,7 +24,7 @@ function subscribe(listener: () => void): () => void {
 }
 
 export function AnalyticsOptOut({ offLabel, onLabel }: { offLabel: string; onLabel: string }) {
-  // Côté serveur, et au premier rendu, le choix est inconnu : mesure active.
+  // On the server, and on first render, the choice is unknown: tracking on.
   const off = useSyncExternalStore(subscribe, readOptOut, () => false);
 
   function toggle() {

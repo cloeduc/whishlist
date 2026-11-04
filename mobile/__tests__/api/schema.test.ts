@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-// Le contrat de l'API est la source de vérité (R9) : les types de l'app doivent en être la copie exacte.
+// The API contract is the source of truth (R9): the app's types must be an exact copy of it.
 test("src/api/schema.d.ts is up to date with the API contract (npm run api:types)", () => {
   const root = join(__dirname, "../..");
   const out = join(mkdtempSync(join(tmpdir(), "schema-")), "schema.d.ts");

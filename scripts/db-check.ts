@@ -1,5 +1,5 @@
-// Contrôle à blanc, sans rien écrire : `npm run db:check -- <fichier.json|fichier.db> [--counts]`.
-// À lancer sur une copie de la prod avant de déployer la version qui importe l'ancien fichier.
+// Dry-run check, writes nothing: `npm run db:check -- <file.json|file.db> [--counts]`.
+// To run on a copy of prod before deploying the version that imports the old file.
 import path from "node:path";
 import process from "node:process";
 import type { Database as Doc } from "../src/domain/types";
@@ -10,7 +10,7 @@ const args = process.argv.slice(2);
 const counts = args.includes("--counts");
 const target = args.find((arg) => !arg.startsWith("--"));
 if (!target) {
-  console.error("Usage: npm run db:check -- <fichier.json|fichier.db> [--counts]");
+  console.error("Usage: npm run db:check -- <file.json|file.db> [--counts]");
   process.exit(2);
 }
 const file = path.resolve(target);
@@ -33,7 +33,7 @@ if (counts) {
   for (const [name, rows] of Object.entries(doc)) console.log(`${name} ${(rows as unknown[]).length}`);
 }
 if (problems.length > 0) {
-  console.error(`${problems.length} problème(s) :\n- ${problems.join("\n- ")}`);
+  console.error(`${problems.length} problem(s):\n- ${problems.join("\n- ")}`);
   process.exit(1);
 }
-console.log("aucun problème");
+console.log("no problem");

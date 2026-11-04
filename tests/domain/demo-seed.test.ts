@@ -9,7 +9,7 @@ import Database from "better-sqlite3";
 import { importTemplate } from "../../src/domain/import";
 import { emptyDatabase, type SeedFile } from "../../src/domain/types";
 
-test("fixture démo couvre liste, archive et réservation sans données réelles", async () => {
+test("demo fixture covers list, archive and reservation without real data", async () => {
   const seed = JSON.parse(await readFile("data/demo-seed.json", "utf8")) as SeedFile;
   assert.equal(seed.items.length, 9);
   assert.equal(seed.items.some((item) => item.archived), true);
@@ -26,7 +26,7 @@ test("fixture démo couvre liste, archive et réservation sans données réelles
   assert.equal(imported.items.some((item) => item.id === "demo-list:jeu"), true);
 });
 
-test("base de démo : les comptes sont vérifiés, utilisables sans e-mail", async () => {
+test("demo database: accounts are verified, usable without email", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "wl-demo-"));
   try {
     await promisify(execFile)(

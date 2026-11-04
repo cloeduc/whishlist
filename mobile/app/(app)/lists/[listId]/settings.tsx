@@ -6,9 +6,9 @@ import { useOnline } from "@/network";
 import { Alert } from "@/ui/Alert";
 
 /**
- * Onglet Réglages, d'après le bloc catégories / « qui » de `10-liste-reglages.png` (FR-016).
- * Apparence et suppression de la liste restent sur le site dans cette version.
- * Hors ligne, ou pour une liste pas encore envoyée : indisponible, avec l'explication (FR-029b).
+ * Settings tab, from the categories / « qui » block of `10-liste-reglages.png` (FR-016).
+ * List appearance and deletion stay on the site in this version.
+ * Offline, or for a list not sent yet: unavailable, with the explanation (FR-029b).
  */
 export default function Settings() {
   const { t } = useTranslation("mobile");

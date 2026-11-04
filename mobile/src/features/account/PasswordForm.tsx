@@ -12,9 +12,9 @@ import { Input } from "@/ui/Input";
 import { NetworkNote } from "@/ui/NetworkNote";
 
 /**
- * Bloc « Modifier le mot de passe » de `11-compte.png`. `forced` : première connexion,
- * sans mot de passe actuel (FR-005). Le serveur rend un nouveau jeton, enregistré aussitôt.
- * `testID` : base des identifiants des champs et du bouton (`<testID>-current`, `-next`, `-confirm`, `-submit`).
+ * « Modifier le mot de passe » block of `11-compte.png`. `forced`: first sign-in,
+ * without a current password (FR-005). The server returns a new token, saved right away.
+ * `testID`: base of the field and button identifiers (`<testID>-current`, `-next`, `-confirm`, `-submit`).
  */
 export function PasswordForm({ forced = false, testID }: { forced?: boolean; testID?: string }) {
   const id = (suffix: string) => (testID ? `${testID}-${suffix}` : undefined);
@@ -37,7 +37,7 @@ export function PasswordForm({ forced = false, testID }: { forced?: boolean; tes
   );
 
   function submit() {
-    // Seule vérification locale, comme le formulaire du site : les deux saisies doivent être identiques.
+    // Only local check, like the site form: both entries must match.
     if (next !== confirm) {
       change.setError(t("changePassword.errorMismatch"));
       return;

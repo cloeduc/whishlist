@@ -25,14 +25,14 @@ function confirmUrl(ctx: CommandContext, token: string, suite: string | null): s
   return suite ? `${page}?suite=${encodeURIComponent(suite)}` : page;
 }
 
-/** Le lien n'est rendu qu'en dev quand l'e-mail n'est pas parti (affichage du site), jamais en production. */
+/** The link is returned only in dev when the email was not sent (shown by the site), never in production. */
 function revealed(url: string, sent: boolean): string | null {
   return !sent && process.env.NODE_ENV !== "production" ? url : null;
 }
 
 /**
- * Crée (ou remplace) le lien de confirmation de l'adresse actuelle et l'envoie, hors de la transaction.
- * `suite` : où reprendre après la confirmation (une invitation, par exemple).
+ * Creates (or replaces) the confirmation link of the current address and sends it, outside the transaction.
+ * `suite`: where to resume after the confirmation (an invitation, for example).
  */
 export async function sendVerificationLink(
   ctx: CommandContext,
@@ -48,7 +48,7 @@ export async function sendVerificationLink(
   return { ok: true, sent: mail.sent, failed: mail.failed, verificationUrl: revealed(url, mail.sent) };
 }
 
-/** Renvoie le lien de confirmation (bandeau, « Mon compte ») ; le lien précédent cesse de valoir (US2). */
+/** Resends the confirmation link (banner, « Mon compte »); the previous link stops being valid (US2). */
 export async function resendEmailVerification(
   ctx: CommandContext,
 ): Promise<CommandResult<{ sent: boolean; failed: boolean; verificationUrl: string | null }>> {
@@ -60,8 +60,8 @@ export async function resendEmailVerification(
 }
 
 /**
- * Ce que montre la page de confirmation avant le clic, sans rien écrire.
- * L'adresse n'est lisible en entier que par le compte concerné, connecté.
+ * What the confirmation page shows before the click, without writing anything.
+ * The full address is readable only by the account concerned, signed in.
  */
 export async function previewEmailConfirmation(
   ctx: CommandContext,
@@ -74,7 +74,7 @@ export async function previewEmailConfirmation(
   return { ok: true, purpose: found.confirmation.purpose, email: ownAccount ? email : maskEmail(email), ownAccount };
 }
 
-/** Confirme le lien (bouton de la page, jamais à l'ouverture : les antivirus de messagerie ouvrent les liens). */
+/** Confirms the link (page button, never on opening: mail antivirus software opens links). */
 export async function confirmEmailWithToken(
   ctx: CommandContext,
   input: { token: string; suite?: string | null },
@@ -86,7 +86,7 @@ export async function confirmEmailWithToken(
   });
   if (!confirmed.ok) return { ok: false, error: confirmed.error };
   if (confirmed.purpose === "change") {
-    // L'ancienne adresse est prévenue, sans lien d'action : si ce n'était pas elle, le contact.
+    // The old address is notified, without an action link: if it was not them, the contact.
     await sendEmailChangedNoticeMail({
       to: confirmed.previousEmail,
       maskedNewEmail: maskEmail(confirmed.email),
@@ -102,8 +102,8 @@ export async function confirmEmailWithToken(
 }
 
 /**
- * Demande de changement d'adresse (US3), mot de passe actuel exigé. Avec l'envoi d'e-mail actif, un lien part
- * vers la nouvelle adresse et l'adresse de connexion ne change qu'à sa confirmation ; sinon elle change tout de suite.
+ * Address change request (US3), current password required. With email sending active, a link is sent
+ * to the new address and the sign-in address changes only on its confirmation; otherwise it changes right away.
  */
 export async function requestOwnEmailChange(
   ctx: CommandContext,
@@ -124,14 +124,14 @@ export async function requestOwnEmailChange(
   });
   if (!requested.ok) return requested;
   if (!requested.token) return { ok: true, me: requested.me, sent: false, confirmUrl: null };
-  // Adresse d'un autre compte : rien ne part vers elle, et la réponse ne doit pas le laisser voir.
+  // Address of another account: nothing is sent to it, and the response must not let that show.
   if (requested.taken) return { ok: true, me: requested.me, sent: true, confirmUrl: null };
   const url = confirmUrl(ctx, requested.token, null);
   const mail = await sendEmailChangeMail({ to: requested.email, confirmUrl: url, locale: ctx.locale });
   return { ok: true, me: requested.me, sent: mail.sent, confirmUrl: revealed(url, mail.sent) };
 }
 
-/** Annule le changement d'adresse en attente ; sans demande, ne fait rien. */
+/** Cancels the pending address change; without a request, does nothing. */
 export async function cancelOwnEmailChange(ctx: CommandContext): Promise<CommandResult<{ me: MeView }>> {
   const active = activeUser(ctx);
   if (!active.ok) return active;

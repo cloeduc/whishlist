@@ -29,7 +29,7 @@ async function newAccount(): Promise<Database> {
   return registered.doc;
 }
 
-test("validation : seul le dernier lien envoyé reste valable, et seule son empreinte est stockée", async () => {
+test("validation: only the last link sent stays valid, and only its fingerprint is stored", async () => {
   const doc = await newAccount();
   assert.equal(isEmailVerified(doc.users[0]), false);
 
@@ -58,14 +58,14 @@ test("validation : seul le dernier lien envoyé reste valable, et seule son empr
   assert.equal(isEmailVerified(confirmed.doc.users[0]), true);
   assert.deepEqual(confirmed.doc.emailConfirmations, []);
 
-  // Usage unique.
+  // Single use.
   assert.deepEqual(confirmEmail(confirmed.doc, { token: second.token, now: NOW }), {
     ok: false,
     error: "confirmationLinkInvalid",
   });
 });
 
-test("validation : lien inconnu, vide, expiré ou pour un compte absent", async () => {
+test("validation: unknown, empty or expired link, or for a missing account", async () => {
   const doc = await newAccount();
   const created = createEmailVerification(doc, { userId: "sam", now: NOW });
   assert.ok(created.ok);
@@ -90,7 +90,7 @@ test("validation : lien inconnu, vide, expiré ou pour un compte absent", async 
   });
 });
 
-test("validation : un lien pour une adresse qui n'est plus celle du compte ne vaut plus rien", async () => {
+test("validation: a link for an address that is no longer the account's is worthless", async () => {
   const doc = await newAccount();
   const created = createEmailVerification(doc, { userId: "sam", now: NOW });
   assert.ok(created.ok);
@@ -101,7 +101,7 @@ test("validation : un lien pour une adresse qui n'est plus celle du compte ne va
   });
 });
 
-test("maskEmail : reconnaissable sans être lisible", () => {
+test("maskEmail: recognizable without being readable", () => {
   assert.equal(maskEmail("camille@example.test"), "ca•••@example.test");
   assert.equal(maskEmail("al@example.test"), "a•••@example.test");
   assert.equal(maskEmail("a@example.test"), "a•••@example.test");
@@ -110,7 +110,7 @@ test("maskEmail : reconnaissable sans être lisible", () => {
 
 const PASSWORD = "mot-de-passe-ok";
 
-/** Sam (adresse confirmée) et Lou, qui a déjà `lou@example.test`. */
+/** Sam (confirmed address) and Lou, who already has `lou@example.test`. */
 async function twoAccounts(): Promise<Database> {
   const doc = await newAccount();
   doc.users[0]!.emailVerifiedAt = NOW.toISOString();
@@ -129,7 +129,7 @@ function change(doc: Database, email: string, extra: { currentPassword?: string;
   });
 }
 
-test("changement : mot de passe actuel exigé, adresse valide, différente et libre", async () => {
+test("change: current password required, address valid, different and free", async () => {
   const doc = await twoAccounts();
   assert.deepEqual(await change(doc, "sam.b@example.test", { currentPassword: "mauvais" }), {
     ok: false,
@@ -142,7 +142,7 @@ test("changement : mot de passe actuel exigé, adresse valide, différente et li
   assert.deepEqual(doc.emailConfirmations, []);
 });
 
-test("changement vers l'adresse d'un autre compte : même réponse qu'une adresse libre, refusé à la confirmation", async () => {
+test("change to another account's address: same response as a free address, refused at confirmation", async () => {
   const doc = await twoAccounts();
   const requested = await change(doc, "LOU@example.test");
   assert.ok(requested.ok && requested.token);
@@ -155,7 +155,7 @@ test("changement vers l'adresse d'un autre compte : même réponse qu'une adress
   assert.equal(refused.doc?.users.find((u) => u.id === "sam")!.email, "sam@example.test");
 });
 
-test("changement : un lien part vers la nouvelle adresse, l'adresse de connexion ne change qu'à sa confirmation", async () => {
+test("change: a link is sent to the new address, the sign-in address changes only on its confirmation", async () => {
   const doc = await twoAccounts();
   const first = await change(doc, " Sam.B@Example.test ");
   assert.ok(first.ok && first.token);
@@ -165,7 +165,7 @@ test("changement : un lien part vers la nouvelle adresse, l'adresse de connexion
   assert.equal(pendingEmailChange(first.doc, "sam", NOW), "sam.b@example.test");
   assert.ok(await authenticate(first.doc, "sam@example.test", PASSWORD));
 
-  // Une nouvelle demande remplace la précédente.
+  // A new request replaces the previous one.
   const second = await change(first.doc, "sam.c@example.test");
   assert.ok(second.ok && second.token);
   assert.equal(second.doc.emailConfirmations.filter((c) => c.purpose === "change").length, 1);
@@ -183,7 +183,7 @@ test("changement : un lien part vers la nouvelle adresse, l'adresse de connexion
   assert.ok(await authenticate(confirmed.doc, "sam.c@example.test", PASSWORD));
 });
 
-test("changement : la confirmation efface aussi un lien de validation de l'ancienne adresse", async () => {
+test("change: confirmation also erases a validation link for the old address", async () => {
   const doc = await newAccount();
   const verification = createEmailVerification(doc, { userId: "sam", now: NOW });
   assert.ok(verification.ok);
@@ -195,7 +195,7 @@ test("changement : la confirmation efface aussi un lien de validation de l'ancie
   assert.notEqual(confirmed.doc.users[0]!.emailVerifiedAt, null);
 });
 
-test("changement : annulé, son lien ne vaut plus rien", async () => {
+test("change: cancelled, its link is worthless", async () => {
   const requested = await change(await twoAccounts(), "sam.b@example.test");
   assert.ok(requested.ok && requested.token);
   const cancelled = cancelEmailChange(requested.doc, { userId: "sam" });
@@ -204,11 +204,11 @@ test("changement : annulé, son lien ne vaut plus rien", async () => {
     ok: false,
     error: "confirmationLinkInvalid",
   });
-  // Sans demande en attente : rien ne change.
+  // No pending request: nothing changes.
   assert.deepEqual(cancelEmailChange(cancelled, { userId: "sam" }), cancelled);
 });
 
-test("changement : adresse prise entre-temps par un autre compte, refus et adresse inchangée", async () => {
+test("change: address taken meanwhile by another account, refused and address unchanged", async () => {
   const requested = await change(await twoAccounts(), "noa@example.test");
   assert.ok(requested.ok && requested.token);
   const taken = await registerUser(requested.doc, { id: "noa", email: "noa@example.test", password: PASSWORD, displayName: "Noa" });
@@ -217,13 +217,13 @@ test("changement : adresse prise entre-temps par un autre compte, refus et adres
   assert.equal(refused.ok, false);
   if (refused.ok) return;
   assert.equal(refused.error, "emailTaken");
-  // La demande, devenue impossible, disparaît ; l'adresse du compte ne bouge pas.
+  // The request, now impossible, disappears; the account address does not change.
   assert.ok(refused.doc);
   assert.equal(pendingEmailChange(refused.doc, "sam", NOW), null);
   assert.equal(refused.doc.users.find((u) => u.id === "sam")!.email, "sam@example.test");
 });
 
-test("changement sans envoi d'e-mail : appliqué tout de suite, adresse vérifiée (FR-015)", async () => {
+test("change without email sending: applied immediately, address verified (FR-015)", async () => {
   const doc = await newAccount();
   const verification = createEmailVerification(doc, { userId: "sam", now: NOW });
   assert.ok(verification.ok);
@@ -235,13 +235,13 @@ test("changement sans envoi d'e-mail : appliqué tout de suite, adresse vérifi�
   assert.deepEqual(applied.doc.emailConfirmations, []);
 });
 
-test("changement en attente expiré : plus affiché", async () => {
+test("expired pending change: no longer shown", async () => {
   const requested = await change(await twoAccounts(), "sam.b@example.test");
   assert.ok(requested.ok);
   assert.equal(pendingEmailChange(requested.doc, "sam", new Date(NOW.getTime() + 24 * 60 * 60 * 1000)), null);
 });
 
-test("mustConfirmEmail : seulement si la validation est exigée et l'adresse pas confirmée", async () => {
+test("mustConfirmEmail: only when validation is required and the address is not confirmed", async () => {
   const doc = await newAccount();
   const sam = doc.users[0]!;
   assert.equal(mustConfirmEmail(sam, true), true);

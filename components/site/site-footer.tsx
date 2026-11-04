@@ -8,7 +8,7 @@ import { withLocale } from "@/src/i18n/locale-path";
 
 const GITHUB = "https://github.com/cloeduc/whishlist";
 
-/** Footer global — masqué sur la homepage. */
+/** Global footer — hidden on the homepage. */
 export function SiteFooter({
   infoLabel,
   tagline,

@@ -50,7 +50,7 @@ DEMO_PASSWORD=… npm --prefix mobile run e2e -- --platform android --lang en
 - `--lang` choisit la langue des textes vérifiés. Par défaut, c'est celle de l'appareil, comme l'app.
 - Avant le premier parcours, la commande vérifie les prérequis. S'il en manque un, elle s'arrête avec le code 2 et dit quoi faire.
 - Elle se termine avec le code 0 si aucun parcours n'a échoué, et 1 sinon.
-- Un parcours « non joué » (hors ligne sur iOS) ne compte pas comme un échec.
+- Un parcours « not run » (hors ligne sur iOS) ne compte pas comme un échec.
 
 | Variable | Requis | Rôle |
 |----------|--------|------|

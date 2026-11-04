@@ -12,7 +12,7 @@ export function SupportHeart({ className }: { className?: string }) {
   );
 }
 
-/** Libellé « Soutenir… » toujours précédé du petit cœur rouge. */
+/** « Soutenir… » label, always preceded by the small red heart. */
 export function SupportLabel({
   children,
   className,

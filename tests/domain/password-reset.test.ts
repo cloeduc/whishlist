@@ -9,7 +9,7 @@ import { createEmailVerification, pendingEmailChange, requestEmailChange } from 
 import { authenticate, changePassword, registerUser } from "../../src/domain/users";
 import { emptyDatabase } from "../../src/domain/types";
 
-test("reset : token, expiration, usage unique, e-mail inconnu silencieux", async () => {
+test("reset: token, expiry, single use, unknown email is silent", async () => {
   const registered = await registerUser(emptyDatabase(), {
     email: "ada@example.com",
     password: "ancien-mdp!",
@@ -55,7 +55,7 @@ test("reset : token, expiration, usage unique, e-mail inconnu silencieux", async
   assert.equal(reuse.ok, false);
 });
 
-test("reset réussi : l'adresse est vérifiée et le lien de confirmation en cours n'a plus d'objet", async () => {
+test("successful reset: the address is verified and the pending confirmation link becomes moot", async () => {
   const registered = await registerUser(emptyDatabase(), {
     email: "sam@example.test",
     password: "ancien-mdp!",
@@ -73,7 +73,7 @@ test("reset réussi : l'adresse est vérifiée et le lien de confirmation en cou
   assert.deepEqual(reset.doc.emailConfirmations, []);
 });
 
-test("reset ou changement de mot de passe : un changement d'adresse en attente ne vaut plus rien", async () => {
+test("password reset or change: a pending address change is no longer valid", async () => {
   const registered = await registerUser(emptyDatabase(), {
     email: "sam@example.test",
     password: "ancien-mdp!",

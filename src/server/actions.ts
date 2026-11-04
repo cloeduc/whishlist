@@ -95,7 +95,7 @@ function nextPath(value: FormDataEntryValue | null): string {
 
 async function openSession(userId: string, sessionVersion = 0) {
   const secret = sessionSecret();
-  if (!secret) throw new Error("SESSION_SECRET manquant");
+  if (!secret) throw new Error("SESSION_SECRET missing");
   const jar = await cookies();
   jar.set(SESSION_COOKIE, signSession(userId, secret, Date.now(), sessionVersion), {
     httpOnly: true,
@@ -124,9 +124,9 @@ export async function registerAction(formData: FormData) {
     const code = result.error === "passwordTooShort" ? "password" : "fields";
     return localeRedirect(`/inscription?e=${code}&next=${encodeURIComponent(dest)}`);
   }
-  // E-mail déjà inscrit : même écran, sans connexion (un e-mail est parti).
+  // Email already registered: same screen, no sign-in (an email was sent).
   if (result.user) await openSession(result.user.id, result.user.sessionVersion ?? 0);
-  // Jamais de lien en clair en production (la commande ne le rend pas).
+  // Never a plain link in production (the command does not return it).
   const link = result.verificationUrl ? `&lien=${encodeURIComponent(result.verificationUrl)}` : "";
   const failed = result.mailFailed ? "&envoi=echec" : "";
   return localeRedirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}${link}${failed}`);
@@ -162,12 +162,12 @@ export async function updateDisplayNameAction(formData: FormData) {
   return localeRedirect("/compte?ok=name");
 }
 
-/** Page Compte : nouvelle clé d'API ; le jeton est rendu une fois, pour être copié. */
+/** Account page: new API key; the token is returned once, to be copied. */
 export async function createApiKeyAction(input: {
   name: string;
 }): Promise<{ ok: true; token: string; keyId: string } | { ok: false; error: string }> {
   await memberId();
-  // Une server action s'appelle aussi à la main : l'entrée n'est pas forcément celle du formulaire.
+  // A server action can also be called by hand: the input is not necessarily the form's.
   const name = typeof input?.name === "string" ? input.name : "";
   try {
     const result = await createMyApiKey(await actionContext(), { name });
@@ -178,7 +178,7 @@ export async function createApiKeyAction(input: {
   }
 }
 
-/** Révoquer une clé (dialogue de confirmation de la page Compte). */
+/** Revoke a key (confirmation dialog of the Account page). */
 export async function revokeApiKeyFormAction(formData: FormData) {
   await memberId();
   const result = await revokeMyApiKey(await actionContext(), { keyId: String(formData.get("keyId") ?? "") });
@@ -247,7 +247,7 @@ export async function requestPasswordResetAction(formData: FormData) {
     if (isRateLimitError(error)) return localeRedirect("/mot-de-passe-oublie?e=rate");
     throw error;
   }
-  // Jamais de lien en clair en production (la commande ne le rend pas).
+  // Never a plain link in production (the command does not return it).
   if (result.ok && result.resetUrl) {
     return localeRedirect(`/mot-de-passe-oublie?ok=1&lien=${encodeURIComponent(result.resetUrl)}`);
   }
@@ -272,7 +272,7 @@ export async function resetPasswordAction(formData: FormData) {
   return localeRedirect("/");
 }
 
-/** « Renvoyer le lien » du bandeau ou de la page du lien : retour sur la page d'origine avec le résultat. */
+/** « Renvoyer le lien » from the banner or the link page: back to the original page with the result. */
 export async function resendEmailVerificationAction(formData: FormData) {
   const back = nextPath(formData.get("back"));
   const join = back.includes("?") ? "&" : "?";
@@ -288,14 +288,14 @@ export async function resendEmailVerificationAction(formData: FormData) {
     if (result.error === "mustChangePassword") return localeRedirect("/compte");
     return localeRedirect(`${back}${join}verify=already`);
   }
-  // Jamais de lien en clair en production (la commande ne le rend pas).
+  // Never a plain link in production (the command does not return it).
   if (result.verificationUrl) {
     return localeRedirect(`${back}${join}verify=sent&lien=${encodeURIComponent(result.verificationUrl)}`);
   }
   return localeRedirect(`${back}${join}verify=${result.sent ? "sent" : "failed"}`);
 }
 
-/** Carte « Adresse de connexion » de « Mon compte » (010, US3). */
+/** « Adresse de connexion » card of « Mon compte » (010, US3). */
 export async function requestEmailChangeAction(formData: FormData) {
   const user = await currentUser();
   if (!user) return localeRedirect("/connexion");
@@ -312,7 +312,7 @@ export async function requestEmailChangeAction(formData: FormData) {
   }
   if (!result.ok) return localeRedirect(`/compte?ee=${encodeURIComponent(result.error)}#email`);
   if (!result.me.pendingEmail) return localeRedirect("/compte?email=changed#email");
-  // Jamais de lien en clair en production (la commande ne le rend pas).
+  // Never a plain link in production (the command does not return it).
   const link = result.confirmUrl ? `&lien=${encodeURIComponent(result.confirmUrl)}` : "";
   return localeRedirect(`/compte?email=${result.sent || result.confirmUrl ? "pending" : "failed"}${link}#email`);
 }
@@ -326,7 +326,7 @@ export async function cancelEmailChangeAction() {
   return localeRedirect("/compte?email=cancelled#email");
 }
 
-/** Bouton « Confirmer » de la page du lien reçu par e-mail. */
+/** « Confirmer » button of the page of the link received by email. */
 export async function confirmEmailAction(formData: FormData) {
   const token = String(formData.get("token") ?? "");
   const suite = nextPath(formData.get("suite"));
@@ -341,7 +341,7 @@ export async function confirmEmailAction(formData: FormData) {
   if (!result.ok) return localeRedirect(`${page}?e=${encodeURIComponent(result.error)}`);
   const query = new URLSearchParams({ ok: result.purpose });
   if (result.suite && result.suite !== "/") query.set("suite", result.suite);
-  // Le compte confirmé est celui de la session : la page peut afficher sa nouvelle adresse.
+  // The confirmed account is the session's: the page can show its new address.
   if (result.ownAccount) query.set("compte", "1");
   return localeRedirect(`${page}?${query.toString()}`);
 }
@@ -480,7 +480,7 @@ export async function setItemArchivedAction(input: {
   return { ok: true };
 }
 
-/** Déplacer ou copier une idée depuis le dialogue « Modifier l'idée ». */
+/** Move or copy an idea from the « Modifier l'idée » dialog. */
 export async function transferItemAction(
   input: TransferFields & { mode: "move" | "copy" },
 ): Promise<{ ok: true } | { ok: false; error: string }> {
@@ -500,7 +500,7 @@ export async function setItemArchivedFormAction(formData: FormData) {
   return redirectToList(wishlistId, formData);
 }
 
-/** Formulaires de Réglages : une catégorie ou un « qui » ajouté, renommé ou retiré. */
+/** Settings forms: a category or a « qui » added, renamed or removed. */
 async function labelFormAction(
   formData: FormData,
   kind: LabelInput["kind"],
@@ -560,7 +560,7 @@ export async function cancelReservationAction(formData: FormData) {
   return redirectToList(wishlistId, formData);
 }
 
-/** Réponse commune des formulaires de partage : erreur sur la liste, ou succès signalé. */
+/** Common response of the sharing forms: error on the list, or reported success. */
 async function sharingResult(
   wishlistId: string,
   formData: FormData,
@@ -621,7 +621,7 @@ export async function unlockPublicListAction(formData: FormData) {
           isUnlocked: () => true,
         });
       } catch (error) {
-        // La liste est déverrouillée : seul l'abonnement a échoué, on l'affiche sans repasser par le formulaire.
+        // The list is unlocked: only the subscription failed, it is shown without going back through the form.
         if (isRateLimitError(error)) return localeRedirect(`/l/${readToken}?e=rateLimited`);
         throw error;
       }
@@ -693,7 +693,7 @@ export async function reserveAction(formData: FormData) {
   const itemId = String(formData.get("itemId") ?? "");
   const fromName = String(formData.get("fromName") ?? "");
   const note = String(formData.get("note") ?? "");
-  // Honeypot anti-bot (doit rester vide).
+  // Anti-bot honeypot (must stay empty).
   if (String(formData.get("website") ?? "").trim()) {
     return localeRedirect(`/l/${readToken}?ok=1`);
   }
@@ -765,7 +765,7 @@ export async function subscribeAction(formData: FormData) {
   }
   if (!result.ok) {
     if (result.error === "listMissing") return localeRedirect("/");
-    // Déverrouillage expiré ou mot de passe changé : le formulaire garde l'intention de suivre la liste.
+    // Unlock expired or password changed: the form keeps the intent to follow the list.
     if (result.error === "readPasswordRequired") {
       return localeRedirect(`/l/${readToken}?e=readPasswordRequired&subscribe=1`);
     }

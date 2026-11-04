@@ -2,25 +2,25 @@ import { ApiError, NetworkError } from "@/api/client";
 
 import { getChange, markPending, markSending, markSent, nextPending, reject, type Change } from "./outbox";
 
-/** Ce que la synchronisation demande au serveur ; les tests le remplacent par un faux. */
+/** What the sync asks of the server; tests replace it with a fake. */
 export interface Transport {
-  /** Envoie un changement ; lève `ApiError` (refus) ou `NetworkError`. */
+  /** Sends a change; throws `ApiError` (refusal) or `NetworkError`. */
   send(change: Change): Promise<void>;
-  /** Recharge la copie locale de « Mes listes » et des listes touchées. */
+  /** Reloads the local copy of « Mes listes » and of the affected lists. */
   refresh(listIds: string[]): Promise<void>;
 }
 
-/** Listes à relire après un changement : la sienne, et la liste d'arrivée d'un déplacement ou d'une copie. */
+/** Lists to reload after a change: its own, and the target list of a move or a copy. */
 function listsOf(change: Change): string[] {
   return change.kind === "moveItem" || change.kind === "copyItem" ? [change.listId, change.payload.targetListId] : [change.listId];
 }
 
-/** Attente avant un nouvel essai : 1 s, 2 s, 4 s… plafonnée à 1 minute (R6). */
+/** Wait before a new attempt: 1 s, 2 s, 4 s… capped at 1 minute (R6). */
 export function retryDelay(attempts: number): number {
   return Math.min(60_000, 1000 * 2 ** Math.max(0, attempts - 1));
 }
 
-/** Réponse qui ne dit rien du changement : on réessaiera plus tard, sans le refuser. */
+/** Response that says nothing about the change: we will retry later, without rejecting it. */
 function isTransient(error: unknown): boolean {
   if (error instanceof NetworkError) return true;
   if (!(error instanceof ApiError)) return false;
@@ -44,7 +44,7 @@ function schedule(delay: number) {
   }, delay);
 }
 
-/** Un passage sur la file ; rend `false` s'il s'est arrêté faute de réponse. */
+/** One pass over the queue; returns `false` if it stopped for lack of an answer. */
 async function run(send: Transport): Promise<boolean> {
   const touched = new Set<string>();
   try {
@@ -55,7 +55,7 @@ async function run(send: Transport): Promise<boolean> {
         await markSent(change.seq);
         for (const id of listsOf(change)) touched.add(id);
       } catch (error) {
-        // Une idée déjà supprimée : le renvoi d'une suppression est un succès (contrat api-v1-additions).
+        // An idea already deleted: resending a deletion is a success (contract api-v1-additions).
         if (change.kind === "deleteItem" && error instanceof ApiError && error.code === "itemMissing") {
           await markSent(change.seq);
           touched.add(change.listId);
@@ -63,11 +63,11 @@ async function run(send: Transport): Promise<boolean> {
         }
         if (isTransient(error)) {
           await markPending(change.seq);
-          // 401 : la session gère la reconnexion ; la file est gardée pour le même compte.
+          // 401: the session handles signing in again; the queue is kept for the same account.
           if (!(error instanceof ApiError && error.status === 401)) schedule(retryDelay(change.attempts + 1));
           return false;
         }
-        // Refus métier : signalé, et les autres changements continuent (FR-029a).
+        // Business refusal: reported, and the other changes go on (FR-029a).
         await reject(change.seq, error instanceof ApiError ? error.code : "serverError");
         for (const id of listsOf(change)) touched.add(id);
       }
@@ -79,13 +79,13 @@ async function run(send: Transport): Promise<boolean> {
 }
 
 /**
- * Envoie la file un changement à la fois, dans l'ordre (FR-028). Un seul envoi à la fois :
- * un appel pendant un envoi attend le même, qui prend aussi les changements ajoutés entre-temps.
+ * Sends the queue one change at a time, in order (FR-028). Only one send at a time:
+ * a call during a send waits for that same one, which also takes the changes added meanwhile.
  */
 export function syncNow(): Promise<void> {
   if (!transport) return Promise.resolve();
   if (running) {
-    // Un changement ajouté pendant l'envoi : un nouveau passage le prendra.
+    // A change added during the send: a new pass will take it.
     again = true;
     return running;
   }
@@ -106,7 +106,7 @@ export function syncNow(): Promise<void> {
 
 export type Outcome = { status: "sent" } | { status: "pending" } | { status: "rejected"; errorCode: string };
 
-/** Après un ajout : envoie tout de suite si possible, et dit ce qu'il est advenu du changement. */
+/** After an add: sends right away if possible, and tells what became of the change. */
 export async function sendAndWait(seq: number | null): Promise<Outcome> {
   if (seq === null) return { status: "sent" };
   await syncNow();
@@ -116,7 +116,7 @@ export async function sendAndWait(seq: number | null): Promise<Outcome> {
   return { status: "pending" };
 }
 
-/** Tests : arrête le nouvel essai programmé. */
+/** Tests: stops the scheduled new attempt. */
 export function stopSync(): void {
   if (timer) clearTimeout(timer);
   timer = null;

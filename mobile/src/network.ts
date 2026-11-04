@@ -5,7 +5,7 @@ let online = true;
 const listeners = new Set<() => void>();
 
 function isOnline(state: NetInfoState): boolean {
-  // `isInternetReachable` vaut null tant que le système ne sait pas : on suppose le réseau là.
+  // `isInternetReachable` is null while the system does not know: we assume the network is there.
   return state.isConnected !== false && state.isInternetReachable !== false;
 }
 
@@ -18,7 +18,7 @@ function update(state: NetInfoState) {
 
 let started = false;
 
-/** Démarre l'écoute du réseau (une fois, au lancement de l'app). */
+/** Starts listening to the network (once, at app launch). */
 export function watchNetwork(): void {
   if (started) return;
   started = true;

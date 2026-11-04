@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { Locale } from "@/src/i18n/config";
 import { phonePlatform, type PhonePlatform } from "@/src/site/device";
 
-/** La plateforme ne change pas pendant la visite : rien à écouter. */
+/** The platform does not change during the visit: nothing to listen to. */
 function subscribe(): () => void {
   return () => undefined;
 }
@@ -23,12 +23,12 @@ function readPlatform(): PhonePlatform | null {
 type Badge = { platform: PhonePlatform; href: string; src: string; alt: string; className: string };
 
 /**
- * Icône « l'app sur votre téléphone » de l'en-tête (011, US3), seulement sur un téléphone et si une fiche
- * de store est réglée. Elle sonne 5 fois une seconde à l'affichage (animation CSS bornée, `phone-ring`),
- * s'arrête dès qu'on la touche, et ouvre la fenêtre des badges, celui du téléphone en premier.
+ * Header « l'app sur votre téléphone » icon (011, US3), only on a phone and if a store listing
+ * is set. It rings 5 times for one second when shown (bounded CSS animation, `phone-ring`),
+ * stops as soon as it is touched, and opens the badges dialog, the phone's badge first.
  */
 export function GetAppButton(props: { appStoreUrl: string | null; playStoreUrl: string | null; locale: Locale }) {
-  // Le layout reste monté d'une page à l'autre : la clé remonte le bouton, qui sonne à chaque page affichée.
+  // The layout stays mounted from page to page: the key remounts the button, which rings on each page shown.
   return <PhoneButton key={usePathname()} {...props} />;
 }
 
@@ -42,7 +42,7 @@ function PhoneButton({
   locale: Locale;
 }) {
   const { t } = useTranslation("common");
-  // Côté serveur, et au premier rendu, l'appareil est inconnu : rien n'est rendu.
+  // On the server, and on first render, the device is unknown: nothing is rendered.
   const platform = useSyncExternalStore(subscribe, readPlatform, () => null);
   const [ringing, setRinging] = useState(true);
   if (!platform || (!appStoreUrl && !playStoreUrl)) return null;
@@ -58,7 +58,7 @@ function PhoneButton({
     });
   }
   if (playStoreUrl) {
-    // Le PNG de Google a une marge transparente : plus haut pour paraître de la taille du badge Apple.
+    // Google's PNG has a transparent margin: taller so it looks the size of the Apple badge.
     badges.push({
       platform: "android",
       href: playStoreUrl,

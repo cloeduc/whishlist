@@ -1,11 +1,11 @@
 import { getRandomBytes } from "expo-crypto";
 
-// Contrat api-v1-additions : même règle que le serveur.
+// Contract api-v1-additions: same rule as the server.
 export { isClientId } from "../../../src/domain/client-ids";
 
 const BASE64URL = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-/** Même format que `newId()` du serveur : 12 octets aléatoires → 16 caractères base64url. */
+/** Same format as the server's `newId()`: 12 random bytes → 16 base64url characters. */
 export function newClientId(): string {
   const bytes = getRandomBytes(12);
   let id = "";

@@ -1,8 +1,8 @@
-# 005 US2 : mes listes (Alex voit la liste de démo) ; avec un compte neuf, nouvelle liste ouverte puis présente
-# dans « Mes listes » ; une liste créée sans rien remplir prend les valeurs par défaut du site (nom d'après le
-# nom du compte). Voir specs/005-mobile-list-app/spec.md.
+# 005 US2: my lists (Alex sees the demo list); with a new account, new list opened then shown
+# in « Mes listes »; a list created without filling anything takes the site's default values (name based on the
+# account name). See specs/005-mobile-list-app/spec.md.
 appId: app.ohyoushouldnt.mobile
-name: "005 US2 — Voir ses listes et en créer une"
+name: "005 US2 — See your lists and create one"
 tags:
   - 005-us2
 ---
@@ -17,12 +17,12 @@ tags:
     id: lists.card-demo-list
 - runFlow: ../subflows/logout.yaml
 
-# Compte neuf, pour que les listes comptées ne dépendent d'aucun autre parcours.
+# New account, so that the counted lists depend on no other flow.
 - runFlow: ../subflows/register.yaml
 - assertVisible:
     id: lists.empty
 
-# Nouvelle liste : elle s'ouvre, puis apparaît dans « Mes listes ».
+# New list: it opens, then shows in « Mes listes ».
 - runFlow:
     file: ../subflows/create-list.yaml
     env:
@@ -38,7 +38,7 @@ tags:
     element:
       text: Noël ${output.unique}
 
-# Rien de rempli : comme sur le site, chaque champ prend sa valeur par défaut et la liste s'ouvre.
+# Nothing filled: as on the site, each field takes its default value and the list opens.
 - tapOn:
     id: lists.new
 - extendedWaitUntil:
@@ -50,8 +50,8 @@ tags:
     visible:
       id: list.screen
     timeout: 20000
-# Nom par défaut d'après le nom du compte (« E2E <unique> », register.yaml), en français ou en anglais :
-# un texte à variable, absent de output.t, donc vérifié par motif.
+# Default name based on the account name (« E2E <unique> », register.yaml), in French or in English:
+# a text with a variable, missing from output.t, so checked by pattern.
 - assertVisible: "(Liste de E2E ${output.unique}|E2E ${output.unique}’s list)"
 - tapOn:
     id: back-link.back
@@ -59,7 +59,7 @@ tags:
     visible:
       id: lists.screen
     timeout: 10000
-# Deux listes : « Noël » et la liste par défaut.
+# Two lists: « Noël » and the default list.
 - assertVisible:
     id: lists\.card-.*(?<!-shadow)
     index: 1

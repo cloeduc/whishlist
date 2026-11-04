@@ -4,7 +4,7 @@ import type { ApiSession, Database, User } from "../domain/types";
 import { API_KEY_PREFIX } from "./api-keys";
 import { SESSION_TTL_SEC } from "./session";
 
-/** Même durée qu'une session du site. */
+/** Same lifetime as a site session. */
 const TTL_MS = SESSION_TTL_SEC * 1000;
 
 export const hashApiToken = hashSecretToken;
@@ -15,7 +15,7 @@ export function issueApiSession(
   nowMs = Date.now(),
   newToken: () => string = newSecretToken,
 ): { doc: Database; token: string; session: ApiSession } {
-  // Un jeton qui commencerait par le préfixe des clés serait lu comme une clé et refusé partout.
+  // A token starting with the key prefix would be read as a key and refused everywhere.
   let token = newToken();
   while (token.startsWith(API_KEY_PREFIX)) token = newToken();
   const session: ApiSession = {
@@ -52,7 +52,7 @@ export function revokeApiSession(doc: Database, token: string): Database {
   return next;
 }
 
-/** Retire les sessions expirées ou périmées par un changement de mot de passe. */
+/** Removes sessions that expired or were invalidated by a password change. */
 export function pruneApiSessions(doc: Database, nowMs = Date.now()): Database {
   const next = clone(doc);
   next.apiSessions = next.apiSessions.filter((entry) => isLive(next, entry, nowMs));

@@ -3,8 +3,8 @@ import { siteOrigin } from "@/api/client";
 import { APP_SCHEME, appPathForSiteUrl } from "../../../src/site/app-links";
 
 /**
- * Écran de l'app pour une adresse reçue (lien universel, App Link ou schéma `ohyoushouldnt://`),
- * ou `null` si l'app ne la traite pas. Seules les adresses du serveur de ce build sont reconnues.
+ * App screen for a received address (universal link, App Link or `ohyoushouldnt://` scheme),
+ * or `null` if the app does not handle it. Only addresses of this build's server are recognized.
  */
 export function appPathForUrl(url: string): string | null {
   const host = siteOrigin().replace(/^https?:\/\//, "");

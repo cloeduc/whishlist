@@ -8,7 +8,7 @@ export function stripLocalePrefix(pathname: string): { locale: Locale; path: str
   return { locale: "fr", path: pathname || "/" };
 }
 
-/** Préfixe anglais uniquement. Le français canonique n'a pas de préfixe. */
+/** English prefix only. Canonical French has no prefix. */
 export function withLocale(locale: Locale, pathname: string): string {
   const bare = stripLocalePrefix(pathname).path;
   if (!bare.startsWith("/") || bare.startsWith("//")) return pathname;
@@ -21,7 +21,7 @@ export type LocaleDecision =
   | { type: "rewrite"; pathname: string; search: string; locale: Locale }
   | { type: "continue"; locale: Locale };
 
-/** Chemin interne du site (`/inviter/…`), jamais une autre origine (`//hote`, `/\\hote`, `https://…`). */
+/** Internal site path (`/inviter/…`), never another origin (`//hote`, `/\\hote`, `https://…`). */
 export function internalPath(value: unknown): string | null {
   if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
     return null;
@@ -35,8 +35,8 @@ function pathOnly(value: string | null): string | null {
 }
 
 /**
- * L'adresse décide de la langue. `?lang=` et `/fr` redirigent vers l'URL canonique.
- * Une navigation interne depuis `/en` garde le préfixe.
+ * The address decides the language. `?lang=` and `/fr` redirect to the canonical URL.
+ * An internal navigation from `/en` keeps the prefix.
  */
 export function decideLocaleRoute(input: {
   pathname: string;

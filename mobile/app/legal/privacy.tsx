@@ -7,9 +7,9 @@ import { ContentSection, ContentText } from "@/ui/ContentSection";
 import { CONTACT_EMAIL } from "../../../src/site/contact";
 
 /**
- * Données personnelles, d'après `14-donnees-personnelles.png` : mêmes textes que le site.
- * Les prestataires optionnels suivent la dernière réponse connue de `/capabilities` ;
- * sans aucune réponse, leurs paragraphes s'affichent (ils disent « quand … est configuré »).
+ * Personal data, from `14-donnees-personnelles.png`: same texts as the site.
+ * Optional providers follow the last known answer of `/capabilities`;
+ * with no answer at all, their paragraphs are shown (they say « quand … est configuré »).
  */
 export default function Privacy() {
   const { t } = useTranslation("content");

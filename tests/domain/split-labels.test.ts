@@ -7,20 +7,20 @@ import { apiDoc, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtur
 
 before(ensurePasswordHash);
 
-test("splitLabels découpe, nettoie et dédoublonne", () => {
+test("splitLabels splits, trims and deduplicates", () => {
   assert.deepEqual(splitLabels("Wilh, Nathan, Nous deux"), ["Wilh", "Nathan", "Nous deux"]);
   assert.deepEqual(splitLabels("Livres"), ["Livres"]);
   assert.deepEqual(splitLabels("A;B\nC"), ["A", "B", "C"]);
-  // blancs et séparateurs vides ignorés
+  // blanks and empty separators ignored
   assert.deepEqual(splitLabels("  A ,, , B  "), ["A", "B"]);
-  // doublons retirés sans tenir compte de la casse, premier arrivé conservé
+  // duplicates removed case-insensitively, first one kept
   assert.deepEqual(splitLabels("Nathan, nathan, NATHAN"), ["Nathan"]);
-  // une saisie vide ne donne aucun libellé
+  // an empty input gives no label
   assert.deepEqual(splitLabels("   "), []);
   assert.deepEqual(splitLabels(""), []);
 });
 
-test("ajouter des « qui » séparés par des virgules en crée plusieurs", async () => {
+test("adding comma-separated « qui » creates several", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -36,12 +36,12 @@ test("ajouter des « qui » séparés par des virgules en crée plusieurs", asyn
       added.labels.map((entry) => entry.label),
       ["Wilh", "Nathan", "Nous deux"],
     );
-    // `label` reste le premier, pour les appelants qui n'en attendent qu'un (API v1).
+    // `label` stays the first one, for callers that expect only one (API v1).
     assert.equal(added.label?.label, "Wilh");
   });
 });
 
-test("une saisie vide garde l'erreur du domaine", async () => {
+test("an empty input keeps the domain error", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -56,7 +56,7 @@ test("une saisie vide garde l'erreur du domaine", async () => {
   });
 });
 
-test("renommer ne découpe pas : une virgule reste dans le libellé", async () => {
+test("renaming does not split: a comma stays in the label", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -76,7 +76,7 @@ test("renommer ne découpe pas : une virgule reste dans le libellé", async () =
   });
 });
 
-test("créer une liste découpe aussi la catégorie et le « qui »", async () => {
+test("creating a list also splits the category and the « qui »", async () => {
   const doc = apiDoc();
   const camille = ctx(doc.users[1]!);
   await withStore(doc, async () => {

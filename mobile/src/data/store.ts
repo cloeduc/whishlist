@@ -21,15 +21,15 @@ type ListsBody = Schemas["ListSummary"][];
 type SubscriptionsBody = Schemas["SubscribedListSummary"][];
 type ListBody = Schemas["MemberList"];
 
-/** Ce que les écrans lisent : copies du serveur et file de changements (en mémoire, rechargées de SQLite). */
+/** What the screens read: server copies and write queue (in memory, reloaded from SQLite). */
 type State = {
   lists: Snapshot<ListsBody> | null;
   subscriptions: Snapshot<SubscriptionsBody> | null;
   list: Record<string, Snapshot<ListBody> | null>;
-  /** Listes supprimées côté serveur ou dont la personne n'est plus membre (404). */
+  /** Lists deleted on the server or that the person is no longer a member of (404). */
   missing: Record<string, true>;
   changes: Change[];
-  /** La file a été lue au moins une fois depuis SQLite. */
+  /** The queue has been read at least once from SQLite. */
   changesLoaded: boolean;
 };
 
@@ -62,7 +62,7 @@ async function reloadChanges() {
   update({ changes: await listChanges(), changesLoaded: true });
 }
 
-/** Les écrans lisent la file même avant le démarrage du moteur (liste créée hors ligne). */
+/** Screens read the queue even before the engine starts (list created offline). */
 async function ensureChanges() {
   if (!state.changesLoaded) await reloadChanges();
 }
@@ -79,7 +79,7 @@ async function loadList(listId: string) {
   update({ list: { ...state.list, [listId]: await getSnapshot<ListBody>(listKey(listId)) } });
 }
 
-/** Relit « Mes listes » et les listes suivies sur le serveur ; sans réseau, garde la copie. */
+/** Reloads « Mes listes » and the followed lists from the server; without network, keeps the copy. */
 export async function refreshLists(): Promise<void> {
   try {
     const body = await ok(api.GET("/lists"));
@@ -92,9 +92,9 @@ export async function refreshLists(): Promise<void> {
   }
 }
 
-/** Relit une liste ; un 404 la retire de la copie (data-model.md, « snapshot »). */
+/** Reloads a list; a 404 removes it from the copy (data-model.md, « snapshot »). */
 export async function refreshList(listId: string): Promise<void> {
-  // Une liste encore en attente de création n'existe pas sur le serveur.
+  // A list still waiting to be created does not exist on the server.
   if (state.changes.some((change) => change.kind === "createList" && change.targetId === listId)) return;
   try {
     const list = await ok(api.GET("/lists/{listId}", { params: { path: { listId } } }));
@@ -111,7 +111,7 @@ export async function refreshList(listId: string): Promise<void> {
   }
 }
 
-/** Envoi d'un changement de la file, route par route (contrat 004 + api-v1-additions). */
+/** Sends a change from the queue, route by route (contract 004 + api-v1-additions). */
 async function send(change: Change): Promise<void> {
   const path = { listId: change.listId };
   switch (change.kind) {
@@ -153,8 +153,8 @@ export const apiTransport: Transport = {
 let started = false;
 
 /**
- * Démarre le moteur hors ligne (une fois, connecté) : la file reprend où elle en était, puis
- * s'envoie au démarrage, au retour du réseau, au retour de l'app au premier plan (R6).
+ * Starts the offline engine (once, when signed in): the queue resumes where it was, then
+ * is sent at startup, when the network comes back, and when the app returns to the foreground (R6).
  */
 export async function startOfflineEngine(): Promise<void> {
   if (started) return;
@@ -172,15 +172,15 @@ export async function startOfflineEngine(): Promise<void> {
   void syncNow();
 }
 
-/** Après une déconnexion : rien de l'ancien compte ne reste en mémoire. */
+/** After a sign-out: nothing of the previous account stays in memory. */
 export function resetStore(): void {
   update(empty);
 }
 
-/** Rafraîchit au montage et au retour de l'app au premier plan (FR-017). */
+/** Refreshes on mount and when the app returns to the foreground (FR-017). */
 function useRefreshing(refresh: () => Promise<void>) {
   const [refreshing, setRefreshing] = useState(false);
-  // Le premier chargement de cette source (liste) est terminé, réussi ou non.
+  // The first load of this source (list) is done, successful or not.
   const [settledFor, setSettledFor] = useState<(() => Promise<void>) | null>(null);
   const run = useCallback(async () => {
     setRefreshing(true);
@@ -228,8 +228,8 @@ export function useMyLists(): {
 }
 
 /**
- * La liste de ce lien est dans « Listes suivies » (copie locale de `GET /lists`). Sert quand la liste
- * elle-même ne se lit pas (mot de passe changé) : on peut quand même ne plus la suivre.
+ * The list of this link is in « Listes suivies » (local copy of `GET /lists`). Used when the list
+ * itself cannot be read (password changed): it can still be unfollowed.
  */
 export function useIsFollowed(readToken: string): boolean {
   const store = useStore();
@@ -241,9 +241,9 @@ export function useIsFollowed(readToken: string): boolean {
 
 export function useMemberList(listId: string): {
   list: ViewList | null;
-  /** Copie locale et file lues : `list` null veut alors dire « inconnue sur ce téléphone ». */
+  /** Local copy and queue read: a null `list` then means « unknown on this phone ». */
   loaded: boolean;
-  /** La liste n'existe plus pour ce compte (404). */
+  /** The list no longer exists for this account (404). */
   missing: boolean;
   fetchedAt: string | null;
   refreshing: boolean;
@@ -266,12 +266,12 @@ export function useMemberList(listId: string): {
   return { list, loaded, missing: store.missing[listId] === true, fetchedAt: snapshot?.fetchedAt ?? null, ...refreshing };
 }
 
-/** Changements pas encore acceptés (bandeau hors ligne, avertissement à la déconnexion). */
+/** Changes not yet accepted (offline banner, warning on sign-out). */
 export function usePendingCount(): number {
   return useStore().changes.filter((change) => change.state !== "rejected").length;
 }
 
-/** Date de la copie la plus récente affichée (bandeau « dernière mise à jour à … »). */
+/** Date of the most recent copy shown (« dernière mise à jour à … » banner). */
 export function useLastFetchedAt(listId?: string): string | null {
   const store = useStore();
   return (listId ? store.list[listId]?.fetchedAt : store.lists?.fetchedAt) ?? null;

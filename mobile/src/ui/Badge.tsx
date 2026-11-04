@@ -9,7 +9,7 @@ import { Text } from "./Text";
 
 export type BadgeVariant = "default" | "highlight" | "neutral" | "destructive";
 
-/** `components/ui/badge.tsx` : hauteur 24, bordure, ombre, texte 12 gras. */
+/** `components/ui/badge.tsx`: height 24, border, shadow, bold 12 text. */
 export function Badge({
   children,
   variant = "neutral",

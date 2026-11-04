@@ -2,9 +2,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { isSiteLink } from "@/src/site/dev-link";
 
 /**
- * Lien d'un e-mail qui n'est pas parti (dev, envoi simulé), lu dans l'URL de la page.
- * Jamais affiché en production (la commande ne le rend pas), et seulement vers une page de ce site
- * (`origin`, chemin qui commence par `page`) : un lien glissé dans l'URL n'est pas montré.
+ * Link from an email that was not sent (dev, simulated sending), read from the page URL.
+ * Never shown in production (the command does not return it), and only to a page of this site
+ * (`origin`, path starting with `page`): a link slipped into the URL is not shown.
  */
 export function DevLinkAlert({
   label,

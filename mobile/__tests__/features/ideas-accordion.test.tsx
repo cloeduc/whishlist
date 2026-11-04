@@ -69,7 +69,7 @@ test("categories open collapsed, their ideas not mounted, then unfold with the a
   await render(<IdeasAccordion list={list} />);
   expect(expanded("books")).toBe(false);
   expect(screen.getByTestId("list.category-books").props.accessibilityHint).toBe("Déplier");
-  // Repliée : ses idées ne sont pas montées (liste légère, aucun bouton caché).
+  // Collapsed: its ideas are not mounted (light list, no hidden button).
   expect(screen.queryByText("Livre", { includeHiddenElements: true })).toBeNull();
 
   await fireEvent.press(screen.getByTestId("list.category-books"));
@@ -81,7 +81,7 @@ test("categories open collapsed, their ideas not mounted, then unfold with the a
   await fireEvent.press(screen.getByTestId("list.category-books"));
   expect(expanded("books")).toBe(false);
   expect(timing).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ toValue: 0, duration: 200 }));
-  // Pendant le repli, le contenu est déjà caché aux lecteurs d'écran et aux appuis.
+  // While collapsing, the content is already hidden from screen readers and from presses.
   expect(screen.queryByText("Livre")).toBeNull();
   expect(screen.getByTestId("list.category-books-content", { includeHiddenElements: true }).props.pointerEvents).toBe("none");
 });
@@ -131,7 +131,7 @@ test("an open category stays open at its new place after a reorder", async () =>
 });
 
 test("an open category follows the height of its content (an idea added)", async () => {
-  // Sans animation : la catégorie est tout de suite à sa hauteur dépliée.
+  // Without animation: the category is at its expanded height right away.
   jest.spyOn(AccessibilityInfo, "isReduceMotionEnabled").mockResolvedValue(true);
   await render(<IdeasAccordion list={list} />);
   await fireEvent.press(screen.getByTestId("list.category-books"));

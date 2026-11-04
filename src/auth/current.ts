@@ -21,7 +21,7 @@ export const currentUser = cache(async (): Promise<User | null> => {
   return user;
 });
 
-/** Base URL publique. Prod : `APP_ORIGIN` (évite Host-header poisoning sur reset/invite). */
+/** Public base URL. Prod: `APP_ORIGIN` (prevents Host-header poisoning on reset/invite). */
 export async function origin(): Promise<string> {
   const configured = preferredOrigin(originFromEnv());
   if (configured) return configured;

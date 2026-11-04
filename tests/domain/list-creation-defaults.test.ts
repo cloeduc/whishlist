@@ -5,7 +5,7 @@ import { apiDoc, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtur
 
 before(ensurePasswordHash);
 
-test("création : champs vides → valeurs par défaut (langue FR)", async () => {
+test("creation: empty fields → default values (FR language)", async () => {
   const doc = apiDoc();
   const user = doc.users[1]!;
   const c = ctx(user); // locale "fr"
@@ -19,7 +19,7 @@ test("création : champs vides → valeurs par défaut (langue FR)", async () =>
   });
 });
 
-test("création : un deuxième nom par défaut est numéroté", async () => {
+test("creation: a second default name is numbered", async () => {
   const doc = apiDoc();
   const user = doc.users[1]!;
   const c = ctx(user);
@@ -32,7 +32,7 @@ test("création : un deuxième nom par défaut est numéroté", async () => {
   });
 });
 
-test("création : les valeurs fournies priment sur les défauts", async () => {
+test("creation: provided values take precedence over defaults", async () => {
   const doc = apiDoc();
   const c = ctx(doc.users[1]!);
   await withStore(doc, async () => {
@@ -45,7 +45,7 @@ test("création : les valeurs fournies priment sur les défauts", async () => {
   });
 });
 
-test("création : nom affiché vide (ancien compte importé) → libellés de repli", async () => {
+test("creation: empty display name (old imported account) → fallback labels", async () => {
   const doc = apiDoc();
   doc.users[1]!.displayName = "";
   await withStore(doc, async () => {
@@ -57,7 +57,7 @@ test("création : nom affiché vide (ancien compte importé) → libellés de re
   });
 });
 
-test("création : le nom affiché est repris tel quel, sans échappement", async () => {
+test("creation: the display name is used as is, without escaping", async () => {
   const doc = apiDoc();
   doc.users[1]!.displayName = "Léa & Tom";
   await withStore(doc, async () => {
@@ -69,7 +69,7 @@ test("création : le nom affiché est repris tel quel, sans échappement", async
   });
 });
 
-test("création en anglais : valeurs par défaut anglaises", async () => {
+test("creation in English: English default values", async () => {
   const doc = apiDoc();
   const user = doc.users[1]!;
   await withStore(doc, async () => {
@@ -81,7 +81,7 @@ test("création en anglais : valeurs par défaut anglaises", async () => {
   });
 });
 
-test("création avec #3 : une saisie à virgules en crée plusieurs ; un champ vide ou fait de virgules prend le défaut", async () => {
+test("creation with #3: a comma-separated entry creates several; an empty or comma-only field takes the default", async () => {
   const doc = apiDoc();
   const user = doc.users[1]!;
   const c = ctx(user);
@@ -94,7 +94,7 @@ test("création avec #3 : une saisie à virgules en crée plusieurs ; un champ v
   });
 });
 
-test("création : le nom du compte pris par défaut n'est jamais découpé, même avec une virgule", async () => {
+test("creation: the account name used by default is never split, even with a comma", async () => {
   const doc = apiDoc();
   const user = doc.users[1]!;
   user.displayName = "Dupont, Marie";

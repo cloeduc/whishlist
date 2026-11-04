@@ -9,7 +9,7 @@ import type { User, Wishlist } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import { bucketExhausted, RateLimitError, rateLimitForIp, takeToken } from "../rate-limit";
 
-/** Jeton d'un en-tête `Authorization: Bearer …`, ou null. */
+/** Token of an `Authorization: Bearer …` header, or null. */
 export function bearerFrom(header: string | null): string | null {
   const match = /^Bearer\s+(\S+)$/i.exec((header ?? "").trim());
   return match ? match[1]! : null;
@@ -19,29 +19,29 @@ export function bearerToken(req: NextRequest): string | null {
   return bearerFrom(req.headers.get("authorization"));
 }
 
-/** Requêtes par minute et par clé d'API, en plus des limites par action. */
+/** Requests per minute per API key, on top of the per-action limits. */
 export const API_KEY_RATE = { limit: 120, windowMs: 60 * 1000 };
 
 /**
- * Échecs par IP (clé `oys_…` inconnue ou révoquée) avant refus : le budget des échecs de connexion
- * (`login`, 20 par 15 minutes). Seuls les échecs comptent : une clé valide n'use pas ce budget.
+ * Failures per IP (unknown or revoked `oys_…` key) before refusal: the sign-in failure budget
+ * (`login`, 20 per 15 minutes). Only failures count: a valid key does not use up this budget.
  */
 export const API_KEY_FAILURE_RATE = { limit: 20, windowMs: 15 * 60 * 1000 };
 const API_KEY_FAILURE_SCOPE = "api-key-failure";
 
-/** Une clé d'API (`oys_…`) plutôt qu'un jeton de session de l'app. */
+/** An API key (`oys_…`) rather than an app session token. */
 export function usesApiKey(req: NextRequest): boolean {
   const token = bearerToken(req);
   return token !== null && isApiKeyToken(token);
 }
 
 /**
- * Compte d'une clé d'API, ou null. Limite le débit de la clé et note son utilisation (au plus une écriture
- * par heure). Utilisé par le serveur MCP, seul à accepter une clé.
+ * Account of an API key, or null. Rate-limits the key and records its use (at most one write
+ * per hour). Used by the MCP server, the only one to accept a key.
  *
- * Une clé inconnue ou révoquée compte un échec pour l'IP (`ip`, celle du proxy). Une fois ses échecs épuisés,
- * l'IP est refusée (`rateLimited`) avant toute recherche, pour qu'on ne puisse plus tester de clé depuis elle.
- * Sans IP de confiance, même règle que `rateLimitForIp` : en production un échec est refusé.
+ * An unknown or revoked key counts a failure for the IP (`ip`, the proxy's). Once its failures are used up,
+ * the IP is refused (`rateLimited`) before any lookup, so no more keys can be tried from it.
+ * Without a trusted IP, same rule as `rateLimitForIp`: in production a failure is refused.
  */
 export async function apiKeyUser(token: string, ip: string | null = null): Promise<User | null> {
   if (ip && bucketExhausted(`${API_KEY_FAILURE_SCOPE}:${ip}`, API_KEY_FAILURE_RATE.limit)) {
@@ -56,7 +56,7 @@ export async function apiKeyUser(token: string, ip: string | null = null): Promi
   if (!takeToken(`api-key:${found.key.id}`, API_KEY_RATE.limit, API_KEY_RATE.windowMs)) {
     throw new RateLimitError("api-key");
   }
-  // `touchApiKey` ne fait que dire s'il faut écrire ; l'écriture le rejoue sur le document de la transaction.
+  // `touchApiKey` only tells whether to write; the write replays it on the transaction's document.
   if (touchApiKey(current, found.key.id)) {
     await updateDocument((doc) => ({ doc: touchApiKey(doc, found.key.id) ?? doc, result: null }));
   }
@@ -64,8 +64,8 @@ export async function apiKeyUser(token: string, ip: string | null = null): Promi
 }
 
 /**
- * Compte du jeton de session de l'app, ou null (pas de jeton, jeton invalide). Une clé d'API ne vaut pas ici :
- * `withApi` la refuse avant (`apiKeyNotAllowed`), elle n'ouvre que le serveur MCP.
+ * Account of the app session token, or null (no token, invalid token). An API key does not count here:
+ * `withApi` refuses it earlier (`apiKeyNotAllowed`), it only opens the MCP server.
  */
 export async function optionalApiUser(req: NextRequest): Promise<User | null> {
   const token = bearerToken(req);
@@ -73,7 +73,7 @@ export async function optionalApiUser(req: NextRequest): Promise<User | null> {
   return findApiSessionUser(await readDocument(), token);
 }
 
-/** Preuves invité envoyées en en-tête : déverrouillage et claims de réservation. */
+/** Guest proofs sent as headers: unlock and reservation claims. */
 export function guestProofs(req: NextRequest, readToken: string) {
   const secret = sessionSecret();
   const unlock = req.headers.get("x-read-unlock");

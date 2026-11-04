@@ -5,7 +5,7 @@ import { tokens } from "@/theme/tokens";
 
 import { Text } from "./Text";
 
-/** `components/ui/empty.tsx` : illustration, texte centré, action ; sans carte. */
+/** `components/ui/empty.tsx`: illustration, centered text, action; no card. */
 export function Empty({
   title,
   description,

@@ -1,6 +1,6 @@
 import { androidAssociationResponse } from "@/src/site/app-links-config";
 
-/** App Links Android (feature 011) : lu à chaque requête, la variable peut changer sans rebuild. */
+/** Android App Links (feature 011): read on each request, so the variable can change without a rebuild. */
 export const dynamic = "force-dynamic";
 
 export function GET() {

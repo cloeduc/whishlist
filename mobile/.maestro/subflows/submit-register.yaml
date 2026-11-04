@@ -1,14 +1,14 @@
-# Depuis l'écran de connexion : remplit et envoie l'inscription, env NAME et EMAIL, mot de passe DEMO_PASSWORD.
-# N'attend aucun écran (compte créé, ou adresse déjà utilisée : c'est à l'appelant de vérifier).
+# From the login screen: fills and submits the sign-up form, env NAME and EMAIL, password DEMO_PASSWORD.
+# Waits for no screen (account created, or address already used: the caller checks).
 appId: app.ohyoushouldnt.mobile
 ---
-# Une demande « Enregistrer le mot de passe ? » d'une connexion précédente peut arriver en retard.
+# A « Enregistrer le mot de passe ? » prompt from a previous login can show up late.
 - tapOn:
     text: Plus tard|Not Now
     optional: true
 - tapOn:
     id: login.create-account
-# Quitter un formulaire de connexion rempli fait apparaître cette demande à ce moment-là.
+# Leaving a filled login form makes this prompt show up at that moment.
 - tapOn:
     text: Plus tard|Not Now
     optional: true
@@ -20,8 +20,8 @@ appId: app.ohyoushouldnt.mobile
 - inputText: ${EMAIL}
 - tapOn:
     id: register.password
-# iOS propose un mot de passe robuste dans une feuille du système, invisible pour Maestro :
-# on la ferme par sa croix, puis on revient au champ.
+# iOS offers a strong password in a system sheet, invisible to Maestro:
+# we close it with its cross, then go back to the field.
 - runFlow:
     when:
       platform: iOS
@@ -39,7 +39,7 @@ appId: app.ohyoushouldnt.mobile
       id: register.submit
 - tapOn:
     id: register.submit
-# iOS propose d'enregistrer le mot de passe après l'inscription : « Plus tard ».
+# iOS offers to save the password after sign-up: « Plus tard ».
 - tapOn:
     text: Plus tard|Not Now
     optional: true

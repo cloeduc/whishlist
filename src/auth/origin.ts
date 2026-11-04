@@ -1,4 +1,4 @@
-/** Origine canonique pour liens mails / partage — jamais dérivée des headers si `APP_ORIGIN` est set. */
+/** Canonical origin for mail / sharing links — never derived from headers if `APP_ORIGIN` is set. */
 
 export function normalizeAppOrigin(
   raw: string,
@@ -32,7 +32,7 @@ export function originFromEnv(env?: {
   return normalizeAppOrigin(raw);
 }
 
-/** Fallback headers (dev / legacy). Ne pas utiliser si un APP_ORIGIN valide existe. */
+/** Headers fallback (dev / legacy). Do not use if a valid APP_ORIGIN exists. */
 export function originFromHeaders(input: {
   host: string | null;
   forwardedHost: string | null;

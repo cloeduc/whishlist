@@ -1,6 +1,6 @@
-# 010 US2 : depuis le rappel, demander un nouveau lien ; il arrive (MailDev) et confirme l'adresse.
+# 010 US2: from the reminder, ask for a new link; it arrives (MailDev) and confirms the address.
 appId: app.ohyoushouldnt.mobile
-name: "010 US2 — Renvoyer le lien de confirmation"
+name: "010 US2 — Resend the confirmation link"
 tags:
   - 010-us2
 ---
@@ -16,7 +16,7 @@ tags:
       id: verify.sent
     timeout: 10000
 
-# Deux liens reçus : celui de l'inscription et le nouveau ; seul le dernier confirme.
+# Two links received: the sign-up one and the new one; only the last one confirms.
 - runScript:
     file: ../scripts/maildev-link.js
     env:

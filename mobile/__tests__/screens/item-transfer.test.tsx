@@ -119,7 +119,7 @@ test("move: target list preselected, same-name « qui » matched, missing catego
     },
   });
   await renderScreen();
-  // « Livres » n'existe pas dans Noël : première catégorie ; « Alex » y est (casse et espaces ignorés).
+  // « Livres » does not exist in « Noël »: first category; « Alex » is there (case and spaces ignored).
   await waitFor(() => expect(screen.getByLabelText(i18n.t("list:form.type"))).toHaveTextContent("Jeux"));
   expect(screen.getByLabelText(i18n.t("list:form.person"))).toHaveTextContent("alex");
   expect(screen.getByLabelText(i18n.t("list:transfer.target"))).toHaveTextContent("Noël");

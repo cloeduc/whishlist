@@ -17,11 +17,11 @@ export type SessionState =
   | { status: "mustChangePassword"; user: Me }
   | { status: "signedIn"; user: Me | null };
 
-// Clés du stockage sécurisé (data-model.md, « Connexion »).
+// Secure storage keys (data-model.md, « Connexion »).
 const TOKEN = "session.token";
 const EXPIRES_AT = "session.expiresAt";
 const USER_ID = "session.userId";
-// Le compte est gardé dans la copie locale pour l'afficher hors ligne.
+// The account is kept in the local copy to show it offline.
 const ME = "me";
 
 let token: string | null = null;
@@ -55,8 +55,8 @@ function stateFor(user: Me): SessionState {
   return user.mustChangePassword ? { status: "mustChangePassword", user } : { status: "signedIn", user };
 }
 
-// Un 401 alors qu'on était connecté : connexion expirée ou invalidée (FR-004).
-// Les changements en attente sont gardés pour la reconnexion du même compte.
+// A 401 while signed in: the session expired or was revoked (FR-004).
+// Pending changes are kept for when the same account signs in again.
 configureClient({
   getToken: () => token,
   getLocale: currentLocale,
@@ -66,7 +66,7 @@ configureClient({
   },
 });
 
-/** Au démarrage : jeton stocké → connecté tout de suite, puis vérifié par `GET /me` (R3). */
+/** At startup: stored token → signed in right away, then checked with `GET /me` (R3). */
 export async function restore(): Promise<void> {
   const [stored, expiresAt, userId] = await Promise.all(
     [TOKEN, EXPIRES_AT, USER_ID].map((key) => SecureStore.getItemAsync(key)),
@@ -83,7 +83,7 @@ export async function restore(): Promise<void> {
   await refreshMe();
 }
 
-/** Relit le compte ; sans réseau, garde l'état actuel. */
+/** Reloads the account; without network, keeps the current state. */
 export async function refreshMe(): Promise<void> {
   if (!token) return;
   try {
@@ -91,19 +91,19 @@ export async function refreshMe(): Promise<void> {
     await putSnapshot(ME, me);
     setState(stateFor(me));
   } catch (error) {
-    // 401 : déjà traité par onUnauthorized. Réseau : on reste sur la copie.
+    // 401: already handled by onUnauthorized. Network: we stay on the copy.
     if (error instanceof NetworkError) return;
     if (!token) return;
     throw error;
   }
 }
 
-// Au retour au premier plan : le compte a pu changer ailleurs (adresse confirmée dans le navigateur, 010).
+// When back in the foreground: the account may have changed elsewhere (address confirmed in the browser, 010).
 AppState.addEventListener("change", (status) => {
   if (status === "active") refreshMe().catch(() => undefined);
 });
 
-/** Enregistre la connexion rendue par login, register ou /me/password. */
+/** Saves the session returned by login, register or /me/password. */
 export async function signIn(session: Schemas["Session"]): Promise<void> {
   await ensureUser(session.user.id);
   await Promise.all([
@@ -116,13 +116,13 @@ export async function signIn(session: Schemas["Session"]): Promise<void> {
   setState(stateFor(session.user));
 }
 
-/** Met à jour le compte affiché (nom changé). */
+/** Updates the displayed account (name changed). */
 export async function updateMe(me: Me): Promise<void> {
   await putSnapshot(ME, me);
   setState(stateFor(me));
 }
 
-/** Oublie tout sur le téléphone : jeton, copie locale, fichiers d'export du cache. */
+/** Forgets everything on the phone: token, local copy, export files in the cache. */
 async function forgetEverything(next: SessionState): Promise<void> {
   await forgetToken();
   await clearAll();
@@ -131,23 +131,23 @@ async function forgetEverything(next: SessionState): Promise<void> {
   setState(next);
 }
 
-/** Invalide la connexion côté serveur si possible (FR-003), puis oublie tout sur le téléphone. */
+/** Revokes the session on the server if possible (FR-003), then forgets everything on the phone. */
 export async function signOut(): Promise<void> {
   try {
     await api.POST("/auth/logout");
   } catch {
-    // Hors ligne : le jeton expirera de lui-même ; on l'oublie quand même.
+    // Offline: the token will expire on its own; we forget it anyway.
   }
-  // Seulement à la déconnexion et à la suppression, pas à l'expiration : les claims servent à annuler
-  // une réservation faite en invité (011).
+  // Only on sign-out and account deletion, not on expiry: the claims are used to cancel
+  // a reservation made as a guest (011).
   await clearGuestAccess();
   await forgetEverything({ status: "signedOut", expired: false });
 }
 
 /**
- * Supprime le compte sur le serveur (mot de passe exigé), puis efface tout sur le téléphone,
- * comme `signOut` mais sans `/auth/logout` : le jeton ne vaut déjà plus rien (R9).
- * Une erreur (mot de passe faux, réseau…) remonte et ne change rien.
+ * Deletes the account on the server (password required), then wipes everything on the phone,
+ * like `signOut` but without `/auth/logout`: the token is already worthless (R9).
+ * An error (wrong password, network…) is thrown and changes nothing.
  */
 export async function deleteAccount(password: string): Promise<void> {
   await done(api.POST("/me/deletion", { body: { password } }));

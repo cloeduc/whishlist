@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Smoke / hygiène ops Oh, You Shouldn't! sur le Mac mini.
+# Ops smoke / hygiene check for Oh, You Shouldn't! on the Mac mini.
 set -euo pipefail
 
 DOMAIN="${WHISHLIST_DOMAIN:-ohyoushouldnt.app}"

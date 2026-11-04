@@ -3,7 +3,7 @@ import path from "node:path";
 import { chromium } from "playwright";
 
 const baseURL = process.env.DEMO_BASE_URL ?? "http://localhost:3010";
-// `--mobile` : écrans du site en largeur de téléphone, référence de design de l'app (feature 005).
+// `--mobile`: site screens at phone width, design reference for the app (feature 005).
 const mobile = process.argv.includes("--mobile");
 const outputArg = process.argv.slice(2).find((arg) => !arg.startsWith("--"));
 const outputRoot = path.resolve(outputArg ?? (mobile ? "specs/005-mobile-list-app/design/web-mobile" : "public/guide"));
@@ -209,7 +209,7 @@ async function captureLocale(locale) {
         const formCard = document.querySelector('main [data-slot="card"]');
         if (formCard) formCard.style.display = "none";
       });
-      // Accordéon fermé par défaut : ouvrir 2 sections pour montrer idées + drag
+      // Accordion closed by default: open 2 sections to show ideas + drag
       const triggers = page.locator('[data-slot="accordion-trigger"]');
       const count = await triggers.count();
       for (let i = 0; i < Math.min(2, count); i += 1) {
@@ -230,8 +230,8 @@ async function captureLocale(locale) {
 }
 
 /**
- * Mode mobile : 390 × 844, densité 2, pages entières avec l'en-tête et le pied du site,
- * en français. Mêmes noms que les captures de specs/005-mobile-list-app/design-reference.md.
+ * Mobile mode: 390 × 844, density 2, full pages with the site header and footer,
+ * in French. Same names as the captures in specs/005-mobile-list-app/design-reference.md.
  */
 async function captureMobile() {
   await mkdir(outputRoot, { recursive: true });
@@ -245,8 +245,8 @@ async function captureMobile() {
   const page = await context.newPage();
   async function shot(name, pathname) {
     await page.goto(`${baseURL}${pathname}`, { waitUntil: "load", timeout: 60000 });
-    // Les outils de dev de Next.js (serveur de dev) ne font pas partie du site.
-    // Par le DOM : la CSP du site refuse une feuille de style injectée.
+    // The Next.js dev tools (dev server) are not part of the site.
+    // Through the DOM: the site CSP rejects an injected style sheet.
     await page.evaluate(() => {
       document.querySelectorAll("[data-nextjs-dev-overlay], nextjs-portal").forEach((el) => {
         el.style.display = "none";
@@ -287,7 +287,7 @@ for (const locale of locales) {
   await captureLocale(locale);
 }
 
-// Anciennes captures à la racine de /guide (si présentes)
+// Old captures at the root of /guide (if present)
 for (const name of [
   "liste-partagee",
   "reserver-cadeau",

@@ -4,9 +4,9 @@ import { Pressable, View, type PressableProps, type StyleProp, type ViewStyle } 
 import { tokens } from "@/theme/tokens";
 
 /**
- * Boîte néo-brutaliste du site : bordure noire de 2, rayon 5, ombre noire pleine décalée de 4/4.
- * L'ombre est une vue dessinée sous la boîte (et non l'ombre native, floue et différente
- * sur iOS et Android, R7). `pressed` : la boîte « s'enfonce » de 4/4 et l'ombre disparaît.
+ * The site's neo-brutalist box: black border of 2, radius 5, solid black shadow offset by 4/4.
+ * The shadow is a view drawn under the box (and not the native shadow, blurry and different
+ * on iOS and Android, R7). `pressed`: the box « sinks » by 4/4 and the shadow disappears.
  */
 export function Shadow({
   children,
@@ -23,9 +23,9 @@ export function Shadow({
   shadow?: boolean;
   shadowColor?: string;
   radius?: number;
-  /** Style de la boîte (fond, bordure, marges internes). */
+  /** Box style (background, border, padding). */
   style?: StyleProp<ViewStyle>;
-  /** Style du conteneur (largeur, marges externes). */
+  /** Container style (width, margins). */
   containerStyle?: StyleProp<ViewStyle>;
   testID?: string;
 }) {
@@ -48,8 +48,8 @@ export function Shadow({
         />
       ) : null}
       {/*
-        Jamais « aplatie » par React Native : sinon le décalage à l'appui ou au focus change la
-        hiérarchie native, et un champ de saisie à l'intérieur perd le focus à la première lettre.
+        Never « flattened » by React Native: otherwise the offset on press or focus changes the
+        native hierarchy, and an input inside loses focus at the first letter.
       */}
       <View
         testID={testID}
@@ -72,8 +72,8 @@ export function Shadow({
 }
 
 /**
- * Élément cliquable qui s'enfonce à l'appui (bouton, carte, pastille), comme le survol du site.
- * L'état « appuyé » est tenu ici (onPressIn / onPressOut), le même pour tous et testable.
+ * Pressable element that sinks on press (button, card, pill), like the site's hover.
+ * The « pressed » state is held here (onPressIn / onPressOut), the same for all and testable.
  */
 export function PressableShadow({
   children,
@@ -87,9 +87,9 @@ export function PressableShadow({
   children: ReactNode;
   boxStyle?: StyleProp<ViewStyle>;
   boxTestID?: string;
-  /** `false` : pas d'effet d'appui (onglet déjà actif). */
+  /** `false`: no press effect (tab already active). */
   sink?: boolean;
-  /** `false` : pas de boîte du tout (lien, bouton fantôme). */
+  /** `false`: no box at all (link, ghost button). */
   framed?: boolean;
 }) {
   const [pressed, setPressed] = useState(false);

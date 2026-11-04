@@ -12,7 +12,7 @@ import { Field } from "@/ui/Field";
 import { Input } from "@/ui/Input";
 import { NetworkNote } from "@/ui/NetworkNote";
 
-/** Mot de passe oublié, comme la page `/mot-de-passe-oublie` du site : même message que l'e-mail ait un compte ou non (FR-006). */
+/** Forgotten password, like the site's `/mot-de-passe-oublie` page: same message whether the email has an account or not (FR-006). */
 export default function ForgotPassword() {
   const { t } = useTranslation("auth");
   const online = useOnline();

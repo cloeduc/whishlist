@@ -6,8 +6,8 @@ import { useOnline } from "@/network";
 import { Alert } from "./Alert";
 
 /**
- * Bandeau-alerte blanc en haut d'écran : hors ligne, date de la copie affichée,
- * et nombre de changements en attente d'envoi (FR-025, FR-040).
+ * White alert banner at the top of the screen: offline, date of the copy shown,
+ * and number of changes waiting to be sent (FR-025, FR-040).
  */
 export function OfflineBanner({ fetchedAt, pendingCount }: { fetchedAt: string | null; pendingCount: number }) {
   const { t } = useTranslation("mobile");

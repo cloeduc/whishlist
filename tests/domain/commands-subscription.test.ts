@@ -32,7 +32,7 @@ async function protectedSubDoc() {
   return saved.ok ? saved.doc : subDoc();
 }
 
-test("s'abonner par URL ou jeton, retrouver la liste dans listMine et lire ses états subscribed / isMember", async () => {
+test("follow by URL or token, find the list in listMine and read its subscribed / isMember states", async () => {
   const doc = subDoc();
   const alex = doc.users[0]!;
   const camille = doc.users[1]!;
@@ -58,7 +58,7 @@ test("s'abonner par URL ou jeton, retrouver la liste dans listMine et lire ses �
     assert.equal(replay.ok, true);
     if (replay.ok) assert.equal(replay.replayed, true);
 
-    // listMine retourne la liste de Camille dans lists et celle d'Alex dans subscriptions
+    // listMine returns Camille's list in lists and Alex's in subscriptions
     const mine = await listMine(ctx(camille));
     assert.equal(mine.ok, true);
     if (mine.ok) {
@@ -67,7 +67,7 @@ test("s'abonner par URL ou jeton, retrouver la liste dans listMine et lire ses �
       assert.equal(mine.subscriptions[0]!.title, "Liste d'Alex");
     }
 
-    // Alex peut aussi s'abonner à la liste de Camille (qui n'est pas la sienne)
+    // Alex can also follow Camille's list (which is not theirs)
     const subAlex = await subscribeToList(ctx(alex), {
       urlOrToken: "https://ohyoushouldnt.example.test/l/rt-camille-1234",
       isUnlocked: noUnlock,
@@ -80,7 +80,7 @@ test("s'abonner par URL ou jeton, retrouver la liste dans listMine et lire ses �
       assert.deepEqual(mineAlex.subscriptions.map((s) => s.id), ["w-camille"]);
     }
 
-    // readPublicList indique subscribed: true pour Camille et isMember: true pour Alex
+    // readPublicList gives subscribed: true for Camille and isMember: true for Alex
     const pubCamille = await readPublicList(ctx(camille), {
       readToken: "rt-alex-1234",
       isUnlocked: noUnlock,
@@ -103,7 +103,7 @@ test("s'abonner par URL ou jeton, retrouver la liste dans listMine et lire ses �
       assert.equal(pubAlex.list.isMember, true);
     }
 
-    // Confidentialité : la vue membre d'Alex ne contient aucune trace de l'abonnement de Camille
+    // Privacy: Alex's member view holds no trace of Camille's subscription
     const memberView = await readMemberList(ctx(alex), { wishlistId: "w" });
     assert.equal(memberView.ok, true);
     if (memberView.ok) {
@@ -115,7 +115,7 @@ test("s'abonner par URL ou jeton, retrouver la liste dans listMine et lire ses �
   });
 });
 
-test("refus : non connecté, mustChangePassword, déjà membre, lien invalide, liste inconnue ou non suivie", async () => {
+test("refusals: not signed in, mustChangePassword, already a member, invalid link, unknown or unfollowed list", async () => {
   const doc = subDoc();
   const alex = doc.users[0]!;
   const camille = doc.users[1]!;
@@ -161,7 +161,7 @@ test("refus : non connecté, mustChangePassword, déjà membre, lien invalide, l
   });
 });
 
-test("liste protégée par mot de passe : exigé à l'abonnement, accès maintenu, et invalidé si le propriétaire change le MDP", async () => {
+test("password-protected list: required to follow, access kept, and invalidated if the owner changes the password", async () => {
   const doc = await protectedSubDoc();
   const alex = doc.users[0]!;
   const camille = doc.users[1]!;
@@ -194,7 +194,7 @@ test("liste protégée par mot de passe : exigé à l'abonnement, accès mainten
     if (!sub.ok) return;
     assert.equal(sub.subscription.locked, false);
 
-    // L'abonnée accède ensuite à la liste sans preuve externe (isUnlocked: noUnlock)
+    // The subscriber then accesses the list without external proof (isUnlocked: noUnlock)
     const read = await readPublicList(ctx(camille), {
       readToken: "rt-alex-1234",
       isUnlocked: noUnlock,
@@ -202,7 +202,7 @@ test("liste protégée par mot de passe : exigé à l'abonnement, accès mainten
     });
     assert.equal(read.ok, true);
 
-    // Le propriétaire change le mot de passe de lecture -> l'abonnement devient verrouillé
+    // The owner changes the read password -> the subscription becomes locked
     const changed = await setReadPasswordCmd(ctx(alex), {
       wishlistId: "w",
       password: "nouveau-secret",
@@ -223,7 +223,7 @@ test("liste protégée par mot de passe : exigé à l'abonnement, accès mainten
     });
     assert.equal(readAfterChange.ok, false);
 
-    // L'abonnée déverrouille avec le nouveau mot de passe -> l'abonnement est de nouveau déverrouillé
+    // The subscriber unlocks with the new password -> the subscription is unlocked again
     const unlocked = await unlockPublicList(ctx(camille), {
       readToken: "rt-alex-1234",
       password: "nouveau-secret",
@@ -239,7 +239,7 @@ test("liste protégée par mot de passe : exigé à l'abonnement, accès mainten
   });
 });
 
-test("se désabonner retire l'abonnement mais conserve les réservations, et rejoindre la liste retire l'abonnement", async () => {
+test("unfollowing removes the subscription but keeps reservations, and joining the list removes the subscription", async () => {
   const doc = subDoc();
   const camille = doc.users[1]!;
 
@@ -252,7 +252,7 @@ test("se désabonner retire l'abonnement mais conserve les réservations, et rej
     });
     assert.equal(res.ok, true);
 
-    // L'idée réservée par Camille compte toujours dans son itemCount d'abonnée (FR-006)
+    // The idea reserved by Camille still counts in their subscriber itemCount (FR-006)
     const mineWhileReserved = await listMine(ctx(camille));
     assert.equal(mineWhileReserved.ok && mineWhileReserved.subscriptions[0]?.itemCount, 2);
 
@@ -262,7 +262,7 @@ test("se désabonner retire l'abonnement mais conserve les réservations, et rej
     const mineAfter = await listMine(ctx(camille));
     assert.equal(mineAfter.ok && mineAfter.subscriptions.length, 0);
 
-    // La réservation de Camille sur "gift" est toujours active
+    // Camille's reservation on "gift" is still active
     const pubAfter = await readPublicList(ctx(camille), {
       readToken: "rt-alex-1234",
       isUnlocked: noUnlock,
@@ -273,7 +273,7 @@ test("se désabonner retire l'abonnement mais conserve les réservations, et rej
       assert.equal(pubAfter.list.items.find((i) => i.id === "gift")?.mine, true);
     }
 
-    // Si Camille se réabonne puis rejoint la liste comme membre, son abonnement disparaît
+    // If Camille follows again then joins the list as a member, their subscription disappears
     await subscribeToList(ctx(camille), { urlOrToken: "rt-alex-1234", isUnlocked: noUnlock });
     const joined = await joinInvite(ctx(camille), { token: "it-alex-1234" });
     assert.equal(joined.ok, true);
@@ -286,7 +286,7 @@ test("se désabonner retire l'abonnement mais conserve les réservations, et rej
   });
 });
 
-test("31 demandes d'abonnement en 15 minutes : la 31e est refusée", async () => {
+test("31 follow requests in 15 minutes: the 31st is refused", async () => {
   const doc = subDoc();
   const camille = doc.users[1]!;
   await withStore(doc, async () => {

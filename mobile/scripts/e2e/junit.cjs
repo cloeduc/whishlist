@@ -1,4 +1,4 @@
-// Rapport JUnit de Maestro → résultat par parcours, résumé affiché et code de sortie (R12).
+// Maestro JUnit report → result per flow, printed summary and exit code (R12).
 
 function decode(text) {
   return text
@@ -38,29 +38,25 @@ function formatDate(date) {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
-/** Nom du dossier de résultats : AAAAMMJJ-HHMMSS. */
+/** Name of the results folder: YYYYMMDD-HHMMSS. */
 function formatStamp(date) {
   return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
 }
 
-function plural(count, word) {
-  return `${count} ${word}${count > 1 ? "s" : ""}`;
-}
-
 /**
- * Un parcours lancé mais absent du rapport (Maestro arrêté avant la fin) compte comme un échec.
+ * A flow that was started but is missing from the report (Maestro stopped before the end) counts as a failure.
  * @param {Array<{ id: string, name: string, status: string, durationS: number, failedStep?: string }>} results
  * @param {Array<{ id: string, name: string }>} flows
  */
 function withMissing(results, flows) {
   const missing = flows
     .filter((flow) => !results.some((r) => r.name === flow.name || r.id === flow.id))
-    .map((flow) => ({ id: flow.id, name: flow.name, status: "failed", durationS: 0, failedStep: "absent du rapport de Maestro" }));
+    .map((flow) => ({ id: flow.id, name: flow.name, status: "failed", durationS: 0, failedStep: "missing from the Maestro report" }));
   return [...results, ...missing];
 }
 
 /**
- * Captures de chaque parcours en échec : Maestro les range dans un dossier au nom du parcours.
+ * Screenshots of each failed flow: Maestro puts them in a folder named after the flow.
  * @param {string[]} pngPaths  @param {Array<{ name: string, status: string }>} results
  * @returns {Record<string, string[]>}
  */
@@ -77,23 +73,23 @@ function capturesByFlow(pngPaths, results) {
 
 function formatSummary({ platform, lang, startedAt, results, skipped, outputDir, captures = {} }) {
   const width = Math.max(40, ...results.map((r) => r.name.length), ...skipped.map((s) => s.name.length)) + 2;
-  const lines = [`Parcours e2e — ${platform} — ${lang} — ${formatDate(startedAt)}`];
+  const lines = [`E2E flows — ${platform} — ${lang} — ${formatDate(startedAt)}`];
   for (const result of results) {
     const mark = result.status === "passed" ? "✓" : "✗";
     lines.push(`  ${mark} ${result.name.padEnd(width)}${result.durationS} s`);
-    if (result.failedStep) lines.push(`      étape : ${result.failedStep}`);
-    for (const capture of captures[result.name] ?? []) lines.push(`      capture : ${capture}`);
+    if (result.failedStep) lines.push(`      step: ${result.failedStep}`);
+    for (const capture of captures[result.name] ?? []) lines.push(`      screenshot: ${capture}`);
   }
-  for (const skip of skipped) lines.push(`  – ${skip.name.padEnd(width)}non joué : ${skip.reason}`);
+  for (const skip of skipped) lines.push(`  – ${skip.name.padEnd(width)}not run: ${skip.reason}`);
   const passedCount = results.filter((r) => r.status === "passed").length;
   const failedCount = results.length - passedCount;
   lines.push(
-    `${plural(passedCount, "réussi")}, ${plural(failedCount, "échoué")}, ${skipped.length} non joué${skipped.length > 1 ? "s" : ""} — résultats : ${outputDir}`,
+    `${passedCount} passed, ${failedCount} failed, ${skipped.length} not run — results: ${outputDir}`,
   );
   return lines.join("\n");
 }
 
-/** Les « non joué » ne comptent pas comme des échecs. */
+/** « Non joué » results do not count as failures. */
 function exitCode(results) {
   return results.some((r) => r.status === "failed") ? 1 : 0;
 }

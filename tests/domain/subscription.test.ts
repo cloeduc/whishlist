@@ -13,7 +13,7 @@ import {
 } from "../../src/domain/subscription";
 import { accountDoc } from "./helpers/account-fixtures";
 
-test("extractReadToken accepte un jeton brut, un chemin /l/ ou /en/l/, et une URL complète", () => {
+test("extractReadToken accepts a raw token, a /l/ or /en/l/ path, and a full URL", () => {
   assert.equal(extractReadToken("read-other-123456"), "read-other-123456");
   assert.equal(extractReadToken("  read-other-123456  "), "read-other-123456");
   assert.equal(extractReadToken("/l/read-other-123456"), "read-other-123456");
@@ -41,7 +41,7 @@ test("extractReadToken accepte un jeton brut, un chemin /l/ ou /en/l/, et une UR
   assert.equal(extractReadToken("http://[invalid"), null);
 });
 
-test("subscribeWishlist crée un abonnement et reste idempotent", () => {
+test("subscribeWishlist creates a subscription and stays idempotent", () => {
   const doc = accountDoc();
   const now = new Date("2026-11-02T10:00:00.000Z");
   const created = subscribeWishlist(doc, { wishlistId: "other", userId: "alex", verifiedHash: null, now });
@@ -63,7 +63,7 @@ test("subscribeWishlist crée un abonnement et reste idempotent", () => {
   );
 });
 
-test("subscribeWishlist refuse alreadyMember, listMissing et accountMissing", () => {
+test("subscribeWishlist refuses alreadyMember, listMissing and accountMissing", () => {
   const doc = accountDoc();
   assert.deepEqual(subscribeWishlist(doc, { wishlistId: "shared", userId: "lou", verifiedHash: null }), {
     ok: false,
@@ -83,32 +83,32 @@ test("subscribeWishlist refuse alreadyMember, listMissing et accountMissing", ()
   });
 });
 
-test("subscribeWishlist refuse une empreinte qui n'est plus celle de la liste", () => {
+test("subscribeWishlist refuses a fingerprint that is no longer the list's", () => {
   const doc = accountDoc();
-  // Accès vérifié contre l'ancien mot de passe, changé par le propriétaire pendant la vérification.
+  // Access verified against the old password, changed by the owner during the check.
   assert.deepEqual(
     subscribeWishlist(doc, { wishlistId: "alexs", userId: "camille", verifiedHash: "scrypt$old-secret" }),
     { ok: false, error: "readPasswordChanged" },
   );
-  // Liste sans mot de passe à la vérification, protégée depuis.
+  // List without a password at check time, protected since.
   assert.deepEqual(
     subscribeWishlist(doc, { wishlistId: "alexs", userId: "camille", verifiedHash: null }),
     { ok: false, error: "readPasswordChanged" },
   );
 });
 
-test("isSubscriptionUnlocked et syncSubscriptionUnlock suivent le mot de passe de lecture", () => {
+test("isSubscriptionUnlocked and syncSubscriptionUnlock follow the read password", () => {
   const doc = accountDoc();
   const sub = subscribeWishlist(doc, { wishlistId: "alexs", userId: "camille", verifiedHash: "scrypt$read-secret" });
   assert.ok(sub.ok);
   const list = sub.doc.wishlists.find((w) => w.id === "alexs")!;
   assert.equal(isSubscriptionUnlocked(list, sub.subscription), true);
 
-  // Si le propriétaire change le mot de passe de lecture, l'abonnement devient verrouillé.
+  // If the owner changes the read password, the subscription becomes locked.
   list.readPasswordHash = "scrypt$new-secret";
   assert.equal(isSubscriptionUnlocked(list, sub.subscription), false);
 
-  // Un déverrouillage vérifié contre l'ancienne empreinte ne met rien à jour.
+  // An unlock verified against the old hash updates nothing.
   const stale = syncSubscriptionUnlock(sub.doc, {
     wishlistId: "alexs",
     userId: "camille",
@@ -116,7 +116,7 @@ test("isSubscriptionUnlocked et syncSubscriptionUnlock suivent le mot de passe d
   });
   assert.equal(isSubscriptionUnlocked(list, findSubscription(stale, "alexs", "camille")!), false);
 
-  // Après déverrouillage avec le nouveau mot de passe, syncSubscriptionUnlock met à jour l'empreinte.
+  // After unlocking with the new password, syncSubscriptionUnlock updates the hash.
   const synced = syncSubscriptionUnlock(sub.doc, {
     wishlistId: "alexs",
     userId: "camille",
@@ -126,7 +126,7 @@ test("isSubscriptionUnlocked et syncSubscriptionUnlock suivent le mot de passe d
   assert.equal(isSubscriptionUnlocked(list, updatedSub), true);
 });
 
-test("unsubscribeWishlist retire l'abonnement sans toucher aux réservations", () => {
+test("unsubscribeWishlist removes the subscription without touching reservations", () => {
   const doc = accountDoc();
   const res = unsubscribeWishlist(doc, { wishlistId: "other", userId: "lou" });
   assert.ok(res.ok);
@@ -138,7 +138,7 @@ test("unsubscribeWishlist retire l'abonnement sans toucher aux réservations", (
   });
 });
 
-test("acceptInvite retire automatiquement l'abonnement existant du nouveau membre", () => {
+test("acceptInvite automatically removes the new member's existing subscription", () => {
   const doc = accountDoc();
   assert.ok(findSubscription(doc, "other", "lou"));
   const joined = acceptInvite(doc, { token: "invite-other", userId: "lou" });
@@ -146,7 +146,7 @@ test("acceptInvite retire automatiquement l'abonnement existant du nouveau membr
   assert.equal(findSubscription(joined.doc, "other", "lou"), null);
 });
 
-test("deleteWishlist supprime les abonnements de la liste", () => {
+test("deleteWishlist deletes the list's subscriptions", () => {
   const doc = accountDoc();
   assert.ok(findSubscription(doc, "solo", "camille"));
   const res = deleteWishlist(doc, { wishlistId: "solo", actorId: "lou" });
@@ -154,20 +154,20 @@ test("deleteWishlist supprime les abonnements de la liste", () => {
   assert.equal(findSubscription(res.doc, "solo", "camille"), null);
 });
 
-test("followedListsOf ne garde que les listes suivies dont on n'est pas membre", () => {
+test("followedListsOf keeps only followed lists the account is not a member of", () => {
   const doc = accountDoc();
-  // Lou suit "other" ; on lui ajoute un abonnement à "solo", dont elle est membre.
+  // Lou follows "other"; we add a subscription to "solo", which they are a member of.
   doc.subscriptions.push({ wishlistId: "solo", userId: "lou", readPasswordHash: null, createdAt: "2026-04-05T00:00:00.000Z" });
   assert.deepEqual(
     followedListsOf(doc, "lou").map(({ wishlist }) => wishlist.id),
     ["other"],
   );
-  // Un abonnement dont la liste a disparu est ignoré.
+  // A subscription whose list is gone is ignored.
   doc.wishlists = doc.wishlists.filter((w) => w.id !== "other");
   assert.deepEqual(followedListsOf(doc, "lou"), []);
 });
 
-test("viewerRelation distingue membre, abonné et visiteur", () => {
+test("viewerRelation tells member, subscriber and visitor apart", () => {
   const doc = accountDoc();
   assert.deepEqual(viewerRelation(doc, "other", "lou"), { isMember: false, subscribed: true });
   assert.deepEqual(viewerRelation(doc, "solo", "lou"), { isMember: true, subscribed: false });

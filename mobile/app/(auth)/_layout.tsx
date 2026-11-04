@@ -3,7 +3,7 @@ import { Redirect, Stack } from "expo-router";
 import { useSession } from "@/auth/session";
 import { afterSignIn } from "@/links/pending";
 
-/** Écrans sans connexion ; une personne connectée va à ses listes, ou au lien qui l'a amenée ici (011). */
+/** Signed-out screens; a signed-in person goes to their lists, or to the link that brought them here (011). */
 export default function AuthLayout() {
   const session = useSession();
   if (session.status === "signedIn") return <Redirect href={afterSignIn()} />;

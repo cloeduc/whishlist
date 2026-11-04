@@ -1,14 +1,14 @@
 import * as SecureStore from "expo-secure-store";
 
 /**
- * Preuves de la vue invité gardées sur le téléphone (011, data-model « Accès invité ») : le jeton de
- * déverrouillage d'une liste protégée (`X-Read-Unlock`, 14 jours, durée rendue par le serveur) et les claims
- * des réservations faites sans compte (`X-Reservation-Claims`, 90 jours), comme les cookies du site.
+ * Guest view proofs kept on the phone (011, data-model « Accès invité »): the unlock token of a
+ * protected list (`X-Read-Unlock`, 14 days, duration returned by the server) and the claims
+ * of reservations made without an account (`X-Reservation-Claims`, 90 days), like the site cookies.
  */
 const UNLOCKS = "guest.unlocks";
 const CLAIMS = "guest.claims";
 const CLAIM_TTL_MS = 90 * 24 * 60 * 60 * 1000;
-/** Le serveur lit 50 claims au plus par liste. */
+/** The server reads at most 50 claims per list. */
 const MAX_CLAIMS_PER_LIST = 50;
 
 type Unlock = { token: string; expiresAt: string };
@@ -36,7 +36,7 @@ async function claims(): Promise<Claim[]> {
   return (await readJson<Claim[]>(CLAIMS, [])).filter((claim) => alive(claim.expiresAt));
 }
 
-/** Jeton de déverrouillage encore valable pour cette liste, sinon `null`. */
+/** Unlock token still valid for this list, otherwise `null`. */
 export async function unlockTokenFor(readToken: string): Promise<string | null> {
   return (await unlocks())[readToken]?.token ?? null;
 }
@@ -45,13 +45,13 @@ export async function saveUnlock(readToken: string, token: string, expiresAt: st
   await SecureStore.setItemAsync(UNLOCKS, JSON.stringify({ ...(await unlocks()), [readToken]: { token, expiresAt } }));
 }
 
-/** Jeton refusé (mot de passe changé, `readPasswordRequired`) : on l'oublie. */
+/** Token refused (password changed, `readPasswordRequired`): forget it. */
 export async function forgetUnlock(readToken: string): Promise<void> {
   const { [readToken]: _dropped, ...rest } = await unlocks();
   await SecureStore.setItemAsync(UNLOCKS, JSON.stringify(rest));
 }
 
-/** Claims de cette liste, les plus récents d'abord. */
+/** Claims of this list, most recent first. */
 export async function claimsFor(readToken: string): Promise<string[]> {
   return (await claims())
     .filter((entry) => entry.readToken === readToken)
@@ -65,13 +65,13 @@ export async function saveClaim(readToken: string, reservationId: string, claim:
   await SecureStore.setItemAsync(CLAIMS, JSON.stringify(next));
 }
 
-/** Réservation annulée : son claim ne sert plus. */
+/** Reservation cancelled: its claim is no longer needed. */
 export async function forgetReservation(reservationId: string): Promise<void> {
   const next = (await claims()).filter((entry) => entry.reservationId !== reservationId);
   await SecureStore.setItemAsync(CLAIMS, JSON.stringify(next));
 }
 
-/** Déconnexion ou suppression du compte : le téléphone oublie aussi l'accès invité. */
+/** Sign-out or account deletion: the phone also forgets the guest access. */
 export async function clearGuestAccess(): Promise<void> {
   await Promise.all([SecureStore.deleteItemAsync(UNLOCKS), SecureStore.deleteItemAsync(CLAIMS)]);
 }

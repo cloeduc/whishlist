@@ -22,7 +22,7 @@ import { Text } from "@/ui/Text";
 
 type Preview = Schemas["AccountDeletionPreview"];
 
-/** Titres affichés par groupe ; au-delà, « et N de plus ». */
+/** Titles shown per group; beyond that, « et N de plus ». */
 const SHOWN = 5;
 
 function Titles({ titles }: { titles: string[] }) {
@@ -41,8 +41,8 @@ function Titles({ titles }: { titles: string[] }) {
 }
 
 /**
- * Supprimer mon compte, même contenu que la confirmation du site : ce qui part, ce qui reste,
- * les changements jamais envoyés (FR-016), puis le mot de passe. Exige le réseau.
+ * Delete my account, same content as the site's confirmation: what goes, what stays,
+ * the changes never sent (FR-016), then the password. Requires the network.
  */
 export default function DeleteAccount() {
   const { t } = useTranslation(["auth", "mobile"]);
@@ -52,7 +52,7 @@ export default function DeleteAccount() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
 
-  // Relu à l'ouverture, au retour du réseau, et à chaque « Réessayer ».
+  // Read again on open, when the network comes back, and on each « Réessayer ».
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!online) return;
@@ -110,7 +110,7 @@ export default function DeleteAccount() {
                   <Titles titles={preview.deletedLists.map((list) => list.title)} />
                 </View>
               ) : null}
-              {/* `followedLists` n'existe pas avant l'API 1.7.0. */}
+              {/* `followedLists` does not exist before API 1.7.0. */}
               {preview.followedLists && preview.followedLists.length > 0 ? (
                 <View style={{ gap: tokens.space[1] }}>
                   <Text size="sm">{t("auth:account.deleteRemovedFollowed", { count: preview.followedLists.length })}</Text>

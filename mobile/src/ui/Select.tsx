@@ -12,8 +12,8 @@ import { Text } from "./Text";
 export type SelectOption = { value: string; label: string };
 
 /**
- * `components/ui/native-select.tsx` : un champ avec chevron. Le choix s'ouvre dans une feuille
- * en bas d'écran, aux couleurs et bordures du site.
+ * `components/ui/native-select.tsx`: a field with a chevron. The choice opens in a sheet
+ * at the bottom of the screen, in the site's colors and borders.
  */
 export function Select({
   value,
@@ -26,7 +26,7 @@ export function Select({
   value: string;
   options: SelectOption[];
   onChange: (value: string) => void;
-  /** Libellé du champ, annoncé par le lecteur d'écran et repris en titre de la feuille. */
+  /** Field label, announced by the screen reader and reused as the sheet title. */
   label: string;
   placeholder?: string;
   disabled?: boolean;

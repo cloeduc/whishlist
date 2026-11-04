@@ -6,7 +6,7 @@ import { test } from "node:test";
 const CONTRACT = path.join(process.cwd(), "specs/004-mobile-api/contracts/openapi.yaml");
 const METHODS = ["get", "post", "put", "patch", "delete"] as const;
 
-/** Chemins et méthodes du contrat (`paths:` à 2 espaces, méthodes à 4), sans dépendance YAML. */
+/** Contract paths and methods (`paths:` at 2 spaces, methods at 4), without a YAML dependency. */
 function contractOperations(): Map<string, Set<string>> {
   const operations = new Map<string, Set<string>>();
   let inPaths = false;
@@ -36,7 +36,7 @@ function exportedMethods(source: string): Set<string> {
   return found;
 }
 
-test("chaque opération du contrat a sa route", () => {
+test("each operation of the contract has its route", () => {
   const operations = contractOperations();
   assert.ok(operations.size > 20, "le contrat est lu");
   for (const [route, methods] of operations) {

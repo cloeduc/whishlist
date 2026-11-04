@@ -1,5 +1,5 @@
-# Depuis « Mes listes » : ouvre « Créer une liste » et remplit la première catégorie (« Livres ») et « Pour qui ? »
-# (« Alex »), de bas en haut pour que le clavier ne cache jamais le prochain champ. Le titre reste à l'appelant.
+# From « Mes listes »: opens « Créer une liste » and fills the first category (« Livres ») and « Pour qui ? »
+# (« Alex »), bottom to top so the keyboard never hides the next field. The title is left to the caller.
 appId: app.ohyoushouldnt.mobile
 ---
 - tapOn:

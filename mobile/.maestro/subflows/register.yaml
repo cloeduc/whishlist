@@ -1,8 +1,8 @@
-# Nouveau compte e2e-<unique>@example.test (R6), mot de passe DEMO_PASSWORD, depuis l'écran de connexion,
-# adresse confirmée par le lien reçu dans MailDev (010). Rend l'adresse dans output.email ; attend « Mes listes ».
+# New account e2e-<unique>@example.test (R6), password DEMO_PASSWORD, from the login screen,
+# address confirmed by the link received in MailDev (010). Returns the address in output.email; waits for « Mes listes ».
 appId: app.ohyoushouldnt.mobile
 ---
-# Textes attendus (output.t) : certains parcours appelants ne les chargent pas eux-mêmes.
+# Expected texts (output.t): some calling flows do not load them themselves.
 - runScript: ../scripts/strings.generated.js
 - runFlow: register-unconfirmed.yaml
 - runFlow:

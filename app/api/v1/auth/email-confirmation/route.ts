@@ -6,8 +6,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 /**
- * Confirme le lien reçu par e-mail, ouvert dans l'app (011). Le bearer, facultatif, ne sert qu'à `ownAccount` :
- * le jeton du lien porte toute l'autorisation. Le corps n'est pas journalisé (il contient le jeton).
+ * Confirms the link received by email, opened in the app (011). The optional bearer only serves `ownAccount`:
+ * the link's token carries all the authorization. The body is not logged (it contains the token).
  */
 export const POST = withApi(async (api) => {
   const body = await readJsonBody(api.req);

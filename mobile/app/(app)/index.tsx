@@ -20,12 +20,12 @@ import { RejectedAlert } from "@/ui/RejectedAlert";
 import { Screen } from "@/ui/Screen";
 import { Text } from "@/ui/Text";
 
-/** Mes listes et listes suivies, d'après `04-mes-listes.png` (FR-010, FR-025) et `012-list-subscriptions`. */
+/** My lists and followed lists, from `04-mes-listes.png` (FR-010, FR-025) and `012-list-subscriptions`. */
 export default function MyLists() {
   const { t } = useTranslation(["home", "mobile", "errors"]);
   const { lists, subscriptions, loaded, fetchedAt, refreshing, refresh } = useMyLists();
   const pendingCount = usePendingCount();
-  // Adresse pas encore confirmée : le serveur refuserait la création (010, FR-005).
+  // Address not confirmed yet: the server would refuse the creation (010, FR-005).
   const unverified = useEmailUnverified();
   const newList = (
     <Button title={t("home:mine.newList")} size="sm" onPress={() => router.push("/lists/new")} disabled={unverified} testID="lists.new" />

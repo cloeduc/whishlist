@@ -10,7 +10,7 @@ import { Text } from "./Text";
 export type ButtonVariant = "default" | "neutral" | "destructive" | "ghost" | "link";
 export type ButtonSize = "xs" | "sm" | "default" | "lg" | "icon";
 
-/** Variantes et tailles de `components/ui/button.tsx`. */
+/** Variants and sizes of `components/ui/button.tsx`. */
 export function Button({
   title,
   icon,
@@ -25,7 +25,7 @@ export function Button({
   testID,
 }: {
   title?: string;
-  /** Icône avant le libellé, ou seule pour `size="icon"`. */
+  /** Icon before the label, or alone for `size="icon"`. */
   icon?: ReactNode;
   onPress?: () => void;
   variant?: ButtonVariant;
@@ -58,7 +58,7 @@ export function Button({
       accessibilityLabel={accessibilityLabel ?? title}
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
-      // Cible tactile d'au moins 44 même pour les petits boutons.
+      // Touch target of at least 44 even for small buttons.
       hitSlop={Math.max(0, (tokens.touchTarget - height) / 2)}
       testID={testID}
       boxTestID={testID ? `${testID}-box` : undefined}

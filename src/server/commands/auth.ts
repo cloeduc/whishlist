@@ -11,7 +11,7 @@ import { rateLimitForIp } from "../rate-limit";
 import { activeUser, type CommandContext, type CommandResult } from "./context";
 import { sendVerificationLink } from "./email";
 
-/** Vérifie e-mail et mot de passe, avec la même limite que la connexion du site. */
+/** Checks email and password, with the same limit as the site sign-in. */
 export async function checkCredentials(
   ctx: CommandContext,
   input: { email: string; password: string },
@@ -22,7 +22,7 @@ export async function checkCredentials(
   return { ok: true, user };
 }
 
-/** Émet un jeton d'API pour ce compte, en purgeant les sessions mortes. */
+/** Issues an API token for this account, purging dead sessions. */
 export async function openApiSession(userId: string): Promise<CommandResult<{ session: SessionView }>> {
   return updateDocument<CommandResult<{ session: SessionView }>>((doc) => {
     const user = doc.users.find((entry) => entry.id === userId);
@@ -57,10 +57,10 @@ export async function logout(_ctx: CommandContext, input: { token: string }): Pr
 }
 
 /**
- * Inscription. Un e-mail déjà inscrit ne donne pas d'erreur : un e-mail part vers cette adresse
- * et `user` vaut null (pas de connexion), pour ne pas révéler les comptes existants.
- * Avec l'envoi d'e-mail actif, un lien de confirmation part vers l'adresse (`next` : où reprendre ensuite) ;
- * `verificationUrl` n'est rendu qu'en dev quand l'e-mail n'est pas parti.
+ * Sign-up. An already registered email gives no error: an email is sent to that address
+ * and `user` is null (no sign-in), so as not to reveal existing accounts.
+ * With email sending active, a confirmation link is sent to the address (`next`: where to resume afterwards);
+ * `verificationUrl` is returned only in dev when the email was not sent.
  */
 export async function register(
   ctx: CommandContext,
@@ -78,7 +78,7 @@ export async function register(
     return { ok: true, user: result.value, verificationUrl: link.verificationUrl, mailFailed: link.failed };
   }
   if (result.error !== "emailTaken") return result;
-  // `mailFailed` vaut aussi pour cet e-mail : la réponse ne distingue pas un compte existant.
+  // `mailFailed` also applies to this email: the response does not single out an existing account.
   const mail = await sendAlreadyRegisteredMail({
     to: normalizeEmail(input.email),
     loginUrl: `${ctx.origin}${withLocale(ctx.locale, "/connexion")}`,
@@ -88,9 +88,9 @@ export async function register(
 }
 
 /**
- * Change le mot de passe du compte connecté et périme toutes ses connexions.
- * L'ancien mot de passe n'est pas demandé si un changement est imposé.
- * Avec `openApiSession`, un nouveau jeton d'API est émis dans la même écriture.
+ * Changes the signed-in account's password and invalidates all its sessions.
+ * The old password is not asked for if a change is required.
+ * With `openApiSession`, a new API token is issued in the same write.
  */
 export async function changeOwnPassword(
   ctx: CommandContext,
@@ -123,7 +123,7 @@ export async function changeOwnPassword(
   });
 }
 
-/** Le compte connecté tel que l'API le montre, même s'il doit changer son mot de passe (le client l'apprend ici). */
+/** The signed-in account as the API shows it, even if it must change its password (the client learns it here). */
 export async function readMe(ctx: CommandContext): Promise<CommandResult<{ me: MeView }>> {
   if (!ctx.user) return { ok: false, error: "unauthorized" };
   return { ok: true, me: toMe(ctx.user, pendingEmailChange(await readDocument(), ctx.user.id)) };
@@ -144,8 +144,8 @@ export async function updateOwnDisplayName(
 }
 
 /**
- * Envoie un lien de réinitialisation qui ouvre le site. Même réponse que l'e-mail existe ou non.
- * `resetUrl` n'est rendu qu'en dev quand l'e-mail n'est pas parti (affichage du site), jamais en production.
+ * Sends a reset link that opens the site. Same response whether the email exists or not.
+ * `resetUrl` is returned only in dev when the email was not sent (shown by the site), never in production.
  */
 export async function requestPasswordReset(
   ctx: CommandContext,
@@ -164,9 +164,9 @@ export async function requestPasswordReset(
 }
 
 /**
- * Nouveau mot de passe choisi depuis le lien reçu par e-mail : page du site et app (011, R7).
- * Le mot de passe change, l'adresse est vérifiée et les autres connexions tombent (`sessionVersion`).
- * Avec `signIn`, une session d'API est ouverte pour ce compte ; le site ouvre la sienne (cookie) lui-même.
+ * New password chosen from the link received by email: site page and app (011, R7).
+ * The password changes, the address is verified and the other sessions are dropped (`sessionVersion`).
+ * With `signIn`, an API session is opened for this account; the site opens its own (cookie) itself.
  */
 export async function resetPasswordWithLink(
   ctx: CommandContext,

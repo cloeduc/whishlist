@@ -32,21 +32,21 @@ import { Text } from "@/ui/Text";
 const ALL = "all";
 
 /**
- * Vue publique d'une liste, ouverte par son lien (011, US4) ou depuis « Listes suivies » (012), comme la page
- * `/l/{readToken}` du site : idées libres et celles réservées par ce téléphone (ou ce compte), filtres par
- * catégorie, « Pour qui ? » et budget, tri par envie, « Réserver ce cadeau », et avec un compte « Suivre cette
- * liste » / « Ne plus suivre ». Aucune action de membre (FR-010b). Un membre arrive sur sa vue membre, sauf
- * depuis « Voir comme un invité » (`preview=1`). Une liste suivie se relit hors ligne (copie locale).
+ * Public view of a list, opened by its link (011, US4) or from « Listes suivies » (012), like the site's
+ * `/l/{readToken}` page: free ideas and those reserved by this phone (or this account), filters by
+ * category, « Pour qui ? » and budget, sort by wish level, « Réserver ce cadeau », and with an account « Suivre cette
+ * liste » / « Ne plus suivre ». No member action (FR-010b). A member lands on their member view, except
+ * from « Voir comme un invité » (`preview=1`). A followed list can be read again offline (local copy).
  */
 export default function GuestList() {
   const { t } = useTranslation(["public", "mobile"]);
   const { readToken, typeId, preview } = useLocalSearchParams<{ readToken: string; typeId?: string; preview?: string }>();
   const session = useSession();
-  // Connecté : on cherche d'abord si le compte est membre (copie locale), avant tout appel au serveur (R9).
+  // Signed in: first check whether the account is a member (local copy), before any server call (R9).
   const mustCheck = session.status === "signedIn" && preview !== "1";
   const [checked, setChecked] = useState(!mustCheck);
   const { state, reload } = useGuestList(readToken, checked || !mustCheck);
-  // De retour sur la liste (après une réservation, par exemple) : relue, pour montrer « Réservé par vous ».
+  // Back on the list (after a reservation, for example): reloaded, to show « Réservé par vous ».
   const focusedOnce = useRef(false);
   useFocusEffect(
     useCallback(() => {
@@ -104,8 +104,8 @@ export default function GuestList() {
 }
 
 /**
- * Liste protégée : le mot de passe transmis avec le lien, comme `ReadUnlockForm` du site. Une liste suivie
- * dont le mot de passe a changé se quitte aussi d'ici, sans la déverrouiller.
+ * Protected list: the password sent with the link, like the site's `ReadUnlockForm`. A followed list
+ * whose password changed can also be left from here, without unlocking it.
  */
 function Unlock({ readToken, onUnlocked }: { readToken: string; onUnlocked: () => void }) {
   const { t } = useTranslation("public");
@@ -183,7 +183,7 @@ function Ready({
   const [budgetKey, setBudgetKey] = useState(ALL);
   const person = list.people.some((entry) => entry.id === who) ? who : null;
   const budget = parseBudget(budgetKey === ALL ? undefined : budgetKey);
-  // Mêmes filtres et même ordre que la page publique du site : envie d'abord, puis l'ordre du propriétaire.
+  // Same filters and same order as the site's public page: wish level first, then the owner's order.
   const filtered = filterAndSortPublicItems(list.items, person, budget);
   const items = type === ALL ? filtered : filtered.filter((item) => item.typeId === type);
   const narrowed = person !== null || budget !== null;

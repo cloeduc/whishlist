@@ -14,7 +14,7 @@ export const POST = withApi(async (api) => {
     displayName: text(body.body.displayName),
   });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);
-  // E-mail déjà inscrit : un e-mail part, pas de connexion.
+  // Email already registered: an email is sent, no sign-in.
   if (!result.user) return apiJson({ status: "checkEmail" }, 202, api.cors);
   const session = await openApiSession(result.user.id);
   if (!session.ok) return apiError(session.error, api.locale, api.cors);

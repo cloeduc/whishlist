@@ -37,7 +37,7 @@ export const getLocale = cache(async (): Promise<Locale> => {
   return defaultLocale;
 });
 
-/** Traductions d'une langue donnée (API, commandes) — sans lire la requête. */
+/** Translations for a given language (API, commands) — without reading the request. */
 export async function getTranslationsFor(
   locale: Locale,
   ns: Namespace | Namespace[] = "common",

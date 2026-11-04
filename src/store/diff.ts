@@ -7,13 +7,13 @@ interface Plan<K extends CollectionName> {
   next: Map<string, RowOf<K>>;
 }
 
-/** Lignes par clé ; deux lignes de même clé lèvent une erreur au lieu de disparaître en silence. */
+/** Rows by key; two rows with the same key throw an error instead of silently disappearing. */
 function byKey<K extends CollectionName>(name: K, rows: Database[K]): Map<string, RowOf<K>> {
   const collection = COLLECTIONS[name];
   const map = new Map<string, RowOf<K>>();
   for (const row of rows) {
     const key = collection.key(row);
-    if (map.has(key)) throw new Error(`${name}: deux enregistrements avec la même clé (${key})`);
+    if (map.has(key)) throw new Error(`${name}: two records with the same key (${key})`);
     map.set(key, row);
   }
   return map;
@@ -48,10 +48,10 @@ function insertAdded<K extends CollectionName>(db: StoreDb, { name, old, next }:
 }
 
 /**
- * Écrit seulement ce qui a changé entre `before` et `after`, par clé primaire.
- * Suppressions d'abord (un index unique, comme une réservation par idée, n'est pas différé),
- * puis modifications, puis ajouts dans l'ordre du tableau. Jamais INSERT OR REPLACE : il change le rowid.
- * À appeler dans une transaction, avec `defer_foreign_keys` actif.
+ * Writes only what changed between `before` and `after`, by primary key.
+ * Deletions first (a unique index, like one reservation per idea, is not deferred),
+ * then updates, then inserts in array order. Never INSERT OR REPLACE: it changes the rowid.
+ * Call inside a transaction, with `defer_foreign_keys` active.
  */
 export function writeDiff(db: StoreDb, before: Database, after: Database): void {
   const plans = COLLECTION_NAMES.map((name) => plan(name, before, after));
@@ -65,12 +65,12 @@ function insertCollection<K extends CollectionName>(db: StoreDb, name: K, doc: D
   for (const row of doc[name]) db.insert(table).values(row).run();
 }
 
-/** Insère tout le document, dans l'ordre des tableaux (import, remplacement). */
+/** Inserts the whole document, in array order (import, replacement). */
 export function insertAll(db: StoreDb, doc: Database): void {
   for (const name of COLLECTION_NAMES) insertCollection(db, name, doc);
 }
 
-/** Vide toutes les tables (remplacement). */
+/** Empties all tables (replacement). */
 export function deleteAll(db: StoreDb): void {
   for (const name of [...COLLECTION_NAMES].reverse()) db.delete(COLLECTIONS[name].table).run();
 }

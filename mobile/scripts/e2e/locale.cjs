@@ -1,13 +1,13 @@
-// Langue des textes vérifiés (R8) : --lang, puis E2E_LANG, puis la langue de l'appareil, comme l'app.
+// Language of the checked strings (R8): --lang, then E2E_LANG, then the device language, like the app.
 const { execFileSync } = require("node:child_process");
 
 function explicit(value, source) {
   if (value === undefined || value === null || value === "") return null;
-  if (value !== "fr" && value !== "en") throw new Error(`${source} doit valoir fr ou en (reçu : ${value}).`);
+  if (value !== "fr" && value !== "en") throw new Error(`${source} must be fr or en (got: ${value}).`);
   return value;
 }
 
-/** Première langue de l'appareil (« en-US », « en_GB » ou la liste AppleLanguages) → en ; le reste → fr. */
+/** First device language (« en-US », « en_GB » or the AppleLanguages list) → en; anything else → fr. */
 function fromDevice(deviceLocale) {
   const first = String(deviceLocale ?? "").match(/[a-zA-Z]{2,3}(?:[-_][a-zA-Z0-9]+)*/);
   return first && first[0].toLowerCase().split(/[-_]/)[0] === "en" ? "en" : "fr";

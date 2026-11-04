@@ -6,9 +6,9 @@ import { fonts, tokens } from "@/theme/tokens";
 import { Shadow } from "./Shadow";
 
 /**
- * `components/ui/input.tsx` : fond blanc, hauteur 40, bordure et ombre.
- * Au focus, comme sur le site, le champ s'enfonce et perd son ombre.
- * `muted` : champ en lecture seule sur fond atténué (adresse e-mail du compte).
+ * `components/ui/input.tsx`: white background, height 40, border and shadow.
+ * On focus, as on the site, the field sinks and loses its shadow.
+ * `muted`: read-only field on a muted background (account email address).
  */
 export function Input({
   invalid = false,

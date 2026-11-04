@@ -9,8 +9,8 @@ import { Screen } from "@/ui/Screen";
 import { LegalLinks } from "./LegalLinks";
 
 /**
- * Écrans sans connexion (`02-connexion.png`, `03-inscription.png`) : en-tête du site, une carte-formulaire,
- * puis les liens vers les mentions légales et les données personnelles (FR-002).
+ * Signed-out screens (`02-connexion.png`, `03-inscription.png`): site header, a form card,
+ * then the links to the legal notice and the privacy page (FR-002).
  */
 export function AuthLayout({
   title,
@@ -22,7 +22,7 @@ export function AuthLayout({
   title: string;
   description?: string;
   children: ReactNode;
-  /** Sous la carte (bouton « Créer un compte »). */
+  /** Below the card (« Créer un compte » button). */
   below?: ReactNode;
   testID?: string;
 }) {
@@ -36,7 +36,7 @@ export function AuthLayout({
         </CardHeader>
         <CardContent>{children}</CardContent>
       </Card>
-      {/* Centré, comme le lien « Créer un compte » sous la carte du site. */}
+      {/* Centered, like the « Créer un compte » link below the site card. */}
       {below ? <View style={{ flexDirection: "row", justifyContent: "center", gap: tokens.space[3] }}>{below}</View> : null}
       <LegalLinks />
     </Screen>

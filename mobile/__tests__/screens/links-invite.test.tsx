@@ -34,7 +34,7 @@ async function signInAs(user = me) {
   await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user });
 }
 
-test("sans session : le lien est gardé et la connexion ou l'inscription est proposée", async () => {
+test("without a session: the link is kept and sign-in or sign-up is offered", async () => {
   fakeFetch({});
   await render(<InviteLink />);
   expect(screen.getByTestId("invite.register")).toBeOnTheScreen();
@@ -43,7 +43,7 @@ test("sans session : le lien est gardé et la connexion ou l'inscription est pro
   expect(afterSignIn()).toBe("/links/invite/it");
 });
 
-test("connectée, pas encore membre : le titre, « Rejoindre », puis la liste", async () => {
+test("signed in, not yet a member: the title, « Rejoindre », then the list", async () => {
   await signInAs();
   const { calls } = fakeFetch({
     "GET /invitations/it": () => json(200, { title: "Liste d'Alex", listId: null }),
@@ -59,7 +59,7 @@ test("connectée, pas encore membre : le titre, « Rejoindre », puis la liste",
   expect(router.replace).toHaveBeenCalledWith("/lists/w");
 });
 
-test("déjà membre : la liste s'ouvre tout de suite, sans « Rejoindre »", async () => {
+test("already a member: the list opens right away, without « Rejoindre »", async () => {
   await signInAs();
   const { calls } = fakeFetch({
     "GET /invitations/it": () => json(200, { title: "Liste d'Alex", listId: "w" }),
@@ -71,7 +71,7 @@ test("déjà membre : la liste s'ouvre tout de suite, sans « Rejoindre »", asy
   expect(calls).not.toContain("POST /invitations/it/accept");
 });
 
-test("adresse pas confirmée : le refus du serveur et le rappel de confirmation", async () => {
+test("address not confirmed: the server's refusal and the confirmation reminder", async () => {
   await signInAs({ ...me, emailVerified: false });
   fakeFetch({
     "GET /invitations/it": () => json(200, { title: "Liste d'Alex", listId: null }),
@@ -84,7 +84,7 @@ test("adresse pas confirmée : le refus du serveur et le rappel de confirmation"
   expect(router.replace).not.toHaveBeenCalled();
 });
 
-test("lien régénéré : le message du site", async () => {
+test("regenerated link: the site's message", async () => {
   await signInAs();
   fakeFetch({ "GET /invitations/it": () => json(404, { error: { code: "inviteLinkBroken", message: "x" } }) });
   await render(<InviteLink />);
@@ -92,7 +92,7 @@ test("lien régénéré : le message du site", async () => {
   expect(screen.getByTestId("invite.home")).toBeOnTheScreen();
 });
 
-test("mot de passe à changer d'abord : le lien est gardé pour après (R5)", async () => {
+test("password must be changed first: the link is kept for later (R5)", async () => {
   await signInAs({ ...me, mustChangePassword: true });
   const { calls } = fakeFetch({});
   await render(<InviteLink />);

@@ -7,7 +7,7 @@ import { AuthLayout } from "@/features/account/AuthLayout";
 import { PasswordForm } from "@/features/account/PasswordForm";
 import { Button } from "@/ui/Button";
 
-/** Changement de mot de passe imposé : seul écran accessible tant qu'il n'est pas fait (FR-005). */
+/** Forced password change: the only reachable screen until it is done (FR-005). */
 export default function ChangePassword() {
   const { t } = useTranslation(["auth", "common"]);
   const session = useSession();

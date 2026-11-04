@@ -27,7 +27,7 @@ function sameLabel(a: string, b: string): boolean {
   return a.trim().toLocaleLowerCase() === b.trim().toLocaleLowerCase();
 }
 
-/** Même nom dans la liste d'arrivée (casse et espaces ignorés), sinon la première entrée, comme sur le site. */
+/** Same name in the target list (case and spaces ignored), otherwise the first entry, as on the site. */
 function matching(options: { id: string; label: string }[], label: string | undefined): string {
   return (label ? options.find((option) => sameLabel(option.label, label)) : undefined)?.id ?? options[0]?.id ?? "";
 }
@@ -37,7 +37,7 @@ function Transfer({ list, item }: { list: ViewList; item: ViewItem }) {
   const { lists, loaded } = useMyLists();
   const others = lists.filter((entry) => entry.id !== list.id);
   const canMove = others.length > 0;
-  // Rien n'est figé avant que « Mes listes » soit lu : sans choix fait à la main, les défauts suivent les données.
+  // Nothing is fixed before « Mes listes » is read: without a manual choice, the defaults follow the data.
   const [chosenMode, setChosenMode] = useState<Mode | null>(null);
   const mode: Mode = canMove ? (chosenMode ?? "move") : "copy";
   const choices = mode === "move" ? others : lists;
@@ -46,7 +46,7 @@ function Transfer({ list, item }: { list: ViewList; item: ViewItem }) {
   const offered = (id: string | null): id is string => id !== null && choices.some((entry) => entry.id === id);
   const targetId = offered(chosenId) ? chosenId : offered(fallbackId) ? fallbackId : (choices[0]?.id ?? list.id);
   const target = useMemberList(targetId);
-  // Un choix fait à la main vaut pour cette liste d'arrivée seulement.
+  // A manual choice applies to this target list only.
   const [picked, setPicked] = useState<{ listId: string; typeId?: string; personId?: string }>({ listId: targetId });
   const typeLabel = list.categories.find((category) => category.id === item.typeId)?.label;
   const personLabel = list.people.find((person) => person.id === item.personId)?.label;
@@ -67,7 +67,7 @@ function Transfer({ list, item }: { list: ViewList; item: ViewItem }) {
         setError(result.error);
         return;
       }
-      // Déplacée : l'écran de modification n'a plus d'idée à montrer, retour direct à la liste.
+      // Moved: the edit screen has no idea left to show, go straight back to the list.
       router.dismissTo(`/lists/${list.id}`);
     } finally {
       setBusy(false);
@@ -151,7 +151,7 @@ function Transfer({ list, item }: { list: ViewList; item: ViewItem }) {
   );
 }
 
-/** Déplacer une idée vers une autre liste, ou la copier (même liste ou une autre). */
+/** Move an idea to another list, or copy it (same list or another one). */
 export default function TransferScreen() {
   const { t } = useTranslation("errors");
   const { itemId } = useLocalSearchParams<{ itemId: string }>();

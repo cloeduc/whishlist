@@ -158,7 +158,7 @@ Attendu : `200`.
 
 ### Mise à jour
 
-Première mise à jour vers la version SQLite (le volume contient encore `wishlist.json`) : faire une copie de `wishlist.json` hors du volume, puis vérifier cette copie avec `npm run db:check -- <copie>` (« aucun problème » attendu) avant de reconstruire. Au démarrage, le journal du conteneur affiche `[store] ancien fichier importé : …` ; si le fichier est incohérent, le conteneur s'arrête en nommant les enregistrements fautifs, sans rien modifier.
+Première mise à jour vers la version SQLite (le volume contient encore `wishlist.json`) : faire une copie de `wishlist.json` hors du volume, puis vérifier cette copie avec `npm run db:check -- <copie>` (« no problem » attendu) avant de reconstruire. Au démarrage, le journal du conteneur affiche `[store] old file imported: …` ; si le fichier est incohérent, le conteneur s'arrête en nommant les enregistrements fautifs, sans rien modifier.
 
 ```bash
 git pull
@@ -295,11 +295,17 @@ mobile/               # app Expo (package séparé)
 components/site/      # UI métier
 src/domain/           # règles métier (testées)
 src/server/commands/  # orchestration partagée par les server actions et l’API
-src/store/            # JSON + lock fichier
+src/store/            # base SQLite (Drizzle), seul accès aux données
 locales/{fr,en}/      # i18n
 deploy/               # compose, bootstrap, Runtipi
 data/seed.json        # fixture de test uniquement (pas d’import produit)
 ```
+
+---
+
+## Contribuer
+
+Les conventions du dépôt (couches, i18n, tests, workflow Spec Kit) sont dans [AGENTS.md](AGENTS.md). Le code est en anglais : identifiants, commentaires, descriptions de tests, messages techniques. Les textes du site et de l'app passent par `locales/{fr,en}`, et la documentation reste en français. `npm test` le vérifie pour les commentaires et les descriptions de tests.
 
 ---
 

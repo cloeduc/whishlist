@@ -4,20 +4,20 @@ import type { Locale } from "../../i18n/config";
 import { emailVerificationRequired } from "../mail";
 
 /**
- * Ce qu'une commande sait de la requête, sans dépendre de Next :
- * les server actions le construisent depuis les cookies, l'API depuis les en-têtes.
+ * What a command knows about the request, without depending on Next:
+ * server actions build it from cookies, the API from headers.
  */
 export type CommandContext = {
   user: User | null;
   ip: string | null;
   locale: Locale;
-  /** Origine publique pour les liens (invitation, reset). */
+  /** Public origin for links (invitation, reset). */
   origin: string;
 };
 
 export type CommandResult<T extends object = object> = ({ ok: true } & T) | { ok: false; error: string };
 
-/** Compte connecté qui n'a pas de changement de mot de passe en attente. */
+/** Signed-in account with no pending password change. */
 export function activeUser(ctx: CommandContext): { ok: true; user: User } | { ok: false; error: string } {
   if (!ctx.user) return { ok: false, error: "unauthorized" };
   if (ctx.user.mustChangePassword) return { ok: false, error: "mustChangePassword" };
@@ -25,8 +25,8 @@ export function activeUser(ctx: CommandContext): { ok: true; user: User } | { ok
 }
 
 /**
- * Compte actif dont l'adresse est confirmée, quand la validation est exigée (envoi d'e-mail actif) :
- * seul ce compte crée une liste, en rejoint une ou invite (010, FR-005).
+ * Active account whose address is confirmed, when validation is required (email sending active):
+ * only such an account creates a list, joins one or invites (010, FR-005).
  */
 export function verifiedUser(ctx: CommandContext): { ok: true; user: User } | { ok: false; error: string } {
   const active = activeUser(ctx);
@@ -36,16 +36,16 @@ export function verifiedUser(ctx: CommandContext): { ok: true; user: User } | { 
 }
 
 /**
- * Compte actif qui doit encore confirmer son adresse, avec la configuration de ce serveur :
- * bandeau du site, renvoi du lien. Un compte qui doit changer son mot de passe le fait d'abord.
+ * Active account that still has to confirm its address, with this server's configuration:
+ * site banner, link resend. An account that must change its password does that first.
  */
 export function emailConfirmationPending(user: User): boolean {
   return !user.mustChangePassword && mustConfirmEmail(user, emailVerificationRequired());
 }
 
 /**
- * Compte à prendre en compte côté public (accès membre, réservation liée, annulation par compte).
- * Un compte qui doit changer son mot de passe n'agit qu'en invité (FR-023).
+ * Account to take into account on the public side (member access, linked reservation, cancellation by account).
+ * An account that must change its password only acts as a guest (FR-023).
  */
 export function publicAccount(ctx: CommandContext): User | null {
   return ctx.user && !ctx.user.mustChangePassword ? ctx.user : null;

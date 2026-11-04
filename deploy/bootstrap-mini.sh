@@ -1,5 +1,5 @@
 #!/bin/bash
-# Bootstrap Oh, You Shouldn't! sur le Mac mini (image + compose + tunnel DNS/ingress).
+# Bootstrap Oh, You Shouldn't! on the Mac mini (image + compose + DNS/ingress tunnel).
 set -euo pipefail
 
 REPO="${HOME}/webserver/repos/whishlist"
@@ -32,7 +32,7 @@ echo "== harden data perms =="
 chmod +x deploy/harden-data.sh
 WHISHLIST_ENV_FILE="$ENV_FILE" WHISHLIST_DATA_DIR="$DATA_DIR" bash deploy/harden-data.sh
 
-# APP_ORIGIN obligatoire pour les mails / liens (Host-header safe)
+# APP_ORIGIN required for mails / links (Host-header safe)
 if ! grep -q '^WHISHLIST_APP_ORIGIN=.\+' "$ENV_FILE"; then
   echo "WHISHLIST_APP_ORIGIN=https://${DOMAIN}" >> "$ENV_FILE"
   echo "appended WHISHLIST_APP_ORIGIN"

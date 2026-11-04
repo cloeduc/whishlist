@@ -2,7 +2,7 @@ import { api, ApiError, configureClient, NetworkError, ok } from "@/api/client";
 
 const fetchMock = jest.fn<Promise<Response>, Parameters<typeof fetch>>();
 
-// Le client appelle fetch avec un objet Request.
+// The client calls fetch with a Request object.
 function sentRequest(): Request {
   const input = fetchMock.mock.calls[0][0];
   if (!(input instanceof Request)) throw new Error("fetch called without a Request");

@@ -14,7 +14,7 @@ const HOST = "ohyoushouldnt.app";
 const to = (url: string) => appPathForSiteUrl(url, { apiHost: HOST });
 const FINGERPRINT = Array.from({ length: 32 }, () => "AB").join(":");
 
-test("chaque lien de la table ouvre son écran, en français comme sous /en", () => {
+test("each link in the table opens its screen, in French as under /en", () => {
   const cases: [string, string][] = [
     ["/confirmer-email/tok", "/links/confirm-email/tok"],
     ["/reinitialiser/tok", "/links/reset-password/tok"],
@@ -32,7 +32,7 @@ test("chaque lien de la table ouvre son écran, en français comme sous /en", ()
   }
 });
 
-test("trois formes d'adresse : web, schéma de l'app, chemin seul", () => {
+test("three address forms: web, app scheme, path only", () => {
   assert.equal(to(`https://${HOST}/reinitialiser/tok`), "/links/reset-password/tok");
   assert.equal(to("ohyoushouldnt://reinitialiser/tok"), "/links/reset-password/tok");
   assert.equal(to("ohyoushouldnt:///reinitialiser/tok"), "/links/reset-password/tok");
@@ -45,7 +45,7 @@ test("trois formes d'adresse : web, schéma de l'app, chemin seul", () => {
   assert.equal(to(`https://${HOST}/reinitialiser/tok/`), "/links/reset-password/tok");
 });
 
-test("requête : seules les clés prévues passent, encodées", () => {
+test("query: only the expected keys pass, encoded", () => {
   assert.equal(
     to(`https://${HOST}/confirmer-email/tok?suite=%2Finviter%2Fabc&utm=x`),
     "/links/confirm-email/tok?suite=%2Finviter%2Fabc",
@@ -56,14 +56,14 @@ test("requête : seules les clés prévues passent, encodées", () => {
   assert.equal(to(`https://${HOST}/l/read?typeId=`), "/guest/read");
 });
 
-test("adresses que l'app ne traite pas : null", () => {
+test("addresses the app does not handle: null", () => {
   for (const url of [
     `https://${HOST}/`,
     `https://${HOST}/en`,
     `https://${HOST}/guide`,
     `https://${HOST}/compte/export`,
     `https://${HOST}/api/v1/me`,
-    // Ouvertes exprès dans le navigateur depuis l'app (« Gérer le partage sur le site »).
+    // Opened in the browser on purpose from the app (« Gérer le partage sur le site »).
     `https://${HOST}/listes/abc?onglet=partage`,
     `https://${HOST}/inviter/`,
     `https://${HOST}/inviter//x`,
@@ -80,12 +80,12 @@ test("adresses que l'app ne traite pas : null", () => {
   }
 });
 
-test("un jeton est décodé puis réencodé une fois", () => {
+test("a token is decoded then re-encoded once", () => {
   assert.equal(to(`https://${HOST}/inviter/a%20b`), "/links/invite/a%20b");
   assert.equal(to(`https://${HOST}/inviter/a-b_c`), "/links/invite/a-b_c");
 });
 
-test("fichier Apple : l'app publiée et chaque chemin, avec et sans /en", () => {
+test("Apple file: the published app and each path, with and without /en", () => {
   const detail = appleAssociation("ABCDE12345").applinks.details[0]!;
   assert.deepEqual(detail.appIDs, ["ABCDE12345.app.ohyoushouldnt.mobile"]);
   const paths = detail.components.map((component) => component["/"]);
@@ -96,7 +96,7 @@ test("fichier Apple : l'app publiée et chaque chemin, avec et sans /en", () => 
   assert.equal(paths.some((path) => path.startsWith("/guide") || path.startsWith("/listes") || path === "/"), false);
 });
 
-test("fichier Android : empreintes mal formées ignorées, préfixes de la table", () => {
+test("Android file: malformed fingerprints ignored, prefixes from the table", () => {
   const [entry] = androidAssociation([FINGERPRINT.toLowerCase(), "pas-une-empreinte", " "]);
   assert.equal(entry!.target.package_name, "app.ohyoushouldnt.mobile");
   assert.deepEqual(entry!.target.sha256_cert_fingerprints, [FINGERPRINT]);
@@ -114,7 +114,7 @@ function assertJsonHeaders(response: Response) {
   assert.equal(response.headers.get("cache-control"), "public, max-age=3600");
 }
 
-test("GET /.well-known/apple-app-site-association : 404 sans APPLE_TEAM_ID, JSON sinon", async () => {
+test("GET /.well-known/apple-app-site-association: 404 without APPLE_TEAM_ID, JSON otherwise", async () => {
   await withEnv({ APPLE_TEAM_ID: undefined }, () => assert.equal(appleAssociationResponse().status, 404));
   await withEnv({ APPLE_TEAM_ID: "trop-court" }, () => assert.equal(appleAssociationResponse().status, 404));
   await withEnv({ APPLE_TEAM_ID: "abcde12345" }, async () => {
@@ -125,7 +125,7 @@ test("GET /.well-known/apple-app-site-association : 404 sans APPLE_TEAM_ID, JSON
   });
 });
 
-test("GET /.well-known/assetlinks.json : 404 sans empreinte valide, JSON sinon", async () => {
+test("GET /.well-known/assetlinks.json: 404 without a valid fingerprint, JSON otherwise", async () => {
   await withEnv({ ANDROID_CERT_SHA256: undefined }, () => assert.equal(androidAssociationResponse().status, 404));
   await withEnv({ ANDROID_CERT_SHA256: "nimporte-quoi" }, () => assert.equal(androidAssociationResponse().status, 404));
   await withEnv({ ANDROID_CERT_SHA256: `${FINGERPRINT}, ${FINGERPRINT.replace(/^AB/, "CD")}` }, async () => {

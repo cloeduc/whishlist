@@ -11,26 +11,26 @@ export interface User {
   passwordHash: string;
   displayName: string;
   createdAt: string;
-  /** Si true, la session est redirigée vers le changement de mot de passe. */
+  /** If true, the session is redirected to the password change. */
   mustChangePassword: boolean;
-  /** Incrémenté à chaque changement de mot de passe. Les jetons plus anciens sont refusés. */
+  /** Incremented on each password change. Older tokens are refused. */
   sessionVersion?: number;
-  /** Date de confirmation de l'adresse. null : adresse non vérifiée. */
+  /** Date the address was confirmed. null: address not verified. */
   emailVerifiedAt: string | null;
 }
 
 export interface Wishlist {
   id: string;
   title: string;
-  /** Sous-titre affiché sous le titre sur la page publique. */
+  /** Subtitle shown under the title on the public page. */
   subtitle: string | null;
-  /** Image d'illustration (URL http(s)) — sinon le cadeau SVG aux couleurs du thème. */
+  /** Illustration image (http(s) URL) — otherwise the SVG gift in the theme colors. */
   coverImageUrl: string | null;
-  /** Palette propre à la liste (défaut = favicon cadeau). */
+  /** The list's own palette (default = gift favicon). */
   theme: WishlistTheme;
   readToken: string;
   inviteToken: string;
-  /** Si non null, la page publique `/l/[readToken]` exige ce mot de passe (hash scrypt). */
+  /** If not null, the public page `/l/[readToken]` requires this password (scrypt hash). */
   readPasswordHash: string | null;
   fromTemplate: boolean;
   createdAt: string;
@@ -46,7 +46,7 @@ export interface Membership {
 export interface Subscription {
   wishlistId: string;
   userId: string;
-  /** Empreinte du mot de passe de lecture au moment où l'abonnement a été créé ou déverrouillé. */
+  /** Hash of the read password when the subscription was created or unlocked. */
   readPasswordHash: string | null;
   createdAt: string;
 }
@@ -55,7 +55,7 @@ export interface WishType {
   id: string;
   wishlistId: string;
   label: string;
-  /** Ordre d’affichage des catégories (accordéon). */
+  /** Display order of categories (accordion). */
   sortOrder: number;
 }
 
@@ -84,9 +84,9 @@ export interface Item {
   imageUrl: string | null;
   priceCents: number | null;
   priority: string | null;
-  /** L'idée convient aussi d'occasion (livres, jeux…), signalé à qui offre. */
+  /** The idea is fine second-hand too (books, games…), shown to the giver. */
   secondHandOk: boolean;
-  /** Contexte pour qui offre : ce qu'est le produit, pourquoi on le veut, à quoi il servira. */
+  /** Context for the giver: what the product is, why it is wanted, what it will be used for. */
   description: string | null;
   personId: string;
   sortOrder: number;
@@ -99,7 +99,7 @@ export interface Reservation {
   itemId: string;
   fromName: string | null;
   note: string | null;
-  /** Rempli si la réservation a été faite en étant connecté. */
+  /** Set if the reservation was made while signed in. */
   userId: string | null;
   createdAt: string;
 }
@@ -113,34 +113,34 @@ export interface PasswordReset {
 }
 
 /**
- * Lien de confirmation d'une adresse : `verify` pour l'adresse actuelle, `change` pour une nouvelle.
- * Au plus une demande par compte et par motif ; le jeton n'est stocké que haché.
+ * Address confirmation link: `verify` for the current address, `change` for a new one.
+ * At most one request per account and purpose; the token is only stored hashed.
  */
 export interface EmailConfirmation {
   id: string;
   userId: string;
   purpose: "verify" | "change";
-  /** Adresse à confirmer, normalisée. */
+  /** Address to confirm, normalized. */
   email: string;
   tokenHash: string;
   expiresAt: string;
   createdAt: string;
 }
 
-/** Connexion d'un client d'API (app mobile). Le jeton n'est stocké que haché. */
+/** Session of an API client (mobile app). The token is only stored hashed. */
 export interface ApiSession {
   id: string;
   userId: string;
   tokenHash: string;
-  /** `user.sessionVersion` à l'émission : un changement de mot de passe la périme. */
+  /** `user.sessionVersion` when issued: a password change makes it expire. */
   sessionVersion: number;
   createdAt: string;
   expiresAt: string;
 }
 
 /**
- * Clé d'API créée par la personne (assistant IA, script). Elle agit pour son compte, sauf les actions de
- * compte. Seul son hachage est gardé ; `hint` (4 derniers caractères) aide à la reconnaître dans la liste.
+ * API key created by the person (AI assistant, script). It acts for their account, except account
+ * actions. Only its hash is kept; `hint` (last 4 characters) helps recognize it in the list.
  */
 export interface ApiKey {
   id: string;
@@ -149,7 +149,7 @@ export interface ApiKey {
   tokenHash: string;
   hint: string;
   createdAt: string;
-  /** Mis à jour au plus une fois par heure, pour ne pas écrire à chaque requête. */
+  /** Updated at most once an hour, so as not to write on every request. */
   lastUsedAt: string | null;
 }
 

@@ -7,7 +7,7 @@ import { tokens } from "@/theme/tokens";
 import { Shadow } from "./Shadow";
 import { Text } from "./Text";
 
-/** `components/ui/alert.tsx` : blanche (info) ou rouge à texte blanc (erreur), avec actions. */
+/** `components/ui/alert.tsx`: white (info) or red with white text (error), with actions. */
 export function Alert({
   title,
   children,

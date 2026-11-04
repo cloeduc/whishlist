@@ -1,4 +1,4 @@
-# Sur l'onglet Idées : déplie la catégorie CATEGORY si l'idée ITEM n'est pas visible.
+# On the Ideas tab: expands the category CATEGORY if the idea ITEM is not visible.
 appId: app.ohyoushouldnt.mobile
 ---
 - runFlow:
@@ -8,7 +8,7 @@ appId: app.ohyoushouldnt.mobile
       - scrollUntilVisible:
           element:
             text: ${CATEGORY}.*
-      # Le bouton de la catégorie a pour libellé « <nom> <nombre d'idées> ».
+      # The category button's label is « <nom> <nombre d'idées> ».
       - tapOn: ${CATEGORY}.*
 - scrollUntilVisible:
     element:

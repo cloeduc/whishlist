@@ -1,7 +1,7 @@
-// Dernier lien envoyé à TO, lu dans MailDev (MAILDEV_URL, passé par la commande e2e).
-// KIND choisit la page du lien : confirmer-email (par défaut), reinitialiser ou inviter.
-// Rend output.link (et output.confirmUrl, nom gardé pour les parcours de la 010) ;
-// échoue si aucun e-mail n'est encore arrivé (l'appelant réessaie).
+// Last link sent to TO, read in MailDev (MAILDEV_URL, passed by the e2e command).
+// KIND picks the link's page: confirmer-email (default), reinitialiser or inviter.
+// Returns output.link (and output.confirmUrl, name kept for the 010 flows);
+// fails if no email has arrived yet (the caller retries).
 const kind = typeof KIND === "undefined" || !KIND ? "confirmer-email" : KIND;
 const pattern = new RegExp("https?:\\/\\/\\S+\\/" + kind + "\\/[\\w-]+(\\?\\S*)?");
 const response = http.get(MAILDEV_URL + "/api/email");

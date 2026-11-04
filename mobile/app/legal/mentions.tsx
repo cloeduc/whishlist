@@ -8,7 +8,7 @@ import { ContentSection, ContentText } from "@/ui/ContentSection";
 
 import { CONTACT_EMAIL } from "../../../src/site/contact";
 
-/** Mentions légales, d'après `13-mentions-legales.png` : mêmes textes que le site (FR-030). */
+/** Legal notice, from `13-mentions-legales.png`: same texts as the site (FR-030). */
 export default function LegalMentions() {
   const { t } = useTranslation("content");
   return (

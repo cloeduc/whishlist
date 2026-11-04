@@ -16,7 +16,7 @@ import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel, FieldLeg
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { transferItemAction } from "@/src/server/actions";
 
-/** Une liste dont on est membre, avec ses catégories et ses « qui ». */
+/** A list the user is a member of, with its categories and its « qui ». */
 export type TransferTarget = {
   id: string;
   title: string;
@@ -30,7 +30,7 @@ function sameLabel(a: string, b: string): boolean {
   return a.trim().toLocaleLowerCase() === b.trim().toLocaleLowerCase();
 }
 
-/** Même nom dans la liste d'arrivée (casse et espaces ignorés), sinon la première entrée. */
+/** Same name in the target list (case and spaces ignored), otherwise the first entry. */
 function matching(options: { id: string; label: string }[], label: string | undefined): string {
   return (label ? options.find((option) => sameLabel(option.label, label)) : undefined)?.id ?? options[0]?.id ?? "";
 }
@@ -45,7 +45,7 @@ export function MoveCopyDialog({
 }: {
   wishlistId: string;
   item: { id: string; name: string };
-  /** Libellés actuels de l'idée, pour pré-choisir les mêmes dans la liste d'arrivée. */
+  /** The idea's current labels, to preselect the same ones in the target list. */
   typeLabel: string | undefined;
   personLabel: string | undefined;
   targets: TransferTarget[];
@@ -74,7 +74,7 @@ export function MoveCopyDialog({
   function chooseMode(next: "move" | "copy") {
     setMode(next);
     setError(null);
-    // La liste actuelle ne se propose que pour une copie.
+    // The current list is offered only for a copy.
     if (next === "move" && targetId === wishlistId) chooseTarget(others[0]);
   }
 
@@ -156,7 +156,7 @@ export function MoveCopyDialog({
               ))}
             </NativeSelect>
           </Field>
-          {/* Deux colonnes selon la place du dialogue, pas la largeur de la fenêtre. */}
+          {/* Two columns based on the dialog's space, not the window width. */}
           <div className="@container">
             <div className="grid gap-4 @sm:grid-cols-2">
               <Field>

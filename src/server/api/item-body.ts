@@ -1,7 +1,7 @@
 import type { ItemFields } from "../commands/items";
 import { text, type JsonBody } from "./http";
 
-/** Corps `ItemInput` du contrat → champs de la commande. */
+/** Contract `ItemInput` body → command fields. */
 export function itemFieldsFrom(wishlistId: string, body: JsonBody, itemId?: string): ItemFields {
   return {
     wishlistId,
@@ -13,9 +13,9 @@ export function itemFieldsFrom(wishlistId: string, body: JsonBody, itemId?: stri
     imageUrl: text(body.imageUrl),
     price: text(body.price),
     priority: text(body.priority),
-    // Absent (client antérieur à 1.5.0) : non transmis, la valeur enregistrée est gardée.
+    // Missing (client older than 1.5.0): not passed on, the stored value is kept.
     secondHandOk: typeof body.secondHandOk === "boolean" ? body.secondHandOk : undefined,
-    // Absent (client antérieur à 1.5.0) : non transmis, la description enregistrée est gardée. null l'efface.
+    // Missing (client older than 1.5.0): not passed on, the stored description is kept. null clears it.
     description: typeof body.description === "string" || body.description === null ? body.description : undefined,
   };
 }

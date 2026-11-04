@@ -20,16 +20,16 @@ function withKey() {
   return created;
 }
 
-/** Épuise les échecs autorisés de `ip` : chacun reste un simple refus (null). */
+/** Uses up the allowed failures of `ip`: each one stays a plain refusal (null). */
 async function failUpToLimit(ip: string) {
   for (let i = 0; i < API_KEY_FAILURE_RATE.limit; i++) assert.equal(await apiKeyUser(unknownKey(i), ip), null, `échec ${i + 1}`);
 }
 
-test("limite par IP : 20 clés inconnues en 15 minutes, comme les échecs de connexion", () => {
+test("per-IP limit: 20 unknown keys in 15 minutes, like sign-in failures", () => {
   assert.deepEqual(API_KEY_FAILURE_RATE, { limit: 20, windowMs: 15 * 60 * 1000 });
 });
 
-test("clé inconnue : au-delà de la limite, l'IP reçoit rateLimited, même avec une clé valide ; une autre IP non", async () => {
+test("unknown key: beyond the limit, the IP gets rateLimited, even with a valid key; another IP does not", async () => {
   const { doc, token } = withKey();
   await withStore(doc, async () => {
     await failUpToLimit(IP);
@@ -40,7 +40,7 @@ test("clé inconnue : au-delà de la limite, l'IP reçoit rateLimited, même ave
   });
 });
 
-test("seuls les échecs comptent : les requêtes d'une clé valide n'usent pas le budget de l'IP", async () => {
+test("only failures count: requests with a valid key do not use the IP's budget", async () => {
   const { doc, token } = withKey();
   await withStore(doc, async () => {
     for (let i = 0; i < 100; i++) assert.equal((await apiKeyUser(token, IP))?.id, "alex");
@@ -49,7 +49,7 @@ test("seuls les échecs comptent : les requêtes d'une clé valide n'usent pas l
   });
 });
 
-test("une clé révoquée compte comme un échec", async () => {
+test("a revoked key counts as a failure", async () => {
   const { doc, token } = withKey();
   await withStore({ ...doc, apiKeys: [] }, async () => {
     for (let i = 0; i < API_KEY_FAILURE_RATE.limit; i++) assert.equal(await apiKeyUser(token, IP), null);
@@ -57,7 +57,7 @@ test("une clé révoquée compte comme un échec", async () => {
   });
 });
 
-test("MCP : unauthorized jusqu'à la limite, puis rateLimited pour cette IP", async () => {
+test("MCP: unauthorized up to the limit, then rateLimited for this IP", async () => {
   const { doc, token } = withKey();
   const access = (authorization: string, ip: string) =>
     mcpAccess({ origin: null, siteOrigin: "https://ohyoushouldnt.example.test", authorization: `Bearer ${authorization}`, ip });
@@ -72,7 +72,7 @@ test("MCP : unauthorized jusqu'à la limite, puis rateLimited pour cette IP", as
   });
 });
 
-test("sans IP de confiance : en production un échec est refusé, une clé valide passe", async () => {
+test("without a trusted IP: in production a failure is refused, a valid key passes", async () => {
   const { doc, token } = withKey();
   await withStore(doc, async () => {
     await withEnv({ NODE_ENV: "production" }, async () => {

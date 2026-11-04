@@ -5,7 +5,7 @@ import { previewInvite } from "@/src/server/commands/sharing";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Aperçu d'une invitation avant de la rejoindre (011) : titre, et `listId` si le compte en est déjà membre. */
+/** Preview of an invitation before joining (011): title, and `listId` if the account is already a member. */
 export const GET = withApi<{ inviteToken: string }>(async (api, { inviteToken }) => {
   const result = await previewInvite(await commandContext(api), { token: inviteToken });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);

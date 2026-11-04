@@ -4,7 +4,7 @@ import { listMyOffers, listOffrir } from "../../src/domain/offrir";
 import { DEFAULT_WISHLIST_THEME } from "../../src/domain/theme";
 import { emptyDatabase } from "../../src/domain/types";
 
-test("offrir scopé à la liste, champs vides, zéro ligne", () => {
+test("offrir scoped to the list, empty fields, zero rows", () => {
   const doc = emptyDatabase();
   doc.types.push({ id: "t", wishlistId: "w", label: "Jeux", sortOrder: 0 });
   doc.items.push({
@@ -51,7 +51,7 @@ test("offrir scopé à la liste, champs vides, zéro ligne", () => {
   assert.equal(rows[0]?.note, null);
 });
 
-test("mes cadeaux : seulement les réservations liées au compte", () => {
+test("my gifts: only the reservations linked to the account", () => {
   const doc = emptyDatabase();
   doc.wishlists.push({
     id: "w",

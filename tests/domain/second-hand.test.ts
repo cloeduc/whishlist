@@ -36,14 +36,14 @@ function ready() {
 
 const base = { wishlistId: "w", actorId: "u", name: "Roman", typeId: "t", personId: "p" };
 
-test("création : décoché par défaut, coché si demandé", () => {
+test("creation: unchecked by default, checked if requested", () => {
   const unset = createItem(ready(), base);
   assert.equal(unset.ok && unset.item.secondHandOk, false);
   const set = createItem(ready(), { ...base, secondHandOk: true });
   assert.equal(set.ok && set.item.secondHandOk, true);
 });
 
-test("modification : absent garde la valeur, false la retire", () => {
+test("update: absent keeps the value, false clears it", () => {
   const created = createItem(ready(), { ...base, secondHandOk: true });
   assert.ok(created.ok);
   if (!created.ok) return;
@@ -58,14 +58,14 @@ test("modification : absent garde la valeur, false la retire", () => {
   assert.equal(cleared.doc.items.find((i) => i.id === itemId)?.secondHandOk, false);
 });
 
-test("corps d'API : seul un vrai booléen est transmis", () => {
+test("API body: only a real boolean is passed on", () => {
   assert.equal(itemFieldsFrom("w", { name: "x" }).secondHandOk, undefined);
   assert.equal(itemFieldsFrom("w", { name: "x", secondHandOk: true }).secondHandOk, true);
   assert.equal(itemFieldsFrom("w", { name: "x", secondHandOk: false }).secondHandOk, false);
   assert.equal(itemFieldsFrom("w", { name: "x", secondHandOk: "true" }).secondHandOk, undefined);
 });
 
-test("un client antérieur à 1.5.0 qui modifie une idée ne décoche pas « l'occasion me va »", async () => {
+test("a client older than 1.5.0 that updates an idea does not uncheck « l'occasion me va »", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -82,7 +82,7 @@ test("un client antérieur à 1.5.0 qui modifie une idée ne décoche pas « l'o
     });
     assert.ok(created.ok);
     if (!created.ok) return;
-    // PUT d'un ancien client : tous les champs, sauf secondHandOk.
+    // PUT from an old client: all fields, except secondHandOk.
     const oldClient = itemFieldsFrom(
       "w",
       { name: "Jeu de société (édition 2)", typeId: "t", personId: "p", url: "", imageUrl: "", price: "", priority: "" },
@@ -96,7 +96,7 @@ test("un client antérieur à 1.5.0 qui modifie une idée ne décoche pas « l'o
   });
 });
 
-test("vues JSON : le champ est présent pour les membres et pour la page publique", () => {
+test("JSON views: the field is present for members and for the public page", () => {
   const created = createItem(ready(), { ...base, secondHandOk: true });
   assert.ok(created.ok);
   if (!created.ok) return;
@@ -106,7 +106,7 @@ test("vues JSON : le champ est présent pour les membres et pour la page publiqu
   assert.equal(view.items[0]?.secondHandOk, true);
 });
 
-test("ancien fichier JSON sans le champ : importé comme décoché", async () => {
+test("old JSON file without the field: imported as unchecked", async () => {
   await withTempDataPath(async (dataPath) => {
     const legacy = apiDoc() as unknown as { items: Record<string, unknown>[] };
     for (const item of legacy.items) delete item.secondHandOk;
@@ -117,7 +117,7 @@ test("ancien fichier JSON sans le champ : importé comme décoché", async () =>
   });
 });
 
-test("base existante d'avant ce champ : la migration l'ajoute, décoché, sans perdre les idées", async () => {
+test("existing database from before this field: the migration adds it, unchecked, without losing ideas", async () => {
   await withTempDataPath(async () => {
     const file = databaseFilePath();
     const init = readFileSync(path.join(process.cwd(), "drizzle", "0000_init.sql"), "utf8");
@@ -126,7 +126,7 @@ test("base existante d'avant ce champ : la migration l'ajoute, décoché, sans p
     };
     const initWhen = journal.entries.find((entry) => entry.tag === "0000_init")!.when;
 
-    // La base telle qu'elle était : seule la première migration appliquée, une idée dedans.
+    // The database as it was: only the first migration applied, one idea in it.
     const old = new Database(file);
     for (const statement of init.split("--> statement-breakpoint")) if (statement.trim()) old.exec(statement);
     old.exec("CREATE TABLE IF NOT EXISTS __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric)");

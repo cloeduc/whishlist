@@ -75,7 +75,7 @@ test.each([
   expect(jest.mocked(router.push).mock.calls.slice(-2)).toEqual([["/legal/mentions"], ["/legal/privacy"]]);
 });
 
-test("connexion ouverte par /connexion?next=/inviter/… (011) : l'invitation est gardée pour après", async () => {
+test("sign-in opened from /connexion?next=/inviter/… (011): the invitation is kept for later", async () => {
   params.next = "/inviter/tok";
   try {
     await render(<Login />);

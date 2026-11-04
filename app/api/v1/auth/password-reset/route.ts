@@ -5,7 +5,7 @@ import { requestPasswordReset } from "@/src/server/commands/auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Toujours 202 : la réponse ne dit pas si l'e-mail a un compte, et ne contient jamais le lien. */
+/** Always 202: the response does not tell whether the email has an account, and never contains the link. */
 export const POST = withApi(async (api) => {
   const body = await readJsonBody(api.req);
   if (!body.ok) return apiError(body.error, api.locale, api.cors);

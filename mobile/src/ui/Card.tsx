@@ -9,7 +9,7 @@ import { Text } from "./Text";
 
 const spacing = tokens.space[4];
 
-/** `components/ui/card.tsx` : fond blanc, bordure, ombre, marges 16. Cliquable : s'enfonce à l'appui. */
+/** `components/ui/card.tsx`: white background, border, shadow, padding 16. Pressable: sinks on press. */
 export function Card({
   children,
   onPress,
@@ -45,8 +45,8 @@ export function Card({
 }
 
 /**
- * Carte repliable : l'accordéon du site (`components/ui/accordion.tsx`, voir `./Accordion`) dans
- * la boîte de `Card`. Seul l'en-tête est un bouton.
+ * Collapsible card: the site's accordion (`components/ui/accordion.tsx`, see `./Accordion`) in
+ * the `Card` box. Only the header is a button.
  */
 export function CollapsibleCard({
   title,
@@ -60,7 +60,7 @@ export function CollapsibleCard({
   description?: string;
   children: ReactNode;
   defaultExpanded?: boolean;
-  /** Style du `CardContent` (une liste de liens alignés à gauche, par exemple). */
+  /** Style of the `CardContent` (a list of left-aligned links, for example). */
   contentStyle?: StyleProp<ViewStyle>;
   testID?: string;
 }) {

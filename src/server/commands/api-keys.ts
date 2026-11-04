@@ -4,7 +4,7 @@ import { updateDocument } from "../../store/db";
 import { rateLimitForIp } from "../rate-limit";
 import { activeUser, type CommandContext, type CommandResult } from "./context";
 
-/** Crée une clé ; le jeton n'est rendu qu'ici. Limité à 10 créations par heure. */
+/** Creates a key; the token is returned only here. Limited to 10 creations per hour. */
 export async function createMyApiKey(
   ctx: CommandContext,
   input: { name: string },

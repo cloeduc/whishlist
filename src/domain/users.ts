@@ -76,16 +76,16 @@ export async function changePassword(
   user.passwordHash = await hashPassword(password);
   user.mustChangePassword = false;
   user.sessionVersion = (user.sessionVersion ?? 0) + 1;
-  // Compte repris en main : un changement d'adresse demandé avant ne vaut plus rien (010).
+  // The account is taken back: an address change requested before is no longer valid (010).
   next.emailConfirmations = next.emailConfirmations.filter(
     (entry) => !(entry.userId === user.id && entry.purpose === "change"),
   );
-  // Comme les sessions : changer son mot de passe après une fuite doit aussi couper une clé d'API volée.
+  // Like sessions: changing one's password after a leak must also cut off a stolen API key.
   next.apiKeys = next.apiKeys.filter((entry) => entry.userId !== user.id);
   return { ok: true, doc: next, value: user };
 }
 
-/** Adresse normalisée, valide et qu'aucun autre compte n'utilise. */
+/** Normalized, valid address that no other account uses. */
 export function validateNewEmail(doc: Database, userId: string, value: string): { ok: true; email: string } | Err {
   const email = normalizeEmail(value);
   if (!email || !email.includes("@")) return { ok: false, error: "emailInvalid" };
@@ -93,7 +93,7 @@ export function validateNewEmail(doc: Database, userId: string, value: string): 
   return { ok: true, email };
 }
 
-/** Nouvelle adresse de connexion, confirmée à `now` (lien ouvert, ou sans envoi d'e-mail). */
+/** New sign-in address, confirmed at `now` (link opened, or no email sending). */
 export function setUserEmail(
   doc: Database,
   input: { userId: string; email: string; now?: Date },

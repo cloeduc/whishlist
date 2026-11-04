@@ -1,7 +1,7 @@
 import { GiftMark } from "@/components/site/gift-mark";
 import { LinkButton } from "@/components/site/link-button";
 
-/** Landing hors session : brand + pitch + CTA, ambiance cadeau néo-brutale. */
+/** Signed-out landing: brand + pitch + CTA, neo-brutalist gift mood. */
 export function GuestHero({
   brand,
   headline,

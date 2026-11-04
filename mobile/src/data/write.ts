@@ -2,15 +2,15 @@ import { enqueue, retry, type NewChange } from "@/offline/outbox";
 import { sendAndWait } from "@/offline/sync";
 
 /**
- * Résultat d'un enregistrement passé par la file :
- * - `sent` : accepté par le serveur ; `pending` : gardé sur le téléphone, envoyé plus tard ;
- * - refus : le code d'erreur, et le `seq` à reprendre (« Corriger ») au prochain envoi du formulaire.
+ * Result of a save made through the queue:
+ * - `sent`: accepted by the server; `pending`: kept on the phone, sent later;
+ * - refusal: the error code, and the `seq` to resume (« Corriger ») on the next form submit.
  */
 export type WriteResult = { ok: true; status: "sent" | "pending" } | { ok: false; error: string; seq: number | null };
 
 /**
- * Ajoute le changement à la file (ou reprend un changement refusé) et tente de l'envoyer tout de suite.
- * En ligne, le formulaire connaît donc la réponse du serveur ; hors ligne, il passe « en attente ».
+ * Adds the change to the queue (or resumes a rejected change) and tries to send it right away.
+ * Online, the form therefore knows the server's answer; offline, it becomes « en attente ».
  */
 export async function write(change: NewChange, retrySeq?: number | null): Promise<WriteResult> {
   let seq: number | null;

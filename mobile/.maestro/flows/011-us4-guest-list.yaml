@@ -1,14 +1,14 @@
-# 011 US4 : le lien public de la liste de démo (jeton fixe de la base de la suite) ouvre la vue invité de
-# l'app, sans compte : réserver une idée avec un nom, la voir marquée « Réservé par vous », puis annuler.
-# Le lien s'ouvre par le schéma ohyoushouldnt:// (research R10).
+# 011 US4: the public link of the demo list (fixed token of the suite's database) opens the guest view of
+# the app, without an account: reserve an idea with a name, see it marked « Réservé par vous », then cancel.
+# The link opens through the ohyoushouldnt:// scheme (research R10).
 appId: app.ohyoushouldnt.mobile
-name: "011 US4 — Le lien public d'une liste ouvre l'app, même sans compte"
+name: "011 US4 — A list's public link opens the app, even without an account"
 tags:
   - 011-us4
 ---
 - runFlow: ../subflows/launch-clean.yaml
 - runScript: ../scripts/strings.generated.js
-# Preuve du serveur local avant d'écrire, puis sans compte.
+# Proof of the local server before writing, then without an account.
 - runFlow:
     file: ../subflows/login.yaml
     env:
@@ -23,7 +23,7 @@ tags:
 - assertNotVisible:
     id: list.add-item
 
-# Réserver la première idée, avec un nom.
+# Reserve the first idea, with a name.
 - tapOn:
     id: guest.offer-0
 - extendedWaitUntil:
@@ -44,7 +44,7 @@ tags:
     visible: ${output.t.public.reservation.mine}
     timeout: 20000
 
-# Annuler sa réservation : l'idée redevient réservable.
+# Cancel one's reservation: the idea can be reserved again.
 - scrollUntilVisible:
     element:
       id: guest.cancel-0

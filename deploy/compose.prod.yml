@@ -1,4 +1,4 @@
-# Déploiement direct Mac Mini (port hôte → cloudflared).
+# Direct deployment on the Mac Mini (host port → cloudflared).
 services:
   whishlist:
     image: whishlist:local

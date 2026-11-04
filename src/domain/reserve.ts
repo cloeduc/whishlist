@@ -2,7 +2,7 @@ import { clone } from "./access";
 import { newId } from "./tokens";
 import type { Database, Reservation } from "./types";
 
-/** Longueurs maximales du nom de l'offreur et du petit mot. */
+/** Maximum lengths of the giver's name and of the note. */
 export const MAX_FROM_NAME = 200;
 export const MAX_NOTE = 2000;
 
@@ -37,7 +37,7 @@ export function reserveItem(
     return { ok: false, error: "fieldTooLong" };
   }
   const item = doc.items.find((i) => i.id === input.itemId && i.wishlistId === input.wishlistId);
-  // Une idée réservée est archivée : on dit pourquoi elle n'est plus proposable.
+  // A reserved idea is archived: we say why it can no longer be offered.
   if (item && doc.reservations.some((r) => r.itemId === item.id)) {
     return { ok: false, error: "itemAlreadyReserved" };
   }

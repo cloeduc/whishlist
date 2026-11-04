@@ -10,10 +10,10 @@ export { useMemberList, useMyLists, refreshList, refreshLists } from "./store";
 type Translate = (key: string, vars?: Record<string, string>) => string;
 
 /**
- * Valeurs que prend un champ laissé vide, calculées comme sur le site (`src/domain/list-defaults.ts`) :
- * nom du compte, textes du namespace `home` dans la langue de l'app, celle que l'app envoie au serveur.
- * Le nom est numéroté d'après les listes connues du téléphone ; hors ligne, le numéro peut différer de
- * celui que le serveur choisira, et c'est le sien qui reste après l'envoi.
+ * Values a field left empty takes, computed as on the site (`src/domain/list-defaults.ts`):
+ * account name, texts of the `home` namespace in the app language, the one the app sends to the server.
+ * The name is numbered from the lists known to the phone; offline, the number may differ from
+ * the one the server will pick, and the server's one is kept after sending.
  */
 export function newListDefaults(displayName: string, takenTitles: Iterable<string>, t: Translate): ListPreview {
   const defaults = listDefaults(displayName, t);
@@ -21,11 +21,11 @@ export function newListDefaults(displayName: string, takenTitles: Iterable<strin
 }
 
 /**
- * Crée une liste avec sa première catégorie et son premier « qui » (FR-011). Comme sur le site, aucun
- * champ n'est obligatoire : un champ vide part vide et le serveur lui donne sa valeur par défaut.
- * `preview` (voir `newListDefaults`) ne sert qu'à montrer la liste avant sa création sur le serveur.
- * Les identifiants sont choisis ici (R5) : la liste s'ouvre tout de suite, même hors ligne,
- * et un renvoi ne crée pas de doublon. Le reste est vérifié à l'envoi (FR-041).
+ * Creates a list with its first category and its first « qui » (FR-011). As on the site, no
+ * field is required: an empty field is sent empty and the server gives it its default value.
+ * `preview` (see `newListDefaults`) is only used to show the list before it is created on the server.
+ * The ids are picked here (R5): the list opens right away, even offline,
+ * and a resend creates no duplicate. The rest is checked when sending (FR-041).
  */
 export async function createList(
   input: { title: string; category: string; person: string },

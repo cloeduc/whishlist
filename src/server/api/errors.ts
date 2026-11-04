@@ -1,4 +1,4 @@
-/** Statut HTTP de chaque code d'erreur rendu par l'API. Un code absent vaut 400 (validation). */
+/** HTTP status of each error code returned by the API. A missing code means 400 (validation). */
 const STATUS_BY_CODE: Record<string, number> = {
   unauthorized: 401,
   invalidCredentials: 401,
@@ -46,7 +46,7 @@ export function apiStatusFor(code: string): number {
   return STATUS_BY_CODE[code] ?? 400;
 }
 
-/** Un non-membre reçoit la même réponse que pour une liste qui n'existe pas (FR-030). */
+/** A non-member gets the same response as for a list that does not exist (FR-030). */
 export function publicErrorCode(code: string): string {
   return code === "notMember" ? "listMissing" : code;
 }

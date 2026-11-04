@@ -1,4 +1,4 @@
-# Sur « Mon compte » : déplie la carte « Vos données et informations », repliée à l'ouverture (009).
+# On « Mon compte »: expands the « Vos données et informations » card, collapsed on open (009).
 appId: app.ohyoushouldnt.mobile
 ---
 - scrollUntilVisible:

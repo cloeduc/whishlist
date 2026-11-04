@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { contentSecurityPolicy } from "../../src/server/content-security";
 
-test("CSP de production autorise le nonce et les images http(s), pas eval", () => {
+test("production CSP allows the nonce and http(s) images, not eval", () => {
   const policy = contentSecurityPolicy({ dev: false, nonce: "abc+def=" });
   assert.equal(policy.nonce, "abc+def=");
   assert.match(policy.value, /script-src 'self' 'nonce-abc\+def=' 'strict-dynamic'/);
@@ -15,7 +15,7 @@ test("CSP de production autorise le nonce et les images http(s), pas eval", () =
   assert.match(policy.value, /upgrade-insecure-requests/);
 });
 
-test("CSP de développement garde unsafe-eval et n'impose pas https", () => {
+test("development CSP keeps unsafe-eval and does not enforce https", () => {
   const policy = contentSecurityPolicy({ dev: true, nonce: "dev" });
   assert.match(policy.value, /'unsafe-eval'/);
   assert.doesNotMatch(policy.value, /upgrade-insecure-requests/);

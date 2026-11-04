@@ -7,7 +7,7 @@ export function parsePrice(input: string): number | null | "invalid" {
   return cents;
 }
 
-/** Affichage localisé ; devise inchangée (EUR). */
+/** Localized display; currency unchanged (EUR). */
 export function formatPrice(cents: number | null, locale = "fr-FR"): string | null {
   if (cents === null) return null;
   return new Intl.NumberFormat(locale, {
@@ -16,7 +16,7 @@ export function formatPrice(cents: number | null, locale = "fr-FR"): string | nu
   }).format(cents / 100);
 }
 
-/** Prix tel qu'on le saisit (formulaire, outils MCP) : « 18,50 » en français, « 18.50 » par défaut ; "" sans prix. */
+/** Price as it is typed (form, MCP tools): « 18,50 » in French, « 18.50 » by default; "" without a price. */
 export function priceInput(cents: number | null, locale = "en-US"): string {
   if (cents === null) return "";
   return new Intl.NumberFormat(locale, {

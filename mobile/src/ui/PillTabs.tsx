@@ -9,8 +9,8 @@ import { Text } from "./Text";
 export type PillTab = { key: string; label: string };
 
 /**
- * Onglets en pastilles du site (Idées, Archives…) : actif bleu à texte blanc, inactif blanc.
- * `scroll` : une barre qui défile au lieu de passer à la ligne (design-reference.md, « Onglets »).
+ * The site's pill tabs (« Idées », « Archives »…): active blue with white text, inactive white.
+ * `scroll`: a bar that scrolls instead of wrapping (design-reference.md, « Onglets »).
  */
 export function PillTabs({
   tabs,

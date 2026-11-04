@@ -31,12 +31,12 @@ import { emailVerificationRequired } from "@/src/server/mail";
 
 export const dynamic = "force-dynamic";
 
-export default async function ComptePage({
+export default async function AccountPage({
   searchParams,
 }: {
   /**
-   * `e` / `ok` : profil et mot de passe ; `email` / `ee` / `lien` : changement d'adresse ; `x` : export ;
-   * `d` : suppression du compte ; `k` : clés d'API.
+   * `e` / `ok`: profile and password; `email` / `ee` / `lien`: address change; `x`: export;
+   * `d`: account deletion; `k`: API keys.
    */
   searchParams: Promise<{ e?: string; ok?: string; x?: string; d?: string; email?: string; ee?: string; lien?: string; k?: string }>;
 }) {

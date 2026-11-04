@@ -54,12 +54,12 @@ export async function resetPasswordWithToken(
   user.passwordHash = await hashPassword(password);
   user.mustChangePassword = false;
   user.sessionVersion = (user.sessionVersion ?? 0) + 1;
-  // Le lien est arrivé à cette adresse : elle est donc valide (010, FR-007). Compte repris en main :
-  // un changement d'adresse demandé avant (peut-être par quelqu'un d'autre) ne vaut plus rien.
+  // The link reached this address, so it is valid (010, FR-007). The account is taken back:
+  // an address change requested before (maybe by someone else) is no longer valid.
   if (user.emailVerifiedAt === null) user.emailVerifiedAt = now.toISOString();
   next.passwordResets = next.passwordResets.filter((entry) => entry.userId !== user.id);
   next.emailConfirmations = next.emailConfirmations.filter((entry) => entry.userId !== user.id);
-  // Un reset sert souvent à reprendre un compte compromis : une clé d'API volée ne doit pas survivre.
+  // A reset is often used to take back a compromised account: a stolen API key must not survive it.
   next.apiKeys = next.apiKeys.filter((entry) => entry.userId !== user.id);
   return { ok: true, doc: next, userId: user.id, sessionVersion: user.sessionVersion };
 }

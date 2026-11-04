@@ -10,8 +10,8 @@ import { Text } from "./Text";
 const BOX = 20;
 
 /**
- * `components/ui/checkbox.tsx` : case de 20, bordure, ombre, couleur principale et coche blanche
- * une fois cochée. Toute la ligne (case et libellé) se touche, à la hauteur minimale d'une cible.
+ * `components/ui/checkbox.tsx`: 20 box, border, shadow, primary color and white check mark
+ * once checked. The whole row (box and label) is pressable, at the minimum target height.
  */
 export function Checkbox({
   checked,

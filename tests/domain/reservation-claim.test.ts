@@ -52,14 +52,14 @@ function doc(): Database {
   return data;
 }
 
-test("mine : compte ou claim cookie", () => {
+test("mine: account or claim cookie", () => {
   const data = doc();
   assert.deepEqual([...mineReservationIdsFor(data, "w", "u1", new Set())], ["res1"]);
   assert.deepEqual([...mineReservationIdsFor(data, "w", null, new Set(["res1"]))], ["res1"]);
   assert.equal(mineReservationIdsFor(data, "w", "other", new Set()).size, 0);
 });
 
-test("liste publique : résa des autres masquée, la mienne visible", () => {
+test("public list: others' reservations hidden, mine visible", () => {
   const data = doc();
   const mine = mineReservationIdsFor(data, "w", "u1", new Set());
   const visible = listPublicVisibleItems(data, "w", mine);
@@ -73,7 +73,7 @@ test("liste publique : résa des autres masquée, la mienne visible", () => {
   assert.equal(hidden.length, 0);
 });
 
-test("cancelOwnReservation : compte, claim, refus", () => {
+test("cancelOwnReservation: account, claim, refusal", () => {
   const byUser = cancelOwnReservation(doc(), {
     wishlistId: "w",
     reservationId: "res1",

@@ -73,12 +73,12 @@ Env `~/webserver/data/whishlist.env` → `600`. Volume data → `700`, `wishlist
 ```bash
 # 1. copie de l'ancien fichier hors du volume
 cp -a ~/webserver/data/whishlist/wishlist.json ~/webserver/backups/whishlist/wishlist-avant-sqlite.json
-# 2. contrôle à blanc de la copie (attendu : « aucun problème »)
+# 2. contrôle à blanc de la copie (attendu : « no problem »)
 cd ~/webserver/repos/whishlist && npm ci && npm run db:check -- ~/webserver/backups/whishlist/wishlist-avant-sqlite.json
 # 3. build et redémarrage habituels, puis lire le journal
 docker build --pull -t whishlist:local .
 docker compose -f deploy/compose.prod.yml --env-file ~/webserver/data/whishlist.env up -d --force-recreate --pull never
-docker logs whishlist 2>&1 | grep '\[store\]'   # « ancien fichier importé : N comptes, … »
+docker logs whishlist 2>&1 | grep '\[store\]'   # « old file imported: N accounts, … »
 bash deploy/harden-data.sh && bash deploy/ops-check.sh
 ```
 

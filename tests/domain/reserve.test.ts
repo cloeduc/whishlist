@@ -59,7 +59,7 @@ function doc(): Database {
   return data;
 }
 
-test("réservation, blank, type, champs vides", () => {
+test("reservation, blank, type, empty fields", () => {
   const data = doc();
   assert.equal(availableItems(data, "w", "").length, 2);
   assert.equal(availableItems(data, "w", "jeux").length, 1);
@@ -89,7 +89,7 @@ test("réservation, blank, type, champs vides", () => {
   assert.equal(wrongType.ok, false);
 });
 
-test("deux confirmations simultanées sous lock", async () => {
+test("two simultaneous confirmations under lock", async () => {
   await withTempDataPath(async () => {
     await updateDocument((current) => ({ doc: doc(), result: current }));
     await Promise.all([
@@ -107,7 +107,7 @@ test("deux confirmations simultanées sous lock", async () => {
   });
 });
 
-test("nom et petit mot : longueur maximale", () => {
+test("name and note: maximum length", () => {
   const long = reserveItem(doc(), { wishlistId: "w", itemId: "gang", fromName: "x".repeat(MAX_FROM_NAME + 1) });
   assert.deepEqual(long, { ok: false, error: "fieldTooLong" });
   const note = reserveItem(doc(), { wishlistId: "w", itemId: "gang", note: "x".repeat(MAX_NOTE + 1) });
@@ -121,7 +121,7 @@ test("nom et petit mot : longueur maximale", () => {
   assert.equal(exact.ok, true);
 });
 
-test("une idée déjà réservée dit « déjà réservée », une idée archivée « pas dans la liste »", () => {
+test("an already reserved idea says « déjà réservée », an archived idea « pas dans la liste »", () => {
   const first = reserveItem(doc(), { wishlistId: "w", itemId: "gang" });
   assert.equal(first.ok, true);
   if (!first.ok) return;

@@ -3,8 +3,8 @@ import { hasReadPassword } from "./read-password";
 import type { Database, Subscription, Wishlist } from "./types";
 
 /**
- * Listes que `userId` suit sans en être membre, avec leur abonnement. Devenir membre l'emporte :
- * une liste dont on est membre n'est jamais une liste suivie (« Mes listes », export, suppression du compte).
+ * Lists that `userId` follows without being a member, with their subscription. Membership wins:
+ * a list one is a member of is never a followed list (« Mes listes », export, account deletion).
  */
 export function followedListsOf(
   doc: Database,
@@ -17,7 +17,7 @@ export function followedListsOf(
   });
 }
 
-/** Lien d'un visiteur avec une liste publique : membre, ou abonné sans en être membre. */
+/** A visitor's relation to a public list: member, or subscriber without being a member. */
 export function viewerRelation(
   doc: Database,
   wishlistId: string,
@@ -41,8 +41,8 @@ export function findSubscription(
 }
 
 /**
- * Indique si l'abonnement donne accès en lecture sans ressaisir le mot de passe :
- * vrai si la liste n'a pas de mot de passe ou si l'empreinte mémorisée correspond à celle de la liste.
+ * Tells whether the subscription gives read access without typing the password again:
+ * true if the list has no password or if the stored hash matches the list's.
  */
 export function isSubscriptionUnlocked(wishlist: Wishlist, subscription: Subscription): boolean {
   if (!hasReadPassword(wishlist)) return true;
@@ -50,12 +50,12 @@ export function isSubscriptionUnlocked(wishlist: Wishlist, subscription: Subscri
 }
 
 /**
- * Abonne `userId` à `wishlistId`.
- * - `verifiedHash` : empreinte du mot de passe de lecture contre laquelle l'appelant a vérifié l'accès
- *   (`null` pour une liste sans mot de passe). Si la liste a changé de mot de passe entre-temps,
- *   refuse `readPasswordChanged` : l'abonnement ne doit jamais mémoriser une empreinte non vérifiée.
- * - Refuse `alreadyMember` si l'utilisateur est déjà membre de la liste.
- * - Idempotent : si l'abonnement existe déjà, met à jour `readPasswordHash` et retourne `replayed: true`.
+ * Subscribes `userId` to `wishlistId`.
+ * - `verifiedHash`: hash of the read password against which the caller checked access
+ *   (`null` for a list without a password). If the list's password changed in the meantime,
+ *   refuses with `readPasswordChanged`: the subscription must never store an unverified hash.
+ * - Refuses with `alreadyMember` if the user is already a member of the list.
+ * - Idempotent: if the subscription already exists, updates `readPasswordHash` and returns `replayed: true`.
  */
 export function subscribeWishlist(
   doc: Database,
@@ -96,9 +96,9 @@ export function subscribeWishlist(
 }
 
 /**
- * Met à jour `readPasswordHash` d'un abonnement existant après déverrouillage de la liste.
- * `verifiedHash` est l'empreinte contre laquelle le mot de passe saisi a été vérifié : si la liste
- * a changé de mot de passe entre-temps, rien n'est mis à jour.
+ * Updates `readPasswordHash` of an existing subscription after the list is unlocked.
+ * `verifiedHash` is the hash against which the typed password was checked: if the list's
+ * password changed in the meantime, nothing is updated.
  */
 export function syncSubscriptionUnlock(
   doc: Database,
@@ -115,8 +115,8 @@ export function syncSubscriptionUnlock(
 }
 
 /**
- * Retire l'abonnement de `userId` à `wishlistId`.
- * Les réservations faites par `userId` sur cette liste ne sont pas touchées.
+ * Removes the subscription of `userId` to `wishlistId`.
+ * Reservations made by `userId` on this list are not touched.
  */
 export function unsubscribeWishlist(
   doc: Database,

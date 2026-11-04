@@ -2,11 +2,11 @@ import { getLocales } from "expo-localization";
 import { createInstance } from "i18next";
 import { initReactI18next } from "react-i18next";
 
-// Mêmes textes et mêmes namespaces que le site (R8).
+// Same texts and same namespaces as the site (R8).
 import { defaultLocale, namespaces, type Locale } from "../../../src/i18n/config";
 import { resources } from "../../../src/i18n/resources";
 
-/** Anglais si la première langue du téléphone est l'anglais, français sinon. */
+/** English if the phone's first language is English, French otherwise. */
 export function pickLocale(languageCodes: readonly (string | null | undefined)[]): Locale {
   return languageCodes[0]?.toLowerCase().startsWith("en") ? "en" : "fr";
 }
@@ -31,12 +31,12 @@ export function currentLocale(): Locale {
   return i18n.language === "en" ? "en" : "fr";
 }
 
-/** Même règle que `translateErrorFor` du site : le code si aucune traduction. */
+/** Same rule as the site's `translateErrorFor`: the code if there is no translation. */
 export function translateError(code: string): string {
   return i18n.t(code, { ns: "errors", defaultValue: "" }) || code;
 }
 
-/** Locale BCP 47 pour Intl (heures, prix). */
+/** BCP 47 locale for Intl (times, prices). */
 export { intlLocale } from "../../../src/i18n/config";
-/** Liens vers le site dans la langue de l'app. */
+/** Links to the site in the app language. */
 export { withLocale } from "../../../src/i18n/locale-path";

@@ -12,14 +12,14 @@ function scrypt(password: string, salt: Buffer, keylen: number, options: { N: nu
   });
 }
 
-test("un nouveau hash coûte 2^17 et se vérifie", async () => {
+test("a new hash costs 2^17 and verifies", async () => {
   const stored = await hashPassword("secret-ok!!");
   assert.match(stored, /^scrypt\$131072\$8\$1\$/);
   assert.equal(await verifyPassword("secret-ok!!", stored), true);
   assert.equal(await verifyPassword("autre-mot!!", stored), false);
 });
 
-test("un hash ancien en 2^14 reste valable", async () => {
+test("an old 2^14 hash stays valid", async () => {
   const salt = Buffer.from("ancien-sel-16b!!");
   const derived = await scrypt("secret-ok!!", salt, 32, {
     N: 16384,
@@ -30,7 +30,7 @@ test("un hash ancien en 2^14 reste valable", async () => {
   assert.equal(await verifyPassword("secret-ok!!", stored), true);
 });
 
-test("un coût absurde est refusé sans calcul", async () => {
+test("an absurd cost is refused without computing", async () => {
   assert.equal(await verifyPassword("secret-ok!!", "scrypt$1048576$8$1$YQ==$YQ=="), false);
   assert.equal(await verifyPassword("secret-ok!!", "scrypt$131072$32$1$YQ==$YQ=="), false);
 });

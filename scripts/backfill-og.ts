@@ -6,7 +6,7 @@ async function main() {
   const targets = doc.items.filter((item) => item.url && !item.imageUrl);
   console.log(`targets ${targets.length} / ${doc.items.length}`);
 
-  // Les pages produit se téléchargent hors transaction : la base reste libre pendant ce temps.
+  // Product pages are downloaded outside the transaction: the database stays free meanwhile.
   const found = new Map<string, string>();
   let fail = 0;
   for (const item of targets) {
@@ -20,7 +20,7 @@ async function main() {
     }
   }
 
-  // Une seule écriture ; une image ajoutée entre-temps par l'app n'est pas écrasée.
+  // A single write; an image added by the app in the meantime is not overwritten.
   const ok = await updateDocument((current) => {
     let saved = 0;
     for (const item of current.items) {

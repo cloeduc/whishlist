@@ -20,7 +20,7 @@ function LicenseRow({ entry }: { entry: License }) {
   );
 }
 
-/** Licences des logiciels libres de l'app (FR-041), lues dans le fichier généré : marche hors ligne. */
+/** Open source licenses of the app (FR-041), read from the generated file: works offline. */
 export default function Licenses() {
   const { t } = useTranslation("mobile");
   return (

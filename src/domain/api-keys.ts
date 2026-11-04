@@ -5,12 +5,12 @@ import type { ApiKey, Database, User } from "./types";
 
 export { MAX_API_KEY_NAME, MAX_API_KEYS };
 
-/** `lastUsedAt` n'est réécrit qu'au-delà de ce délai : une requête de lecture n'écrit pas à chaque fois. */
+/** `lastUsedAt` is only rewritten after this delay: a read request does not write every time. */
 const TOUCH_EVERY_MS = 60 * 60 * 1000;
 
 export type ApiKeyView = Pick<ApiKey, "id" | "name" | "hint" | "createdAt" | "lastUsedAt">;
 
-/** Code d'erreur du nom d'une clé (déjà nettoyé de ses espaces), ou null s'il est valable. */
+/** Error code for a key name (already trimmed), or null if it is valid. */
 export function apiKeyNameError(name: string): string | null {
   if (!name) return "apiKeyNeedsName";
   if (name.length > MAX_API_KEY_NAME) return "apiKeyNameTooLong";
@@ -18,8 +18,8 @@ export function apiKeyNameError(name: string): string | null {
 }
 
 /**
- * Ajoute au compte une clé dont le jeton a déjà été tiré et haché (`src/auth/api-keys.ts`) :
- * nom obligatoire, au plus MAX_API_KEY_NAME caractères, au plus MAX_API_KEYS clés par compte.
+ * Adds to the account a key whose token was already drawn and hashed (`src/auth/api-keys.ts`):
+ * name required, at most MAX_API_KEY_NAME characters, at most MAX_API_KEYS keys per account.
  */
 export function addApiKey(
   doc: Database,
@@ -51,7 +51,7 @@ function viewOf(key: ApiKey): ApiKeyView {
   return { id: key.id, name: key.name, hint: key.hint, createdAt: key.createdAt, lastUsedAt: key.lastUsedAt };
 }
 
-/** Les clés du compte, les plus récentes d'abord, sans leur hachage. */
+/** The account's keys, most recent first, without their hash. */
 export function listApiKeys(doc: Database, userId: string): ApiKeyView[] {
   return doc.apiKeys
     .filter((key) => key.userId === userId)
@@ -59,7 +59,7 @@ export function listApiKeys(doc: Database, userId: string): ApiKeyView[] {
     .map(viewOf);
 }
 
-/** La clé de ce hachage et son compte, ou null (clé inconnue, révoquée, compte supprimé). */
+/** The key with this hash and its account, or null (unknown or revoked key, deleted account). */
 export function findApiKeyByHash(doc: Database, tokenHash: string): { key: ApiKey; user: User } | null {
   const key = doc.apiKeys.find((entry) => entry.tokenHash === tokenHash);
   const user = key ? doc.users.find((entry) => entry.id === key.userId) : undefined;
@@ -78,7 +78,7 @@ export function revokeApiKey(
   return { ok: true, doc: next };
 }
 
-/** Note l'utilisation de la clé ; null s'il n'y a rien à écrire (utilisée il y a moins d'une heure). */
+/** Records the key's use; null if there is nothing to write (used less than an hour ago). */
 export function touchApiKey(doc: Database, keyId: string, nowMs = Date.now()): Database | null {
   const key = doc.apiKeys.find((entry) => entry.id === keyId);
   if (!key) return null;

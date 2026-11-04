@@ -12,7 +12,7 @@ import {
 import { apiDoc, mailLog, user, withStore } from "./helpers/api-fixtures";
 import { withEnv } from "./helpers/env";
 
-test("validation des adresses : absente sans envoi d'e-mail, active avec Resend ou l'envoi simulé", async () => {
+test("address verification: off without email sending, on with Resend or simulated sending", async () => {
   await withEnv({ RESEND_API_KEY: undefined, MAIL_FROM: undefined, MAIL_DRY_RUN: undefined, NODE_ENV: "test" }, () => {
     assert.equal(emailVerificationRequired(), false);
   });
@@ -25,14 +25,14 @@ test("validation des adresses : absente sans envoi d'e-mail, active avec Resend 
   });
 });
 
-test("MAIL_DRY_RUN est ignorée en production", async () => {
+test("MAIL_DRY_RUN is ignored in production", async () => {
   await withEnv({ RESEND_API_KEY: undefined, MAIL_FROM: undefined, MAIL_DRY_RUN: "1", NODE_ENV: "production" }, () => {
     assert.equal(mailDryRun(), false);
     assert.equal(emailVerificationRequired(), false);
   });
 });
 
-test("emailConfirmationPending : un compte qui doit changer son mot de passe le fait d'abord", async () => {
+test("emailConfirmationPending: an account that must change its password does that first", async () => {
   const sam = { ...user("sam", "sam@example.test", "Sam"), emailVerifiedAt: null };
   await withEnv({ RESEND_API_KEY: undefined, MAIL_FROM: undefined, MAIL_DRY_RUN: "1", NODE_ENV: "test" }, () => {
     assert.equal(emailConfirmationPending(sam), true);
@@ -43,7 +43,7 @@ test("emailConfirmationPending : un compte qui doit changer son mot de passe le 
   });
 });
 
-test("MAIL_SMTP_URL : envoi réel vers un serveur SMTP local, jamais en production", async () => {
+test("MAIL_SMTP_URL: real sending to a local SMTP server, never in production", async () => {
   const base = { RESEND_API_KEY: undefined, MAIL_FROM: undefined, MAIL_DRY_RUN: undefined };
   await withEnv({ ...base, MAIL_SMTP_URL: "smtp://localhost:1025", NODE_ENV: "test" }, () => {
     assert.equal(mailSmtpUrl(), "smtp://localhost:1025");
@@ -59,7 +59,7 @@ test("MAIL_SMTP_URL : envoi réel vers un serveur SMTP local, jamais en producti
   });
 });
 
-test("mail.log en production : les liens de confirmation et de changement d'adresse sont masqués (FR-017)", async () => {
+test("mail.log in production: confirmation and address change links are redacted (FR-017)", async () => {
   const noMail = { RESEND_API_KEY: undefined, MAIL_FROM: undefined, MAIL_DRY_RUN: undefined, MAIL_SMTP_URL: undefined };
   await withStore(apiDoc(), () =>
     withEnv({ ...noMail, NODE_ENV: "production" }, async () => {

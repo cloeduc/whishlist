@@ -11,9 +11,9 @@ import { Button } from "@/ui/Button";
 import { ConfirmDialog } from "@/ui/ConfirmDialog";
 
 /**
- * « Suivre cette liste » / « Ne plus suivre » de la vue d'une liste (012), comme le bouton de la page
- * publique du site : seulement avec un compte, jamais pour un membre de la liste. Ne plus suivre se confirme
- * et ne touche pas aux réservations.
+ * « Suivre cette liste » / « Ne plus suivre » of a list view (012), like the button of the site public
+ * page: only with an account, never for a member of the list. Unfollowing asks for confirmation
+ * and does not touch reservations.
  */
 export function GuestFollow({
   readToken,
@@ -30,7 +30,7 @@ export function GuestFollow({
   const session = useSession();
   const online = useOnline();
   const [confirming, setConfirming] = useState(false);
-  // Refus du serveur rendu comme résultat (pas comme exception) : son code traduit.
+  // Server refusal returned as a result (not as an exception): its translated code.
   const [refused, setRefused] = useState<string | null>(null);
   const toggle = useServerAction(async () => {
     setRefused(null);

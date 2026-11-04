@@ -75,7 +75,7 @@ test("newListDefaults: the site's defaults, numbered against the lists the phone
   const t = (key: string, vars?: Record<string, string>) => fr(key, vars);
   expect(newListDefaults("Alex", [], t)).toEqual({ title: "Liste de Alex", category: "Cadeaux", person: "Alex" });
   expect(newListDefaults("Alex", ["liste de alex", "Noël"], t).title).toBe("Liste de Alex 2");
-  // Nom affiché vide (ancien compte importé) : les libellés de repli du site.
+  // Empty display name (old imported account): the site's fallback labels.
   expect(newListDefaults(" ", [], t)).toEqual({ title: "Ma liste", category: "Cadeaux", person: "Moi" });
   const en = i18n.getFixedT("en", "home");
   expect(newListDefaults("Alex", [], (key, vars) => en(key, vars))).toEqual({ title: "Alex’s list", category: "Gifts", person: "Alex" });
@@ -109,7 +109,7 @@ test("offline, a list created with empty fields shows the defaults; once sent, t
   await waitFor(() => expect(opened.current.list?.categories.map((category) => category.label)).toEqual(["Cadeaux"]));
   expect(opened.current.list?.people.map((person) => person.label)).toEqual(["Alex"]);
 
-  // Le serveur a numéroté autrement (une liste créée ailleurs entre-temps) : c'est son nom qui reste.
+  // The server numbered differently (a list created elsewhere in the meantime): its name is the one kept.
   fakeFetch({
     "POST /lists": () => json(201, {}),
     "GET /lists": () => json(200, { lists: [summary(created.listId, "Liste de Alex 2")] }),

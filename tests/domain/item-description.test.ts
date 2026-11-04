@@ -40,9 +40,9 @@ function ready() {
 
 const base = { wishlistId: "w", actorId: "u", name: "Liseuse", typeId: "t", personId: "p" };
 
-// --- Règles de l'idée ---
+// --- Idea rules ---
 
-test("création : sans description → null ; texte gardé avec ses retours à la ligne, blancs autour retirés", () => {
+test("creation: no description → null; text kept with its line breaks, surrounding whitespace trimmed", () => {
   const none = createItem(ready(), base);
   assert.equal(none.ok && none.item.description, null);
   const blank = createItem(ready(), { ...base, description: "  \n " });
@@ -51,7 +51,7 @@ test("création : sans description → null ; texte gardé avec ses retours à l
   assert.equal(text.ok && text.item.description, "Pour lire au lit.\nÉcran sans reflet.");
 });
 
-test(`au-delà de ${MAX_DESCRIPTION} caractères : refusée, à la création comme en modification`, () => {
+test(`beyond ${MAX_DESCRIPTION} characters: refused, on creation as on edit`, () => {
   const long = "a".repeat(MAX_DESCRIPTION + 1);
   assert.deepEqual(createItem(ready(), { ...base, description: long }), { ok: false, error: "descriptionTooLong" });
   const exact = createItem(ready(), { ...base, description: "a".repeat(MAX_DESCRIPTION) });
@@ -61,7 +61,7 @@ test(`au-delà de ${MAX_DESCRIPTION} caractères : refusée, à la création com
   assert.deepEqual(update, { ok: false, error: "descriptionTooLong" });
 });
 
-test("modification : absente garde la description, vide ou null l'efface", () => {
+test("edit: absent keeps the description, empty or null erases it", () => {
   const created = createItem(ready(), { ...base, description: "Pour lire au lit." });
   assert.ok(created.ok);
   if (!created.ok) return;
@@ -82,14 +82,14 @@ test("modification : absente garde la description, vide ou null l'efface", () =>
 
 // --- API ---
 
-test("corps d'API : une chaîne ou null est transmis, autre chose (absent, nombre) ne l'est pas", () => {
+test("API body: a string or null is passed through, anything else (absent, number) is not", () => {
   assert.equal(itemFieldsFrom("w", { name: "x" }).description, undefined);
   assert.equal(itemFieldsFrom("w", { name: "x", description: "Texte" }).description, "Texte");
   assert.equal(itemFieldsFrom("w", { name: "x", description: null }).description, null);
   assert.equal(itemFieldsFrom("w", { name: "x", description: 12 }).description, undefined);
 });
 
-test("un client antérieur à 1.5.0 qui modifie une idée n'efface pas sa description", async () => {
+test("a client older than 1.5.0 editing an idea does not erase its description", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -106,7 +106,7 @@ test("un client antérieur à 1.5.0 qui modifie une idée n'efface pas sa descri
     });
     assert.ok(created.ok);
     if (!created.ok) return;
-    // PUT d'un ancien client : tous les champs, sauf description.
+    // PUT from an old client: all fields, except description.
     const oldClient = itemFieldsFrom(
       "w",
       { name: "Jeu de société (édition 2)", typeId: "t", personId: "p", url: "", imageUrl: "", price: "", priority: "" },
@@ -120,7 +120,7 @@ test("un client antérieur à 1.5.0 qui modifie une idée n'efface pas sa descri
   });
 });
 
-test("vues JSON et export de compte : la description est présente", () => {
+test("JSON views and account export: the description is present", () => {
   const created = createItem(ready(), { ...base, description: "Pour lire au lit." });
   assert.ok(created.ok);
   if (!created.ok) return;
@@ -131,9 +131,9 @@ test("vues JSON et export de compte : la description est présente", () => {
   assert.equal(exported?.lists[0]?.items[0]?.description, "Pour lire au lit.");
 });
 
-// --- Stockage ---
+// --- Storage ---
 
-test("ancien fichier JSON sans le champ : importé sans description", async () => {
+test("old JSON file without the field: imported without a description", async () => {
   await withTempDataPath(async (dataPath) => {
     const legacy = apiDoc() as unknown as { items: Record<string, unknown>[] };
     for (const item of legacy.items) delete item.description;
@@ -144,7 +144,7 @@ test("ancien fichier JSON sans le champ : importé sans description", async () =
   });
 });
 
-test("base existante d'avant ce champ : la migration ajoute la colonne, sans perdre les idées", async () => {
+test("existing database from before this field: the migration adds the column without losing ideas", async () => {
   await withTempDataPath(async () => {
     const file = databaseFilePath();
     const init = readFileSync(path.join(process.cwd(), "drizzle", "0000_init.sql"), "utf8");
@@ -153,7 +153,7 @@ test("base existante d'avant ce champ : la migration ajoute la colonne, sans per
     };
     const initWhen = journal.entries.find((entry) => entry.tag === "0000_init")!.when;
 
-    // La base telle qu'elle était : seule la première migration appliquée, une idée dedans.
+    // The database as it was: only the first migration applied, one idea in it.
     const old = new Database(file);
     for (const statement of init.split("--> statement-breakpoint")) if (statement.trim()) old.exec(statement);
     old.exec("CREATE TABLE IF NOT EXISTS __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric)");
@@ -182,9 +182,9 @@ test("base existante d'avant ce champ : la migration ajoute la colonne, sans per
   });
 });
 
-// --- Remplissage depuis le lien ---
+// --- Prefill from the link ---
 
-test("page produit : description JSON-LD en texte brut, sinon og:description, jamais la meta description du site", () => {
+test("product page: JSON-LD description as plain text, otherwise og:description, never the site's meta description", () => {
   const ld = extractProductHints(
     `<script type="application/ld+json">{"@type":"Product","name":"Liseuse","description":"<p>Écran 7&nbsp;pouces,<br>étanche.</p>"}</script>
      <meta property="og:description" content="Texte og" />`,
@@ -203,7 +203,7 @@ test("page produit : description JSON-LD en texte brut, sinon og:description, ja
   assert.equal(seoOnly.description, null);
 });
 
-test("description proposée : coupée à un mot vers 300 caractères, avec une ellipse", () => {
+test("suggested description: cut at a word around 300 characters, with an ellipsis", () => {
   const long = `${"mot ".repeat(120)}fin`;
   const cleaned = cleanDescription(long)!;
   assert.ok(cleaned.length <= 300, String(cleaned.length));
@@ -212,7 +212,7 @@ test("description proposée : coupée à un mot vers 300 caractères, avec une e
   assert.equal(cleanDescription("<br>"), null);
 });
 
-test("fusion des indices : la description de l'IA remplace celle de la page, sinon la page reste", () => {
+test("merging hints: the AI description replaces the page's, otherwise the page's stays", () => {
   const page = { name: "Liseuse", price: null, imageUrl: null, typeId: null, description: "Texte de la page" };
   assert.equal(mergeHints(page, { description: "Texte de l'IA" }).description, "Texte de l'IA");
   assert.equal(mergeHints(page, { description: null }).description, "Texte de la page");
@@ -227,7 +227,7 @@ afterEach(() => {
   process.env.OPENAI_API_KEY = realKeys.openai ?? "";
 });
 
-test("IA : le prompt demande une description dans la langue de la personne, et la réponse la remplit", async () => {
+test("AI: the prompt asks for a description in the person's language, and the response fills it", async () => {
   process.env.GEMINI_API_KEY = "";
   process.env.OPENAI_API_KEY = "test-key";
   const prompts: string[] = [];

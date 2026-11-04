@@ -1,6 +1,6 @@
-// Icône et splash de l'app, dessinés avec la géométrie de components/site/gift-mark.tsx
-// et les couleurs par défaut d'une liste (src/domain/theme.ts).
-// Usage : node mobile/scripts/make-icons.mjs (sharp vient des dépendances du site).
+// App icon and splash, drawn with the geometry of components/site/gift-mark.tsx
+// and the default colors of a list (src/domain/theme.ts).
+// Usage: node mobile/scripts/make-icons.mjs (sharp comes from the site's dependencies).
 import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,7 +25,7 @@ const frame = `
   <rect x="12" y="12" width="116" height="116" rx="24" fill="#000"/>
   <rect x="6" y="6" width="116" height="116" rx="24" fill="#fff" stroke="#000" stroke-width="4"/>`;
 
-/** Le cadeau encadré (viewBox 136) placé au centre d'un carré `size`, à l'échelle `scale`. */
+/** The framed gift (viewBox 136) placed in the center of a `size` square, at scale `scale`. */
 function svg(size, { background, scale, framed = true, colors = theme, stroke }) {
   const s = (size * scale) / 136;
   const offset = (size - 136 * s) / 2;
@@ -36,9 +36,9 @@ function svg(size, { background, scale, framed = true, colors = theme, stroke })
 
 await mkdir(out, { recursive: true });
 const files = {
-  // iOS : pas de transparence ; le cadre du site sur le fond de l'app.
+  // iOS: no transparency; the site's frame on the app's background.
   "icon.png": svg(1024, { background: theme.background, scale: 0.78 }),
-  // Android : premier plan dans la zone sûre (66 %), fond dans app.config.ts.
+  // Android: foreground in the safe zone (66 %), background in app.config.ts.
   "android-icon-foreground.png": svg(1024, { scale: 0.6 }),
   "android-icon-monochrome.png": svg(1024, {
     scale: 0.6,

@@ -19,7 +19,7 @@ function storiesOf(feature: string, file: string): string[] {
   return [...text.matchAll(/^### User Story (\d+)\b/gm)].map((match) => `${feature}-us${match[1]}`);
 }
 
-/** Tags de l'en-tête d'un parcours, lus comme le runner les lit. */
+/** Tags of a flow's header, read the way the runner reads them. */
 function tagsOf(file: string): string[] {
   return readFlowHeader(join(flowsDir, file)).tags;
 }

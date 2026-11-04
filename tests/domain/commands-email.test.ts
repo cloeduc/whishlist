@@ -30,14 +30,14 @@ before(ensurePasswordHash);
 
 const NEW_LIST = { title: "Ma liste", category: "Livres", person: "Moi" };
 
-/** Alex (propriétaire de « w ») et Camille (sans liste), tous deux à l'adresse non confirmée. */
+/** Alex (owner of « w ») and Camille (no list), both with an unconfirmed address. */
 function unverifiedDoc(): Database {
   const doc = apiDoc();
   for (const user of doc.users) user.emailVerifiedAt = null;
   return doc;
 }
 
-test("adresse non confirmée : créer, rejoindre et inviter sont refusés quand la validation est exigée", async () => {
+test("unconfirmed address: creating, joining and inviting are refused when validation is required", async () => {
   await withMailDryRun(() =>
     withStore(unverifiedDoc(), async () => {
       const [alex, camille] = (await readDocument()).users;
@@ -47,13 +47,13 @@ test("adresse non confirmée : créer, rejoindre et inviter sont refusés quand 
         ok: false,
         error: "emailNotVerified",
       });
-      // Les autres écritures d'un membre restent possibles (R5) ; seule la porte d'entrée est gardée.
+      // A member's other writes stay possible (R5); only the entry point is guarded.
       assert.equal((await readDocument()).wishlists.length, 1);
     }),
   );
 });
 
-test("adresse confirmée : la garde laisse passer", async () => {
+test("confirmed address: the guard lets it through", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const camille = (await readDocument()).users[1]!;
@@ -61,17 +61,17 @@ test("adresse confirmée : la garde laisse passer", async () => {
       assert.equal(created.ok, true);
       const joined = await joinInvite(ctx(camille), { token: "it" });
       assert.equal(joined.ok, true);
-      // L'envoi simulé ne part pas : la commande va jusqu'à l'envoi, après la garde.
+      // The simulated send does not go out: the command reaches the send step, past the guard.
       assert.deepEqual(await sendInvite(ctx(camille), { wishlistId: "w", email: "lou@example.test" }), {
         ok: false,
         error: "mailNotConfigured",
       });
-      assert.match(await mailLog(), /invite \(envoi simulé\) -> lou@example\.test/);
+      assert.match(await mailLog(), /invite \(dry run\) -> lou@example\.test/);
     }),
   );
 });
 
-test("sans envoi d'e-mail, la validation est absente : rien n'est refusé (FR-008)", async () => {
+test("without email sending, validation is off: nothing is refused (FR-008)", async () => {
   await withStore(unverifiedDoc(), async () => {
     const camille = (await readDocument()).users[1]!;
     assert.equal((await createList(ctx(camille), NEW_LIST)).ok, true);
@@ -83,7 +83,7 @@ test("sans envoi d'e-mail, la validation est absente : rien n'est refusé (FR-00
   });
 });
 
-test("adresse non confirmée : réserver reste possible, avec ou sans compte (US1-7, FR-005)", async () => {
+test("unconfirmed address: reserving is still possible, with or without an account (US1-7, FR-005)", async () => {
   await withMailDryRun(() =>
     withStore(unverifiedDoc(), async () => {
       const camille = (await readDocument()).users[1]!;
@@ -95,7 +95,7 @@ test("adresse non confirmée : réserver reste possible, avec ou sans compte (US
   );
 });
 
-test("confirmation : 20 essais par IP en 15 minutes, le 21ᵉ est refusé (R13)", async () => {
+test("confirmation: 20 attempts per IP in 15 minutes, the 21st is refused (R13)", async () => {
   await withStore(apiDoc(), async () => {
     for (let attempt = 0; attempt < 20; attempt++) {
       assert.deepEqual(await confirmEmailWithToken(ctx(), { token: `faux-${attempt}` }), {
@@ -104,12 +104,12 @@ test("confirmation : 20 essais par IP en 15 minutes, le 21ᵉ est refusé (R13)"
       });
     }
     await assert.rejects(confirmEmailWithToken(ctx(), { token: "faux-21" }), isRateLimitError);
-    // La limite est par IP : une autre adresse peut encore essayer.
+    // The limit is per IP: another address can still try.
     assert.equal((await confirmEmailWithToken(ctx(null, "203.0.113.9"), { token: "faux" })).ok, false);
   });
 });
 
-test("inscription : un lien de confirmation part, avec la suite si c'est un chemin interne", async () => {
+test("sign-up: a confirmation link is sent, with the next path if it is internal", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const created = await register(ctx(), {
@@ -120,10 +120,10 @@ test("inscription : un lien de confirmation part, avec la suite si c'est un chem
       });
       assert.ok(created.ok && created.user);
       assert.equal(created.user.emailVerifiedAt, null);
-      // En dev, l'e-mail simulé n'est pas parti : le lien est rendu pour l'afficher.
+      // In dev, the simulated email was not sent: the link is returned so it can be shown.
       assert.match(created.verificationUrl ?? "", /^https:\/\/ohyoushouldnt\.example\.test\/confirmer-email\/[\w-]+\?suite=%2Finviter%2Fit$/);
       const log = await mailLog();
-      assert.match(log, /email-verification \(envoi simulé\) -> sam@example\.test/);
+      assert.match(log, /email-verification \(dry run\) -> sam@example\.test/);
       const doc = await readDocument();
       assert.deepEqual(
         doc.emailConfirmations.map((c) => [c.userId, c.purpose, c.email]),
@@ -142,7 +142,7 @@ test("inscription : un lien de confirmation part, avec la suite si c'est un chem
   );
 });
 
-test("inscription sans envoi d'e-mail : aucun lien, aucune demande", async () => {
+test("sign-up without email sending: no link, no request", async () => {
   await withStore(apiDoc(), async () => {
     const created = await register(ctx(), { email: "sam@example.test", password: "mot-de-passe-long", displayName: "Sam" });
     assert.ok(created.ok);
@@ -152,7 +152,7 @@ test("inscription sans envoi d'e-mail : aucun lien, aucune demande", async () =>
   });
 });
 
-test("confirmation : l'adresse n'est lisible en entier que par son compte, et la suite reste interne", async () => {
+test("confirmation: the full address is readable only by its account, and the next path stays internal", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const created = await register(ctx(), { email: "sam@example.test", password: "mot-de-passe-long", displayName: "Sam" });
@@ -173,7 +173,7 @@ test("confirmation : l'adresse n'est lisible en entier que par son compte, et la
   );
 });
 
-test("confirmation dans l'app avec la session du compte du lien (011) : ownAccount vrai, suite interne gardée", async () => {
+test("confirmation in the app with the session of the link's account (011): ownAccount true, internal next path kept", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const created = await register(ctx(), { email: "sam@example.test", password: "mot-de-passe-long", displayName: "Sam" });
@@ -185,13 +185,13 @@ test("confirmation dans l'app avec la session du compte du lien (011) : ownAccou
   );
 });
 
-test("renvoi du lien : le nouveau confirme, l'ancien ne vaut plus rien (US2)", async () => {
+test("link resend: the new one confirms, the old one is worthless (US2)", async () => {
   await withMailDryRun(() =>
     withStore(unverifiedDoc(), async () => {
       const camille = (await readDocument()).users[1]!;
       const first = await resendEmailVerification(ctx(camille));
       assert.ok(first.ok);
-      assert.equal(first.sent, false); // envoi simulé
+      assert.equal(first.sent, false); // simulated send
       const oldToken = await lastConfirmationToken();
       const second = await resendEmailVerification(ctx(camille));
       assert.ok(second.ok);
@@ -207,7 +207,7 @@ test("renvoi du lien : le nouveau confirme, l'ancien ne vaut plus rien (US2)", a
   );
 });
 
-test("renvoi du lien : refusé à un compte vérifié, sans validation exigée, ou qui doit changer son mot de passe", async () => {
+test("link resend: refused to a verified account, when validation is not required, or when the password must be changed", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const alex = (await readDocument()).users[0]!;
@@ -226,7 +226,7 @@ test("renvoi du lien : refusé à un compte vérifié, sans validation exigée, 
   });
 });
 
-test("renvoi du lien : 5 par heure et par compte, la 6e demande est refusée", async () => {
+test("link resend: 5 per hour per account, the 6th request is refused", async () => {
   await withMailDryRun(() =>
     withStore(unverifiedDoc(), async () => {
       const camille = (await readDocument()).users[1]!;
@@ -236,7 +236,7 @@ test("renvoi du lien : 5 par heure et par compte, la 6e demande est refusée", a
   );
 });
 
-test("changement d'adresse : lien vers la nouvelle, connexion inchangée jusqu'à la confirmation, avis à l'ancienne (US3)", async () => {
+test("address change: link to the new one, sign-in unchanged until confirmation, notice to the old one (US3)", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const camille = (await readDocument()).users[1]!;
@@ -244,7 +244,7 @@ test("changement d'adresse : lien vers la nouvelle, connexion inchangée jusqu'�
       assert.ok(requested.ok);
       assert.equal(requested.me.email, "camille@example.test");
       assert.equal(requested.me.pendingEmail, "camille.b@example.test");
-      assert.match(await mailLog(), /email-change \(envoi simulé\) -> camille\.b@example\.test/);
+      assert.match(await mailLog(), /email-change \(dry run\) -> camille\.b@example\.test/);
       assert.equal((await login(ctx(), { email: "camille@example.test", password: PASSWORD })).ok, true);
 
       const token = await lastConfirmationToken();
@@ -255,7 +255,7 @@ test("changement d'adresse : lien vers la nouvelle, connexion inchangée jusqu'�
 
       const log = await mailLog();
       const notice = log.slice(log.lastIndexOf("email-changed"));
-      assert.match(notice, /^email-changed \(envoi simulé\) -> camille@example\.test/);
+      assert.match(notice, /^email-changed \(dry run\) -> camille@example\.test/);
       assert.match(notice, /ca•••@example\.test/);
       assert.doesNotMatch(notice, /camille\.b@example\.test|confirmer-email|mot-de-passe-oublie/);
       assert.match(notice, /contact@ohyoushouldnt\.app/);
@@ -265,7 +265,7 @@ test("changement d'adresse : lien vers la nouvelle, connexion inchangée jusqu'�
         error: "invalidCredentials",
       });
       assert.equal((await login(ctx(), { email: "camille.b@example.test", password: PASSWORD })).ok, true);
-      // La réinitialisation part vers la nouvelle adresse seulement (FR-016).
+      // The reset goes to the new address only (FR-016).
       await requestPasswordReset(ctx(), { email: "camille@example.test" });
       await requestPasswordReset(ctx(), { email: "camille.b@example.test" });
       const resets = [...(await mailLog()).matchAll(/password-reset \([^)]*\) -> (\S+)/g)].map((m) => m[1]);
@@ -274,7 +274,7 @@ test("changement d'adresse : lien vers la nouvelle, connexion inchangée jusqu'�
   );
 });
 
-test("changement d'adresse : mauvais mot de passe, adresse d'un autre compte, rien n'est envoyé", async () => {
+test("address change: wrong password, another account's address, nothing is sent", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const camille = (await readDocument()).users[1]!;
@@ -282,7 +282,7 @@ test("changement d'adresse : mauvais mot de passe, adresse d'un autre compte, ri
         ok: false,
         error: "wrongCurrentPassword",
       });
-      // Adresse d'un autre compte : même réponse qu'une adresse libre, et rien ne part vers elle.
+      // Address of another account: same response as a free address, and nothing is sent to it.
       const taken = await requestOwnEmailChange(ctx(camille), { email: "alex@example.test", currentPassword: PASSWORD });
       assert.ok(taken.ok);
       assert.equal(taken.sent, true);
@@ -296,7 +296,7 @@ test("changement d'adresse : mauvais mot de passe, adresse d'un autre compte, ri
   );
 });
 
-test("changement d'adresse : annulé, le lien reçu ne vaut plus rien", async () => {
+test("address change: cancelled, the received link is worthless", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const camille = (await readDocument()).users[1]!;
@@ -310,7 +310,7 @@ test("changement d'adresse : annulé, le lien reçu ne vaut plus rien", async ()
   );
 });
 
-test("changement d'adresse : la même adresse demandée par deux comptes revient au premier qui confirme", async () => {
+test("address change: the same address requested by two accounts goes to the first to confirm", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const [alex, camille] = (await readDocument()).users;
@@ -323,13 +323,13 @@ test("changement d'adresse : la même adresse demandée par deux comptes revient
       const doc = await readDocument();
       assert.equal(doc.users.find((u) => u.id === "alex")!.email, "alex@example.test");
       assert.equal(doc.users.find((u) => u.id === "camille")!.email, "nous@example.test");
-      // La demande d'Alex, devenue impossible, a disparu.
+      // Alex's request, now impossible, is gone.
       assert.deepEqual(doc.emailConfirmations, []);
     }),
   );
 });
 
-test("changement d'adresse sans envoi d'e-mail : appliqué tout de suite (FR-015)", async () => {
+test("address change without email sending: applied immediately (FR-015)", async () => {
   await withStore(apiDoc(), async () => {
     const camille = (await readDocument()).users[1]!;
     assert.deepEqual(await requestOwnEmailChange(ctx(camille), { email: "alex@example.test", currentPassword: PASSWORD }), {
@@ -345,7 +345,7 @@ test("changement d'adresse sans envoi d'e-mail : appliqué tout de suite (FR-015
   });
 });
 
-test("changement d'adresse : 5 demandes par heure et par compte", async () => {
+test("address change: 5 requests per hour per account", async () => {
   await withMailDryRun(() =>
     withStore(apiDoc(), async () => {
       const camille = (await readDocument()).users[1]!;
@@ -360,7 +360,7 @@ test("changement d'adresse : 5 demandes par heure et par compte", async () => {
   );
 });
 
-test("inscription : un refus de Resend est signalé, pour le nouveau compte comme pour une adresse déjà inscrite", async () => {
+test("sign-up: a Resend refusal is reported, for a new account as for an already registered address", async () => {
   const realFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response("down", { status: 503 });
   try {

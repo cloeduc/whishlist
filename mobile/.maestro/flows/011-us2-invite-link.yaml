@@ -1,14 +1,14 @@
-# 011 US2 : le lien d'invitation de la liste de démo (jeton fixe de la base de la suite) s'ouvre dans l'app.
-# Sans session, la connexion passe d'abord, puis l'invitation reprend sans rouvrir le lien ; « Rejoindre »
-# ouvre la liste. Le lien s'ouvre par le schéma ohyoushouldnt:// (research R10).
+# 011 US2: the invite link of the demo list (fixed token of the suite's database) opens in the app.
+# Without a session, login comes first, then the invitation resumes without reopening the link; « Rejoindre »
+# opens the list. The link opens through the ohyoushouldnt:// scheme (research R10).
 appId: app.ohyoushouldnt.mobile
-name: "011 US2 — Le lien d'invitation fait rejoindre la liste dans l'app"
+name: "011 US2 — The invite link joins the list in the app"
 tags:
   - 011-us2
 ---
 - runFlow: ../subflows/launch-clean.yaml
 - runScript: ../scripts/strings.generated.js
-# Compte e2e confirmé, qui n'est pas membre de la liste de démo ; puis déconnexion.
+# Confirmed e2e account, which is not a member of the demo list; then logout.
 - runFlow: ../subflows/register.yaml
 - runFlow: ../subflows/logout.yaml
 
@@ -25,7 +25,7 @@ tags:
       EMAIL: ${output.email}
       PASSWORD: ${MAESTRO_DEMO_PASSWORD}
 
-# Retour à l'invitation après la connexion, puis « Rejoindre » ouvre la liste.
+# Back to the invitation after login, then « Rejoindre » opens the list.
 - extendedWaitUntil:
     visible:
       id: invite.join
@@ -37,7 +37,7 @@ tags:
       id: list.add-item
     timeout: 20000
 
-# Rouvrir le lien, déjà membre : la liste s'ouvre tout de suite.
+# Reopening the link, already a member: the list opens right away.
 - openLink: ohyoushouldnt://inviter/demo-list-invitation
 - extendedWaitUntil:
     visible:

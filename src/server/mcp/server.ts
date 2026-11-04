@@ -12,25 +12,25 @@ import { createList, listMine, readMemberList, updateSettings } from "../command
 import { deleteList } from "../commands/sharing";
 
 /**
- * Serveur MCP d'un compte : chaque outil appelle les mêmes commandes que le site et l'API, donc les mêmes
- * règles et les mêmes droits : une idée réservée ne se supprime pas, seul le propriétaire supprime une liste.
- * Rien pour le compte (mot de passe, suppression, export).
- * Les réservations ne sont jamais montrées : une idée dit seulement si elle est réservée (oui/non).
+ * MCP server of an account: each tool calls the same commands as the site and the API, so the same
+ * rules and the same rights: a reserved idea cannot be deleted, only the owner deletes a list.
+ * Nothing for the account (password, deletion, export).
+ * Reservations are never shown: an idea only says whether it is reserved (yes/no).
  *
- * Descriptions et messages propres aux outils en anglais : ils s'adressent au modèle, pas à l'interface.
- * Les erreurs des règles sont traduites dans la langue de la requête.
+ * Tool descriptions and messages in English: they address the model, not the interface.
+ * Rule errors are translated into the request language.
  */
 
 type Labelled = { id: string; label: string };
 
-// Indications pour le client, qui peut demander confirmation avant un outil qui supprime. Sans elles,
-// MCP suppose qu'un outil qui écrit peut détruire.
+// Hints for the client, which can ask for confirmation before a tool that deletes. Without them,
+// MCP assumes that a tool that writes can destroy.
 const READ = { readOnlyHint: true, openWorldHint: false };
 const WRITE = { readOnlyHint: false, destructiveHint: false, openWorldHint: false };
 const DELETE = { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false };
 type ToolResult = { content: { type: "text"; text: string }[]; isError?: boolean };
 
-// Bornes des entrées : le corps est déjà limité à 64 Kio, elles gardent des libellés lisibles.
+// Input bounds: the body is already limited to 64 KiB, they keep labels readable.
 const ID = z.string().max(100);
 const NAME = z.string().trim().min(1).max(200);
 const URL_MAX = 2048;
@@ -43,14 +43,14 @@ function fail(text: string): ToolResult {
   return { content: [{ type: "text", text }], isError: true };
 }
 
-/** Catégorie ou « qui » donné par son nom (casse et espaces ignorés) ou son id, comme « Remplir depuis le lien ». */
+/** Category or « qui » given by its name (case and spaces ignored) or its id, like « Remplir depuis le lien ». */
 function find(options: Labelled[], wanted: string, what: string): Labelled | string {
   const id = resolveTypeId(options, wanted);
   const found = id ? options.find((option) => option.id === id) : undefined;
   return found ?? `Unknown ${what} "${wanted}". The list's ${what === "category" ? "categories" : "people"}: ${options.map((option) => option.label).join(", ") || "none"}.`;
 }
 
-/** Pour une nouvelle idée : absent ou vide, le premier de la liste. */
+/** For a new idea: missing or empty, the first of the list. */
 function findOrFirst(options: Labelled[], wanted: string | undefined, what: string): Labelled | string {
   if (!wanted?.trim()) return options[0] ?? `This list has no ${what} yet.`;
   return find(options, wanted, what);
@@ -59,18 +59,18 @@ function findOrFirst(options: Labelled[], wanted: string | undefined, what: stri
 export function buildMcpServer(ctx: CommandContext): McpServer {
   const server = new McpServer({ name: "oh-you-shouldnt", version: "1.0.0" });
 
-  /** Une commande qui refuse, ou une limite de débit : message lisible pour le modèle. */
+  /** A command that refuses, or a rate limit: readable message for the model. */
   async function run(action: () => Promise<ToolResult>): Promise<ToolResult> {
     try {
       return await action();
     } catch (error) {
       if (isRateLimitError(error)) return fail(await translateErrorFor(ctx.locale, "rateLimited"));
-      // Comme l'API : le détail reste dans le journal, jamais dans la réponse lue par le modèle.
+      // Like the API: the detail stays in the log, never in the response read by the model.
       console.error("MCP tool error", error);
       return fail(await translateErrorFor(ctx.locale, "serverError"));
     }
   }
-  // Comme l'API : un non-membre reçoit la même réponse que pour une liste qui n'existe pas.
+  // Like the API: a non-member gets the same response as for a list that does not exist.
   const refused = async (code: string) => {
     const shown = publicErrorCode(code);
     return fail(`${await translateErrorFor(ctx.locale, shown)} (${shown})`);
@@ -135,10 +135,10 @@ export function buildMcpServer(ctx: CommandContext): McpServer {
     category: z.string().max(200).optional().describe("Category name (or id). Defaults to the list's first category."),
     for: z.string().max(200).optional().describe("Who the gift is for: a person's name (or id) from the list. Defaults to the first one."),
     url: z.string().max(URL_MAX).optional().describe("Link to the product page (http or https)."),
-    // Un assistant envoie souvent un nombre (32.5) : les deux sont acceptés.
+    // An assistant often sends a number (32.5): both are accepted.
     price: z.union([z.string().max(20), z.number().nonnegative()]).optional().describe("Price in euros, e.g. \"18.50\" or 18.5."),
     priority: z.number().int().min(1).max(5).optional().describe("How much the person wants it, 1 to 5 stars."),
-    // Borné par la règle (descriptionTooLong, message traduit), pas par le schéma.
+    // Bounded by the rule (descriptionTooLong, translated message), not by the schema.
     description: z
       .string()
       .optional()
@@ -198,7 +198,7 @@ export function buildMcpServer(ctx: CommandContext): McpServer {
         if (typeof list === "string") return refused(list);
         const current = list.items.find((item) => item.id === input.ideaId);
         if (!current) return refused("itemMissing");
-        // Absent ou vide : on garde la catégorie et le « qui » de l'idée, au lieu de prendre le premier.
+        // Missing or empty: keep the idea's category and « qui », instead of taking the first.
         const type = input.category?.trim() ? find(list.categories, input.category, "category") : { id: current.typeId };
         if (typeof type === "string") return fail(type);
         const person = input.for?.trim() ? find(list.people, input.for, "person") : { id: current.personId };
@@ -213,7 +213,7 @@ export function buildMcpServer(ctx: CommandContext): McpServer {
           imageUrl: current.imageUrl ?? "",
           price: input.price === undefined ? priceInput(current.priceCents) : String(input.price),
           priority: input.priority === undefined ? (current.priority ?? "") : input.priority === 0 ? "" : String(input.priority),
-          // Absents : la règle garde la description et « occasion acceptée » enregistrées.
+          // Missing: the rule keeps the stored description and « occasion acceptée ».
           description: input.description,
           secondHandOk: input.secondHandOk,
         });
@@ -274,7 +274,7 @@ export function buildMcpServer(ctx: CommandContext): McpServer {
   };
   type TransferInput = { listId: string; ideaId: string; targetListId: string; category?: string; for?: string };
 
-  /** Catégorie et « qui » dans la liste d'arrivée : donnés par nom, sinon même nom qu'au départ, sinon le premier (comme le site). */
+  /** Category and « qui » in the target list: given by name, otherwise same name as at the source, otherwise the first (like the site). */
   async function transferTarget(
     input: TransferInput,
   ): Promise<
@@ -359,7 +359,7 @@ export function buildMcpServer(ctx: CommandContext): McpServer {
         }),
     );
 
-    /** Le libellé visé par son nom ou son id ; jamais « le premier » par défaut (le schéma refuse un nom vide). */
+    /** The label targeted by its name or its id; never the first one by default (the schema refuses an empty name). */
     async function target(
       listId: string,
       wanted: string,
@@ -462,7 +462,7 @@ export function buildMcpServer(ctx: CommandContext): McpServer {
       description:
         "Read a product page and propose a name, a price, an image and a description for a new idea, like the site's \"Fill from the link\". Creates nothing.",
       inputSchema: z.object({ listId: ID, url: z.string().max(URL_MAX) }),
-      // Lit une page web, ne change rien.
+      // Reads a web page, changes nothing.
       annotations: { readOnlyHint: true, openWorldHint: true },
     },
     ({ listId, url }) =>

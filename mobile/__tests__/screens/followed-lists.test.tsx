@@ -15,7 +15,7 @@ jest.mock("expo-router", () => ({
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true },
   useLocalSearchParams: jest.fn(() => ({ readToken: "demo-list-lecture" })),
 }));
-// Caméra simulée (US4) : le viseur garde son `onBarcodeScanned` pour que le test « montre » un QR code.
+// Simulated camera (US4): the viewfinder keeps its `onBarcodeScanned` so that the test can « show » a QR code.
 const camera: {
   permission: { granted: boolean; canAskAgain: boolean };
   grantOnRequest: boolean;
@@ -108,7 +108,7 @@ test("FollowSharedList handles link submission and 423 password prompt", async (
   );
   await fireEvent.press(screen.getByTestId("follow.submit"));
 
-  // Le champ mot de passe et le titre de la liste apparaissent après 423
+  // The password field and the list title appear after 423
   expect(await screen.findByText("Liste de Camille")).toBeOnTheScreen();
   const pwdInput = await screen.findByTestId("follow.password");
   await fireEvent.changeText(pwdInput, "secret-1234");
@@ -126,11 +126,11 @@ test("FollowSharedList shows an error when the link is invalid or user is alread
   });
 
   await render(<FollowSharedList />);
-  // Lien vide refusé localement
+  // Empty link rejected locally
   await fireEvent.press(screen.getByTestId("follow.submit"));
   expect(await screen.findByText("Saisissez le lien valide d'une liste partagée.")).toBeOnTheScreen();
 
-  // Lien d'une liste dont on est déjà membre
+  // Link of a list we are already a member of
   await fireEvent.changeText(screen.getByTestId("follow.link"), "demo-list-lecture");
   await fireEvent.press(screen.getByTestId("follow.submit"));
   expect(await screen.findByText("Vous faites déjà partie des membres de cette liste.")).toBeOnTheScreen();

@@ -12,7 +12,7 @@ const DAY = 24 * 60 * 60 * 1000;
 
 beforeEach(clearGuestAccess);
 
-test("jeton de déverrouillage : gardé par liste jusqu'à son expiration, puis oublié", async () => {
+test("unlock token: kept per list until it expires, then forgotten", async () => {
   await saveUnlock("rt", "unlock-1", new Date(Date.now() + 14 * DAY).toISOString());
   await saveUnlock("old", "unlock-2", new Date(Date.now() - 1000).toISOString());
   expect(await unlockTokenFor("rt")).toBe("unlock-1");
@@ -22,7 +22,7 @@ test("jeton de déverrouillage : gardé par liste jusqu'à son expiration, puis 
   expect(await unlockTokenFor("rt")).toBeNull();
 });
 
-test("claims : 90 jours, par liste, retirés après annulation", async () => {
+test("claims: 90 days, per list, removed after cancellation", async () => {
   await saveClaim("rt", "r1", "claim-1");
   await saveClaim("rt", "r2", "claim-2");
   await saveClaim("autre", "r3", "claim-3");

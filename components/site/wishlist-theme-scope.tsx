@@ -30,7 +30,7 @@ export function useWishlistTheme(): ThemeScopeValue {
   return ctx;
 }
 
-/** Applique le thème wishlist (CSS vars) et permet un preview live. */
+/** Applies the wishlist theme (CSS vars) and allows a live preview. */
 export function WishlistThemeScope({
   theme: initialTheme,
   children,

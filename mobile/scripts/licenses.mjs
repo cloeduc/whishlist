@@ -1,6 +1,6 @@
-// Licences des paquets embarqués dans l'app (dépendances de production, directes et indirectes),
-// lues dans node_modules et écrites dans src/legal/licenses.json, affichées par l'écran « Licences ».
-// Usage : npm --prefix mobile run licenses, après chaque changement de dépendances de l'app.
+// Licenses of the packages bundled in the app (production dependencies, direct and indirect),
+// read from node_modules and written to src/legal/licenses.json, shown by the « Licences » screen.
+// Usage: npm --prefix mobile run licenses, after each change of the app's dependencies.
 import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -15,7 +15,7 @@ const tree = JSON.parse(
   }),
 );
 
-/** Champ `license` d'un package.json : chaîne, objet `{ type }` ou ancien tableau `licenses`. */
+/** `license` field of a package.json: string, `{ type }` object or old `licenses` array. */
 function licenseOf(pkg) {
   if (typeof pkg.license === "string") return pkg.license;
   if (pkg.license?.type) return pkg.license.type;
@@ -23,7 +23,7 @@ function licenseOf(pkg) {
   return "UNKNOWN";
 }
 
-// Texte standard, pour un paquet MIT publié sans fichier de licence (FR-041).
+// Standard text, for an MIT package published without a license file (FR-041).
 const MIT = `MIT License
 
 Copyright (c) {author}
@@ -75,6 +75,6 @@ walk(tree);
 const entries = [...packages.values()].sort((a, b) => a.name.localeCompare(b.name) || a.version.localeCompare(b.version));
 const out = path.join(root, "src/legal/licenses.json");
 writeFileSync(out, `${JSON.stringify(entries, null, 1)}\n`);
-console.log(`${entries.length} paquets → ${path.relative(root, out)}`);
+console.log(`${entries.length} packages → ${path.relative(root, out)}`);
 const missing = entries.filter((entry) => !entry.text);
-if (missing.length) console.warn(`Sans texte de licence : ${missing.map((entry) => `${entry.name}@${entry.version}`).join(", ")}`);
+if (missing.length) console.warn(`No license text: ${missing.map((entry) => `${entry.name}@${entry.version}`).join(", ")}`);

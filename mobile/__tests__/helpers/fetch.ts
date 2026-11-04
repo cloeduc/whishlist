@@ -1,4 +1,4 @@
-/** Faux serveur HTTP : une réponse par « MÉTHODE /chemin », et la liste des appels reçus. */
+/** Fake HTTP server: one response per « METHOD /path », and the list of calls received. */
 export function fakeFetch(routes: Record<string, (request: Request) => Response | Promise<Response>>) {
   const calls: string[] = [];
   const mock = jest.fn(async (input: Parameters<typeof fetch>[0]) => {

@@ -5,12 +5,12 @@ import { tokens } from "@/theme/tokens";
 
 import { Shadow } from "./Shadow";
 
-/** Taille minimale pour un scan à 20–50 cm par un autre téléphone (FR-020, SC-002). */
+/** Minimum size for a scan at 20–50 cm by another phone (FR-020, SC-002). */
 export const QR_SIZE = 240;
 
 /**
- * QR code noir sur blanc, avec une marge blanche autour (« quiet zone ») pour rester lisible,
- * dans une boîte au style du site.
+ * Black on white QR code, with a white margin around it (« quiet zone ») to stay readable,
+ * in a box in the site's style.
  */
 export function QrCard({ value, accessibilityLabel }: { value: string; accessibilityLabel: string }) {
   return (

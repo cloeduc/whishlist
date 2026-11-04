@@ -3,8 +3,8 @@ import Svg, { Circle, Ellipse, Path, Rect } from "react-native-svg";
 import { useTheme, type Palette } from "@/theme/ListTheme";
 
 /**
- * Le cadeau du site (`components/site/gift-mark.tsx`) : même viewBox, mêmes formes.
- * Couvercle `accent`, corps `primary`, ruban `highlight`, aux couleurs du thème courant.
+ * The site's gift (`components/site/gift-mark.tsx`): same viewBox, same shapes.
+ * Lid `accent`, body `primary`, ribbon `highlight`, in the current theme's colors.
  */
 export function GiftMark({
   size = 40,
@@ -13,9 +13,9 @@ export function GiftMark({
   accessibilityLabel,
 }: {
   size?: number;
-  /** Cadre blanc + ombre brute ; `false` = le cadeau sur fond blanc. */
+  /** White frame + hard shadow; `false` = the gift on a white background. */
   framed?: boolean;
-  /** Couleurs d'une liste précise (carte de « Mes listes ») ; sinon le thème courant. */
+  /** Colors of a given list (card in « Mes listes »); otherwise the current theme. */
   colors?: Palette["gift"];
   accessibilityLabel?: string;
 }) {

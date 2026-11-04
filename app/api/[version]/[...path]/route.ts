@@ -3,7 +3,7 @@ import { apiError, apiPreflight, withApi } from "@/src/server/api/http";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Version retirée → 410 ; chemin inconnu de la v1 → 404. */
+/** Retired version → 410; path unknown to v1 → 404. */
 const unknown = withApi<{ version: string; path: string[] }>(async ({ locale, cors }, { version }) =>
   apiError(version === "v1" ? "notFound" : "apiVersionUnsupported", locale, cors),
 );

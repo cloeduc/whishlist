@@ -4,7 +4,7 @@ import { createWishlist } from "../../src/domain/import";
 import { addType, reorderTypes } from "../../src/domain/items";
 import { emptyDatabase } from "../../src/domain/types";
 
-test("reorderTypes change l’ordre des catégories", () => {
+test("reorderTypes changes the order of the categories", () => {
   const doc = emptyDatabase();
   doc.users.push({
     id: "u",

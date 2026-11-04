@@ -1,5 +1,5 @@
-# Build Debug : si le lanceur du dev client s'affiche au lieu de l'app, lui donner Metro (E2E_METRO_URL).
-# Sans effet sur un build Release, qui n'a pas de lanceur.
+# Debug build: if the dev client launcher shows instead of the app, give it Metro (E2E_METRO_URL).
+# No effect on a Release build, which has no launcher.
 appId: app.ohyoushouldnt.mobile
 ---
 - waitForAnimationToEnd
@@ -7,14 +7,14 @@ appId: app.ohyoushouldnt.mobile
     when:
       visible: Development Build
     commands:
-      # Même lien que `expo run` : sans bouton flottant ni écran d'accueil du dev client.
+      # Same link as `expo run`: no floating button and no dev client welcome screen.
       - openLink: app.ohyoushouldnt.mobile://?__expo_url=${METRO_URL}&__expo_disable_fab=1&__expo_disable_onboarding=1
-      # iOS demande « Ouvrir dans … ? » pour un lien vers l'app elle-même.
+      # iOS asks « Ouvrir dans … ? » for a link to the app itself.
       - tapOn:
           text: Ouvrir|Open
           optional: true
       - waitForAnimationToEnd
-# Filet de sécurité : si le menu développeur s'ouvre malgré les arguments de lancement, on le ferme.
+# Safety net: if the developer menu opens despite the launch arguments, close it.
 - runFlow:
     when:
       visible: Runtime version.*

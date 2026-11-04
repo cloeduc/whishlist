@@ -11,9 +11,9 @@ export type RowOf<K extends CollectionName> = Database[K][number];
 
 export interface Collection<K extends CollectionName> {
   table: SQLiteTable;
-  /** Clé primaire, sérialisée en une chaîne (identifiants seulement, jamais une donnée personnelle). */
+  /** Primary key, serialized as one string (identifiers only, never personal data). */
   key(row: RowOf<K>): string;
-  /** Condition SQL sur la clé primaire. */
+  /** SQL condition on the primary key. */
   where(row: RowOf<K>): SQL;
 }
 
@@ -27,7 +27,7 @@ function byId<K extends WithId>(table: SQLiteTable & { id: SQLiteColumn }): Coll
   };
 }
 
-/** Chaque objet du domaine est une ligne telle quelle (mêmes noms de propriétés que le schéma). */
+/** Each domain object is a row as is (same property names as the schema). */
 export const COLLECTIONS: { [K in CollectionName]: Collection<K> } = {
   users: byId(schema.users),
   wishlists: byId(schema.wishlists),
@@ -54,7 +54,7 @@ export const COLLECTIONS: { [K in CollectionName]: Collection<K> } = {
   apiKeys: byId(schema.apiKeys),
 };
 
-/** Les collections dans l'ordre de `Database`. */
+/** The collections in `Database` order. */
 export const COLLECTION_NAMES: CollectionName[] = [
   "users",
   "wishlists",
@@ -71,7 +71,7 @@ export const COLLECTION_NAMES: CollectionName[] = [
   "apiKeys",
 ];
 
-/** Même contenu colonne par colonne (`undefined` vaut `null`, JSON comparé sérialisé). */
+/** Same content column by column (`undefined` counts as `null`, JSON compared serialized). */
 export function sameRow<K extends CollectionName>(collection: Collection<K>, a: RowOf<K>, b: RowOf<K>): boolean {
   const left = new Map(Object.entries(a));
   const right = new Map(Object.entries(b));
@@ -81,7 +81,7 @@ export function sameRow<K extends CollectionName>(collection: Collection<K>, a: 
   return true;
 }
 
-/** Toutes les tables, dans l'ordre d'insertion (`rowid`), comme les tableaux de l'ancien fichier. */
+/** All tables, in insertion order (`rowid`), like the arrays of the old file. */
 export function readAll(db: StoreDb): Database {
   const byRowid = sql`rowid`;
   return {

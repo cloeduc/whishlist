@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function ConnexionPage({
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ e?: string; next?: string; deleted?: string }>;

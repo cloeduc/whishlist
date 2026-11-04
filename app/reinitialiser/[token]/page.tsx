@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function ReinitialiserPage({
+export default async function ResetPasswordPage({
   params,
   searchParams,
 }: {

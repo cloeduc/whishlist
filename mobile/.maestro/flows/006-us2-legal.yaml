@@ -1,13 +1,13 @@
-# 006 US2 : mentions légales et données personnelles, sans compte (sous la connexion) et depuis « Mon compte ».
+# 006 US2: legal notice and personal data, without an account (under the login) and from « Mon compte ».
 appId: app.ohyoushouldnt.mobile
-name: "006 US2 — Lire les mentions légales et la politique de confidentialité"
+name: "006 US2 — Read the legal notice and the privacy policy"
 tags:
   - 006-us2
 ---
 - runFlow: ../subflows/launch-clean.yaml
 - runScript: ../scripts/strings.generated.js
 
-# Sans compte.
+# Without an account.
 - scrollUntilVisible:
     element:
       id: legal-links.mentions
@@ -41,7 +41,7 @@ tags:
       id: login.screen
     timeout: 10000
 
-# Connecté : en bas de « Mon compte ».
+# Logged in: at the bottom of « Mon compte ».
 - runFlow:
     file: ../subflows/login.yaml
     env:

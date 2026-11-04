@@ -44,7 +44,7 @@ async function assertRefused(dataPath: string, content: string, expected: RegExp
   assert.equal(await readFile(dataPath, "utf8"), content);
 }
 
-test("import : tout le fichier est repris tel quel, puis marqué importé", async () => {
+test("import: the whole file is taken as is, then marked imported", async () => {
   await withTempDataPath(async (dataPath) => {
     const doc = apiDoc();
     doc.users[0].passwordHash = "scrypt$hash-alex";
@@ -54,7 +54,7 @@ test("import : tout le fichier est repris tel quel, puis marqué importé", asyn
   });
 });
 
-test("import : les champs anciens reçoivent leur valeur par défaut", async () => {
+test("import: old fields get their default value", async () => {
   await withTempDataPath(async (dataPath) => {
     const legacy = JSON.parse(JSON.stringify(apiDoc())) as Record<string, unknown> & Doc;
     delete (legacy as Partial<Doc>).subscriptions;
@@ -76,7 +76,7 @@ test("import : les champs anciens reçoivent leur valeur par défaut", async () 
     delete item.archived;
     delete (legacy.reservations[0] as Partial<Doc["reservations"][number]>).userId;
     legacy.types.push({ id: "t0", wishlistId: "w", label: "Autres", sortOrder: 0 });
-    // Les premiers fichiers n'avaient pas de sortOrder sur les libellés.
+    // The first files had no sortOrder on labels.
     for (const type of legacy.types) delete (type as Partial<Doc["types"][number]>).sortOrder;
     await writeFile(dataPath, JSON.stringify(legacy), "utf8");
 
@@ -86,7 +86,7 @@ test("import : les champs anciens reçoivent leur valeur par défaut", async () 
     assert.deepEqual(doc.passwordResets, []);
     assert.deepEqual(doc.emailConfirmations, []);
     assert.deepEqual(doc.apiKeys, []);
-    // Compte d'avant la validation des adresses : vérifié à sa date de création (010, FR-005b).
+    // Account from before address validation: verified at its creation date (010, FR-005b).
     assert.equal(doc.users[0].emailVerifiedAt, doc.users[0].createdAt);
     assert.equal(doc.users[0].sessionVersion, 0);
     assert.equal(doc.users[0].mustChangePassword, false);
@@ -97,7 +97,7 @@ test("import : les champs anciens reçoivent leur valeur par défaut", async () 
     assert.equal(doc.items[0].imageUrl, null);
     assert.equal(doc.items[0].archived, false);
     assert.equal(doc.reservations[0].userId, null);
-    // sortOrder absents : ordre alphabétique recalculé (Autres, Jeux).
+    // Missing sortOrder: alphabetical order recomputed (Autres, Jeux).
     assert.deepEqual(
       doc.types.map((t) => [t.id, t.sortOrder]),
       [
@@ -108,7 +108,7 @@ test("import : les champs anciens reçoivent leur valeur par défaut", async () 
   });
 });
 
-test("pas de réimport : la base fait foi, l'ancien fichier n'est plus touché", async () => {
+test("no reimport: the database is authoritative, the old file is no longer touched", async () => {
   await withTempDataPath(async (dataPath) => {
     await writeFile(dataPath, JSON.stringify(apiDoc()), "utf8");
     openStore();
@@ -124,7 +124,7 @@ test("pas de réimport : la base fait foi, l'ancien fichier n'est plus touché",
   });
 });
 
-test("installation neuve : base vide, marquée sans import", async () => {
+test("fresh install: empty database, marked as without import", async () => {
   await withTempDataPath(async () => {
     const doc = await readDocument();
     assert.equal(doc.users.length, 0);
@@ -132,52 +132,52 @@ test("installation neuve : base vide, marquée sans import", async () => {
   });
 });
 
-test("refus : JSON invalide ou collection absente, sans base créée ni fichier modifié", async () => {
+test("rejected: invalid JSON or missing collection, no database created nor file changed", async () => {
   await withTempDataPath(async (dataPath) => {
-    await assertRefused(dataPath, "{ \"users\": [", /JSON invalide/);
-    // Le message de JSON.parse cite un extrait du fichier : il ne doit pas arriver dans le journal.
+    await assertRefused(dataPath, "{ \"users\": [", /invalid JSON/);
+    // The JSON.parse message quotes part of the file: it must not reach the log.
     await assertRefused(
       dataPath,
       '{"users":[{"email":"alex@example.test","passwordHash":"scrypt$secret" oops',
-      /^JSON invalide \((ligne \d+, colonne \d+|position \d+)\)$/m,
+      /^invalid JSON \((line \d+, column \d+|position \d+)\)$/m,
       ["alex@example.test", "scrypt$secret", "oops"],
     );
     const noItems: Record<string, unknown> = { ...apiDoc() };
     delete noItems.items;
-    await assertRefused(dataPath, JSON.stringify(noItems), /^items: collection absente/m);
+    await assertRefused(dataPath, JSON.stringify(noItems), /^items: collection missing/m);
   });
 });
 
-test("refus : chaque contrôle d'intégrité nomme la collection et l'identifiant, jamais l'e-mail ni le nom", async () => {
+test("rejected: each integrity check names the collection and the id, never the email or the name", async () => {
   const cases: [string, (doc: Doc) => void, RegExp][] = [
-    ["identifiant en double", (d) => d.items.push({ ...d.items[0] }), /^items: identifiant en double \(gift\)/m],
+    ["duplicate id", (d) => d.items.push({ ...d.items[0] }), /^items: duplicate id \(gift\)/m],
     [
-      "adhésion en double",
+      "duplicate membership",
       (d) => d.memberships.push({ ...d.memberships[0] }),
-      /^memberships: adhésion en double \(w\/alex\)/m,
+      /^memberships: duplicate membership \(w\/alex\)/m,
     ],
     [
-      "e-mail en double",
+      "duplicate email",
       (d) => (d.users[1].email = d.users[0].email),
-      /^users: e-mail en double \(alex, camille\)/m,
+      /^users: duplicate email \(alex, camille\)/m,
     ],
     [
-      "readToken en double",
+      "duplicate readToken",
       (d) => d.wishlists.push({ ...d.wishlists[0], id: "w2", inviteToken: "it2" }),
-      /^wishlists: readToken en double \(w, w2\)/m,
+      /^wishlists: duplicate readToken \(w, w2\)/m,
     ],
     [
-      "deux réservations pour une idée",
+      "two reservations for one idea",
       (d) => d.reservations.push({ ...d.reservations[0], id: "r-2" }),
-      /^reservations: plusieurs réservations pour la même idée \(r-taken, r-2\)/m,
+      /^reservations: several reservations for the same idea \(r-taken, r-2\)/m,
     ],
     [
-      "idée vers une liste absente",
+      "idea pointing to a missing list",
       (d) => (d.items[0].wishlistId = "w-9"),
-      /^items: gift → wishlistId absent \(w-9\)/m,
+      /^items: gift → wishlistId missing \(w-9\)/m,
     ],
     [
-      "confirmation d'adresse vers un compte absent",
+      "email confirmation pointing to a missing account",
       (d) =>
         d.emailConfirmations.push({
           id: "ec",
@@ -188,10 +188,10 @@ test("refus : chaque contrôle d'intégrité nomme la collection et l'identifian
           expiresAt: "2026-01-02T00:00:00.000Z",
           createdAt: "2026-01-01T00:00:00.000Z",
         }),
-      /^emailConfirmations: ec → userId absent \(u-9\)/m,
+      /^emailConfirmations: ec → userId missing \(u-9\)/m,
     ],
     [
-      "deux demandes du même motif pour un compte",
+      "two requests with the same purpose for one account",
       (d) => {
         const request = {
           userId: "alex",
@@ -202,21 +202,21 @@ test("refus : chaque contrôle d'intégrité nomme la collection et l'identifian
         };
         d.emailConfirmations.push({ ...request, id: "ec-1", tokenHash: "h1" }, { ...request, id: "ec-2", tokenHash: "h2" });
       },
-      /^emailConfirmations: plusieurs demandes du même motif pour un compte \(ec-1, ec-2\)/m,
+      /^emailConfirmations: several requests with the same purpose for one account \(ec-1, ec-2\)/m,
     ],
     [
-      "vue vers un libellé absent",
+      "view pointing to a missing label",
       (d) => d.views.push({ id: "v", wishlistId: "w", label: "V", kind: "types", typeIds: ["t-9"], personId: null, pinned: false }),
-      /^views: v → typeIds absent \(t-9\)/m,
+      /^views: v → typeIds missing \(t-9\)/m,
     ],
     [
-      "abonnement en double",
+      "duplicate subscription",
       (d) =>
         d.subscriptions.push(
           { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-01T00:00:00.000Z" },
           { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-02T00:00:00.000Z" },
         ),
-      /^subscriptions: abonnement en double \(w\/camille\)/m,
+      /^subscriptions: duplicate subscription \(w\/camille\)/m,
     ],
     [
       "abonnement vers une liste absente",
@@ -227,7 +227,7 @@ test("refus : chaque contrôle d'intégrité nomme la collection et l'identifian
           readPasswordHash: null,
           createdAt: "2026-01-01T00:00:00.000Z",
         }),
-      /^subscriptions: w-9\/camille → wishlistId absent \(w-9\)/m,
+      /^subscriptions: w-9\/camille → wishlistId missing \(w-9\)/m,
     ],
   ];
   for (const [label, breakDoc, expected] of cases) {
@@ -241,14 +241,14 @@ test("refus : chaque contrôle d'intégrité nomme la collection et l'identifian
   }
 });
 
-test("refus : champ obligatoire absent ou de mauvais type, nommé par collection et identifiant", async () => {
+test("rejected: required field missing or of the wrong type, named by collection and id", async () => {
   const cases: [(doc: Record<string, unknown[]>) => void, RegExp][] = [
-    [(d) => delete (d.items[1] as Record<string, unknown>).name, /^items: gift2 → name absent ou invalide$/m],
-    [(d) => ((d.users[0] as Record<string, unknown>).displayName = 42), /^users: alex → displayName absent ou invalide$/m],
-    [(d) => ((d.memberships[0] as Record<string, unknown>).role = "admin"), /^memberships: w\/alex → role absent ou invalide$/m],
+    [(d) => delete (d.items[1] as Record<string, unknown>).name, /^items: gift2 → name missing or invalid$/m],
+    [(d) => ((d.users[0] as Record<string, unknown>).displayName = 42), /^users: alex → displayName missing or invalid$/m],
+    [(d) => ((d.memberships[0] as Record<string, unknown>).role = "admin"), /^memberships: w\/alex → role missing or invalid$/m],
     [
       (d) => d.views.push({ id: "v", wishlistId: "w", label: "V", kind: "types", personId: null, pinned: false }),
-      /^views: v → typeIds absent ou invalide$/m,
+      /^views: v → typeIds missing or invalid$/m,
     ],
   ];
   for (const [breakDoc, expected] of cases) {
@@ -260,10 +260,10 @@ test("refus : champ obligatoire absent ou de mauvais type, nommé par collection
   }
 });
 
-test("tout ou rien : un échec au milieu de l'import ne garde rien, la fois suivante importe tout", async () => {
+test("all or nothing: a failure midway through the import keeps nothing, the next run imports everything", async () => {
   await withTempDataPath(async (dataPath) => {
-    // Base existante sans marque d'import, qui contient déjà une idée `gift2` :
-    // l'import échoue sur cette idée, après les comptes, les listes et les libellés.
+    // Existing database without an import marker, which already holds an idea `gift2`:
+    // the import fails on that idea, after the accounts, lists and labels.
     const writer = openStore().writer;
     writer.exec("delete from meta");
     writer.exec(`insert into wishlists values ('w9', 'L', null, null, '{}', 'rt9', 'it9', null, 0, '2026-01-01')`);
@@ -293,7 +293,7 @@ test("tout ou rien : un échec au milieu de l'import ne garde rien, la fois suiv
   });
 });
 
-test("un seul import quand deux processus ouvrent la même base neuve", async () => {
+test("a single import when two processes open the same new database", async () => {
   await withTempDataPath(async (dataPath) => {
     await writeFile(dataPath, JSON.stringify(apiDoc()), "utf8");
     const helper = path.join(import.meta.dirname, "helpers", "open-store.ts");
@@ -305,7 +305,7 @@ test("un seul import quand deux processus ouvrent la même base neuve", async ()
   });
 });
 
-test("sessions expirées importées : toujours refusées", async () => {
+test("imported expired sessions: still refused", async () => {
   await withTempDataPath(async (dataPath) => {
     const base = apiDoc();
     const expired = issueApiSession(base, base.users[0], Date.parse("2020-01-01T00:00:00.000Z"));
@@ -318,7 +318,7 @@ test("sessions expirées importées : toujours refusées", async () => {
   });
 });
 
-test("demande de réinitialisation expirée importée : toujours refusée", async () => {
+test("imported expired reset request: still refused", async () => {
   await withTempDataPath(async (dataPath) => {
     const issued = createPasswordReset(apiDoc(), {
       email: "alex@example.test",
@@ -333,11 +333,11 @@ test("demande de réinitialisation expirée importée : toujours refusée", asyn
   });
 });
 
-test("migration 0001 : les comptes d'une base existante sont vérifiés à leur date de création", async () => {
+test("migration 0001: accounts of an existing database are verified at their creation date", async () => {
   await withTempDataPath(async () => {
     const { readMigrationFiles } = await import("drizzle-orm/migrator");
     const [init] = readMigrationFiles({ migrationsFolder: path.join(process.cwd(), "drizzle") });
-    // Base telle qu'en prod avant la 010 : seule la migration initiale, un compte.
+    // Database as in prod before 010: only the initial migration, one account.
     const old = new Database(databaseFilePath());
     for (const statement of init.sql) if (statement.trim()) old.exec(statement);
     old.exec("CREATE TABLE __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric)");

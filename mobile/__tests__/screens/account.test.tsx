@@ -30,7 +30,7 @@ beforeEach(async () => {
 
 type Node = { props: Record<string, unknown>; children: (Node | string)[] | null };
 
-/** Libellés des boutons et liens, dans l'ordre de l'écran. */
+/** Labels of the buttons and links, in screen order. */
 function actions(): string[] {
   const labels: string[] = [];
   const walk = (node: Node | string) => {
@@ -117,7 +117,7 @@ test("the password card opens collapsed, shows the error then the success in the
   expect(toggle.props.accessibilityState).toMatchObject({ expanded: false });
   expect(screen.queryByTestId("account.password-current")).toBeNull();
 
-  // Les deux cartes peuvent être ouvertes ensemble.
+  // Both cards can be open together.
   await fireEvent.press(screen.getByTestId("account.profile-toggle"));
   await fireEvent.press(toggle);
   expect(screen.getByTestId("account.name")).toBeOnTheScreen();
@@ -220,7 +220,7 @@ test("« Adresse de connexion »: the server's refusals show in the card", async
   expect(await screen.findByText("Cet e-mail est déjà utilisé.")).toBeOnTheScreen();
 });
 
-// Dernier : le réseau reste coupé pour la suite du fichier.
+// Last: the network stays cut for the rest of the file.
 test("offline: download and deletion are disabled, the legal pages stay open", async () => {
   watchNetwork();
   const listener = jest.mocked(NetInfo.addEventListener).mock.calls[0][0];
@@ -228,11 +228,11 @@ test("offline: download and deletion are disabled, the legal pages stay open", a
   await screen.findByText("Vos données et informations");
   listener({ isConnected: false, isInternetReachable: false, type: NetInfoStateType.none, details: null, isWifiEnabled: false });
   expect(await screen.findByRole("button", { name: "Supprimer mon compte" })).toBeDisabled();
-  // La carte des données se déplie hors ligne (009, US3 scénario 4).
+  // The data card expands offline (009, US3 scenario 4).
   await fireEvent.press(screen.getByTestId("account.data-toggle"));
   expect(screen.getByRole("link", { name: "Télécharger mes données" })).toBeDisabled();
   expect(screen.getByRole("link", { name: "Mentions légales" })).toBeEnabled();
-  // Les cartes se déplient hors ligne ; l'enregistrement du nom reste désactivé.
+  // The cards expand offline; saving the name stays disabled.
   await fireEvent.press(screen.getByTestId("account.profile-toggle"));
   expect(screen.getByTestId("account.profile-toggle").props.accessibilityState).toMatchObject({ expanded: true });
   expect(screen.getByTestId("account.save-name")).toBeDisabled();

@@ -10,10 +10,10 @@ import { buildStrings, escapeRegex, readNamespaces, renderStringsScript } from "
 
 const repo = join(__dirname, "../../..");
 
-/** Valeur d'une clé `a.b.c` dans les textes générés ; échoue si ce n'est pas un texte. */
+/** Value of an `a.b.c` key in the generated strings; fails if it is not a string. */
 function at(strings: unknown, key: string): string {
   const value = key.split(".").reduce<unknown>((node, part) => (node as Record<string, unknown> | undefined)?.[part], strings);
-  if (typeof value !== "string") throw new Error(`${key} n'est pas un texte`);
+  if (typeof value !== "string") throw new Error(`${key} is not a string`);
   return value;
 }
 
@@ -76,15 +76,15 @@ describe("resolveLang", () => {
 const passed = `<?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
   <testsuite name="Test Suite" device="iPhone 17" tests="2" failures="0" time="62">
-    <testcase id="005-us1-auth" name="005 US1 — Se connecter ou créer un compte" classname="005 US1 — Se connecter ou créer un compte" time="41.2" status="SUCCESS"/>
-    <testcase id="006-us2-legal" name="006 US2 — Lire les mentions légales" classname="006 US2 — Lire les mentions légales" time="20.8" status="SUCCESS"/>
+    <testcase id="005-us1-auth" name="005 US1 — Sign in or create an account" classname="005 US1 — Sign in or create an account" time="41.2" status="SUCCESS"/>
+    <testcase id="006-us2-legal" name="006 US2 — Read the legal notice" classname="006 US2 — Read the legal notice" time="20.8" status="SUCCESS"/>
   </testsuite>
 </testsuites>`;
 
 const failed = `<?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
   <testsuite name="Test Suite" tests="1" failures="1">
-    <testcase id="005-us3-items" name="005 US3 — Remplir une liste" classname="005 US3 — Remplir une liste" time="28" status="ERROR">
+    <testcase id="005-us3-items" name="005 US3 — Fill a list" classname="005 US3 — Fill a list" time="28" status="ERROR">
       <failure>Element not found: Id matching regex: item-form.submit &amp; more</failure>
     </testcase>
   </testsuite>
@@ -93,8 +93,8 @@ const failed = `<?xml version="1.0" encoding="UTF-8"?>
 describe("parseJunit", () => {
   test("reads passed flows", () => {
     expect(parseJunit(passed)).toEqual([
-      { id: "005-us1-auth", name: "005 US1 — Se connecter ou créer un compte", status: "passed", durationS: 41 },
-      { id: "006-us2-legal", name: "006 US2 — Lire les mentions légales", status: "passed", durationS: 21 },
+      { id: "005-us1-auth", name: "005 US1 — Sign in or create an account", status: "passed", durationS: 41 },
+      { id: "006-us2-legal", name: "006 US2 — Read the legal notice", status: "passed", durationS: 21 },
     ]);
   });
 
@@ -102,7 +102,7 @@ describe("parseJunit", () => {
     expect(parseJunit(failed)).toEqual([
       {
         id: "005-us3-items",
-        name: "005 US3 — Remplir une liste",
+        name: "005 US3 — Fill a list",
         status: "failed",
         durationS: 28,
         failedStep: "Element not found: Id matching regex: item-form.submit & more",
@@ -129,7 +129,7 @@ describe("parseJunit", () => {
 
 describe("summary", () => {
   const results = [...parseJunit(passed), ...parseJunit(failed)];
-  const skipped = [{ id: "005-us5-offline", name: "005 US5 — Continuer sans réseau", reason: "le simulateur iOS ne permet pas de couper le réseau de l'app" }];
+  const skipped = [{ id: "005-us5-offline", name: "005 US5 — Keep working without a network", reason: "the iOS simulator cannot cut the app's network" }];
 
   test("one line per flow, the failed step below, skipped flows with their reason", () => {
     const text = formatSummary({
@@ -141,11 +141,11 @@ describe("summary", () => {
       outputDir: "tmp/e2e/results/20261102-140312-ios",
     });
     const lines = text.split("\n");
-    expect(lines[0]).toBe("Parcours e2e — ios — fr — 2026-11-02 14:03");
-    expect(text).toMatch(/✓ 005 US1 — Se connecter ou créer un compte\s+41 s/);
-    expect(text).toMatch(/✗ 005 US3 — Remplir une liste\s+28 s\n\s+étape : Element not found: Id matching regex: item-form.submit & more/);
-    expect(text).toMatch(/– 005 US5 — Continuer sans réseau\s+non joué : le simulateur iOS ne permet pas de couper le réseau de l'app/);
-    expect(lines.at(-1)).toBe("2 réussis, 1 échoué, 1 non joué — résultats : tmp/e2e/results/20261102-140312-ios");
+    expect(lines[0]).toBe("E2E flows — ios — fr — 2026-11-02 14:03");
+    expect(text).toMatch(/✓ 005 US1 — Sign in or create an account\s+41 s/);
+    expect(text).toMatch(/✗ 005 US3 — Fill a list\s+28 s\n\s+step: Element not found: Id matching regex: item-form.submit & more/);
+    expect(text).toMatch(/– 005 US5 — Keep working without a network\s+not run: the iOS simulator cannot cut the app's network/);
+    expect(lines.at(-1)).toBe("2 passed, 1 failed, 1 not run — results: tmp/e2e/results/20261102-140312-ios");
   });
 
   test("captures are listed under their failed flow", () => {
@@ -156,9 +156,9 @@ describe("summary", () => {
       results: parseJunit(failed),
       skipped: [],
       outputDir: "tmp/e2e/results/x",
-      captures: { "005 US3 — Remplir une liste": ["tmp/e2e/results/x/005 US3 — Remplir une liste/screenshots/step-9.png"] },
+      captures: { "005 US3 — Fill a list": ["tmp/e2e/results/x/005 US3 — Fill a list/screenshots/step-9.png"] },
     });
-    expect(text).toContain("étape : Element not found: Id matching regex: item-form.submit & more\n      capture : tmp/e2e/results/x/005 US3 — Remplir une liste/screenshots/step-9.png");
+    expect(text).toContain("step: Element not found: Id matching regex: item-form.submit & more\n      screenshot: tmp/e2e/results/x/005 US3 — Fill a list/screenshots/step-9.png");
   });
 
   test("skipped flows are not failures", () => {
@@ -190,7 +190,7 @@ describe("flows to run", () => {
   });
 
   test("an unknown file stops everything", () => {
-    expect(resolveFlowPaths(["nope.yaml"], { mobileRoot, flowsDir })).toEqual({ ok: false, message: "Parcours introuvable : nope.yaml" });
+    expect(resolveFlowPaths(["nope.yaml"], { mobileRoot, flowsDir })).toEqual({ ok: false, message: "Flow not found: nope.yaml" });
   });
 
   test("android-only flows are skipped on iOS, ios-only flows on Android", () => {
@@ -214,18 +214,18 @@ describe("pickDevice", () => {
   });
 
   test("messages of the contract when no device or too many", () => {
-    expect(pickDevice([], undefined)).toEqual({ ok: false, message: "Aucun simulateur iOS ni émulateur Android démarré." });
-    expect(pickDevice([android], "ios")).toEqual({ ok: false, message: "Aucun simulateur iOS démarré." });
-    expect(pickDevice([ios], "android")).toEqual({ ok: false, message: "Aucun émulateur Android démarré." });
-    expect(pickDevice([ios, android], undefined)).toEqual({ ok: false, message: "Plusieurs appareils : précisez --platform ios ou --platform android." });
-    expect(pickDevice([ios, { ...ios, id: "U2" }], "ios")).toEqual({ ok: false, message: "Plusieurs appareils ios démarrés : n'en gardez qu'un." });
+    expect(pickDevice([], undefined)).toEqual({ ok: false, message: "No iOS simulator booted and no Android emulator running." });
+    expect(pickDevice([android], "ios")).toEqual({ ok: false, message: "No iOS simulator booted." });
+    expect(pickDevice([ios], "android")).toEqual({ ok: false, message: "No Android emulator running." });
+    expect(pickDevice([ios, android], undefined)).toEqual({ ok: false, message: "Several devices: pass --platform ios or --platform android." });
+    expect(pickDevice([ios, { ...ios, id: "U2" }], "ios")).toEqual({ ok: false, message: "Several ios devices running: keep only one." });
   });
 });
 
 describe("flow header", () => {
   test("reads the name and every tag", () => {
-    const source = 'appId: x\nname: "005 US5 — Hors ligne"\ntags:\n  - 005-us5\n  - android-only\n---\n- launchApp\n';
-    expect(parseFlowHeader(source, "005-us5-offline")).toEqual({ name: "005 US5 — Hors ligne", tags: ["005-us5", "android-only"] });
+    const source = 'appId: x\nname: "005 US5 — Offline"\ntags:\n  - 005-us5\n  - android-only\n---\n- launchApp\n';
+    expect(parseFlowHeader(source, "005-us5-offline")).toEqual({ name: "005 US5 — Offline", tags: ["005-us5", "android-only"] });
   });
 
   test("falls back to the file name, without tags", () => {
@@ -233,26 +233,26 @@ describe("flow header", () => {
   });
 });
 
-test("results folder name is AAAAMMJJ-HHMMSS", () => {
+test("results folder name is YYYYMMDD-HHMMSS", () => {
   expect(formatStamp(new Date(2026, 10, 2, 14, 3, 12))).toBe("20261102-140312");
 });
 
 test("a flow missing from the report counts as failed", () => {
   const results = withMissing(parseJunit(passed), [
-    { id: "005-us1-auth", name: "005 US1 — Se connecter ou créer un compte" },
-    { id: "006-us3-export", name: "006 US3 — Récupérer ses données" },
+    { id: "005-us1-auth", name: "005 US1 — Sign in or create an account" },
+    { id: "006-us3-export", name: "006 US3 — Download your data" },
   ]);
-  expect(results.at(-1)).toEqual({ id: "006-us3-export", name: "006 US3 — Récupérer ses données", status: "failed", durationS: 0, failedStep: "absent du rapport de Maestro" });
+  expect(results.at(-1)).toEqual({ id: "006-us3-export", name: "006 US3 — Download your data", status: "failed", durationS: 0, failedStep: "missing from the Maestro report" });
   expect(results.filter((r) => r.name.startsWith("005 US1"))).toHaveLength(1);
 });
 
 test("captures of each failed flow come from the folder named after it", () => {
-  const pngs = ["r/d/005 US3 — Remplir une liste/screenshots/a.png", "r/d/006 US2 — Lire/screenshots/b.png", "r/d/005 US1 — Se connecter/screenshots/c.png"];
+  const pngs = ["r/d/005 US3 — Fill a list/screenshots/a.png", "r/d/006 US2 — Read/screenshots/b.png", "r/d/005 US1 — Sign in/screenshots/c.png"];
   const results = [
-    { name: "005 US3 — Remplir une liste", status: "failed" },
-    { name: "005 US1 — Se connecter", status: "passed" },
+    { name: "005 US3 — Fill a list", status: "failed" },
+    { name: "005 US1 — Sign in", status: "passed" },
   ];
-  expect(capturesByFlow(pngs, results)).toEqual({ "005 US3 — Remplir une liste": ["r/d/005 US3 — Remplir une liste/screenshots/a.png"] });
+  expect(capturesByFlow(pngs, results)).toEqual({ "005 US3 — Fill a list": ["r/d/005 US3 — Fill a list/screenshots/a.png"] });
 });
 
 describe("isLocalApiUrl", () => {

@@ -18,7 +18,7 @@ import { apiDoc, ctx, ensurePasswordHash, PASSWORD, withStore } from "./helpers/
 
 before(ensurePasswordHash);
 
-test("se connecter rend un jeton et le compte, sans le hash", async () => {
+test("signing in returns a token and the account, without the hash", async () => {
   await withStore(apiDoc(), async () => {
     const result = await login(ctx(), { email: "ALEX@example.test ", password: PASSWORD });
     assert.equal(result.ok, true);
@@ -36,7 +36,7 @@ test("se connecter rend un jeton et le compte, sans le hash", async () => {
   });
 });
 
-test("un mauvais mot de passe et un e-mail inconnu donnent la même erreur", async () => {
+test("a wrong password and an unknown email give the same error", async () => {
   await withStore(apiDoc(), async () => {
     assert.deepEqual(await login(ctx(), { email: "alex@example.test", password: "mauvais-mdp" }), {
       ok: false,
@@ -49,14 +49,14 @@ test("un mauvais mot de passe et un e-mail inconnu donnent la même erreur", asy
   });
 });
 
-test("20 connexions en 15 minutes depuis une IP : la 21e est refusée", async () => {
+test("20 sign-ins in 15 minutes from one IP: the 21st is refused", async () => {
   await withStore(apiDoc(), async () => {
     for (let i = 0; i < 20; i += 1) await login(ctx(), { email: "personne@example.test", password: "x" });
     await assert.rejects(login(ctx(), { email: "alex@example.test", password: PASSWORD }), isRateLimitError);
   });
 });
 
-test("se déconnecter tue le jeton de cet appareil seulement", async () => {
+test("signing out kills the token of this device only", async () => {
   await withStore(apiDoc(), async () => {
     const phone = await login(ctx(), { email: "alex@example.test", password: PASSWORD });
     const tablet = await login(ctx(), { email: "alex@example.test", password: PASSWORD });
@@ -69,7 +69,7 @@ test("se déconnecter tue le jeton de cet appareil seulement", async () => {
   });
 });
 
-test("un changement de mot de passe invalide tous les jetons émis avant", async () => {
+test("a password change invalidates all tokens issued before", async () => {
   await withStore(apiDoc(), async () => {
     const tokens = [];
     for (let i = 0; i < 3; i += 1) {
@@ -85,7 +85,7 @@ test("un changement de mot de passe invalide tous les jetons émis avant", async
   });
 });
 
-test("s'inscrire : nouveau compte connecté ; e-mail déjà pris sans erreur ni jeton", async () => {
+test("signing up: new account signed in; email already taken without error or token", async () => {
   await withStore(apiDoc(), async () => {
     const created = await register(ctx(), { email: "sam@example.test", password: "mot-de-passe-long", displayName: "Sam" });
     assert.equal(created.ok && created.user?.email, "sam@example.test");
@@ -98,14 +98,14 @@ test("s'inscrire : nouveau compte connecté ; e-mail déjà pris sans erreur ni 
   });
 });
 
-test("5 inscriptions par heure depuis une IP", async () => {
+test("5 sign-ups per hour from one IP", async () => {
   await withStore(apiDoc(), async () => {
     for (let i = 0; i < 5; i += 1) await register(ctx(), { email: "", password: "", displayName: "" });
     await assert.rejects(register(ctx(), { email: "", password: "", displayName: "" }), isRateLimitError);
   });
 });
 
-test("changer son mot de passe : l'ancien est vérifié, les autres connexions tombent", async () => {
+test("changing one's password: the old one is checked, other sessions are dropped", async () => {
   await withStore(apiDoc(), async () => {
     const other = await login(ctx(), { email: "alex@example.test", password: PASSWORD });
     assert.ok(other.ok);
@@ -127,7 +127,7 @@ test("changer son mot de passe : l'ancien est vérifié, les autres connexions t
   });
 });
 
-test("un mot de passe à changer se change sans l'ancien", async () => {
+test("a password that must be changed is changed without the old one", async () => {
   const doc = apiDoc();
   doc.users[0]!.mustChangePassword = true;
   await withStore(doc, async () => {
@@ -136,7 +136,7 @@ test("un mot de passe à changer se change sans l'ancien", async () => {
   });
 });
 
-test("nom affiché : obligatoire", async () => {
+test("display name: required", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     assert.deepEqual(await updateOwnDisplayName(ctx(doc.users[0]!), { displayName: " " }), {
@@ -148,7 +148,7 @@ test("nom affiché : obligatoire", async () => {
   });
 });
 
-test("demander une réinitialisation : même réponse que l'e-mail existe ou non, sans lien en production", async () => {
+test("requesting a reset: same response whether the email exists or not, no link in production", async () => {
   const previous = process.env.NODE_ENV;
   (process.env as Record<string, string>).NODE_ENV = "production";
   try {
@@ -164,7 +164,7 @@ test("demander une réinitialisation : même réponse que l'e-mail existe ou non
   }
 });
 
-test("20 essais de changement de mot de passe en 15 minutes : le 21e est refusé", async () => {
+test("20 password change attempts in 15 minutes: the 21st is refused", async () => {
   await withStore(apiDoc(), async () => {
     const alex = (await readDocument()).users[0]!;
     for (let i = 0; i < 20; i += 1) {
@@ -177,7 +177,7 @@ test("20 essais de changement de mot de passe en 15 minutes : le 21e est refusé
   });
 });
 
-/** Base de démo avec un lien de réinitialisation pour Alex, et ce lien. */
+/** Demo database with a reset link for Alex, and that link. */
 function docWithReset(now?: Date) {
   const created = createPasswordReset(apiDoc(), { email: "alex@example.test", now });
   if (!created.token) throw new Error("lien de réinitialisation non créé");
@@ -185,7 +185,7 @@ function docWithReset(now?: Date) {
   return { doc: created.doc, token: created.token };
 }
 
-test("nouveau mot de passe par le lien (011) : changé, adresse vérifiée, autres connexions tombées", async () => {
+test("new password through the link (011): changed, address verified, other sessions dropped", async () => {
   const { doc, token } = docWithReset();
   await withStore(doc, async () => {
     const before = (await readDocument()).users[0]!.sessionVersion ?? 0;
@@ -202,7 +202,7 @@ test("nouveau mot de passe par le lien (011) : changé, adresse vérifiée, autr
   });
 });
 
-test("nouveau mot de passe par le lien avec signIn : une session d'API pour ce compte", async () => {
+test("new password through the link with signIn: an API session for this account", async () => {
   const { doc, token } = docWithReset();
   await withStore(doc, async () => {
     const result = await resetPasswordWithLink(ctx(), { token, password: "nouveau-mdp-solide", signIn: true });
@@ -212,7 +212,7 @@ test("nouveau mot de passe par le lien avec signIn : une session d'API pour ce c
   });
 });
 
-test("nouveau mot de passe par le lien : trop court, lien inconnu, déjà utilisé ou expiré", async () => {
+test("new password through the link: too short, unknown link, already used or expired", async () => {
   const { doc, token } = docWithReset();
   await withStore(doc, async () => {
     assert.deepEqual(await resetPasswordWithLink(ctx(), { token, password: "court", signIn: false }), {
@@ -238,7 +238,7 @@ test("nouveau mot de passe par le lien : trop court, lien inconnu, déjà utilis
   });
 });
 
-test("20 essais de nouveau mot de passe par lien en 15 minutes depuis une IP : le 21e est refusé", async () => {
+test("20 new password attempts by link in 15 minutes from one IP: the 21st is refused", async () => {
   await withStore(apiDoc(), async () => {
     for (let i = 0; i < 20; i += 1) {
       await resetPasswordWithLink(ctx(), { token: `faux-${i}`, password: "nouveau-mdp-solide", signIn: false });

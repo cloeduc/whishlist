@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import type { AccountDeletionPreview } from "@/src/domain/account";
 import { deleteAccountAction } from "@/src/server/actions";
 
-/** Titres affichés par groupe ; au-delà, « et N de plus ». */
+/** Titles shown per group; beyond that, « et N de plus ». */
 const SHOWN = 5;
 
 function Titles({ titles }: { titles: string[] }) {
@@ -33,7 +33,7 @@ function Titles({ titles }: { titles: string[] }) {
   );
 }
 
-/** Confirmation de la suppression du compte : ce qui part, ce qui reste, puis le mot de passe. */
+/** Account deletion confirmation: what goes, what stays, then the password. */
 export function DeleteAccountDialog({ preview }: { preview: AccountDeletionPreview }) {
   const { t } = useTranslation("auth");
   const { deletedLists, transferredLists, reservationsKept, followedLists } = preview;

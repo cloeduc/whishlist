@@ -6,13 +6,13 @@ import { saveItem } from "@/data/items";
 import type { Draft } from "./ItemForm";
 
 /**
- * Enregistrement d'une idée depuis le formulaire. Accepté ou mis en attente (hors ligne) :
- * retour à la liste. Refusé : l'erreur reste sous le formulaire, et le prochain envoi
- * reprend le même changement (« Corriger ») au lieu d'en créer un autre.
+ * Saving an idea from the form. Accepted or queued (offline):
+ * back to the list. Refused: the error stays below the form, and the next submit
+ * resumes the same change (« Corriger ») instead of creating another one.
  *
- * Le retour se fait en arrière s'il y a un écran derrière ; sinon (app ouverte sur le formulaire, par un
- * partage reçu à froid) ou avec `toList`, on remplace le formulaire par l'écran de la liste. Une fois
- * l'idée acceptée, un nouvel envoi est ignoré : pas de doublon si l'on tape deux fois.
+ * Going back pops the screen if there is one behind; otherwise (app opened on the form, by a
+ * share received on cold start) or with `toList`, the form is replaced by the list screen. Once
+ * the idea is accepted, a new submit is ignored: no duplicate on a double tap.
  */
 export function useItemSave(
   listId: string,

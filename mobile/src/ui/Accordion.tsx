@@ -7,11 +7,11 @@ import { useReduceMotion } from "@/theme/motion";
 import { tokens } from "@/theme/tokens";
 
 /**
- * Mécanique de `components/ui/accordion.tsx` : état ouvert, valeur animée (0 replié, 1 déplié),
- * 200 ms, sans animation si l'appareil demande de les réduire. Replier ferme le clavier.
- * `shown` : le contenu est à l'écran (déplié, ou en train de se replier) ; il passe à `false`
- * une fois le repli fini, pour ne monter un contenu lourd que s'il sert (voir `AccordionContent`).
- * L'en-tête : `AccordionTrigger`.
+ * Mechanics of `components/ui/accordion.tsx`: open state, animated value (0 collapsed, 1 expanded),
+ * 200 ms, no animation if the device asks to reduce them. Collapsing dismisses the keyboard.
+ * `shown`: the content is on screen (expanded, or collapsing); it becomes `false`
+ * once the collapse is done, to mount heavy content only when it is used (see `AccordionContent`).
+ * The header: `AccordionTrigger`.
  */
 export function useAccordion(defaultExpanded = false) {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -31,7 +31,7 @@ export function useAccordion(defaultExpanded = false) {
       return;
     }
     Animated.timing(progress, { toValue, duration: 200, easing: Easing.out(Easing.quad), useNativeDriver: false }).start(
-      // Un repli interrompu par un nouvel appui (`finished: false`) garde le contenu.
+      // A collapse interrupted by a new press (`finished: false`) keeps the content.
       ({ finished }) => {
         if (finished && !next) setShown(false);
       },
@@ -42,8 +42,8 @@ export function useAccordion(defaultExpanded = false) {
 }
 
 /**
- * En-tête cliquable : bouton qui annonce son état (déplié ou non) et ce que fait l'appui.
- * Sa mise en page (titre, compteur, chevron) reste à l'appelant.
+ * Pressable header: a button that announces its state (expanded or not) and what pressing does.
+ * Its layout (title, counter, chevron) is up to the caller.
  */
 export function AccordionTrigger({
   expanded,
@@ -55,7 +55,7 @@ export function AccordionTrigger({
 }: {
   expanded: boolean;
   onPress: () => void;
-  /** Nom lu par les lecteurs d'écran, quand le contenu de l'en-tête n'y suffit pas. */
+  /** Name read by screen readers, when the header content is not enough. */
   label?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
@@ -77,7 +77,7 @@ export function AccordionTrigger({
   );
 }
 
-/** Chevron vers le bas qui pivote vers le haut quand le contenu est déplié. */
+/** Down chevron that turns up when the content is expanded. */
 export function AccordionChevron({
   progress,
   color = tokens.colors.mutedForeground,
@@ -96,10 +96,10 @@ export function AccordionChevron({
 }
 
 /**
- * Contenu repliable, caché aux lecteurs d'écran et aux appuis quand il est replié. Monté par défaut
- * (la saisie d'un formulaire survit à un repli) ; `mounted={shown}` ne le monte que déplié (une
- * liste d'idées, un texte de licence). Sa hauteur naturelle est mesurée (`<testID>-measure`) hors
- * de la hauteur animée, et suivie quand elle change (une alerte qui apparaît, une idée ajoutée).
+ * Collapsible content, hidden from screen readers and presses when collapsed. Mounted by default
+ * (form input survives a collapse); `mounted={shown}` mounts it only when expanded (a
+ * list of ideas, a license text). Its natural height is measured (`<testID>-measure`) outside
+ * the animated height, and followed when it changes (an alert that appears, an idea added).
  */
 export function AccordionContent({
   expanded,
@@ -112,9 +112,9 @@ export function AccordionContent({
   expanded: boolean;
   progress: Animated.Value;
   children: ReactNode;
-  /** `false` : contenu retiré (le `shown` de `useAccordion`, pour un contenu lourd). */
+  /** `false`: content removed (the `shown` of `useAccordion`, for heavy content). */
   mounted?: boolean;
-  /** Style de la vue mesurée (marges internes, espacement). */
+  /** Style of the measured view (padding, spacing). */
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }) {

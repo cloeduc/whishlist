@@ -6,8 +6,8 @@ import { createList } from "../../src/server/commands/lists";
 import { readDocument } from "../../src/store/db";
 import { apiDoc, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtures";
 
-// Identifiants choisis par le client (contrat api-v1-additions, feature 005) :
-// un changement renvoyé après une réponse perdue ne crée pas de doublon.
+// Client-chosen ids (contract api-v1-additions, feature 005):
+// a change sent again after a lost response does not create a duplicate.
 
 before(ensurePasswordHash);
 
@@ -31,7 +31,7 @@ function itemInput(overrides: Partial<Parameters<typeof saveItem>[1]> = {}) {
   };
 }
 
-test("format d'un identifiant client : 16 à 32 caractères base64url", () => {
+test("client identifier format: 16 to 32 base64url characters", () => {
   assert.equal(isClientId("a".repeat(16)), true);
   assert.equal(isClientId("A-_z09".padEnd(32, "x")), true);
   assert.equal(isClientId("a".repeat(15)), false);
@@ -39,7 +39,7 @@ test("format d'un identifiant client : 16 à 32 caractères base64url", () => {
   assert.equal(isClientId("abc/def+ghijklmno"), false);
 });
 
-test("createList avec id, categoryId, personId : crée ces identifiants", async () => {
+test("createList with id, categoryId, personId: creates these identifiers", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const created = await createList(ctx(doc.users[0]!), {
@@ -59,7 +59,7 @@ test("createList avec id, categoryId, personId : crée ces identifiants", async 
   });
 });
 
-test("createList rejoué par le même compte : même liste, sans doublon", async () => {
+test("createList replayed by the same account: same list, no duplicate", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const input = { title: "Noël", category: "Livres", person: "Alex", id: LIST_ID, categoryId: CATEGORY_ID, personId: PERSON_ID };
@@ -76,7 +76,7 @@ test("createList rejoué par le même compte : même liste, sans doublon", async
   });
 });
 
-test("createList : id d'une liste dont le compte n'est pas membre → idConflict", async () => {
+test("createList: id of a list the account is not a member of → idConflict", async () => {
   const doc = apiDoc();
   doc.wishlists[0]!.id = LIST_ID;
   for (const name of ["memberships", "types", "people", "items", "reservations"] as const) {
@@ -88,7 +88,7 @@ test("createList : id d'une liste dont le compte n'est pas membre → idConflict
   });
 });
 
-test("createList : categoryId ou personId déjà pris → idConflict, rien n'est créé", async () => {
+test("createList: categoryId or personId already taken → idConflict, nothing is created", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const taken = await createList(ctx(doc.users[0]!), {
@@ -113,7 +113,7 @@ test("createList : categoryId ou personId déjà pris → idConflict, rien n'est
   });
 });
 
-test("createList : identifiant hors format → idInvalid", async () => {
+test("createList: malformed identifier → idInvalid", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     for (const field of ["id", "categoryId", "personId"] as const) {
@@ -123,7 +123,7 @@ test("createList : identifiant hors format → idInvalid", async () => {
   });
 });
 
-test("saveItem avec id : création, puis renvoi → même idée, sans doublon ni modification", async () => {
+test("saveItem with id: creation, then resend → same idea, no duplicate or change", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const created = await saveItem(ctx(doc.users[0]!), itemInput());
@@ -143,7 +143,7 @@ test("saveItem avec id : création, puis renvoi → même idée, sans doublon ni
   });
 });
 
-test("saveItem : id d'une idée d'une autre liste → idConflict", async () => {
+test("saveItem: id of an idea from another list → idConflict", async () => {
   const doc = apiDoc();
   doc.wishlists.push({ ...doc.wishlists[0]!, id: "w2", readToken: "rt2", inviteToken: "it2" });
   doc.memberships.push({ wishlistId: "w2", userId: "alex", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z" });
@@ -156,7 +156,7 @@ test("saveItem : id d'une idée d'une autre liste → idConflict", async () => {
   });
 });
 
-test("saveItem : id déjà pris par autre chose qu'une idée → idConflict ; hors format → idInvalid", async () => {
+test("saveItem: id already taken by something other than an idea → idConflict; malformed → idInvalid", async () => {
   const doc = apiDoc();
   doc.types.push({ id: "type_taken_id_001", wishlistId: "w", label: "Livres", sortOrder: 1 });
   await withStore(doc, async () => {
@@ -168,7 +168,7 @@ test("saveItem : id déjà pris par autre chose qu'une idée → idConflict ; ho
   });
 });
 
-test("saveItem : un renvoi exige d'être membre de la liste", async () => {
+test("saveItem: a resend requires being a member of the list", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     assert.equal((await saveItem(ctx(doc.users[0]!), itemInput())).ok, true);
@@ -176,7 +176,7 @@ test("saveItem : un renvoi exige d'être membre de la liste", async () => {
   });
 });
 
-test("deux créations simultanées avec le même id → une seule idée", async () => {
+test("two simultaneous creations with the same id → a single idea", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const results = await Promise.all([saveItem(ctx(doc.users[0]!), itemInput()), saveItem(ctx(doc.users[0]!), itemInput())]);

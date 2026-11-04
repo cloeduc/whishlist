@@ -5,7 +5,7 @@ import { pathToFileURL } from "node:url";
 
 const outputArg = process.argv[2];
 if (!outputArg) {
-  console.error("Usage: npm run demo:data -- <chemin, comme WISHLIST_DATA_PATH>");
+  console.error("Usage: npm run demo:data -- <path, like WISHLIST_DATA_PATH>");
   process.exit(1);
 }
 
@@ -58,7 +58,7 @@ const other = await registerUser(doc, {
 });
 if (!other.ok) throw new Error(other.error);
 doc = other.doc;
-// Comptes de démo (et de revue des stores) utilisables sans recevoir d'e-mail : adresses vérifiées.
+// Demo accounts (and store review accounts) usable without receiving an e-mail: verified addresses.
 for (const user of doc.users) user.emailVerifiedAt = user.createdAt;
 
 const created = createWishlist(doc, {
@@ -180,8 +180,8 @@ doc.items.push(
   },
 );
 
-// La base `.db` à côté du chemin donné (même règle que WISHLIST_DATA_PATH), remplacée en une transaction :
-// un serveur qui tourne sur cette base voit la nouvelle démo à la requête suivante.
+// The `.db` database next to the given path (same rule as WISHLIST_DATA_PATH), replaced in one transaction:
+// a server running on this database sees the new demo on the next request.
 process.env.WISHLIST_DATA_PATH = output;
 const store = await import(pathToFileURL(path.resolve("src/store/db.ts")).href);
 await store.replaceDocument(doc);

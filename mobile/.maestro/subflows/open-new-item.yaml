@@ -1,4 +1,4 @@
-# Sur l'onglet Idées : ouvre le formulaire « Ajouter une idée cadeau ».
+# On the Ideas tab: opens the « Ajouter une idée cadeau » form.
 appId: app.ohyoushouldnt.mobile
 ---
 - tapOn:

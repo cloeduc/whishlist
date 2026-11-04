@@ -10,7 +10,7 @@ import { readDocument, updateDocument } from "../../store/db";
 import { rateLimitForIp } from "../rate-limit";
 import { activeUser, type CommandContext, type CommandResult } from "./context";
 
-/** Ce que supprimerait la suppression du compte connecté. Ne modifie rien. */
+/** What deleting the signed-in account would delete. Changes nothing. */
 export async function previewOwnDeletion(
   ctx: CommandContext,
 ): Promise<CommandResult<{ preview: AccountDeletionPreview }>> {
@@ -20,8 +20,8 @@ export async function previewOwnDeletion(
 }
 
 /**
- * Supprime le compte connecté après vérification du mot de passe, en une seule écriture.
- * Les cookies du site et les jetons d'API ne trouvent plus le compte ensuite.
+ * Deletes the signed-in account after checking the password, in a single write.
+ * Site cookies and API tokens no longer find the account afterwards.
  */
 export async function deleteOwnAccount(ctx: CommandContext, input: { password: string }): Promise<CommandResult> {
   const active = activeUser(ctx);

@@ -24,7 +24,7 @@ test("a license shows its version and license; its text unfolds with the accordi
   const timing = jest.spyOn(Animated, "timing");
   await render(<Licenses />);
   expect(screen.getAllByText(`${first.version} · ${first.license}`)[0]).toBeOnTheScreen();
-  // Replié : le texte (long) n'est pas monté.
+  // Collapsed: the (long) text is not mounted.
   expect(screen.queryAllByText(first.text, { includeHiddenElements: true })).toHaveLength(0);
 
   const toggle = screen.getAllByRole("button").find((button) => button.props.accessibilityState?.expanded === false);

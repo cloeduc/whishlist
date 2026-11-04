@@ -1,6 +1,6 @@
-// Metro lit aussi des fichiers du site, sources uniques : textes (../locales), configuration i18n
-// (../src/i18n, R8), règles pures partagées avec l'app (../src/domain : format des identifiants, thème)
-// et constantes du site (../src/site/contact.ts).
+// Metro also reads files of the site, single sources: strings (../locales), i18n configuration
+// (../src/i18n, R8), pure rules shared with the app (../src/domain: identifier format, theme)
+// and site constants (../src/site/contact.ts).
 const path = require("node:path");
 const { getDefaultConfig } = require("expo/metro-config");
 

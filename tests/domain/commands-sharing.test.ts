@@ -26,7 +26,7 @@ function docWithCamille() {
   return doc;
 }
 
-test("régénérer le lien d'invitation invalide l'ancien", async () => {
+test("regenerating the invite link invalidates the old one", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const result = await regenerateInvite(ctx(doc.users[0]!), { wishlistId: "w" });
@@ -40,7 +40,7 @@ test("régénérer le lien d'invitation invalide l'ancien", async () => {
   });
 });
 
-test("mot de passe de lecture : longueur minimale, déverrouillage périmé au changement, retrait", async () => {
+test("read password: minimum length, unlock stale on change, removal", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -62,7 +62,7 @@ test("mot de passe de lecture : longueur minimale, déverrouillage périmé au c
   });
 });
 
-test("seul le propriétaire supprime la liste ; un membre la quitte", async () => {
+test("only the owner deletes the list; a member leaves it", async () => {
   const doc = docWithCamille();
   await withStore(doc, async () => {
     assert.deepEqual(await deleteList(ctx(doc.users[1]!), { wishlistId: "w" }), { ok: false, error: "ownerDeleteList" });
@@ -73,7 +73,7 @@ test("seul le propriétaire supprime la liste ; un membre la quitte", async () =
   });
 });
 
-test("le propriétaire retire un membre", async () => {
+test("the owner removes a member", async () => {
   const doc = docWithCamille();
   await withStore(doc, async () => {
     assert.deepEqual(await removeMember(ctx(doc.users[1]!), { wishlistId: "w", userId: "alex" }), {
@@ -84,7 +84,7 @@ test("le propriétaire retire un membre", async () => {
   });
 });
 
-test("inviter par e-mail : adresse requise, e-mail non configuré, 8 envois par heure", async () => {
+test("inviting by email: address required, email not configured, 8 sends per hour", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withEnv({ RESEND_API_KEY: undefined }, () =>
@@ -100,7 +100,7 @@ test("inviter par e-mail : adresse requise, e-mail non configuré, 8 envois par 
   );
 });
 
-test("un non-membre ne partage rien", async () => {
+test("a non-member shares nothing", async () => {
   const doc = apiDoc();
   const camille = ctx(doc.users[1]!);
   await withStore(doc, async () => {
@@ -118,7 +118,7 @@ test("un non-membre ne partage rien", async () => {
   });
 });
 
-test("aperçu d'une invitation (011) : le titre, et la liste si le compte en est déjà membre", async () => {
+test("invite preview (011): the title, and the list if the account is already a member", async () => {
   await withStore(docWithCamille(), async () => {
     const doc = await readDocument();
     const alex = doc.users.find((entry) => entry.id === "alex")!;
@@ -129,12 +129,12 @@ test("aperçu d'une invitation (011) : le titre, et la liste si le compte en est
   await withStore(apiDoc(), async () => {
     const camille = (await readDocument()).users.find((entry) => entry.id === "camille")!;
     assert.deepEqual(await previewInvite(ctx(camille), { token: "it" }), { ok: true, title: "Liste d'Alex", listId: null });
-    // Rien n'est écrit : Camille n'est toujours pas membre.
+    // Nothing is written: Camille is still not a member.
     assert.equal((await readDocument()).memberships.some((entry) => entry.userId === "camille"), false);
   });
 });
 
-test("aperçu d'une invitation : lien inconnu ou régénéré, sans compte, mot de passe à changer", async () => {
+test("invite preview: unknown or regenerated link, no account, password to change", async () => {
   await withStore(apiDoc(), async () => {
     const doc = await readDocument();
     const alex = doc.users.find((entry) => entry.id === "alex")!;

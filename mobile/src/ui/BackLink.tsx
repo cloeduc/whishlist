@@ -7,8 +7,8 @@ import { tokens } from "@/theme/tokens";
 import { Button } from "./Button";
 
 /**
- * Retour à l'écran précédent. Le site n'en a pas besoin (le navigateur s'en charge) :
- * c'est un lien du site, avec un chevron, et non l'en-tête du système.
+ * Back to the previous screen. The site does not need it (the browser handles it):
+ * it is a site link, with a chevron, and not the system header.
  */
 export function BackLink({ fallback = "/" }: { fallback?: "/" | `/lists/${string}` }) {
   const { t } = useTranslation("mobile");

@@ -14,7 +14,7 @@ function docWithCamilleList() {
   return doc;
 }
 
-test("mes listes : seulement celles dont je suis membre", async () => {
+test("my lists: only those I am a member of", async () => {
   const doc = docWithCamilleList();
   await withStore(doc, async () => {
     const alex = await listMine(ctx(doc.users[0]!));
@@ -25,7 +25,7 @@ test("mes listes : seulement celles dont je suis membre", async () => {
       [["w", "owner", 2]],
     );
     assert.equal(alex.lists[0]!.readUrl, "https://ohyoushouldnt.example.test/l/rt");
-    // Depuis 1.1.0 : de quoi dessiner la carte de « Mes listes » comme sur le site.
+    // Since 1.1.0: enough to draw the « Mes listes » card as on the site.
     assert.equal(alex.lists[0]!.subtitle, null);
     assert.equal(alex.lists[0]!.coverImageUrl, null);
     assert.deepEqual(alex.lists[0]!.theme, doc.wishlists[0]!.theme);
@@ -34,7 +34,7 @@ test("mes listes : seulement celles dont je suis membre", async () => {
   });
 });
 
-test("sans compte, ou avec un mot de passe à changer, pas de listes", async () => {
+test("without an account, or with a password to change, no lists", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     assert.deepEqual(await listMine(ctx()), { ok: false, error: "unauthorized" });
@@ -43,7 +43,7 @@ test("sans compte, ou avec un mot de passe à changer, pas de listes", async () 
   });
 });
 
-test("la vue membre montre réservations et membres, sans e-mail ni hash", async () => {
+test("the member view shows reservations and members, without email or hash", async () => {
   const doc = docWithCamilleList();
   doc.wishlists[0]!.readPasswordHash = "hash-secret";
   await withStore(doc, async () => {
@@ -85,7 +85,7 @@ test("la vue membre montre réservations et membres, sans e-mail ni hash", async
   });
 });
 
-test("un non-membre reçoit notMember, comme une liste absente pour l'API", async () => {
+test("a non-member gets notMember, like a missing list for the API", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     assert.deepEqual(await readMemberList(ctx(doc.users[1]!), { wishlistId: "w" }), { ok: false, error: "notMember" });

@@ -1,5 +1,5 @@
-// Nombre de sessions d'API d'un compte : `node --import tsx scripts/db-sessions.ts <WISHLIST_DATA_PATH> <userId>`.
-// Sert au contrôle du serveur e2e (mobile/scripts/e2e.mjs) ; lecture seule. Sortie : un nombre, 0 si la base manque.
+// Number of API sessions of an account: `node --import tsx scripts/db-sessions.ts <WISHLIST_DATA_PATH> <userId>`.
+// Used by the e2e server check (mobile/scripts/e2e.mjs); read-only. Output: a number, 0 if the database is missing.
 import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";

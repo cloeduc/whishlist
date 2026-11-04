@@ -47,11 +47,11 @@ function addList(doc: Database, id: string, title: string, members: [string, Rol
 }
 
 /**
- * Lou (`lou`) est le compte supprimé ou exporté.
- * - `solo` : Lou seule (propriétaire) ;
- * - `shared` : Lou propriétaire, Alex (rejoint en février) et Camille (en mars) membres → Alex hérite ;
- * - `alexs` : Alex propriétaire, Lou membre ;
- * - `other` : Camille seule ; Lou y a réservé une idée connectée.
+ * Lou (`lou`) is the deleted or exported account.
+ * - `solo`: Lou alone (owner);
+ * - `shared`: Lou owner, Alex (joined in February) and Camille (in March) members → Alex inherits;
+ * - `alexs`: Alex owner, Lou member;
+ * - `other`: Camille alone; Lou reserved an idea there while signed in.
  */
 export function accountDoc(): Database {
   const doc = emptyDatabase();

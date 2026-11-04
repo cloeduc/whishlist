@@ -32,7 +32,7 @@ function doc(): Database {
   return data;
 }
 
-test("sans mot de passe : hasReadPassword false, verify toujours ok", async () => {
+test("without a password: hasReadPassword false, verify always ok", async () => {
   const list = doc().wishlists[0]!;
   assert.equal(hasReadPassword(list), false);
   assert.equal(await verifyReadPassword(list, ""), true);
@@ -57,7 +57,7 @@ test("set / verify / clear", async () => {
   assert.equal(hasReadPassword(cleared.doc.wishlists[0]!), false);
 });
 
-test("politique : trop court / non-membre", async () => {
+test("policy: too short / non-member", async () => {
   const short = await setReadPassword(doc(), { wishlistId: "w", actorId: "owner", password: "abc" });
   assert.deepEqual(short, { ok: false, error: "readPasswordTooShort" });
 

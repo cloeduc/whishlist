@@ -5,12 +5,12 @@ import { AppState } from "react-native";
 const key = (payloads: readonly SharePayload[]) => JSON.stringify(payloads.map((p) => [p.shareType, p.mimeType, p.value]));
 
 /**
- * Contenus partagés vers l'app, lus tels quels (`getSharedPayloads`, synchrone, sans réseau).
+ * Contents shared to the app, read as is (`getSharedPayloads`, synchronous, no network).
  *
- * Pas `useIncomingShare` d'expo-sharing : il appelle aussi `getResolvedSharedPayloadsAsync`, qui ouvre l'adresse
- * partagée depuis l'appareil (une requête vers la boutique, avec l'IP de la personne) à chaque retour au premier plan.
- * L'app n'en a pas besoin : « Remplir depuis le lien » passe par le serveur. Relu au montage et à chaque retour au
- * premier plan (un nouveau partage alors que l'écran est déjà ouvert).
+ * Not `useIncomingShare` from expo-sharing: it also calls `getResolvedSharedPayloadsAsync`, which opens the shared
+ * address from the device (a request to the shop, with the person's IP) each time the app returns to the foreground.
+ * The app does not need it: « Remplir depuis le lien » goes through the server. Read again on mount and each time the
+ * app returns to the foreground (a new share while the screen is already open).
  */
 export function useSharedPayloads(): { payloads: SharePayload[]; clear: () => void } {
   const [payloads, setPayloads] = useState<SharePayload[]>(read);
@@ -31,7 +31,7 @@ export function useSharedPayloads(): { payloads: SharePayload[]; clear: () => vo
     try {
       clearSharedPayloads();
     } catch {
-      // Rien à effacer, ou module absent : le partage n'est de toute façon plus affiché.
+      // Nothing to clear, or module missing: the share is no longer shown anyway.
     }
     setPayloads([]);
   }, []);

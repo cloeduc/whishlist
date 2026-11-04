@@ -9,7 +9,7 @@ import { Text } from "./Text";
 
 const boxStyle = { backgroundColor: tokens.colors.white, padding: tokens.space[5], gap: tokens.space[3] };
 
-/** Section de `components/site/content-page.tsx` : carte blanche à bordure et ombre, titre, texte gris. */
+/** Section of `components/site/content-page.tsx`: white card with border and shadow, title, grey text. */
 export function ContentSection({ title, children }: { title: string; children?: ReactNode }) {
   return (
     <Shadow style={boxStyle}>
@@ -22,8 +22,8 @@ export function ContentSection({ title, children }: { title: string; children?: 
 }
 
 /**
- * Section repliable (licences) : le titre et `summary` restent visibles, le titre se touche pour
- * déplier `children` avec l'animation de `./Accordion`. `children` n'est monté que déplié (texte long).
+ * Collapsible section (licenses): the title and `summary` stay visible, the title is pressed to
+ * expand `children` with the `./Accordion` animation. `children` is mounted only when expanded (long text).
  */
 export function CollapsibleContentSection({
   title,
@@ -64,7 +64,7 @@ export function CollapsibleContentSection({
   );
 }
 
-/** Paragraphe d'une section : gris, interligne large (`leading-7`). */
+/** Paragraph of a section: grey, wide line height (`leading-7`). */
 export function ContentText({ children }: { children: ReactNode }) {
   return (
     <Text color={tokens.colors.mutedForeground} style={{ lineHeight: tokens.lineHeight.relaxed }}>

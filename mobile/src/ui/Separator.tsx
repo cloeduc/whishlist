@@ -2,7 +2,7 @@ import { View } from "react-native";
 
 import { tokens } from "@/theme/tokens";
 
-/** `components/ui/separator.tsx` : trait horizontal de 2, couleur de bordure. Décoratif. */
+/** `components/ui/separator.tsx`: horizontal line of 2, border color. Decorative. */
 export function Separator() {
   return (
     <View

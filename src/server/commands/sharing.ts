@@ -24,15 +24,15 @@ import { memberListView } from "./lists";
 type DomainResult = { ok: true; doc: Database } | { ok: false; error: string };
 type Written<T extends object> = { ok: true; doc: Database; result: T } | { ok: false; error: string };
 
-/** Résultat d'une règle du domaine, sans autre information que ok / erreur. */
+/** Result of a domain rule, with no information other than ok / error. */
 function done(saved: DomainResult): Written<object> {
   return saved.ok ? { ok: true, doc: saved.doc, result: {} } : saved;
 }
 
 /**
- * Applique une règle de membre sur la liste et rend son résultat.
- * Un non-membre reçoit `notMember` avant les refus réservés au propriétaire,
- * pour ne pas révéler que la liste existe.
+ * Applies a member rule on the list and returns its result.
+ * A non-member gets `notMember` before the owner-only refusals,
+ * so as not to reveal that the list exists.
  */
 async function memberWrite<T extends object>(
   ctx: CommandContext,
@@ -109,9 +109,9 @@ export function deleteList(ctx: CommandContext, input: { wishlistId: string }) {
 }
 
 /**
- * Aperçu d'une invitation avant de la rejoindre, dans l'app (011, R8) : le titre de la liste, et son
- * identifiant si le compte en est déjà membre. N'écrit rien. N'exige pas une adresse vérifiée : seul
- * `joinInvite` l'exige, et l'app montre alors le rappel de confirmation.
+ * Preview of an invitation before joining it, in the app (011, R8): the list title, and its
+ * identifier if the account is already a member. Writes nothing. Does not require a verified address: only
+ * `joinInvite` requires it, and the app then shows the confirmation reminder.
  */
 export async function previewInvite(
   ctx: CommandContext,

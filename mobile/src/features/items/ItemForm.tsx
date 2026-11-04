@@ -25,7 +25,7 @@ import { Textarea } from "@/ui/Textarea";
 
 export type Draft = Required<ItemInput>;
 
-/** Brouillon vide : première catégorie et premier « qui » de la liste, comme sur le site. */
+/** Empty draft: first category and first « qui » of the list, like on the site. */
 export function emptyDraft(list: ViewList): Draft {
   return {
     name: "",
@@ -41,9 +41,9 @@ export function emptyDraft(list: ViewList): Draft {
 }
 
 /**
- * Formulaire d'idée, d'après la carte « Ajouter une idée cadeau » de `06-liste-idees.png`
- * et `components/site/item-form.tsx` : mêmes champs, mêmes libellés, mêmes aides.
- * Une erreur s'affiche sous le formulaire et tous les champs restent remplis (FR-014).
+ * Idea form, based on the « Ajouter une idée cadeau » card of `06-liste-idees.png`
+ * and `components/site/item-form.tsx`: same fields, same labels, same hints.
+ * An error shows below the form and all fields stay filled (FR-014).
  */
 export function ItemForm({
   list,
@@ -56,12 +56,12 @@ export function ItemForm({
 }: {
   list: ViewList;
   initial: Draft;
-  /** Code d'erreur à afficher (local ou du serveur). */
+  /** Error code to show (local or from the server). */
   error: string | null;
   busy: boolean;
   submitLabel: string;
   onSubmit: (draft: Draft) => void;
-  /** Lien reçu par un partage : remplir depuis le lien dès que c'est possible (une fois). */
+  /** Link received from a share: fill from the link as soon as possible (once). */
   autoFill?: boolean;
 }) {
   const { t } = useTranslation(["list", "common"]);
@@ -81,14 +81,14 @@ export function ItemForm({
     setEnrichError(null);
     try {
       const found = await enrich(list.id, draft.url.trim());
-      // Comme le site : seuls les champs trouvés remplacent la saisie.
+      // Like the site: only the fields found replace the input.
       setDraft((current) => ({
         ...current,
         name: found.name || current.name,
         price: found.price || current.price,
         imageUrl: found.imageUrl || current.imageUrl,
         typeId: found.typeId || current.typeId,
-        // Ce que la personne a écrit (pourquoi elle le veut…) n'est jamais remplacé.
+        // What the person wrote (why they want it…) is never replaced.
         description: current.description?.trim() ? current.description : found.description || current.description,
       }));
       setUsedLlm(found.usedLlm);
@@ -101,14 +101,14 @@ export function ItemForm({
 
   const categories = [...list.categories].sort((a, b) => a.sortOrder - b.sortOrder).map((c) => ({ value: c.id, label: c.label }));
   const people = list.people.map((p) => ({ value: p.id, label: p.label }));
-  // Préremplissage : exige le serveur, et une liste qui existe déjà sur le serveur.
+  // Prefill: requires the server, and a list that already exists on the server.
   const canEnrich = online && !list.localOnly && draft.url.trim() !== "" && !enriching;
   const autoFilled = useRef(false);
   useEffect(() => {
     if (!autoFill || autoFilled.current || !canEnrich) return;
     autoFilled.current = true;
     void fill();
-    // `fill` lit le brouillon courant : seul le premier moment où c'est possible compte.
+    // `fill` reads the current draft: only the first moment it is possible counts.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoFill, canEnrich]);
 

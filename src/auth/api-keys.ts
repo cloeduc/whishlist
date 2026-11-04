@@ -2,14 +2,14 @@ import { addApiKey, findApiKeyByHash, type ApiKeyView } from "../domain/api-keys
 import { hashSecretToken, newSecretToken } from "../domain/tokens";
 import type { ApiKey, Database, User } from "../domain/types";
 
-/** Préfixe des clés : on les reconnaît (et les distingue d'un jeton de session) sans base. */
+/** Key prefix: keys are recognized (and told apart from a session token) without the database. */
 export const API_KEY_PREFIX = "oys_";
 
 export function isApiKeyToken(token: string): boolean {
   return token.startsWith(API_KEY_PREFIX);
 }
 
-/** Tire le jeton d'une nouvelle clé et l'ajoute au compte ; le jeton en clair n'est rendu qu'ici, une fois. */
+/** Draws the token of a new key and adds it to the account; the plain token is returned only here, once. */
 export function createApiKey(
   doc: Database,
   user: User,
@@ -21,7 +21,7 @@ export function createApiKey(
   return added.ok ? { ...added, token } : added;
 }
 
-/** La clé de ce jeton et son compte, ou null (pas une clé, clé inconnue, révoquée, compte supprimé). */
+/** The key of this token and its account, or null (not a key, unknown key, revoked, account deleted). */
 export function findApiKey(doc: Database, token: string): { key: ApiKey; user: User } | null {
   if (!isApiKeyToken(token)) return null;
   return findApiKeyByHash(doc, hashSecretToken(token));

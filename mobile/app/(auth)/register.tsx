@@ -14,7 +14,7 @@ import { Field } from "@/ui/Field";
 import { Input } from "@/ui/Input";
 import { NetworkNote } from "@/ui/NetworkNote";
 
-/** Création de compte, d'après `03-inscription.png` (FR-001). */
+/** Account creation, from `03-inscription.png` (FR-001). */
 export default function Register() {
   const { t } = useTranslation("auth");
   const online = useOnline();
@@ -22,7 +22,7 @@ export default function Register() {
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  // 202 : l'e-mail a déjà un compte ; même message que le site, sans connexion.
+  // 202: the email already has an account; same message as the site, without sign-in.
   const [checkEmail, setCheckEmail] = useState(false);
 
   const register = useServerAction(

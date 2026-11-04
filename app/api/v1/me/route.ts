@@ -5,7 +5,7 @@ import { readMe, updateOwnDisplayName } from "@/src/server/commands/auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Répond aussi quand le mot de passe doit être changé : le client l'apprend ici. */
+/** Also answers when the password must be changed: the client learns it here. */
 export const GET = withApi(async (api) => {
   const result = await readMe(await commandContext(api));
   if (!result.ok) return apiError(result.error, api.locale, api.cors);

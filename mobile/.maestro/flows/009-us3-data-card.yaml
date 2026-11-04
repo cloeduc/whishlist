@@ -1,7 +1,7 @@
-# 009 US3 : la carte « Vos données et informations » s'ouvre repliée, se déplie, reste dépliée
-# au retour d'une page légale, puis se replie.
+# 009 US3: the « Vos données et informations » card opens collapsed, expands, stays expanded
+# when coming back from a legal page, then collapses.
 appId: app.ohyoushouldnt.mobile
-name: "009 US3 — Déplier la carte Données et informations"
+name: "009 US3 — Expand the Data and information card"
 tags:
   - 009-us3
 ---
@@ -21,7 +21,7 @@ tags:
 - assertVisible:
     id: account.logout
 
-# Dépliée : les liens apparaissent, et la carte le reste au retour des mentions légales.
+# Expanded: the links show, and the card stays so when coming back from the legal notice.
 - tapOn:
     id: account.data-toggle
 - scrollUntilVisible:
@@ -40,7 +40,7 @@ tags:
       id: account.legal
     timeout: 10000
 
-# Repliée de nouveau.
+# Collapsed again.
 - scrollUntilVisible:
     element:
       id: account.data-toggle

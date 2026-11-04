@@ -3,14 +3,14 @@ import { test } from "node:test";
 import { faqPageJsonLd } from "../../src/site/faq-jsonld";
 import { legacyHostRedirect, preferredOrigin, PUBLIC_ORIGIN } from "../../src/site/seo";
 
-test("preferredOrigin remplace uniquement l'ancien domaine", () => {
+test("preferredOrigin replaces only the old domain", () => {
   assert.equal(preferredOrigin("https://wishlist.mesdamesduc.fr"), PUBLIC_ORIGIN);
   assert.equal(preferredOrigin("https://ohyoushouldnt.app"), "https://ohyoushouldnt.app");
   assert.equal(preferredOrigin("https://exemple.test"), "https://exemple.test");
   assert.equal(preferredOrigin(null), null);
 });
 
-test("legacyHostRedirect vise le domaine public et garde le chemin", () => {
+test("legacyHostRedirect targets the public domain and keeps the path", () => {
   const moved = legacyHostRedirect(
     "wishlist.mesdamesduc.fr",
     "/faq",
@@ -26,7 +26,7 @@ test("legacyHostRedirect vise le domaine public et garde le chemin", () => {
   );
 });
 
-test("faqPageJsonLd reprend les questions visibles et échappe <", () => {
+test("faqPageJsonLd takes the visible questions and escapes <", () => {
   const json = faqPageJsonLd([
     { q: "Un compte ?", a: "Non, le lien suffit." },
     { q: "  ", a: "vide" },

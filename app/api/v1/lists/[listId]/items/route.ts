@@ -15,7 +15,7 @@ export const POST = withApi<{ listId: string }>(async (api, { listId }) => {
     clientId: optionalText(body.body.id),
   });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);
-  // 200 : renvoi d'une création déjà reçue (même `id`), l'idée n'est pas modifiée.
+  // 200: replay of a creation already received (same `id`), the idea is not changed.
   return apiJson(toMemberItem(result.item, api.locale), result.replayed ? 200 : 201, api.cors);
 });
 

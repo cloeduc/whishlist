@@ -1,8 +1,8 @@
-# App vide au début de chaque parcours (R5) : données effacées, et trousseau iOS vidé
-# (sinon le jeton de session survit et l'app revient connectée).
+# Empty app at the start of each flow (R5): data cleared, and iOS keychain emptied
+# (otherwise the session token survives and the app comes back logged in).
 appId: app.ohyoushouldnt.mobile
 ---
-# Un parcours hors ligne arrêté avant sa fin laisserait l'émulateur en mode avion.
+# An offline flow stopped before its end would leave the emulator in airplane mode.
 - runFlow:
     when:
       platform: Android
@@ -11,8 +11,8 @@ appId: app.ohyoushouldnt.mobile
 - launchApp:
     clearState: true
     clearKeychain: true
-    # Build Debug, iOS : réglages du dev client passés en arguments de lancement (ils priment sur UserDefaults) :
-    # ni bouton d'outils, ni menu développeur à l'ouverture, ni écran d'accueil. Sans effet en Release.
+    # Debug build, iOS: dev client settings passed as launch arguments (they take precedence over UserDefaults):
+    # no tools button, no developer menu on open, no welcome screen. No effect in Release.
     arguments:
       EXDevMenuShowFloatingActionButton: "NO"
       EXDevMenuShowsAtLaunch: "NO"

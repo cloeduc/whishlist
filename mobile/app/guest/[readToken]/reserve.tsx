@@ -21,9 +21,9 @@ import { Select } from "@/ui/Select";
 import { Text } from "@/ui/Text";
 
 /**
- * « Réserver un cadeau » de la vue invité (011, US4), comme `/l/{readToken}/reserver` du site : l'idée
- * choisie, ou une catégorie puis une idée, le nom et le message facultatifs. Toujours en ligne : une
- * réservation n'est jamais mise en attente (FR-010b). Une idée prise entre-temps est refusée par le serveur.
+ * « Réserver un cadeau » of the guest view (011, US4), like the site's `/l/{readToken}/reserver`: the chosen
+ * idea, or a category then an idea, the optional name and message. Always online: a
+ * reservation is never queued (FR-010b). An idea taken in the meantime is refused by the server.
  */
 export default function GuestReserve() {
   const { t } = useTranslation(["public", "mobile"]);
@@ -43,7 +43,7 @@ export default function GuestReserve() {
         ) : null}
         {state.status === "missing" ? <Alert variant="destructive">{t("public:missingList")}</Alert> : null}
         {state.status === "locked" ? (
-          // Le mot de passe se saisit sur la vue de la liste.
+          // The password is entered on the list view.
           <Button title={t("public:reserve.back")} onPress={() => router.replace(`/guest/${readToken}` as Href)} />
         ) : null}
       </Screen>
@@ -83,16 +83,16 @@ function ReserveForm({
   const [fromName, setFromName] = useState("");
   const [note, setNote] = useState("");
 
-  // Sans useCallback : le React Compiler mémorise déjà ce composant.
+  // No useCallback: the React Compiler already memoizes this component.
   const reserve = useServerAction(async () => {
     try {
       await reserveGuestItem(readToken, { itemId: target, typeId: category || undefined, fromName, note });
     } catch (error) {
-      // Idée prise entre-temps (sur le site ou un autre téléphone) : la liste relue ne la propose plus.
+      // Idea taken in the meantime (on the site or another phone): the reloaded list no longer offers it.
       if (error instanceof ApiError && error.status === 409) reload();
       throw error;
     }
-    // Retour à la vue de la liste déjà ouverte (elle se relit au retour), sans l'empiler une seconde fois.
+    // Back to the list view already open (it reloads on return), without stacking it a second time.
     if (router.canGoBack()) router.back();
     else router.replace(`/guest/${readToken}` as Href);
   });

@@ -69,7 +69,7 @@ test("+native-intent: a share opens « Ajouter à une liste » and is kept as th
   expect(redirectSystemPath({ path: "ohyoushouldnt://expo-sharing", initial: false })).toBe("/share");
   expect(afterSignIn()).toBe("/share");
   clearPendingLink();
-  // Les autres adresses gardent la règle des liens du site.
+  // Other addresses keep the site's link rule.
   expect(redirectSystemPath({ path: "ohyoushouldnt://inviter/tok", initial: false })).toBe("/links/invite/tok");
   expect(afterSignIn()).toBe("/");
 });
@@ -112,19 +112,19 @@ beforeEach(async () => {
 
 afterEach(() => {
   stopSync();
-  // Jamais de requête vers l'adresse partagée depuis l'appareil (la résolution d'expo-sharing en fait une).
+  // Never a request to the shared address from the device (expo-sharing's resolution makes one).
   expect(sharingMock.getResolvedSharedPayloadsAsync).not.toHaveBeenCalled();
   expect(sharingMock.useIncomingShare).not.toHaveBeenCalled();
   setSharedPayloads([]);
 });
 
-describe("Ajouter à une liste", () => {
+describe("« Ajouter à une liste » screen", () => {
   test("several lists: pick one, the share is cleared and the form opens with the link, the name and auto-fill", async () => {
     fakeFetch({ "GET /lists": () => json(200, { lists: [summary("w", "Idées cadeaux"), summary("w2", "Noël")] }) });
     setSharedPayloads(lampShare);
     setPendingLink("/share");
     await render(<Share />);
-    // Arrivé sur l'écran (après la connexion s'il le fallait) : le lien en attente est servi.
+    // Once on the screen (after signing in if needed): the pending link is served.
     expect(afterSignIn()).toBe("/");
     expect(await screen.findByTestId("incoming.url")).toHaveTextContent("https://shop.example.test/lampe");
     expect(screen.getByText(i18n.t("mobile:incoming.title"))).toBeOnTheScreen();
@@ -133,7 +133,7 @@ describe("Ajouter à une liste", () => {
       pathname: "/lists/[listId]/items/new",
       params: { listId: "w2", url: "https://shop.example.test/lampe", name: "Lampe de chevet", fill: "1", from: "share" },
     });
-    // Le partage est servi : effacé côté natif, il ne revient pas au prochain passage au premier plan.
+    // The share is served: cleared on the native side, it does not come back the next time the app returns to the foreground.
     expect(sharingMock.clearSharedPayloads).toHaveBeenCalled();
     expect(sharingMock.getSharedPayloads()).toEqual([]);
     await waitFor(() => expect(screen.queryByTestId("incoming.url")).toBeNull());

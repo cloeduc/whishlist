@@ -45,7 +45,7 @@ export async function readMemberList(
   return memberListView(ctx, input.wishlistId, active.user.id);
 }
 
-/** Vue membre relue après une écriture (création, réglages, invitation acceptée). */
+/** Member view read again after a write (creation, settings, accepted invitation). */
 export async function memberListView(
   ctx: CommandContext,
   wishlistId: string,
@@ -59,9 +59,9 @@ export async function memberListView(
 }
 
 /**
- * Une liste naît avec sa première catégorie et son premier « qui » ; un champ vide prend sa valeur par défaut.
- * Le client peut choisir leurs identifiants : un renvoi du même `id` par un membre
- * rend la liste existante (`replayed`) au lieu d'en créer une seconde.
+ * A list is born with its first category and its first « qui »; an empty field takes its default value.
+ * The client can choose their identifiers: a resend of the same `id` by a member
+ * returns the existing list (`replayed`) instead of creating a second one.
  */
 export async function createList(
   ctx: CommandContext,
@@ -72,14 +72,14 @@ export async function createList(
   const ids = [input.id, input.categoryId, input.personId].filter((id) => id !== undefined);
   if (!ids.every(isClientId)) return { ok: false, error: "idInvalid" };
   const actorId = active.user.id;
-  // Champs non bloquants : laissés vides, ils prennent des valeurs par défaut, dans la langue de la
-  // requête (langue de l'URL sur le site, `Accept-Language` pour l'API).
-  // Une saisie à virgules en crée plusieurs ; le nom du compte, valeur par défaut, n'est jamais découpé.
+  // Non-blocking fields: left empty, they take default values, in the language of the
+  // request (URL language on the site, `Accept-Language` for the API).
+  // A comma-separated entry creates several; the account name, the default value, is never split.
   const defaults = listDefaults(active.user.displayName, await getTranslationsFor(ctx.locale, "home"));
   const typed = { categories: splitLabels(input.category), persons: splitLabels(input.person) };
   const categories = typed.categories.length > 0 ? typed.categories : [defaults.category];
   const persons = typed.persons.length > 0 ? typed.persons : [defaults.person];
-  // Renvoi reconnu dans la même écriture que la création : deux envois simultanés ne font qu'une liste.
+  // Resend detected in the same write as the creation: two simultaneous sends make only one list.
   const created = await updateDocument<CommandResult<{ wishlistId: string; replayed: boolean }>>((doc) => {
     const { id } = input;
     if (id && doc.wishlists.some((list) => list.id === id)) {
@@ -93,8 +93,8 @@ export async function createList(
     const list = createWishlist(doc, { ownerId: actorId, title, importTemplate: false, id });
     if (!list.ok) return { doc, result: list };
     const wishlistId = list.wishlist.id;
-    // « Wilh, Nathan » crée deux « qui », comme dans les réglages. L'identifiant choisi par le
-    // client ne vaut que pour le premier : il n'en a envoyé qu'un.
+    // « Wilh, Nathan » creates two « qui », as in the settings. The identifier chosen by the
+    // client only applies to the first: it sent only one.
     let current = list.doc;
     for (const [index, label] of categories.entries()) {
       const saved = addType(current, { wishlistId, actorId, label, id: index === 0 ? input.categoryId : undefined });
@@ -113,7 +113,7 @@ export async function createList(
   return view.ok ? { ...view, replayed: created.replayed } : view;
 }
 
-/** Réglages de la liste ; un champ absent reste tel quel. */
+/** List settings; a missing field stays as is. */
 export async function updateSettings(
   ctx: CommandContext,
   input: {

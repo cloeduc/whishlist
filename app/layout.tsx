@@ -20,7 +20,7 @@ import { emailConfirmationPending } from "@/src/server/commands/context";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
-/** Session et langue sont des cookies : le HTML n’est pas mis en cache. */
+/** Session and language are cookies: the HTML is not cached. */
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {

@@ -1,14 +1,14 @@
 import type { SharePayload } from "expo-sharing";
 
 /**
- * Faux expo-sharing : `shareAsync` (export des données) et un partage reçu que les tests posent.
- * Comme le module natif, il ne prévient de rien : l'app relit le partage (`getSharedPayloads`) quand elle le veut.
- * `getResolvedSharedPayloadsAsync` (et `useIncomingShare`, qui l'appelle) ouvre l'adresse partagée depuis
- * l'appareil : l'app ne doit pas s'en servir, les tests vérifient qu'il n'est jamais appelé.
+ * Fake expo-sharing: `shareAsync` (data export) and a received share that the tests set.
+ * Like the native module, it notifies nothing: the app reads the share again (`getSharedPayloads`) when it wants.
+ * `getResolvedSharedPayloadsAsync` (and `useIncomingShare`, which calls it) opens the shared address from
+ * the device: the app must not use it, the tests check that it is never called.
  */
 let payloads: SharePayload[] = [];
 
-/** Simule un contenu partagé vers l'app (ou `[]` : rien de partagé). */
+/** Simulates content shared to the app (or `[]`: nothing shared). */
 export function setSharedPayloads(next: SharePayload[]): void {
   payloads = next;
 }

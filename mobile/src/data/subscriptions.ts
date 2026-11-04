@@ -10,14 +10,14 @@ export type FollowResult =
   | { ok: false; error: string };
 
 /**
- * S'abonne à une liste publique par son lien ou son jeton. Une liste protégée déjà déverrouillée sur ce
- * téléphone (vue de la liste) passe par sa preuve `X-Read-Unlock` ; sinon le serveur répond `423` avec le
- * titre de la liste, et l'écran demande le mot de passe.
+ * Follows a public list by its link or its token. A protected list already unlocked on this
+ * phone (list view) goes through its `X-Read-Unlock` proof; otherwise the server answers `423` with the
+ * list title, and the screen asks for the password.
  */
 export async function followList(input: {
   urlOrToken: string;
   password?: string;
-  /** Jeton de la liste, quand on le connaît : sa preuve de déverrouillage accompagne la demande. */
+  /** Token of the list, when known: its unlock proof goes with the request. */
   readToken?: string;
 }): Promise<FollowResult> {
   const urlOrToken = input.urlOrToken.trim();
@@ -41,7 +41,7 @@ export async function followList(input: {
   }
 }
 
-/** Ne plus suivre une liste : sa copie hors ligne part avec l'abonnement. */
+/** Unfollow a list: its offline copy goes away with the subscription. */
 export async function unfollowList(readToken: string): Promise<{ ok: true } | { ok: false; error: string }> {
   try {
     await done(api.DELETE("/subscriptions/{readToken}", { params: { path: { readToken } } }));

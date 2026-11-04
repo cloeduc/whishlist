@@ -8,7 +8,7 @@ import { readDocument, replaceDocument } from "../../src/store/db";
 import { apiDoc } from "./helpers/api-fixtures";
 import { withTempDataPath } from "./helpers/temp-store";
 
-/** Toutes les valeurs particulières : null, booléens, JSON, emoji, centimes. */
+/** All the special values: null, booleans, JSON, emoji, cents. */
 function edgeDoc(): Database {
   const doc = apiDoc();
   doc.users[0].mustChangePassword = true;
@@ -86,7 +86,7 @@ function edgeDoc(): Database {
   return doc;
 }
 
-/** Base de démo construite comme `scripts/create-demo-data.mjs` (liste, modèle importé), sans hacher de mot de passe. */
+/** Demo database built like `scripts/create-demo-data.mjs` (list, imported template), without hashing a password. */
 function demoDoc(): Database {
   const seed = JSON.parse(readFileSync(path.join(process.cwd(), "data", "demo-seed.json"), "utf8")) as SeedFile;
   const base = apiDoc();
@@ -101,7 +101,7 @@ function demoDoc(): Database {
   return importTemplate(created.doc, created.wishlist.id, seed);
 }
 
-test("aller-retour : chaque collection ressort à l'identique", async () => {
+test("round trip: each collection comes out identical", async () => {
   await withTempDataPath(async () => {
     for (const doc of [apiDoc(), edgeDoc(), demoDoc()]) {
       await replaceDocument(doc);

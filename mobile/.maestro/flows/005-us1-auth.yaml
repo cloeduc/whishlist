@@ -1,8 +1,8 @@
-# 005 US1 : connexion refusée sans dire quel champ est faux, connexion gardée après réouverture de l'app,
-# déconnexion, mot de passe oublié (même message pour une adresse connue ou non), création de compte,
-# et adresse déjà utilisée (pas de connexion). Voir specs/005-mobile-list-app/spec.md.
+# 005 US1: login refused without saying which field is wrong, login kept after reopening the app,
+# logout, forgotten password (same message for a known or unknown address), account creation,
+# and address already used (no login). See specs/005-mobile-list-app/spec.md.
 appId: app.ohyoushouldnt.mobile
-name: "005 US1 — Se connecter ou créer un compte"
+name: "005 US1 — Sign in or create an account"
 tags:
   - 005-us1
 ---
@@ -10,7 +10,7 @@ tags:
 - runScript: ../scripts/strings.generated.js
 - runScript: ../scripts/unique.js
 
-# Mauvais mot de passe : un seul message, qui ne dit pas lequel des deux est faux.
+# Wrong password: a single message, which does not say which of the two is wrong.
 - runFlow:
     file: ../subflows/submit-login.yaml
     env:
@@ -24,7 +24,7 @@ tags:
 - assertNotVisible:
     id: lists.screen
 
-# Connexion d'Alex, puis déconnexion.
+# Alex logs in, then logs out.
 - runFlow: ../subflows/launch-clean.yaml
 - runFlow:
     file: ../subflows/login.yaml
@@ -33,7 +33,7 @@ tags:
 - assertVisible:
     id: lists.card-demo-list
 
-# Réouverture de l'app : toujours connecté, sans ressaisie.
+# Reopening the app: still logged in, without typing again.
 - runFlow: ../subflows/relaunch.yaml
 - extendedWaitUntil:
     visible:
@@ -41,7 +41,7 @@ tags:
     timeout: 60000
 - runFlow: ../subflows/logout.yaml
 
-# Mot de passe oublié : même message pour une adresse inconnue et pour une adresse connue.
+# Forgotten password: same message for an unknown address and for a known address.
 - tapOn:
     id: login.forgot
 - tapOn:
@@ -79,13 +79,13 @@ tags:
       id: login.screen
     timeout: 10000
 
-# Nouveau compte : connecté, sans liste.
+# New account: logged in, no list.
 - runFlow: ../subflows/register.yaml
 - assertVisible:
     id: lists.empty
 - runFlow: ../subflows/logout.yaml
 
-# Adresse déjà utilisée : même message qu'une inscription, pas de connexion.
+# Address already used: same message as a sign-up, no login.
 - runFlow:
     file: ../subflows/submit-register.yaml
     env:

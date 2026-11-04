@@ -99,7 +99,7 @@ test("204: secure storage, SQLite and export files are emptied, signed out with 
   expect(cache.size).toBe(0);
 });
 
-// Dernier : le réseau reste coupé pour la suite du fichier.
+// Last: the network stays cut for the rest of the file.
 test("offline: no form, the offline message", async () => {
   fakeFetch({ "GET /me/deletion": () => json(200, preview) });
   watchNetwork();

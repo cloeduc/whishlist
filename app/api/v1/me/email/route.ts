@@ -5,7 +5,7 @@ import { cancelOwnEmailChange, requestOwnEmailChange } from "@/src/server/comman
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Demande de changement d'adresse : un lien part vers la nouvelle (010, US3). */
+/** Address change request: a link is sent to the new one (010, US3). */
 export const POST = withApi(async (api) => {
   const body = await readJsonBody(api.req);
   if (!body.ok) return apiError(body.error, api.locale, api.cors);
@@ -17,7 +17,7 @@ export const POST = withApi(async (api) => {
   return apiJson(result.me, 200, api.cors);
 });
 
-/** Annule le changement en attente. */
+/** Cancels the pending change. */
 export const DELETE = withApi(async (api) => {
   const result = await cancelOwnEmailChange(await commandContext(api));
   if (!result.ok) return apiError(result.error, api.locale, api.cors);

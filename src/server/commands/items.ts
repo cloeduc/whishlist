@@ -26,7 +26,7 @@ function blankUrl(value: string): string | null {
   return trimmed ? trimmed : null;
 }
 
-/** Image de l'idée : saisie, inchangée, ou cherchée sur la page du lien (appel réseau limité par `beforeFetch`). */
+/** Idea image: entered, unchanged, or looked up on the link's page (network call limited by `beforeFetch`). */
 async function resolveImageUrl(input: {
   url: string | null;
   manual: string | null;
@@ -47,7 +47,7 @@ function itemIn(doc: Database, wishlistId: string, itemId: string): Item | undef
 
 type Rule = (doc: Database, actorId: string) => { ok: true; doc: Database } | { ok: false; error: string };
 
-/** Applique des règles de membre dans une seule écriture et rend l'idée telle qu'enregistrée. */
+/** Applies member rules in a single write and returns the idea as stored. */
 async function writeItem(
   actorId: string,
   wishlistId: string,
@@ -62,7 +62,7 @@ async function writeItem(
   });
 }
 
-/** Enchaîne des règles sur une idée existante ; la première qui refuse annule tout. */
+/** Chains rules on an existing idea; the first one that refuses cancels everything. */
 async function mutateItem(
   ctx: CommandContext,
   wishlistId: string,
@@ -85,19 +85,19 @@ async function mutateItem(
 export type ItemFields = {
   wishlistId: string;
   itemId?: string;
-  /** Création : identifiant choisi par le client ; un renvoi rend l'idée existante. */
+  /** Creation: identifier chosen by the client; a resend returns the existing idea. */
   clientId?: string;
   name: string;
   typeId: string;
   personId: string;
   url: string;
   imageUrl: string;
-  /** Prix tel que saisi (« 18,50 »). */
+  /** Price as entered (« 18,50 »). */
   price: string;
   priority: string;
-  /** Absent : faux à la création, inchangé en modification. */
+  /** Missing: false on creation, unchanged on edit. */
   secondHandOk?: boolean;
-  /** Absent : aucune à la création, inchangée en modification. */
+  /** Missing: none on creation, unchanged on edit. */
   description?: string | null;
 };
 
@@ -114,7 +114,7 @@ export async function saveItem(
   if (price === "invalid") return { ok: false, error: "priceInvalid" };
   const doc = await readDocument();
   if (!findMembership(doc, input.wishlistId, actorId)) return { ok: false, error: "notMember" };
-  // Renvoi d'une création déjà reçue : rien à recalculer (ni image à chercher).
+  // Resend of a creation already received: nothing to recompute (no image to look up).
   const sent = clientId ? replayedItem(doc, input.wishlistId, clientId) : null;
   if (sent) return sent;
   const current = input.itemId ? itemIn(doc, input.wishlistId, input.itemId) : null;
@@ -146,7 +146,7 @@ export async function saveItem(
       const updated = updateItem(latest, { ...fields, itemId });
       return updated.ok ? { ...updated, itemId } : updated;
     }
-    // Vérifié de nouveau dans l'écriture : deux envois simultanés ne font qu'une idée.
+    // Checked again in the write: two simultaneous sends make only one idea.
     if (clientId) {
       const again = replayedItem(latest, input.wishlistId, clientId);
       if (again) {
@@ -160,7 +160,7 @@ export async function saveItem(
   return saved.ok ? { ...saved, replayed } : saved;
 }
 
-/** Idée déjà créée avec cet identifiant : la même liste → renvoi ; ailleurs → conflit ; sinon null. */
+/** Idea already created with this identifier: same list → resend; elsewhere → conflict; otherwise null. */
 function replayedItem(
   doc: Database,
   wishlistId: string,
@@ -182,7 +182,7 @@ export function setItemArchived(
   return patchItem(ctx, input);
 }
 
-/** Catégorie et/ou archivage en une seule écriture : un refus ne laisse rien d'enregistré. */
+/** Category and/or archiving in a single write: a refusal leaves nothing stored. */
 export function patchItem(
   ctx: CommandContext,
   input: { wishlistId: string; itemId: string; typeId?: string; archived?: boolean },
@@ -204,7 +204,7 @@ export type TransferFields = {
   personId: string;
 };
 
-/** Change une idée de liste. Renvoyé après réussite (file hors ligne) : rend l'idée déjà arrivée. */
+/** Moves an idea to another list. Resent after success (offline queue): returns the idea already moved. */
 export async function moveItem(ctx: CommandContext, input: TransferFields): Promise<CommandResult<{ item: Item }>> {
   const active = activeUser(ctx);
   if (!active.ok) return active;
@@ -226,7 +226,7 @@ export async function moveItem(ctx: CommandContext, input: TransferFields): Prom
   });
 }
 
-/** Copie une idée. `clientId` : comme à la création, un renvoi rend la copie déjà faite. */
+/** Copies an idea. `clientId`: as on creation, a resend returns the copy already made. */
 export async function copyItem(
   ctx: CommandContext,
   input: TransferFields & { clientId?: string },
@@ -258,7 +258,7 @@ export async function deleteItem(
   });
 }
 
-/** Annulation d'une réservation par un membre de la liste (principe III). */
+/** Cancellation of a reservation by a member of the list (principle III). */
 export async function cancelReservationAsMember(
   ctx: CommandContext,
   input: { wishlistId: string; reservationId: string },

@@ -23,7 +23,7 @@ export const POST = withApi(async (api) => {
     personId: optionalText(body.body.personId),
   });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);
-  // 200 : renvoi d'une création déjà reçue (même `id`), rien n'est créé.
+  // 200: replay of a creation already received (same `id`), nothing is created.
   return apiJson(result.list, result.replayed ? 200 : 201, api.cors);
 });
 

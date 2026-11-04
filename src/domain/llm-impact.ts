@@ -1,4 +1,4 @@
-/** Usage tokens renvoyé par le fournisseur LLM. */
+/** Token usage returned by the LLM provider. */
 export type LlmUsage = {
   promptTokens: number;
   completionTokens: number;
@@ -6,13 +6,13 @@ export type LlmUsage = {
 };
 
 /**
- * Ordres de grandeur pédagogiques (pas un ACV).
- * Hypothèses volontairement transparentes, pour un petit modèle type flash / mini.
+ * Illustrative orders of magnitude (not an LCA).
+ * Deliberately transparent assumptions, for a small flash / mini type model.
  */
 export const LLM_IMPACT = {
-  /** Grammes de CO₂e estimés pour 1 000 tokens. */
+  /** Estimated grams of CO₂e per 1,000 tokens. */
   co2GramsPer1kTokens: 0.5,
-  /** Grammes de CO₂e pour 1 g de bœuf (ordre de grandeur ACV). */
+  /** Grams of CO₂e per 1 g of beef (LCA order of magnitude). */
   co2GramsPerBeefGram: 27,
 } as const;
 

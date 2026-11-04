@@ -5,8 +5,8 @@ import { fonts, tokens } from "@/theme/tokens";
 type Size = keyof typeof tokens.fontSize;
 
 /**
- * Texte en Geist. Le poids passe par la famille (Geist 500 / 700), seule façon fiable
- * sur Android ; la taille suit le réglage du téléphone (FR-033).
+ * Text in Geist. The weight goes through the family (Geist 500 / 700), the only reliable way
+ * on Android; the size follows the phone setting (FR-033).
  */
 export function Text({
   size = "base",
@@ -23,7 +23,7 @@ export function Text({
         {
           fontFamily: fonts[weight],
           fontSize: tokens.fontSize[size],
-          // Interlignage du site (`leading-normal` ≈ 1,5 ; titres plus serrés).
+          // The site's line height (`leading-normal` ≈ 1.5; tighter for titles).
           lineHeight: Math.round(tokens.fontSize[size] * (size === "title" ? 1.2 : 1.45)),
           color,
           textDecorationLine: underline ? "underline" : "none",

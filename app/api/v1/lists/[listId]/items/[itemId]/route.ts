@@ -17,7 +17,7 @@ export const PUT = withApi<Params>(async (api, { listId, itemId }) => {
   return apiJson(toMemberItem(result.item, api.locale), 200, api.cors);
 });
 
-/** `{ archived?, typeId? }` : au moins un des deux, appliqués ensemble ou pas du tout. */
+/** `{ archived?, typeId? }`: at least one of the two, applied together or not at all. */
 export const PATCH = withApi<Params>(async (api, { listId, itemId }) => {
   const body = await readJsonBody(api.req);
   if (!body.ok) return apiError(body.error, api.locale, api.cors);

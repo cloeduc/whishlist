@@ -18,9 +18,9 @@ import { UpgradeRequired } from "@/features/account/UpgradeRequired";
 void SplashScreen.preventAutoHideAsync();
 
 /**
- * Racine : police, textes, session restaurée pendant que le cadeau s'affiche (SC-004),
- * puis les écrans. Chaque groupe de routes redirige selon l'état de la session :
- * (auth) sans connexion, change-password si le mot de passe doit changer (FR-005), (app) connecté.
+ * Root: font, texts, session restored while the gift is shown (SC-004),
+ * then the screens. Each route group redirects based on the session state:
+ * (auth) signed out, change-password if the password must change (FR-005), (app) signed in.
  */
 export default function RootLayout() {
   const fontsReady = useAppFonts();
@@ -34,7 +34,7 @@ export default function RootLayout() {
   }, []);
 
   const signedIn = session.status === "signedIn";
-  // À chaque connexion : la file gardée après un 401 part pour le même compte (T072).
+  // On each sign-in: the queue kept after a 401 is sent for the same account (T072).
   useEffect(() => {
     if (signedIn) void startOfflineEngine().then(syncNow);
   }, [signedIn]);

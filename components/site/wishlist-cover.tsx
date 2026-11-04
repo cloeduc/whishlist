@@ -2,7 +2,7 @@ import { GiftMark } from "@/components/site/gift-mark";
 import type { WishlistTheme } from "@/src/domain/theme";
 import { cn } from "@/lib/utils";
 
-/** Illustration wishlist : image custom ou cadeau SVG aux couleurs du thème. */
+/** Wishlist illustration: custom image or SVG gift in the theme colors. */
 export function WishlistCover({
   coverImageUrl,
   theme,
@@ -17,7 +17,7 @@ export function WishlistCover({
   size?: "xs" | "sm" | "md" | "lg";
   /** Cadre / ombre autour de l'illustration. */
   framed?: boolean;
-  /** Nom de la liste, lorsque l'illustration n'est pas purement décorative. */
+  /** List name, when the illustration is not purely decorative. */
   alt?: string;
 }) {
   const box =

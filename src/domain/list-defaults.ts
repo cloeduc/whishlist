@@ -1,4 +1,4 @@
-/** Nom par défaut d'une liste, numéroté pour rester unique chez un même compte. */
+/** Default name of a list, numbered to stay unique for a given account. */
 export function numberedTitle(base: string, existing: Iterable<string>): string {
   const taken = new Set<string>();
   for (const title of existing) taken.add(title.trim().toLocaleLowerCase());
@@ -9,7 +9,7 @@ export function numberedTitle(base: string, existing: Iterable<string>): string 
   }
 }
 
-/** Titres des listes dont ce compte est membre (propriétaire ou non), pour numéroter un nom par défaut. */
+/** Titles of the lists this account is a member of (owner or not), to number a default name. */
 export function memberListTitles(
   memberships: readonly { userId: string; wishlistId: string }[],
   wishlists: readonly { id: string; title: string }[],
@@ -25,9 +25,9 @@ export function memberListTitles(
 type Translate = (key: string, vars?: Record<string, string>) => string;
 
 /**
- * Valeurs prises par les champs laissés vides à la création d'une liste. Partagé par la page
- * (placeholders) et par la commande, pour que ce qui est affiché soit ce qui est créé.
- * Un nom affiché vide (possible pour un compte importé de l'ancien format) a ses propres libellés.
+ * Values taken by the fields left empty when a list is created. Shared by the page
+ * (placeholders) and by the command, so that what is shown is what is created.
+ * An empty display name (possible for an account imported from the old format) has its own labels.
  */
 export function listDefaults(
   displayName: string,

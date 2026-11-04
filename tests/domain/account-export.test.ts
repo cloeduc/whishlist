@@ -14,7 +14,7 @@ function exported(site = SITE) {
   return data;
 }
 
-test("en-tête du document et compte", () => {
+test("document header and account", () => {
   const data = exported();
   assert.equal(data.format, "ohyoushouldnt-export");
   assert.equal(data.version, 1);
@@ -28,7 +28,7 @@ test("en-tête du document et compte", () => {
   });
 });
 
-test("chaque liste dont elle est membre, avec son rôle et ses contenus par libellé", () => {
+test("each list the account is a member of, with its role and its contents by label", () => {
   const data = exported();
   assert.deepEqual(
     data.lists.map((list) => [list.title, list.role]),
@@ -67,18 +67,18 @@ test("chaque liste dont elle est membre, avec son rôle et ses contenus par libe
   assert.equal(data.lists[2]!.reservations[0]!.byMe, true);
 });
 
-test("l'adresse publique suit la langue demandée", () => {
+test("the public address follows the requested language", () => {
   const data = exported({ ...SITE, locale: "en" });
   assert.equal(data.lists[0]!.publicUrl, "https://ohyoushouldnt.example.test/en/l/read-solo");
 });
 
-test("myReservations : seulement ses réservations sur des listes dont elle n'est pas membre", () => {
+test("myReservations: only the account's reservations on lists it is not a member of", () => {
   assert.deepEqual(exported().myReservations, [
     { listTitle: "Liste de Camille", item: "Idée other", fromName: "Lou", note: "Surprise", createdAt: "2026-04-04T00:00:00.000Z" },
   ]);
 });
 
-test("subscriptions : seulement les listes suivies par ce compte, jamais qui suit ses propres listes", () => {
+test("subscriptions: only the lists this account follows, never who follows its own lists", () => {
   assert.deepEqual(exported().subscriptions, [
     {
       title: "Liste de Camille",
@@ -89,7 +89,7 @@ test("subscriptions : seulement les listes suivies par ce compte, jamais qui sui
   ]);
 });
 
-test("readPasswordProtected dit si un mot de passe de lecture existe", () => {
+test("readPasswordProtected tells whether a read password exists", () => {
   const data = exported();
   assert.deepEqual(
     data.lists.map((list) => list.readPasswordProtected),
@@ -97,7 +97,7 @@ test("readPasswordProtected dit si un mot de passe de lecture existe", () => {
   );
 });
 
-test("aucun secret ni donnée d'un autre compte dans le fichier", () => {
+test("no secret and no other account's data in the file", () => {
   const doc = accountDoc();
   const json = JSON.stringify(exportAccount(doc, "lou", SITE, NOW));
   const lou = doc.users.find((u) => u.id === "lou")!;
@@ -120,11 +120,11 @@ test("aucun secret ni donnée d'un autre compte dans le fichier", () => {
   assert.equal(json.includes('"camille"'), false, "id d'un autre compte");
 });
 
-test("un compte inexistant : null", () => {
+test("a missing account: null", () => {
   assert.equal(exportAccount(accountDoc(), "ghost", SITE, NOW), null);
 });
 
-test("nom du fichier d'export : daté, et dans la langue du compte", () => {
+test("export file name: dated, and in the account's language", () => {
   assert.equal(exportFileName("2026-10-28T10:00:00.000Z", "fr"), "ohyoushouldnt-donnees-2026-10-28.json");
   assert.equal(exportFileName("2026-10-28T10:00:00.000Z", "en"), "ohyoushouldnt-data-2026-10-28.json");
   assert.equal(isExportFileName("ohyoushouldnt-donnees-2026-10-28.json"), true);
@@ -132,7 +132,7 @@ test("nom du fichier d'export : daté, et dans la langue du compte", () => {
   assert.equal(isExportFileName("autre.json"), false);
 });
 
-test("un changement d'adresse en attente figure dans l'export (FR-020)", () => {
+test("a pending address change appears in the export (FR-020)", () => {
   const doc = accountDoc();
   doc.emailConfirmations.push({
     id: "ec",

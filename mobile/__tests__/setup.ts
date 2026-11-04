@@ -1,4 +1,4 @@
-// Modules natifs remplacés pour jest.
+// Native modules replaced for jest.
 jest.mock("@react-native-community/netinfo", () => require("@react-native-community/netinfo/jest/netinfo-mock.js"));
 
 jest.mock("expo-secure-store", () => {
@@ -26,7 +26,7 @@ jest.mock("expo-constants", () => ({
   default: { expoConfig: { extra: { apiUrl: "https://api.example.test" } } },
 }));
 
-// Cache de l'app : de faux fichiers, par nom (`__cache`).
+// App cache: fake files, by name (`__cache`).
 jest.mock("expo-file-system", () => {
   const cache = new Map<string, string>();
   class File {

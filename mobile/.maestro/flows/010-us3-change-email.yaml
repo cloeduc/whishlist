@@ -1,7 +1,7 @@
-# 010 US3 : changer son adresse depuis « Mon compte » : le changement reste en attente jusqu'au lien reçu
-# par la nouvelle adresse (MailDev), l'ancienne reçoit un avis, puis on se reconnecte avec la nouvelle.
+# 010 US3: change one's address from « Mon compte »: the change stays pending until the link received
+# by the new address (MailDev), the old one receives a notice, then we log in again with the new one.
 appId: app.ohyoushouldnt.mobile
-name: "010 US3 — Changer son adresse e-mail"
+name: "010 US3 — Change your email address"
 tags:
   - 010-us3
 ---
@@ -33,7 +33,7 @@ tags:
 - tapOn:
     id: account.email-submit
 
-# En attente : l'adresse de connexion ne change qu'à l'ouverture du lien.
+# Pending: the login address only changes when the link is opened.
 - extendedWaitUntil:
     visible:
       id: account.email-pending
@@ -50,17 +50,17 @@ tags:
       id: account.email-pending
     timeout: 15000
 
-# L'ancienne adresse a reçu l'avis (en plus du lien de l'inscription).
+# The old address received the notice (on top of the sign-up link).
 - runScript:
     file: ../scripts/maildev-count.js
     env:
       TO: ${output.oldEmail}
 - assertTrue: ${output.inboxCount == 2}
 
-# L'adresse affichée est la nouvelle (compte relu au retour au premier plan).
+# The address shown is the new one (account reloaded when back to the foreground).
 - assertVisible: .*${output.newEmail}.*
 
-# Reconnexion avec la nouvelle adresse.
+# Logging in again with the new address.
 - hideKeyboard:
     optional: true
 - scrollUntilVisible:

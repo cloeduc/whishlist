@@ -5,7 +5,7 @@ export type ProductHints = {
   price: string | null;
   imageUrl: string | null;
   typeId: string | null;
-  /** Quelques phrases sur le produit, pour pré-remplir la description de l'idée. */
+  /** A few sentences about the product, to prefill the idea's description. */
   description: string | null;
 };
 
@@ -74,10 +74,10 @@ function cleanProductName(name: string | null): string | null {
   return cleaned || null;
 }
 
-/** Longueur d'une description proposée : de quoi situer le produit, pas la fiche entière. */
+/** Length of a suggested description: enough to place the product, not the whole product page. */
 export const SUGGESTED_DESCRIPTION_MAX = 300;
 
-/** Texte brut sur une ligne (les descriptions JSON-LD contiennent souvent du HTML), coupé à un mot. */
+/** Plain text on one line (JSON-LD descriptions often contain HTML), cut at a word. */
 export function cleanDescription(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const text = decodeHtml(raw.replace(/<[^>]*>/g, " "))
@@ -110,7 +110,7 @@ function visibleEuroPrice(html: string): string | null {
   const zone = cartIdx >= 0 ? html.slice(Math.max(0, cartIdx - 3000), cartIdx) : html.slice(0, 80_000);
   const matches = [...zone.matchAll(/(\d{1,5}(?:[.,]\d{2})?)\s*€/g)];
   if (matches.length === 0) return null;
-  // Le prix produit est en général le dernier montant avant « Ajouter au panier ».
+  // The product price is usually the last amount before « Ajouter au panier ».
   const candidate = matches.at(-1)?.[1] ?? null;
   return normalizePrice(candidate);
 }
@@ -279,7 +279,7 @@ export function extractProductHints(html: string, pageUrl: string): ProductHints
     price,
     imageUrl,
     typeId: null,
-    // Pas la balise <meta name="description"> : c'est souvent le texte SEO du site, pas celui du produit.
+    // Not the <meta name="description"> tag: it is often the site's SEO text, not the product's.
     description: ld.description ?? cleanDescription(metaContent(html, "property", "og:description")),
   };
 }

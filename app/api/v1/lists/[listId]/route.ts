@@ -17,7 +17,7 @@ export const GET = withApi<Params>(async (api, { listId }) => {
 
 const THEME_KEYS = ["primary", "accent", "highlight", "background"] as const;
 
-/** Couleurs du thème présentes et de type texte ; leur format est vérifié par le domaine. */
+/** Theme colors present and of type string; their format is checked by the domain. */
 function themeFrom(value: unknown): Partial<WishlistTheme> | undefined {
   if (!isJsonObject(value)) return undefined;
   const theme: Partial<WishlistTheme> = {};
@@ -28,7 +28,7 @@ function themeFrom(value: unknown): Partial<WishlistTheme> | undefined {
   return theme;
 }
 
-/** Un champ absent reste tel quel. */
+/** A missing field stays as it is. */
 export const PATCH = withApi<Params>(async (api, { listId }) => {
   const body = await readJsonBody(api.req);
   if (!body.ok) return apiError(body.error, api.locale, api.cors);
@@ -45,7 +45,7 @@ export const PATCH = withApi<Params>(async (api, { listId }) => {
   return apiJson(result.list, 200, api.cors);
 });
 
-/** Créateur seulement. */
+/** Creator only. */
 export const DELETE = withApi<Params>(async (api, { listId }) => {
   const result = await deleteList(await commandContext(api), { wishlistId: listId });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);

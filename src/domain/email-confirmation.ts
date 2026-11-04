@@ -4,7 +4,7 @@ import { hashSecretToken, newId, newSecretToken } from "./tokens";
 import type { Database, EmailConfirmation, User } from "./types";
 import { normalizeEmail, setUserEmail, validateNewEmail } from "./users";
 
-/** Validité d'un lien de confirmation : 24 h (contre 1 h pour la réinitialisation, plus sensible). */
+/** Validity of a confirmation link: 24 h (versus 1 h for the password reset, more sensitive). */
 const TTL_MS = 24 * 60 * 60 * 1000;
 
 type Err = { ok: false; error: string };
@@ -13,12 +13,12 @@ export function isEmailVerified(user: User): boolean {
   return user.emailVerifiedAt !== null;
 }
 
-/** Le compte doit encore confirmer son adresse : la validation est exigée (envoi d'e-mail actif) et l'adresse n'est pas confirmée. */
+/** The account still has to confirm its address: confirmation is required (email sending on) and the address is not confirmed. */
 export function mustConfirmEmail(user: User, verificationRequired: boolean): boolean {
   return verificationRequired && !isEmailVerified(user);
 }
 
-/** `camille@example.test` → `ca•••@example.test` : assez pour reconnaître son adresse, pas pour la lire. */
+/** `camille@example.test` → `ca•••@example.test`: enough to recognize one's address, not to read it. */
 export function maskEmail(email: string): string {
   const at = email.lastIndexOf("@");
   if (at <= 0) return "•••";
@@ -27,7 +27,7 @@ export function maskEmail(email: string): string {
   return `${shown}•••${email.slice(at)}`;
 }
 
-/** Remplace la demande de ce motif du compte : seul le dernier lien envoyé reste valable. */
+/** Replaces the account's request for this purpose: only the last link sent stays valid. */
 function issue(
   doc: Database,
   input: { userId: string; purpose: EmailConfirmation["purpose"]; email: string; now: Date },
@@ -49,7 +49,7 @@ function issue(
   return { doc: next, token };
 }
 
-/** Lien de confirmation de l'adresse actuelle du compte. */
+/** Confirmation link for the account's current address. */
 export function createEmailVerification(
   doc: Database,
   input: { userId: string; now?: Date },
@@ -61,11 +61,11 @@ export function createEmailVerification(
 }
 
 /**
- * Demande de changement d'adresse (mot de passe actuel exigé). Avec `immediate` (pas d'envoi d'e-mail),
- * l'adresse change tout de suite ; sinon un lien part vers la nouvelle et rien ne change avant son ouverture.
- * Une adresse en attente n'est pas réservée : le premier compte qui confirme l'obtient.
- * L'adresse d'un autre compte reçoit la même réponse qu'une adresse libre (`taken` : aucun e-mail ne doit
- * partir), pour ne pas révéler les comptes, comme l'inscription ; la confirmation la refuserait.
+ * Address change request (current password required). With `immediate` (no email sending),
+ * the address changes right away; otherwise a link is sent to the new one and nothing changes until it is opened.
+ * A pending address is not reserved: the first account that confirms it gets it.
+ * Another account's address gets the same answer as a free address (`taken`: no email must
+ * be sent), so as not to reveal accounts, like sign-up; the confirmation would refuse it.
  */
 export async function requestEmailChange(
   doc: Database,
@@ -80,7 +80,7 @@ export async function requestEmailChange(
   }
   const checked = validateNewEmail(doc, user.id, input.email);
   const taken = !checked.ok && checked.error === "emailTaken";
-  // Sans envoi d'e-mail, l'adresse s'appliquerait tout de suite : celle d'un autre compte est refusée.
+  // Without email sending, the address would apply right away: another account's address is refused.
   if (!checked.ok && (!taken || input.immediate)) return checked;
   const email = checked.ok ? checked.email : normalizeEmail(input.email);
   if (email === user.email) return { ok: false, error: "emailUnchanged" };
@@ -95,7 +95,7 @@ export async function requestEmailChange(
   return { ok: true, doc: issued.doc, token: issued.token, email, previousEmail: user.email, taken };
 }
 
-/** Annule le changement en attente : son lien ne vaut plus rien. Sans demande, ne fait rien. */
+/** Cancels the pending change: its link is no longer valid. Without a request, does nothing. */
 export function cancelEmailChange(doc: Database, input: { userId: string }): Database {
   const next = clone(doc);
   next.emailConfirmations = next.emailConfirmations.filter(
@@ -104,7 +104,7 @@ export function cancelEmailChange(doc: Database, input: { userId: string }): Dat
   return next;
 }
 
-/** Nouvelle adresse en attente de confirmation (lien encore valable), ou null. */
+/** New address awaiting confirmation (link still valid), or null. */
 export function pendingEmailChange(doc: Database, userId: string, now = new Date()): string | null {
   const pending = doc.emailConfirmations.find(
     (entry) => entry.userId === userId && entry.purpose === "change" && Date.parse(entry.expiresAt) > now.getTime(),
@@ -113,8 +113,8 @@ export function pendingEmailChange(doc: Database, userId: string, now = new Date
 }
 
 /**
- * Demande valide pour ce jeton, sans rien écrire (page de confirmation avant le clic).
- * Une demande `verify` dont l'adresse n'est plus celle du compte ne vaut plus rien.
+ * Valid request for this token, without writing anything (confirmation page before the click).
+ * A `verify` request whose address is no longer the account's is no longer valid.
  */
 export function findEmailConfirmation(
   doc: Database,
@@ -137,9 +137,9 @@ export function findEmailConfirmation(
 }
 
 /**
- * Confirme le lien (usage unique). `verify` : l'adresse actuelle est vérifiée. `change` : la nouvelle adresse
- * devient l'adresse de connexion, vérifiée, si aucun autre compte ne l'a prise entre-temps ; sinon `emailTaken`,
- * et la demande, devenue impossible, disparaît (`doc` rendu avec le refus).
+ * Confirms the link (single use). `verify`: the current address is verified. `change`: the new address
+ * becomes the sign-in address, verified, if no other account took it in the meantime; otherwise `emailTaken`,
+ * and the request, now impossible, is removed (`doc` returned with the refusal).
  */
 export function confirmEmail(
   doc: Database,

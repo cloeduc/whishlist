@@ -37,7 +37,7 @@ export function listOffrir(doc: Database, wishlistId: string): OffrirRow[] {
     });
 }
 
-/** Cadeaux réservés en étant connecté (userId sur la réservation). */
+/** Gifts reserved while signed in (userId on the reservation). */
 export function listMyOffers(doc: Database, userId: string, locale = "fr-FR"): MyOfferRow[] {
   return doc.reservations
     .filter((r) => r.userId === userId)

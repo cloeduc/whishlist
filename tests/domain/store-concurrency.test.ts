@@ -10,7 +10,7 @@ import { apiDoc, ctx, withStore } from "./helpers/api-fixtures";
 const run = promisify(execFile);
 const noUnlock = () => false;
 
-test("100 réservations simultanées de la même idée : une seule réussit (SC-004)", async () => {
+test("100 simultaneous reservations of the same idea: only one succeeds (SC-004)", async () => {
   await withStore(apiDoc(), async () => {
     const results = await Promise.all(
       Array.from({ length: 100 }, (_, i) =>
@@ -23,10 +23,10 @@ test("100 réservations simultanées de la même idée : une seule réussit (SC-
   });
 });
 
-test("deux processus réservent la même idée en même temps : une seule réservation au total", async () => {
+test("two processes reserve the same idea at once: only one reservation in total", async () => {
   await withStore(apiDoc(), async () => {
     const dataPath = process.env.WISHLIST_DATA_PATH!;
-    // La base existe déjà (withStore) : les deux processus n'ont rien à importer.
+    // The database already exists (withStore): the two processes have nothing to import.
     closeStore(dataPath);
     const worker = path.join(import.meta.dirname, "helpers", "reserve-worker.ts");
     const repoRoot = path.resolve(import.meta.dirname, "..", "..");
@@ -42,7 +42,7 @@ test("deux processus réservent la même idée en même temps : une seule réser
   });
 });
 
-test("deux écritures concurrentes sur deux listes différentes sont toutes deux gardées", async () => {
+test("two concurrent writes on two different lists are both kept", async () => {
   const doc = apiDoc();
   doc.wishlists.push({ ...doc.wishlists[0], id: "w2", title: "Autre", readToken: "rt2", inviteToken: "it2" });
   await withStore(doc, async () => {

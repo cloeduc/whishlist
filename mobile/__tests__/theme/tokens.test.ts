@@ -3,9 +3,9 @@ import { join } from "node:path";
 
 import { tokens } from "@/theme/tokens";
 
-// Les valeurs de l'app doivent rester celles du site (FR-030a, R7).
+// The app's values must stay the site's (FR-030a, R7).
 const css = readFileSync(join(__dirname, "../../../app/globals.css"), "utf8");
-// Seul le thème clair (`:root`) compte : l'app n'a pas de mode sombre.
+// Only the light theme (`:root`) counts: the app has no dark mode.
 const root = css.slice(css.indexOf(":root"), css.indexOf(".dark {"));
 
 function cssVar(name: string, source = root): string {

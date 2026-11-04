@@ -35,7 +35,7 @@ function docWithSecondList() {
   return doc;
 }
 
-test("créer puis modifier une idée, avec les validations du domaine", async () => {
+test("create then edit an idea, with the domain validations", async () => {
   const doc = docWithSecondList();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -57,7 +57,7 @@ test("créer puis modifier une idée, avec les validations du domaine", async ()
   });
 });
 
-test("archiver, changer de catégorie, supprimer", async () => {
+test("archive, change category, delete", async () => {
   const doc = apiDoc();
   doc.types.push({ id: "t-b", wishlistId: "w", label: "Livres", sortOrder: 1 });
   const alex = ctx(doc.users[0]!);
@@ -73,7 +73,7 @@ test("archiver, changer de catégorie, supprimer", async () => {
   });
 });
 
-test("un non-membre ne change rien", async () => {
+test("a non-member changes nothing", async () => {
   const doc = apiDoc();
   const camille = ctx(doc.users[1]!);
   await withStore(doc, async () => {
@@ -92,13 +92,13 @@ test("un non-membre ne change rien", async () => {
   });
 });
 
-test("sans compte : unauthorized", async () => {
+test("without an account: unauthorized", async () => {
   await withStore(apiDoc(), async () => {
     assert.deepEqual(await saveItem(ctx(), fields), { ok: false, error: "unauthorized" });
   });
 });
 
-test("un membre annule une réservation de sa liste", async () => {
+test("a member cancels a reservation on their list", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const result = await cancelReservationAsMember(ctx(doc.users[0]!), { wishlistId: "w", reservationId: "r-taken" });
@@ -109,7 +109,7 @@ test("un membre annule une réservation de sa liste", async () => {
   });
 });
 
-test("préremplir : lien http(s) obligatoire, 30 appels par heure", async () => {
+test("prefill: http(s) link required, 30 calls per hour", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -122,7 +122,7 @@ test("préremplir : lien http(s) obligatoire, 30 appels par heure", async () => 
   });
 });
 
-test("catégorie et archivage s'appliquent ensemble ou pas du tout", async () => {
+test("category and archiving apply together or not at all", async () => {
   const doc = apiDoc();
   doc.types.push({ id: "t-b", wishlistId: "w", label: "Livres", sortOrder: 1 });
   const alex = ctx(doc.users[0]!);
@@ -135,11 +135,11 @@ test("catégorie et archivage s'appliquent ensemble ou pas du tout", async () =>
   });
 });
 
-test("enregistrer une idée avec un lien : 60 récupérations d'image par heure", async () => {
+test("saving an idea with a link: 60 image fetches per hour", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
-    // Lien local : la récupération est refusée par safeHttpGet, sans réseau, mais compte dans la limite.
+    // Local link: the fetch is refused by safeHttpGet, without network, but counts toward the limit.
     const withLink = { ...fields, url: "http://127.0.0.1/produit", imageUrl: "" };
     for (let i = 0; i < 60; i += 1) await saveItem(alex, withLink);
     await assert.rejects(saveItem(alex, withLink), isRateLimitError);

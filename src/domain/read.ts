@@ -13,7 +13,7 @@ export interface PublicItem {
   description: string | null;
   personLabel: string;
   reserved: boolean;
-  /** Réservation faite par le visiteur courant (compte ou cookie). */
+  /** Reservation made by the current visitor (account or cookie). */
   mine: boolean;
   reservationId: string | null;
   sortOrder: number;
@@ -65,7 +65,7 @@ export function toPublicItem(
   };
 }
 
-/** Ids de réservation « à moi » : compte connecté et/ou claims cookie. */
+/** Reservation ids that are « à moi »: signed-in account and/or claim cookies. */
 export function mineReservationIdsFor(
   doc: Database,
   wishlistId: string,
@@ -82,8 +82,8 @@ export function mineReservationIdsFor(
 }
 
 /**
- * Idées visibles publiquement : non réservées, ou réservées par le visiteur.
- * (Les réservations archivent l'idée — on les ré-inclut si mine.)
+ * Ideas visible publicly: not reserved, or reserved by the visitor.
+ * (Reservations archive the idea — we include them again if mine.)
  */
 export function listPublicVisibleItems(
   doc: Database,

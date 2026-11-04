@@ -1,6 +1,6 @@
 type FaqItem = { q: string; a: string };
 
-/** JSON-LD FAQPage à partir des questions déjà affichées. `<` est échappé. */
+/** FAQPage JSON-LD built from the questions already shown. `<` is escaped. */
 export function faqPageJsonLd(items: FaqItem[]): string {
   const mainEntity = items
     .filter((item) => item.q.trim() && item.a.trim())

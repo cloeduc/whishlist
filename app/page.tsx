@@ -106,10 +106,10 @@ export default async function HomePage({
         ) : (
           <div className="flex flex-col gap-3">
             {mine.map((list) => (
-              // `relative` + `after:inset-0` sur le lien du titre : toute la carte est cliquable,
-              // alors qu'il n'y a toujours qu'un seul lien à parcourir au clavier ; le contour de
-              // focus passe du titre à la carte. La couverture reste décorative (`alt` vide) : le
-              // lien porte déjà le titre, un lecteur d'écran ne l'entend qu'une fois.
+              // `relative` + `after:inset-0` on the title link: the whole card is clickable,
+              // while there is still only one link to tab through with the keyboard; the focus
+              // outline moves from the title to the card. The cover stays decorative (empty `alt`): the
+              // link already carries the title, so a screen reader hears it only once.
               <Card key={list.id} size="sm" className="relative">
                 <CardHeader className="flex flex-row items-center gap-3">
                   <WishlistCover

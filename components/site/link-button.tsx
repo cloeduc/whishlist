@@ -15,7 +15,7 @@ type LinkButtonProps = {
 } & VariantProps<typeof buttonVariants> &
   Pick<ComponentProps<"a">, "aria-current" | "aria-label">;
 
-/** Lien habillé comme un bouton, sans `role="button"`. */
+/** Link styled as a button, without `role="button"`. */
 export async function LinkButton({
   href,
   variant,

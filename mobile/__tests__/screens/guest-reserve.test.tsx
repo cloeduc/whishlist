@@ -37,7 +37,7 @@ async function fillAndSubmit() {
   await fireEvent.press(screen.getByTestId("guest-reserve.submit"));
 }
 
-test("réservation sans compte : nom et message envoyés, claim gardé, retour à la liste", async () => {
+test("reservation without an account: name and message sent, claim kept, back to the list", async () => {
   let body: Record<string, unknown> = {};
   fakeFetch({
     "GET /public/lists/rt": () => json(200, publicList()),
@@ -52,12 +52,12 @@ test("réservation sans compte : nom et message envoyés, claim gardé, retour �
   await screen.findByTestId("guest-reserve.screen");
   expect(body).toEqual({ itemId: "i1", fromName: "Sam", note: "Joyeux anniversaire" });
   expect(await claimsFor("rt")).toEqual(["claim-1"]);
-  // Retour à la vue de la liste déjà ouverte, sans l'empiler une seconde fois.
+  // Back to the view of the list already open, without pushing it a second time.
   expect(router.back).toHaveBeenCalled();
   expect(router.replace).not.toHaveBeenCalled();
 });
 
-test("formulaire ouvert directement (lien /l/<t>/reserver) : la vue de la liste le remplace", async () => {
+test("form opened directly (/l/<t>/reserver link): the list view replaces it", async () => {
   jest.mocked(router.canGoBack).mockReturnValue(false);
   fakeFetch({
     "GET /public/lists/rt": () => json(200, publicList()),
@@ -68,7 +68,7 @@ test("formulaire ouvert directement (lien /l/<t>/reserver) : la vue de la liste 
   await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/guest/rt"));
 });
 
-test("connectée, sans être membre (US4-2) : la réservation part avec la session, liée au compte", async () => {
+test("signed in, not a member (US4-2): the reservation is sent with the session, linked to the account", async () => {
   await signIn({ token: "secret-token", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
   let authorization: string | null = null;
   fakeFetch({
@@ -85,7 +85,7 @@ test("connectée, sans être membre (US4-2) : la réservation part avec la sessi
   expect(router.back).toHaveBeenCalled();
 });
 
-test("idée prise entre-temps : le refus du serveur, et la liste relue ne la propose plus", async () => {
+test("idea taken in the meantime: the server's refusal, and the reloaded list no longer offers it", async () => {
   let taken = false;
   const { calls } = fakeFetch({
     "GET /public/lists/rt": () => json(200, taken ? publicList([]) : publicList()),
@@ -101,7 +101,7 @@ test("idée prise entre-temps : le refus du serveur, et la liste relue ne la pro
   expect(router.replace).not.toHaveBeenCalled();
 });
 
-test("serveur injoignable : l'erreur habituelle, et rien n'est mis en file d'attente", async () => {
+test("server unreachable: the usual error, and nothing is queued", async () => {
   fakeFetch({
     "GET /public/lists/rt": () => json(200, publicList()),
     "POST /public/lists/rt/reservations": () => {
@@ -115,7 +115,7 @@ test("serveur injoignable : l'erreur habituelle, et rien n'est mis en file d'att
   expect(router.replace).not.toHaveBeenCalled();
 });
 
-test("hors ligne : « Confirmer la réservation » est désactivé, avec la raison", async () => {
+test("offline: « Confirmer la réservation » is disabled, with the reason", async () => {
   fakeFetch({ "GET /public/lists/rt": () => json(200, publicList()) });
   watchNetwork();
   const listener = jest.mocked(NetInfo.addEventListener).mock.calls[0][0];

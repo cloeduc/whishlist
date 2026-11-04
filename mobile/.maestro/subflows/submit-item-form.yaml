@@ -1,4 +1,4 @@
-# Envoie le formulaire d'idée (ajout ou modification). N'attend aucun écran (c'est à l'appelant de vérifier).
+# Submits the idea form (add or edit). Waits for no screen (the caller checks).
 appId: app.ohyoushouldnt.mobile
 ---
 - hideKeyboard:

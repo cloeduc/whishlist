@@ -1,7 +1,7 @@
 import { setPendingLink } from "@/links/pending";
 import { appPathForUrl } from "@/links/routes";
 
-/** Lien d'un partage reçu (`ohyoushouldnt://expo-sharing`) ; un chemin relatif n'en est pas un. */
+/** Link of a received share (`ohyoushouldnt://expo-sharing`); a relative path is not one. */
 function isShare(path: string): boolean {
   try {
     return new URL(path).hostname === "expo-sharing";
@@ -11,12 +11,12 @@ function isShare(path: string): boolean {
 }
 
 /**
- * Adresse reçue par l'app (feature 011) → écran : `/reinitialiser/<jeton>` du site devient
- * `/links/reset-password/<jeton>`. Une adresse inconnue ouvre l'accueil. Ne lève jamais (une erreur ici
- * fait planter l'app) et n'écrit pas l'adresse, qui porte un jeton, dans la console.
+ * Address received by the app (feature 011) → screen: the site's `/reinitialiser/<jeton>` becomes
+ * `/links/reset-password/<jeton>`. An unknown address opens the home screen. Never throws (an error here
+ * crashes the app) and does not write the address, which carries a token, to the console.
  *
- * Un partage reçu d'une autre app (expo-sharing : `…://expo-sharing`) ouvre « Ajouter à une liste ». Il est gardé
- * comme lien en attente : sans session, la connexion y ramène ensuite.
+ * A share received from another app (expo-sharing: `…://expo-sharing`) opens « Ajouter à une liste ». It is kept
+ * as a pending link: without a session, sign-in leads back to it afterwards.
  */
 export function redirectSystemPath({ path }: { path: string; initial: boolean }): string {
   try {

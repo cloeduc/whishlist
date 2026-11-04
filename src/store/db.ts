@@ -6,7 +6,7 @@ import { readAll } from "./rows";
 
 export { closeStore, dataFilePath, databaseFilePath, openStore } from "./connection";
 
-/** Lecture complète, instantané cohérent. Ordre des tableaux = ordre d'insertion. */
+/** Full read, consistent snapshot. Array order = insertion order. */
 export async function readDocument(): Promise<Database> {
   const store = openStore();
   return readTransaction(store, readAll);
@@ -16,9 +16,9 @@ export async function readDocument(): Promise<Database> {
 export const getDocument = cache(readDocument);
 
 /**
- * Une modification à la fois par base. `mutate` peut modifier `doc` en place ou en rendre un autre ;
- * seules les lignes ajoutées, modifiées ou retirées sont écrites. Tout ou rien : si `mutate` lève
- * ou si une contrainte échoue, rien n'est écrit et l'erreur remonte.
+ * One change at a time per database. `mutate` can change `doc` in place or return another one;
+ * only the added, changed or removed rows are written. All or nothing: if `mutate` throws
+ * or a constraint fails, nothing is written and the error propagates.
  */
 export async function updateDocument<T>(
   mutate: (doc: Database) => { doc: Database; result: T } | Promise<{ doc: Database; result: T }>,
@@ -33,7 +33,7 @@ export async function updateDocument<T>(
   });
 }
 
-/** Remplace tout le contenu en une transaction (démo, remise à zéro de l'e2e, tests). */
+/** Replaces the whole content in one transaction (demo, e2e reset, tests). */
 export async function replaceDocument(doc: Database): Promise<void> {
   const store = openStore();
   await writeTransaction(store, async (db) => {

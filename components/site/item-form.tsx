@@ -121,7 +121,7 @@ export function ItemForm({
         price: result.price || prev.price,
         imageUrl: result.imageUrl || prev.imageUrl,
         typeId: result.typeId || prev.typeId,
-        // Ce que la personne a écrit (pourquoi elle le veut…) n'est jamais remplacé.
+        // What the person wrote (why they want it…) is never replaced.
         description: prev.description.trim() ? prev.description : result.description || prev.description,
       }));
       if (result.imageUrl) setPreviewImage(result.imageUrl);
@@ -133,11 +133,11 @@ export function ItemForm({
   const errorCode = state?.error ?? enrichError;
   const error = errorCode ? t(`errors:${errorCode}`, { defaultValue: errorCode }) : null;
 
-  // Ce formulaire sert en pleine page (~700 px) et dans le dialogue « Modifier l'idée », que
-  // DialogContent plafonne à `sm:max-w-lg` (~455 px de grille utile). Les points de rupture sont
-  // donc ceux du conteneur `FieldGroup` (`@…/field-group:`) et non ceux de la fenêtre : un `sm:`
-  // classique se déclenche sur la largeur de l'écran et passait la grille en 4 colonnes dans le
-  // dialogue aussi, où les listes déroulantes tombaient à 61 px et 44 px.
+  // This form is used full page (~700 px) and in the « Modifier l'idée » dialog, which
+  // DialogContent caps at `sm:max-w-lg` (~455 px of usable grid). The breakpoints are
+  // therefore those of the `FieldGroup` container (`@…/field-group:`), not the window's: a plain
+  // `sm:` fires on the screen width and switched the grid to 4 columns in the
+  // dialog too, where the dropdowns shrank to 61 px and 44 px.
   return (
     <form action={formAction} className="flex flex-col gap-3">
       <FieldGroup className="gap-3">
@@ -286,10 +286,10 @@ export function ItemForm({
               value={draft.priority}
               onChange={(next) => setField("priority", next)}
             />
-            {/* La piste `auto` se dimensionne sur son contenu le plus large : sans `contain`, cette
-                phrase passait devant les étoiles et prenait 379 px des 700 px de la grille.
-                `contain-inline-size` la retire de ce calcul ; elle occupe ensuite la largeur de la
-                colonne (`*:w-full` de `Field`). */}
+            {/* The `auto` track sizes itself to its widest content: without `contain`, this
+                sentence took over from the stars and used 379 px of the grid's 700 px.
+                `contain-inline-size` removes it from that calculation; it then fills the width of the
+                column (`*:w-full` from `Field`). */}
             <FieldDescription className="contain-inline-size">{t("form.priorityHint")}</FieldDescription>
           </Field>
         </div>

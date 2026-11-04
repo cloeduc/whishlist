@@ -2,8 +2,8 @@ import { api, done, ok } from "@/api/client";
 
 import { refreshList } from "./store";
 
-// Réglages de liste et annulation de réservation : appels directs, indisponibles hors ligne (FR-029b).
-// Après chaque succès, la copie de la liste est rechargée.
+// List settings and reservation cancelling: direct calls, unavailable offline (FR-029b).
+// After each success, the copy of the list is reloaded.
 
 export type LabelKind = "types" | "people";
 
@@ -37,7 +37,7 @@ export async function reorderTypes(listId: string, typeIds: string[]): Promise<v
   await refreshList(listId);
 }
 
-/** Annuler une réservation est une action de membre (constitution, principe III). */
+/** Cancelling a reservation is a member action (constitution, principle III). */
 export async function cancelReservation(listId: string, reservationId: string): Promise<void> {
   await done(api.DELETE("/lists/{listId}/reservations/{reservationId}", { params: { path: { listId, reservationId } } }));
   await refreshList(listId);

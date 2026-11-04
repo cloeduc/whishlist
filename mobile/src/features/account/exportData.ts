@@ -5,7 +5,7 @@ import { exportFileName, isExportFileName } from "../../../../src/domain/export-
 import { api, ok } from "@/api/client";
 import { currentLocale } from "@/i18n";
 
-/** Efface du cache les fichiers d'export (ils contiennent les données du compte). */
+/** Deletes the export files from the cache (they contain the account data). */
 export function removeExportFiles(): void {
   for (const entry of Paths.cache.list()) {
     if (entry instanceof File && isExportFileName(entry.name)) entry.delete();
@@ -13,8 +13,8 @@ export function removeExportFiles(): void {
 }
 
 /**
- * Télécharge ses données (`GET /me/export`), les écrit dans le cache de l'app, puis ouvre la feuille
- * de partage (enregistrer dans Fichiers, envoyer…). Le fichier d'une demande précédente est effacé.
+ * Downloads one's data (`GET /me/export`), writes it to the app cache, then opens the share
+ * sheet (save to Files, send…). The file from a previous request is deleted.
  */
 export async function exportData(dialogTitle: string): Promise<void> {
   const data = await ok(api.GET("/me/export"));

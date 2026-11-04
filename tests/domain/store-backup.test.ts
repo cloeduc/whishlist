@@ -12,7 +12,7 @@ import { apiDoc, withStore } from "./helpers/api-fixtures";
 const run = promisify(execFile);
 const repoRoot = path.resolve(import.meta.dirname, "..", "..");
 
-test("sauvegarde à chaud pendant des écritures : copie intègre et cohérente", async () => {
+test("hot backup during writes: intact and consistent copy", async () => {
   await withStore(apiDoc(), async () => {
     const dataPath = process.env.WISHLIST_DATA_PATH!;
     const destination = path.join(path.dirname(dataPath), "backup.db");
@@ -25,7 +25,7 @@ test("sauvegarde à chaud pendant des écritures : copie intègre et cohérente"
           return { doc, result: null };
         });
         written++;
-        // Rend la main à la boucle d'événements, sinon la fin du processus de sauvegarde n'est jamais lue.
+        // Yields to the event loop, otherwise the end of the backup process is never read.
         await new Promise((resolve) => setImmediate(resolve));
       }
     })();
@@ -37,7 +37,7 @@ test("sauvegarde à chaud pendant des écritures : copie intègre et cohérente"
     const during = written - before;
     writing = false;
     await writes;
-    assert.match(stdout, /backup\.db \(\d+ octets\)/);
+    assert.match(stdout, /backup\.db \(\d+ bytes\)/);
     assert.ok(during > 0, "aucune écriture pendant la sauvegarde");
 
     const copy = new Database(destination, { readonly: true });

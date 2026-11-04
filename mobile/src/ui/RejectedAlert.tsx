@@ -7,8 +7,8 @@ import { Alert } from "./Alert";
 import { Button } from "./Button";
 
 /**
- * Changement refusé par le serveur : alerte rouge avec la raison traduite,
- * « Corriger » (ouvre le formulaire) et « Abandonner » (FR-029a).
+ * Change rejected by the server: red alert with the translated reason,
+ * « Corriger » (opens the form) and « Abandonner » (FR-029a).
  */
 export function RejectedAlert({ seq, errorCode, onFix }: { seq: number; errorCode: string; onFix?: () => void }) {
   const { t } = useTranslation("mobile");

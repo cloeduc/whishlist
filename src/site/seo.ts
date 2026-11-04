@@ -3,12 +3,12 @@ import { originFromEnv } from "@/src/auth/origin";
 import { getLocale } from "@/src/i18n/server";
 import { internalPath, withLocale } from "@/src/i18n/locale-path";
 
-/** Ancien nom d'hôte, encore servi. Les liens publics doivent viser le domaine actuel. */
+/** Old host name, still served. Public links must target the current domain. */
 const LEGACY_ORIGIN = "https://wishlist.mesdamesduc.fr";
 const LEGACY_HOST = "wishlist.mesdamesduc.fr";
 export const PUBLIC_ORIGIN = "https://ohyoushouldnt.app";
 
-/** Remplace l'ancienne origine configurée. Une autre origine explicite est conservée. */
+/** Replaces the old configured origin. Another explicit origin is kept. */
 export function preferredOrigin(origin: string | null): string | null {
   if (origin === LEGACY_ORIGIN) return PUBLIC_ORIGIN;
   return origin;
@@ -19,8 +19,8 @@ export function siteOrigin(): string {
 }
 
 /**
- * 301 vers le domaine public si la requête arrive sur l'ancien hôte.
- * La cible est fixe : le chemin est recopié, pas l'en-tête Host.
+ * 301 to the public domain if the request arrives on the old host.
+ * The target is fixed: the path is copied, not the Host header.
  */
 export function legacyHostRedirect(hostHeader: string | null, pathname: string, search: string): URL | null {
   const host = hostHeader?.split(",")[0]?.trim().toLowerCase().replace(/:\d+$/, "") ?? "";
@@ -33,7 +33,7 @@ export function legacyHostRedirect(hostHeader: string | null, pathname: string, 
   return url;
 }
 
-/** Pages publiques. Le canonique et hreflang suivent l'adresse de la langue. */
+/** Public pages. The canonical and hreflang follow the language's address. */
 export async function publicPageMetadata(input: {
   title: string;
   description: string;

@@ -1,20 +1,20 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 
-// Mêmes règles que le site : couleurs par défaut, valeurs invalides ignorées, rouge assombri pour le texte blanc.
+// Same rules as the site: default colors, invalid values ignored, red darkened for white text.
 import { darkenForWhiteText, resolveTheme, type WishlistTheme } from "../../../src/domain/theme";
 import { tokens } from "./tokens";
 
-/** Couleurs utilisées par les composants ; l'équivalent des variables CSS du site. */
+/** Colors used by the components; the equivalent of the site's CSS variables. */
 export type Palette = {
-  /** `--main` : bouton principal, onglet actif, badge par défaut. */
+  /** `--main`: primary button, active tab, default badge. */
   main: string;
-  /** `--highlight` : étoiles, badge jaune, ruban. */
+  /** `--highlight`: stars, yellow badge, ribbon. */
   highlight: string;
   /** `--destructive`. */
   destructive: string;
   /** `--background`. */
   background: string;
-  /** Couleurs du cadeau. */
+  /** Gift colors. */
   gift: { primary: string; accent: string; highlight: string };
 };
 
@@ -26,7 +26,7 @@ const sitePalette: Palette = {
   gift: { primary: tokens.colors.giftBlue, accent: tokens.colors.giftRed, highlight: tokens.colors.giftYellow },
 };
 
-/** Comme `themeToCssVars` du site : le thème d'une liste remplace bleu, rouge, jaune et fond. */
+/** Like the site's `themeToCssVars`: a list's theme replaces blue, red, yellow and background. */
 export function paletteFor(theme: Partial<WishlistTheme> | null | undefined): Palette {
   const resolved = resolveTheme(theme);
   return {
@@ -40,7 +40,7 @@ export function paletteFor(theme: Partial<WishlistTheme> | null | undefined): Pa
 
 const PaletteContext = createContext<Palette>(sitePalette);
 
-/** Équivalent de `WishlistThemeScope` : les écrans d'une liste prennent ses couleurs (FR-031). */
+/** Equivalent of `WishlistThemeScope`: the screens of a list take its colors (FR-031). */
 export function ListThemeProvider({
   theme,
   children,

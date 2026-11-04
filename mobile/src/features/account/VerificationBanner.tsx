@@ -11,15 +11,15 @@ import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import { NetworkNote } from "@/ui/NetworkNote";
 
-/** Vrai si le serveur exige la validation et que l'adresse du compte n'est pas encore confirmée (010). */
+/** True if the server requires verification and the account address is not confirmed yet (010). */
 export function useEmailUnverified(): boolean {
   const session = useSession();
   return session.status === "signedIn" && session.user?.emailVerified === false;
 }
 
 /**
- * Rappel de confirmer son adresse, comme le bandeau du site, avec « Renvoyer le lien » (US2) ;
- * il disparaît à la relecture du compte.
+ * Reminder to confirm one's address, like the site banner, with « Renvoyer le lien » (US2);
+ * it disappears when the account is read again.
  */
 export function VerificationBanner() {
   const { t } = useTranslation("auth");

@@ -18,9 +18,9 @@ type Outcome =
   | { status: "failed"; message: string; retry: boolean };
 
 /**
- * Lien de confirmation d'adresse ouvert dans l'app (011, R6) : confirmé dès l'ouverture, sans bouton.
- * Le site garde son bouton parce que les antivirus de messagerie ouvrent les liens web ; ils n'ouvrent pas l'app.
- * L'adresse n'est jamais affichée : le lien peut être celui d'un autre compte.
+ * Address confirmation link opened in the app (011, R6): confirmed on open, without a button.
+ * The site keeps its button because email antivirus tools open web links; they do not open the app.
+ * The address is never shown: the link may belong to another account.
  */
 export default function ConfirmEmailLink() {
   const { t } = useTranslation(["auth", "mobile"]);
@@ -35,7 +35,7 @@ export default function ConfirmEmailLink() {
     try {
       const answer = await ok(api.POST("/auth/email-confirmation", { body: { token, suite: suite || undefined } }));
       setOutcome({ status: "done", ...answer });
-      // Le bandeau « confirmez votre adresse » et « Mon compte » suivent le compte relu.
+      // The « confirmez votre adresse » banner and « Mon compte » follow the reloaded account.
       await refreshMe().catch(() => undefined);
     } catch (error) {
       setOutcome({ status: "failed", message: errorText(error), retry: error instanceof NetworkError });
@@ -43,7 +43,7 @@ export default function ConfirmEmailLink() {
   }, [token, suite]);
 
   useEffect(() => {
-    // Une seule tentative à l'ouverture : un second envoi du même jeton serait refusé (déjà utilisé).
+    // A single attempt on open: sending the same token a second time would be refused (already used).
     if (started.current) return;
     started.current = true;
     void confirm();
@@ -66,7 +66,7 @@ export default function ConfirmEmailLink() {
           {outcome.retry ? (
             <Button testID="confirm-email.retry" title={t("mobile:retry")} variant="neutral" onPress={() => void confirm()} />
           ) : null}
-          {/* Comme la page du site : sans session, comment redemander un lien. */}
+          {/* As on the site page: without a session, how to ask for a new link. */}
           {!signedIn && !outcome.retry ? <Text testID="confirm-email.login-to-resend">{t("auth:confirmEmail.loginToResend")}</Text> : null}
           <VerificationBanner />
         </>
@@ -79,8 +79,8 @@ export default function ConfirmEmailLink() {
 }
 
 /**
- * Suite proposée, comme la page du site : l'invitation en cours, ses listes, « Mon compte » après un changement,
- * ou la connexion.
+ * Suggested next step, as on the site page: the pending invitation, its lists, « Mon compte » after a change,
+ * or sign-in.
  */
 function nextStep(
   outcome: Outcome,
@@ -88,7 +88,7 @@ function nextStep(
   t: (key: string) => string,
 ): { href: Href; label: string } | null {
   if (outcome.status === "pending" || (outcome.status === "failed" && outcome.retry)) return null;
-  // Inscription depuis une invitation : on la reprend, comme la page du site (010, US1-6).
+  // Sign-up from an invitation: take it up again, as on the site page (010, US1-6).
   const invite = outcome.status === "done" && outcome.suite?.startsWith("/inviter/") ? appPathForUrl(outcome.suite) : null;
   if (invite) return { href: invite as Href, label: t("auth:confirmEmail.resumeInvite") };
   if (outcome.status === "done" && outcome.purpose === "change" && outcome.ownAccount && signedIn) {

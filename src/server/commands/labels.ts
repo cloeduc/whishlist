@@ -50,11 +50,11 @@ function labelViewFor(doc: Database, input: LabelInput, id: string): LabelView |
 }
 
 /**
- * Ajouter, renommer ou retirer une catégorie ou un « qui ». Rend le libellé enregistré (sauf retrait).
+ * Add, rename or remove a category or a « qui ». Returns the stored label (except on removal).
  *
- * À l'ajout, une saisie séparée par des virgules crée plusieurs entrées (`splitLabels`) : tout
- * passe dans la même écriture, donc un refus sur l'une n'en enregistre aucune. `label` reste la
- * première pour les appelants qui n'en attendent qu'une ; `labels` les porte toutes.
+ * On add, an entry separated by commas creates several entries (`splitLabels`): everything
+ * goes in the same write, so a refusal on one stores none. `label` stays the
+ * first one for callers that expect only one; `labels` carries them all.
  */
 export async function manageLabel(
   ctx: CommandContext,
@@ -71,8 +71,8 @@ export async function manageLabel(
       return { doc: saved.doc, result: { ok: true, label: view, labels: view ? [view] : [] } };
     }
 
-    // Rien d'exploitable (vide, ou seulement des séparateurs) : on laisse le domaine rendre son
-    // erreur habituelle avec un libellé vide — surtout pas la saisie brute, « , , » passerait.
+    // Nothing usable (empty, or only separators): let the domain return its
+    // usual error with an empty label — above all not the raw entry, « , , » would pass.
     const parts = splitLabels(input.label ?? "");
     const labels = parts.length > 0 ? parts : [""];
     let current = doc;

@@ -6,7 +6,7 @@ export const localeCookie = "NEXT_LOCALE";
 export const namespaces = ["common", "auth", "home", "list", "public", "errors", "mail", "content", "mobile"] as const;
 export type Namespace = (typeof namespaces)[number];
 
-/** Locale BCP 47 pour Intl (prix, dates). */
+/** BCP 47 locale for Intl (prices, dates). */
 export function intlLocale(locale: Locale): string {
   return locale === "en" ? "en-US" : "fr-FR";
 }

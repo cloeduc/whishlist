@@ -1,4 +1,4 @@
-# Depuis « Mes listes » : Mon compte → Se déconnecter ; attend l'écran de connexion.
+# From « Mes listes »: « Mon compte » → « Se déconnecter »; waits for the login screen.
 appId: app.ohyoushouldnt.mobile
 ---
 - tapOn:

@@ -27,7 +27,7 @@ export default async function NewListPage({
   if (!user) redirect(withLocale(locale, "/connexion?next=/listes/new"));
   if (user.mustChangePassword) redirect(withLocale(locale, "/compte"));
 
-  // Noms suggérés, calculés comme côté serveur : le placeholder montre ce qu'on obtient à vide.
+  // Suggested names, computed as on the server: the placeholder shows what an empty field gives.
   const defaults = listDefaults(user.displayName, t);
   const doc = await getDocument();
   const suggestedTitle = numberedTitle(defaults.titleBase, memberListTitles(doc.memberships, doc.wishlists, user.id));

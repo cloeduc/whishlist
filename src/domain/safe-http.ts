@@ -16,7 +16,7 @@ export type DnsLookup = (
   options: { all: true },
 ) => Promise<LookupAddress[]>;
 
-/** IPv4 / IPv6 privés, loopback, link-local, CGNAT, documentation — SSRF. */
+/** Private IPv4 / IPv6, loopback, link-local, CGNAT, documentation — SSRF. */
 export function isBlockedIp(ip: string): boolean {
   const normalized = ip.trim().toLowerCase();
   if (!normalized) return true;
@@ -91,8 +91,8 @@ function isBlockedHostname(hostname: string): boolean {
 }
 
 /**
- * Vérifie schéma/port/host + résolution DNS publique.
- * À rappeler sur chaque hop de redirect (anti DNS rebinding / bounce privé).
+ * Checks scheme/port/host + public DNS resolution.
+ * To call again on each redirect hop (anti DNS rebinding / private bounce).
  */
 export async function assertSafeFetchUrl(
   raw: string,

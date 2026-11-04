@@ -1,4 +1,4 @@
-/** Liste publique (vue invité, 011) : deux catégories, une personne, des idées libres par défaut. */
+/** Public list (guest view, 011): two categories, one person, ideas free by default. */
 export const publicItem = (id: string, typeId: string, extra: object = {}) => ({
   id,
   name: `Idée ${id}`,

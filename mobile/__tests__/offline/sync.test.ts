@@ -5,8 +5,8 @@ import { retryDelay, sendAndWait, setTransport, stopSync, syncNow } from "@/offl
 import { freshDb } from "../helpers/memory-db";
 
 /**
- * Faux serveur : garde les idées créées et reconnaît un renvoi par l'`id` (contrat api-v1-additions).
- * `failNext` simule une coupure avant l'arrivée ; `loseNextResponse`, une réponse perdue après l'enregistrement.
+ * Fake server: keeps the created ideas and recognizes a resend by its `id` (api-v1-additions contract).
+ * `failNext` simulates a cut before arrival; `loseNextResponse`, a response lost after saving.
  */
 class FakeServer {
   items = new Map<string, string>();
@@ -138,7 +138,7 @@ test("sendAndWait tells what happened to the change", async () => {
 });
 
 test("SC-008: 20 changes with random drops all arrive, without duplicates", async () => {
-  // Graine fixe : le scénario est le même à chaque exécution.
+  // Fixed seed: the scenario is the same on every run.
   let seed = 42;
   const random = () => {
     seed = (seed * 1103515245 + 12345) % 2 ** 31;

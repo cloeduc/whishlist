@@ -36,7 +36,7 @@ function ready() {
   return person.doc;
 }
 
-test("validation idée et réservation qui bloque la suppression", () => {
+test("idea validation and a reservation that blocks deletion", () => {
   const doc = ready();
   const nameless = createItem(doc, {
     wishlistId: "w",
@@ -118,7 +118,7 @@ test("validation idée et réservation qui bloque la suppression", () => {
   assert.equal(cancelled.doc.items.find((item) => item.id === "item")?.archived, false);
 });
 
-test("changement de catégorie d'une idée", () => {
+test("changing an idea's category", () => {
   let doc = ready();
   const other = addType(doc, { wishlistId: "w", actorId: "u", label: "Livres", id: "livres" });
   assert.equal(other.ok, true);
@@ -152,7 +152,7 @@ test("changement de catégorie d'une idée", () => {
   assert.equal(bad.ok, false);
 });
 
-test("archivage d'une idée", () => {
+test("archiving an idea", () => {
   const doc = ready();
   const created = createItem(doc, {
     wishlistId: "w",
@@ -185,7 +185,7 @@ test("archivage d'une idée", () => {
   assert.equal(restored.doc.items.find((item) => item.id === "item")?.archived, false);
 });
 
-test("retirer un type (bloqué si utilisé)", () => {
+test("removing a type (blocked if used)", () => {
   let doc = ready();
   const extra = addType(doc, { wishlistId: "w", actorId: "u", label: "Tech", id: "tech" });
   assert.equal(extra.ok, true);
@@ -214,7 +214,7 @@ test("retirer un type (bloqué si utilisé)", () => {
   assert.equal(removed.doc.types.some((type) => type.id === "tech"), false);
 });
 
-test("renommer et retirer un qui (bloqué si utilisé)", () => {
+test("renaming and removing a person (blocked if used)", () => {
   let doc = ready();
   const renamed = renamePerson(doc, {
     wishlistId: "w",

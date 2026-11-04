@@ -23,8 +23,8 @@ import { Separator } from "@/ui/Separator";
 import { StarPicker, Stars } from "@/ui/Stars";
 import { Text } from "@/ui/Text";
 
-// Écran de développement (T032) : tous les composants, à comparer à ceux du site.
-// Textes en dur : il n'existe que dans le client de développement, jamais dans un build distribué.
+// Development screen (T032): all the components, to compare with the site's.
+// Hard-coded texts: it exists only in the development client, never in a distributed build.
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (

@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 
-/** Politique par requête. Le nonce autorise les scripts Next, pas un script injecté. */
+/** Per-request policy. The nonce allows Next scripts, not an injected script. */
 export function contentSecurityPolicy(options: { dev: boolean; nonce?: string }): {
   nonce: string;
   value: string;

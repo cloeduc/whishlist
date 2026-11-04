@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function MotDePasseOubliePage({
+export default async function ForgotPasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{ ok?: string; lien?: string; sansmail?: string; e?: string }>;

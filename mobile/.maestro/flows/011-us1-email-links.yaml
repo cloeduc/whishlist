@@ -1,8 +1,8 @@
-# 011 US1 : les liens reçus par e-mail (confirmation d'adresse, réinitialisation, connexion) s'ouvrent dans
-# l'app et y font l'action. Les liens viennent de MailDev et s'ouvrent par le schéma ohyoushouldnt:// :
-# en local, le domaine n'est pas associé à l'app (research R10).
+# 011 US1: the links received by email (address confirmation, reset, login) open in
+# the app and do the action there. The links come from MailDev and open through the ohyoushouldnt:// scheme:
+# locally, the domain is not associated with the app (research R10).
 appId: app.ohyoushouldnt.mobile
-name: "011 US1 — Les liens des e-mails de compte ouvrent l'app"
+name: "011 US1 — Account email links open the app"
 tags:
   - 011-us1
 ---
@@ -12,7 +12,7 @@ tags:
 - assertVisible:
     id: verify.banner
 
-# Lien de confirmation : confirmé dès l'ouverture dans l'app, sans navigateur ni bouton.
+# Confirmation link: confirmed as soon as it opens in the app, with no browser and no button.
 - runFlow:
     file: ../subflows/open-mail-link.yaml
     env:
@@ -31,14 +31,14 @@ tags:
 - assertNotVisible:
     id: verify.banner
 
-# Lien de connexion, déjà connectée : ses listes.
+# Login link, already logged in: their lists.
 - openLink: ohyoushouldnt://connexion
 - extendedWaitUntil:
     visible:
       id: lists.screen
     timeout: 10000
 
-# Mot de passe oublié : le lien de réinitialisation ouvre le formulaire de l'app, qui connecte.
+# Forgotten password: the reset link opens the app's form, which logs in.
 - runFlow: ../subflows/logout.yaml
 - tapOn:
     id: login.forgot
@@ -64,7 +64,7 @@ tags:
     timeout: 20000
 - tapOn:
     id: reset-password.password
-# iOS propose un mot de passe robuste dans une feuille du système (voir submit-register.yaml).
+# iOS offers a strong password in a system sheet (see submit-register.yaml).
 - runFlow:
     when:
       platform: iOS

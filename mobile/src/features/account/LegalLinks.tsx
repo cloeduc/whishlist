@@ -6,7 +6,7 @@ import { tokens } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 import { Text } from "@/ui/Text";
 
-/** Sous les formulaires sans connexion : « Mentions légales · Données personnelles » (FR-002). */
+/** Below the signed-out forms: « Mentions légales · Données personnelles » (FR-002). */
 export function LegalLinks() {
   const { t } = useTranslation("content");
   return (

@@ -115,7 +115,7 @@ export default async function EditListPage({
     description: item.description,
     sortOrder: item.sortOrder,
   }));
-  // Listes où l'idée peut être déplacée ou copiée : celles dont on est membre.
+  // Lists the idea can be moved or copied to: the ones the user is a member of.
   const transferTargets = doc.memberships
     .filter((entry) => entry.userId === user.id)
     .flatMap((entry) => doc.wishlists.filter((wishlist) => wishlist.id === entry.wishlistId))

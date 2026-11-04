@@ -11,7 +11,7 @@ export const POST = withApi(async (api) => {
   if (!body.ok) return apiError(body.error, api.locale, api.cors);
   const urlOrToken = text(body.body.urlOrToken);
   const password = optionalText(body.body.password);
-  // Le jeton de la liste est extrait par la commande : la preuve `X-Read-Unlock` se vérifie sur la liste trouvée.
+  // The command extracts the list token: the `X-Read-Unlock` proof is checked against the list found.
   const result = await subscribeToList(await commandContext(api), {
     urlOrToken,
     password,

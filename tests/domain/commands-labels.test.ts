@@ -7,11 +7,11 @@ import { apiDoc, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtur
 
 before(ensurePasswordHash);
 
-test("créer une liste avec sa première catégorie et son « qui »", async () => {
+test("create a list with its first category and its « qui »", async () => {
   const doc = apiDoc();
   const camille = ctx(doc.users[1]!);
   await withStore(doc, async () => {
-    // Les valeurs par défaut des champs vides sont couvertes par list-creation-defaults.test.ts.
+    // Defaults for empty fields are covered by list-creation-defaults.test.ts.
     const created = await createList(camille, { title: "Noël", category: "Livres", person: "Camille" });
     assert.equal(created.ok, true);
     if (!created.ok) return;
@@ -22,7 +22,7 @@ test("créer une liste avec sa première catégorie et son « qui »", async () 
   });
 });
 
-test("catégories et « qui » : ajouter, renommer, retirer s'ils ne servent pas", async () => {
+test("categories and « qui »: add, rename, remove when unused", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -52,7 +52,7 @@ test("catégories et « qui » : ajouter, renommer, retirer s'ils ne servent pas
   });
 });
 
-test("réordonner les catégories", async () => {
+test("reorder the categories", async () => {
   const doc = apiDoc();
   doc.types.push({ id: "t2", wishlistId: "w", label: "Livres", sortOrder: 1 });
   await withStore(doc, async () => {
@@ -62,7 +62,7 @@ test("réordonner les catégories", async () => {
   });
 });
 
-test("réglages : titre vide refusé, champs absents inchangés", async () => {
+test("settings: empty title refused, missing fields unchanged", async () => {
   const doc = apiDoc();
   const alex = ctx(doc.users[0]!);
   await withStore(doc, async () => {
@@ -75,7 +75,7 @@ test("réglages : titre vide refusé, champs absents inchangés", async () => {
   });
 });
 
-test("un non-membre ne crée ni ne modifie rien", async () => {
+test("a non-member creates and changes nothing", async () => {
   const doc = apiDoc();
   const camille = ctx(doc.users[1]!);
   await withStore(doc, async () => {

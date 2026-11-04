@@ -6,7 +6,7 @@ import { tokens } from "@/theme/tokens";
 import { Button } from "./Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./Card";
 
-/** Boîte de dialogue modale centrée sur fond assombri ; avec des champs, elle reste visible au-dessus du clavier. */
+/** Modal dialog centered on a dimmed background; with fields, it stays visible above the keyboard. */
 export function ModalCard({
   visible,
   title,
@@ -24,7 +24,7 @@ export function ModalCard({
 }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
-      {/* Avec des champs (réservation), le clavier ne doit pas couvrir la carte : elle remonte (iOS) et défile. */}
+      {/* With fields (reservation), the keyboard must not cover the card: it moves up (iOS) and scrolls. */}
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <ScrollView
           style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
@@ -52,7 +52,7 @@ export function ModalCard({
   );
 }
 
-/** Confirmation au style du site (`components/site/confirm-form.tsx`) : titre, texte, action et « Conserver ». */
+/** Confirmation in the site's style (`components/site/confirm-form.tsx`): title, text, action and « Conserver ». */
 export function ConfirmDialog({
   visible,
   title,
@@ -72,7 +72,7 @@ export function ConfirmDialog({
   destructive?: boolean;
   onConfirm: () => void;
   onKeep: () => void;
-  /** Sur le bouton de l'action ; `<testID>-keep` sur « Conserver ». */
+  /** On the action button; `<testID>-keep` on « Conserver ». */
   testID?: string;
 }) {
   return (

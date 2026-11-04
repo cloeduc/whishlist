@@ -7,13 +7,13 @@ import { followedListsOf } from "./subscription";
 import type { Database, Role, WishlistTheme } from "./types";
 
 export type AccountDeletionPreview = {
-  /** Listes dont elle est la seule membre : effacées. */
+  /** Lists where they are the only member: deleted. */
   deletedLists: { id: string; title: string }[];
-  /** Listes qui restent aux autres membres ; `newOwnerName` si elle en était propriétaire. */
+  /** Lists that stay with the other members; `newOwnerName` if they were the owner. */
   transferredLists: { id: string; title: string; newOwnerName: string | null }[];
-  /** Ses réservations sur des listes qui restent : gardées, sans lien au compte. */
+  /** Their reservations on lists that remain: kept, no longer linked to the account. */
   reservationsKept: number;
-  /** Listes publiques qu'elle suit sans en être membre : elle ne les suivra plus. */
+  /** Public lists they follow without being a member: they will no longer follow them. */
   followedLists: { id: string; title: string }[];
 };
 
@@ -49,9 +49,9 @@ export function previewAccountDeletion(doc: Database, userId: string): AccountDe
 }
 
 /**
- * Supprime le compte, définitivement. Listes où elle est seule : effacées ; autres listes :
- * son adhésion part et le membre le plus ancien hérite si elle était propriétaire ;
- * ses réservations restent sans lien au compte ; ses connexions disparaissent.
+ * Deletes the account, permanently. Lists where they are alone: deleted; other lists:
+ * their membership is removed and the oldest member inherits if they were the owner;
+ * their reservations stay, no longer linked to the account; their sessions are removed.
  */
 export function deleteAccount(
   doc: Database,
@@ -139,9 +139,9 @@ export type AccountExport = {
 };
 
 /**
- * Données du compte, champ par champ (liste blanche) : un champ ajouté plus tard au store
- * ne part pas sans être nommé ici. Ni secret, ni e-mail ou identifiant d'un autre compte.
- * Les accès (sessions de l'app, clés d'API) n'en font pas partie : ils se voient et se révoquent sur la page Compte.
+ * Account data, field by field (allowlist): a field added to the store later
+ * is not exported unless named here. No secret, no email or id of another account.
+ * Access (app sessions, API keys) is not included: it is shown and revoked on the Account page.
  */
 export function exportAccount(
   doc: Database,

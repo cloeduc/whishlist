@@ -6,7 +6,7 @@ import {
   originFromHeaders,
 } from "../../src/auth/origin";
 
-test("normalizeAppOrigin accepte http(s) host only", () => {
+test("normalizeAppOrigin accepts http(s) host only", () => {
   assert.equal(normalizeAppOrigin("https://ohyoushouldnt.app"), "https://ohyoushouldnt.app");
   assert.equal(normalizeAppOrigin("https://ohyoushouldnt.app/"), "https://ohyoushouldnt.app");
   assert.equal(normalizeAppOrigin("http://localhost:3000"), "http://localhost:3000");
@@ -15,7 +15,7 @@ test("normalizeAppOrigin accepte http(s) host only", () => {
   assert.equal(normalizeAppOrigin("https://user:pass@evil.com"), null);
 });
 
-test("originFromEnv lit APP_ORIGIN puis WHISHLIST_APP_ORIGIN", () => {
+test("originFromEnv reads APP_ORIGIN then WHISHLIST_APP_ORIGIN", () => {
   assert.equal(originFromEnv({ APP_ORIGIN: "https://a.example/" }), "https://a.example");
   assert.equal(
     originFromEnv({ WHISHLIST_APP_ORIGIN: "https://b.example" }),
@@ -28,7 +28,7 @@ test("originFromEnv lit APP_ORIGIN puis WHISHLIST_APP_ORIGIN", () => {
   assert.equal(originFromEnv({}), null);
 });
 
-test("originFromHeaders prend le premier hop Forwarded", () => {
+test("originFromHeaders takes the first Forwarded hop", () => {
   assert.equal(
     originFromHeaders({
       host: "internal:3000",

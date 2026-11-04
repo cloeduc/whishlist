@@ -8,7 +8,7 @@ import { write, type WriteResult } from "./write";
 
 export type ItemInput = ChangePayloads["updateItem"];
 
-/** Ce que le téléphone vérifie avant l'envoi : de quoi construire une requête valide (data-model.md). */
+/** What the phone checks before sending: enough to build a valid request (data-model.md). */
 function localError(input: ItemInput): string | null {
   if (!input.name.trim()) return "itemNeedsName";
   if (parsePrice(input.price ?? "") === "invalid") return "priceInvalid";
@@ -16,9 +16,9 @@ function localError(input: ItemInput): string | null {
 }
 
 /**
- * Ajoute ou modifie une idée, en passant par la file de changements.
- * Création : sans `itemId`, ou `create` pour corriger une création refusée (même identifiant).
- * Le prix part tel que saisi (« 24,90 ») : le serveur le lit avec la même règle que le site.
+ * Adds or edits an idea, through the write queue.
+ * Creation: without `itemId`, or with `create` to fix a rejected creation (same id).
+ * The price is sent as typed (« 24,90 »): the server reads it with the same rule as the site.
  */
 export async function saveItem(
   listId: string,
@@ -35,12 +35,12 @@ export async function saveItem(
   return { ...result, itemId };
 }
 
-/** Archiver / désarchiver, ou changer de catégorie. */
+/** Archive / unarchive, or change category. */
 export function patchItem(listId: string, itemId: string, payload: ChangePayloads["patchItem"]): Promise<WriteResult> {
   return write({ kind: "patchItem", listId, targetId: itemId, payload });
 }
 
-/** Supprimer une idée (après confirmation, FR-013). */
+/** Delete an idea (after confirmation, FR-013). */
 export function deleteItem(listId: string, itemId: string): Promise<WriteResult> {
   return write({ kind: "deleteItem", listId, targetId: itemId, payload: {} });
 }
@@ -48,20 +48,20 @@ export function deleteItem(listId: string, itemId: string): Promise<WriteResult>
 export type Enriched = { name: string; price: string; imageUrl: string; typeId: string; description: string; usedLlm: boolean };
 
 /**
- * Préremplissage depuis un lien produit : ne crée rien, exige le réseau (FR-029b).
- * Le serveur lit toujours la page ; `capabilities.enrich` dit s'il s'aide en plus d'une IA.
+ * Prefill from a product link: creates nothing, requires the network (FR-029b).
+ * The server always reads the page; `capabilities.enrich` says whether it also uses an AI.
  */
 export async function enrich(listId: string, url: string): Promise<Enriched> {
   const { name, price, imageUrl, typeId, description, usedLlm } = await ok(
     api.POST("/lists/{listId}/enrich", { params: { path: { listId } }, body: { url } }),
   );
-  // Un serveur antérieur à 1.5.0 n'en renvoie pas.
+  // A server older than 1.5.0 does not return it.
   return { name, price, imageUrl, typeId, description: description ?? "", usedLlm };
 }
 
 /**
- * Déplacer ou copier une idée vers une liste (la même est permise pour une copie), en passant par la file.
- * Le changement garde un aperçu de l'idée, pour l'afficher dans la liste d'arrivée avant l'envoi.
+ * Move or copy an idea to a list (the same list is allowed for a copy), through the queue.
+ * The change keeps a preview of the idea, to show it in the target list before it is sent.
  */
 export async function transferItem(
   listId: string,

@@ -1,5 +1,5 @@
-# Remplit et envoie le formulaire de connexion : env EMAIL, PASSWORD. N'attend aucun écran
-# (connexion réussie ou refusée : c'est à l'appelant de vérifier).
+# Fills and submits the login form: env EMAIL, PASSWORD. Waits for no screen
+# (login accepted or refused: the caller checks).
 appId: app.ohyoushouldnt.mobile
 ---
 - tapOn:
@@ -12,7 +12,7 @@ appId: app.ohyoushouldnt.mobile
     optional: true
 - tapOn:
     id: login.submit
-# iOS propose d'enregistrer le mot de passe après la connexion : « Plus tard ».
+# iOS offers to save the password after login: « Plus tard ».
 - tapOn:
     text: Plus tard|Not Now
     optional: true

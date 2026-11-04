@@ -16,7 +16,7 @@ import { getTranslations, translateError } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
 
-export default async function ReserverPage({
+export default async function ReservePage({
   params,
   searchParams,
 }: {

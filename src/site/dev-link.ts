@@ -1,6 +1,6 @@
 import { stripLocalePrefix } from "@/src/i18n/locale-path";
 
-/** Lien d'e-mail affichable en dev : une page de ce site (`origin`) dont le chemin commence par `page`. */
+/** Email link that can be shown in dev: a page of this site (`origin`) whose path starts with `page`. */
 export function isSiteLink(url: string | null | undefined, origin: string, page: string): url is string {
   if (!url) return false;
   try {

@@ -1,7 +1,7 @@
-# 009 US1 : la carte Profil de « Mon compte » s'ouvre repliée, se déplie pour changer le nom, puis se replie.
-# Lecteurs d'écran, réduire les animations et mode avion : à la main (exclusions.md).
+# 009 US1: the Profile card of « Mon compte » opens collapsed, expands to change the name, then collapses.
+# Screen readers, reduce motion and airplane mode: by hand (exclusions.md).
 appId: app.ohyoushouldnt.mobile
-name: "009 US1 — Déplier la carte Profil pour changer son nom"
+name: "009 US1 — Expand the Profile card to change your name"
 tags:
   - 009-us1
 ---
@@ -21,7 +21,7 @@ tags:
 - assertNotVisible:
     id: account.name
 
-# Dépliée : le formulaire apparaît et reste ouvert après l'enregistrement.
+# Expanded: the form shows and stays open after saving.
 - tapOn:
     id: account.profile-toggle
 - assertVisible:
@@ -39,7 +39,7 @@ tags:
 - assertVisible:
     id: account.name
 
-# Repliée de nouveau.
+# Collapsed again.
 - tapOn:
     id: account.profile-toggle
 - assertNotVisible:

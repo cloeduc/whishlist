@@ -37,7 +37,7 @@ function withKey(name = "Claude") {
 
 const bearer = (token: string) => new NextRequest("http://localhost/api/v1/lists", { headers: { authorization: `Bearer ${token}` } });
 
-test("création : préfixe oys_, gardée hachée, indice des 4 derniers caractères, jeton rendu une seule fois", () => {
+test("creation: oys_ prefix, stored hashed, hint of the last 4 characters, token returned only once", () => {
   const { doc, token, key } = withKey();
   assert.ok(token.startsWith(API_KEY_PREFIX));
   const stored = doc.apiKeys[0]!;
@@ -48,7 +48,7 @@ test("création : préfixe oys_, gardée hachée, indice des 4 derniers caractè
   assert.deepEqual(listApiKeys(doc, "camille"), []);
 });
 
-test("création refusée : sans nom, nom trop long, plus de 20 clés", () => {
+test("creation refused: no name, name too long, more than 20 keys", () => {
   const doc = apiDoc();
   const alex = doc.users[0]!;
   assert.deepEqual(createApiKey(doc, alex, { name: "  " }), { ok: false, error: "apiKeyNeedsName" });
@@ -62,7 +62,7 @@ test("création refusée : sans nom, nom trop long, plus de 20 clés", () => {
   assert.deepEqual(createApiKey(current, alex, { name: "une de trop" }), { ok: false, error: "apiKeyLimit" });
 });
 
-test("règles du domaine : nom de 1 à 60 caractères après nettoyage, la clé garde le hachage et l'indice reçus", () => {
+test("domain rules: name of 1 to 60 characters after trimming, the key keeps the hash and hint it receives", () => {
   assert.equal(apiKeyNameError(""), "apiKeyNeedsName");
   assert.equal(apiKeyNameError("x".repeat(MAX_API_KEY_NAME)), null);
   assert.equal(apiKeyNameError("x".repeat(MAX_API_KEY_NAME + 1)), "apiKeyNameTooLong");
@@ -78,7 +78,7 @@ test("règles du domaine : nom de 1 à 60 caractères après nettoyage, la clé 
   assert.equal(doc.apiKeys.length, 0, "la base reçue n'est pas modifiée");
 });
 
-test("retrouver une clé : bonne clé → son compte ; autre jeton, clé révoquée ou compte supprimé → rien", () => {
+test("finding a key: right key → its account; other token, revoked key or deleted account → nothing", () => {
   const { doc, token, key } = withKey();
   assert.equal(findApiKey(doc, token)?.user.id, "alex");
   assert.equal(findApiKey(doc, `${token}x`), null);
@@ -92,7 +92,7 @@ test("retrouver une clé : bonne clé → son compte ; autre jeton, clé révoqu
   if (deleted.ok) assert.deepEqual(deleted.doc.apiKeys, []);
 });
 
-test("dernière utilisation : notée, puis pas réécrite avant une heure", () => {
+test("last use: recorded, then not rewritten for an hour", () => {
   const { doc, key } = withKey();
   const first = touchApiKey(doc, key.id, Date.parse("2026-11-02T10:00:00Z"));
   assert.equal(first?.apiKeys[0]?.lastUsedAt, "2026-11-02T10:00:00.000Z");
@@ -100,7 +100,7 @@ test("dernière utilisation : notée, puis pas réécrite avant une heure", () =
   assert.equal(touchApiKey(first!, key.id, Date.parse("2026-11-02T11:01:00Z"))?.apiKeys[0]?.lastUsedAt, "2026-11-02T11:01:00.000Z");
 });
 
-test("clé valide : donne son compte et note son utilisation ; reconnue comme clé, jamais comme session de l'app", async () => {
+test("valid key: gives its account and records its use; recognized as a key, never as an app session", async () => {
   const { doc, token } = withKey();
   await withStore(doc, async () => {
     assert.equal(usesApiKey(bearer(token)), true);
@@ -112,7 +112,7 @@ test("clé valide : donne son compte et note son utilisation ; reconnue comme cl
   });
 });
 
-test("API : au-delà de 120 requêtes par minute, la clé est limitée ; une autre clé du compte ne l'est pas", async () => {
+test("API: beyond 120 requests per minute, the key is limited; another key of the account is not", async () => {
   const { doc, token } = withKey();
   const second = createApiKey(doc, doc.users[0]!, { name: "Script" });
   assert.ok(second.ok);
@@ -124,7 +124,7 @@ test("API : au-delà de 120 requêtes par minute, la clé est limitée ; une aut
   });
 });
 
-test("API JSON : une clé est refusée sur toute route (403 apiKeyNotAllowed) avant le handler ; elle n'ouvre que /api/mcp", async () => {
+test("JSON API: a key is refused on every route (403 apiKeyNotAllowed) before the handler; it only opens /api/mcp", async () => {
   const { token } = withKey();
   let called = false;
   const route = withApi(async () => {
@@ -137,7 +137,7 @@ test("API JSON : une clé est refusée sur toute route (403 apiKeyNotAllowed) av
   assert.equal(called, false);
 });
 
-test("commandes de la page Compte : créer puis révoquer ; un compte ne révoque pas la clé d'un autre", async () => {
+test("Account page commands: create then revoke; an account cannot revoke another account's key", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const created = await createMyApiKey(ctx(doc.users[0]!), { name: "Script" });
@@ -149,7 +149,7 @@ test("commandes de la page Compte : créer puis révoquer ; un compte ne révoqu
   });
 });
 
-test("réinitialisation ou changement du mot de passe : les clés du compte sont révoquées, celles des autres restent", async () => {
+test("password reset or change: the account's keys are revoked, those of others remain", async () => {
   const { doc } = withKey();
   const other = createApiKey(doc, doc.users[1]!, { name: "Autre" });
   assert.ok(other.ok);
@@ -167,7 +167,7 @@ test("réinitialisation ou changement du mot de passe : les clés du compte sont
   if (changed.ok) assert.deepEqual(changed.doc.apiKeys.map((key) => key.userId), [doc.users[1]!.id]);
 });
 
-test("page Compte : au plus 10 créations de clé par heure", async () => {
+test("Account page: at most 10 key creations per hour", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     for (let i = 0; i < 10; i++) assert.ok((await createMyApiKey(ctx(doc.users[0]!), { name: `Clé ${i}` })).ok);
@@ -176,14 +176,14 @@ test("page Compte : au plus 10 créations de clé par heure", async () => {
   });
 });
 
-test("jeton de session de l'app : jamais avec le préfixe des clés, sinon il serait lu comme une clé", () => {
+test("app session token: never with the key prefix, otherwise it would be read as a key", () => {
   const tokens = ["oys_premier", "oys_second", "jeton-normal"];
   const issued = issueApiSession(apiDoc(), apiDoc().users[0]!, Date.now(), () => tokens.shift()!);
   assert.equal(issued.token, "jeton-normal");
   assert.equal(usesApiKey(bearer(issued.token)), false);
 });
 
-test("base existante d'avant les clés : la migration ajoute la table api_keys, vide", async () => {
+test("existing database from before keys: the migration adds an empty api_keys table", async () => {
   await withTempDataPath(async () => {
     const file = databaseFilePath();
     const journal = JSON.parse(readFileSync(path.join(process.cwd(), "drizzle", "meta", "_journal.json"), "utf8")) as {
@@ -192,7 +192,7 @@ test("base existante d'avant les clés : la migration ajoute la table api_keys, 
     const before = journal.entries.filter((entry) => entry.tag < "0005");
     assert.deepEqual(before.map((entry) => entry.tag.slice(0, 4)), ["0000", "0001", "0002", "0003", "0004"]);
 
-    // La base telle qu'elle était : les migrations 0000 à 0004 appliquées.
+    // The database as it was: migrations 0000 to 0004 applied.
     const old = new Database(file);
     old.exec("CREATE TABLE IF NOT EXISTS __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric)");
     for (const entry of before) {

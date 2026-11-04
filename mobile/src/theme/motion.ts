@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { AccessibilityInfo } from "react-native";
 
 /**
- * Réglage « réduire les animations » du téléphone, suivi en direct. `null` tant que le système
- * n'a pas répondu : une animation qui démarre seule attend la réponse avant de se lancer.
+ * The phone's « réduire les animations » setting, followed live. `null` while the system
+ * has not answered: an animation that starts on its own waits for the answer before running.
  */
 export function useReduceMotion(): boolean | null {
   const [reduced, setReduced] = useState<boolean | null>(null);

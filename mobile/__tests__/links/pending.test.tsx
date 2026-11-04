@@ -23,7 +23,7 @@ afterEach(async () => {
   await signOut();
 });
 
-test("sans lien : l'accueil ; avec un lien : le dernier ouvert, jusqu'à ce que son écran l'efface", () => {
+test("without a link: the home screen; with a link: the last one opened, until its screen clears it", () => {
   expect(afterSignIn()).toBe("/");
   setPendingLink("/links/invite/a");
   setPendingLink("/links/invite/b");
@@ -33,14 +33,14 @@ test("sans lien : l'accueil ; avec un lien : le dernier ouvert, jusqu'à ce que 
   expect(afterSignIn()).toBe("/");
 });
 
-test("une fois connectée, la personne revient au lien qui l'a amenée à la connexion", async () => {
+test("once signed in, the person returns to the link that led them to sign in", async () => {
   setPendingLink("/links/invite/tok");
   await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
   await render(<AuthLayout />);
   expect(screen.getByText("redirect:/links/invite/tok")).toBeOnTheScreen();
 });
 
-test("changement de mot de passe imposé : il passe d'abord, puis l'app reprend le lien (R5)", async () => {
+test("forced password change: it comes first, then the app resumes the link (R5)", async () => {
   setPendingLink("/links/invite/tok");
   await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user: { ...me, mustChangePassword: true } });
   await render(<AuthLayout />);

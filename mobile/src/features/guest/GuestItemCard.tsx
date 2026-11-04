@@ -17,14 +17,14 @@ import { Text } from "@/ui/Text";
 
 import { cancelGuestReservation } from "./api";
 
-/** Seuls les liens web s'ouvrent : l'adresse d'une idée vient de la liste, pas de ce téléphone (011). */
+/** Only web links open: an idea's address comes from the list, not from this phone (011). */
 function webUrl(url: string | null): string | null {
   return url && /^https?:\/\//i.test(url) ? url : null;
 }
 
 /**
- * Une idée de la vue invité, comme `PublicItemCard` du site : nom, envie, prix, « pour qui », lien,
- * puis « Réserver ce cadeau », ou l'annulation de sa propre réservation.
+ * An idea of the guest view, like the site `PublicItemCard`: name, priority, price, « pour qui », link,
+ * then « Réserver ce cadeau », or the cancellation of one's own reservation.
  */
 export function GuestItemCard({
   index,

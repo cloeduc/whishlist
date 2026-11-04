@@ -4,12 +4,12 @@ import { useRef } from "react";
 import { tokens } from "@/theme/tokens";
 import { Shadow } from "@/ui/Shadow";
 
-/** Délai avant de relire le même code : la caméra le renvoie plusieurs fois par seconde. */
+/** Delay before reading the same code again: the camera sends it several times per second. */
 const SAME_CODE_DELAY_MS = 2000;
 
 /**
- * Viseur carré qui lit les QR codes seulement (012, US4), dans une boîte au style du site comme `QrCard`.
- * La permission caméra est demandée par l'écran avant d'afficher le viseur.
+ * Square viewfinder that reads QR codes only (012, US4), in a box styled like the site, like `QrCard`.
+ * The camera permission is requested by the screen before showing the viewfinder.
  */
 export function QrScanner({ onScanned, testID }: { onScanned: (data: string) => void; testID?: string }) {
   const last = useRef<{ data: string; at: number } | null>(null);

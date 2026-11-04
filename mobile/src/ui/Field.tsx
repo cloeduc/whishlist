@@ -5,7 +5,7 @@ import { tokens } from "@/theme/tokens";
 
 import { Text } from "./Text";
 
-/** `components/ui/field.tsx` : libellé au-dessus, aide grise, erreur dessous. */
+/** `components/ui/field.tsx`: label above, grey help, error below. */
 export function Field({
   label,
   description,

@@ -5,7 +5,7 @@ import { tokens } from "@/theme/tokens";
 
 import { Text } from "./Text";
 
-/** Sous une action qui exige le serveur : pourquoi elle est indisponible hors ligne (FR-029b). */
+/** Under an action that requires the server: why it is unavailable offline (FR-029b). */
 export function NetworkNote({ message }: { message?: string }) {
   const { t } = useTranslation("mobile");
   const online = useOnline();

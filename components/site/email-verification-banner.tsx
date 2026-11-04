@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { stripLocalePrefix } from "@/src/i18n/locale-path";
 import { resendEmailVerificationAction } from "@/src/server/actions";
 
-/** Clé du message de retour d'un renvoi (`?verify=`), ou null pour une valeur inconnue. */
+/** Key of the feedback message after a resend (`?verify=`), or null for an unknown value. */
 function feedbackKey(verify: string | null): string | null {
   switch (verify) {
     case "sent":
@@ -25,7 +25,7 @@ function feedbackKey(verify: string | null): string | null {
   }
 }
 
-/** Rappel affiché à un compte dont l'adresse n'est pas confirmée (010, US1), sauf sur la page du lien elle-même. */
+/** Reminder shown to an account whose address is not confirmed (010, US1), except on the link page itself. */
 export function EmailVerificationBanner({ origin }: { origin: string }) {
   return (
     <Suspense fallback={null}>
@@ -41,7 +41,7 @@ function Banner({ origin }: { origin: string }) {
   const path = stripLocalePrefix(pathname).path;
   if (path.startsWith("/confirmer-email/")) return null;
 
-  // Retour sur cette page après le renvoi, sans le résultat d'un renvoi précédent.
+  // Back to this page after the resend, without the result of a previous resend.
   const kept = new URLSearchParams(searchParams.toString());
   const verify = kept.get("verify");
   const devLink = kept.get("lien");

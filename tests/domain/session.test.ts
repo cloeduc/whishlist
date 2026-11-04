@@ -12,7 +12,7 @@ test("sign/read round-trip", () => {
   assert.equal(token.split(".").length, 5);
 });
 
-test("jeton legacy sans version = version 0", () => {
+test("legacy token without version = version 0", () => {
   const now = Date.parse("2026-06-01T12:00:00.000Z");
   const iat = Math.floor(now / 1000);
   const exp = iat + SESSION_TTL_SEC;
@@ -24,14 +24,14 @@ test("jeton legacy sans version = version 0", () => {
   });
 });
 
-test("refuse token expiré", () => {
+test("refuses an expired token", () => {
   const issued = Date.parse("2026-01-01T00:00:00.000Z");
   const token = signSession("u1", secret, issued, 0);
   const afterTtl = issued + (SESSION_TTL_SEC + 1) * 1000;
   assert.equal(readSession(token, secret, afterTtl), null);
 });
 
-test("refuse MAC altéré / legacy userId.mac", () => {
+test("refuses a tampered MAC / legacy userId.mac", () => {
   const now = Date.parse("2026-06-01T12:00:00.000Z");
   const token = signSession("u1", secret, now, 1);
   const parts = token.split(".");
@@ -41,7 +41,7 @@ test("refuse MAC altéré / legacy userId.mac", () => {
   assert.equal(readSession(signSession("u1", "other-secret-xxxxxxxxxxxxxx", now, 1), secret, now), null);
 });
 
-test("refuse extension manuelle de exp", () => {
+test("refuses manual extension of exp", () => {
   const now = Date.parse("2026-06-01T12:00:00.000Z");
   const token = signSession("u1", secret, now, 3);
   const [userId, version, iat] = token.split(".");

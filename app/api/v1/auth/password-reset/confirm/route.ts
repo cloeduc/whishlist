@@ -5,7 +5,7 @@ import { resetPasswordWithLink } from "@/src/server/commands/auth";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Nouveau mot de passe depuis le lien reçu par e-mail, ouvert dans l'app (011). Avec `signIn`, rend une session. */
+/** New password from the link received by email, opened in the app (011). With `signIn`, returns a session. */
 export const POST = withApi(async (api) => {
   const body = await readJsonBody(api.req);
   if (!body.ok) return apiError(body.error, api.locale, api.cors);

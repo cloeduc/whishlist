@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-export default async function InscriptionPage({
+export default async function RegisterPage({
   searchParams,
 }: {
   searchParams: Promise<{ e?: string; next?: string; ok?: string; lien?: string; envoi?: string }>;

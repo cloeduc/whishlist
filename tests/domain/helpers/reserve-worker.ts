@@ -1,5 +1,5 @@
-// Processus séparé pour les tests : `argv[2]` = WISHLIST_DATA_PATH, `argv[3]` = nombre d'essais,
-// `argv[4]` = préfixe d'IP. Réserve la même idée (`gift`) en parallèle et affiche le nombre de succès.
+// Separate process for tests: `argv[2]` = WISHLIST_DATA_PATH, `argv[3]` = number of attempts,
+// `argv[4]` = IP prefix. Reserves the same idea (`gift`) in parallel and prints the number of successes.
 import { reserve } from "../../../src/server/commands/public-list";
 import { ctx } from "./api-fixtures";
 

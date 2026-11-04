@@ -1,7 +1,7 @@
-# iOS : ouvre URL dans Safari et la partage vers l'app par la feuille de partage du système.
-# La cellule de l'app vit dans une vue distante : Maestro la voit (shareCell), mais avec des positions relatives à
-# la feuille, donc on appuie sur sa position à l'écran (3e icône de la rangée des apps). Position relevée sur un
-# iPhone 17 Pro Max (iOS 26.5) : à vérifier sur un autre modèle (voir exclusions.md).
+# iOS: opens URL in Safari and shares it to the app through the system share sheet.
+# The app's cell lives in a remote view: Maestro sees it (shareCell), but with positions relative to
+# the sheet, so we tap its position on screen (3rd icon of the apps row). Position measured on an
+# iPhone 17 Pro Max (iOS 26.5): to check on another model (see exclusions.md).
 appId: com.apple.mobilesafari
 ---
 - launchApp:

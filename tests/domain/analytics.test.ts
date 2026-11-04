@@ -5,7 +5,7 @@ import { analyticsConfig, analyticsUpstreamHeaders, prepareAnalyticsEvent } from
 
 const ID = "11111111-2222-4333-8444-555555555555";
 
-test("sans les deux variables, la mesure est absente", () => {
+test("without both variables, analytics is absent", () => {
   assert.equal(analyticsConfig({}), null);
   assert.equal(analyticsConfig({ UMAMI_WEBSITE_ID: ID }), null);
   assert.equal(analyticsConfig({ UMAMI_URL: "http://analytics.internal" }), null);
@@ -16,7 +16,7 @@ test("sans les deux variables, la mesure est absente", () => {
   );
 });
 
-test("l'origine seule est conservée, pas le chemin ni l'identifiant en dur", () => {
+test("only the origin is kept, not the path or a hardcoded identifier", () => {
   const config = analyticsConfig({
     UMAMI_WEBSITE_ID: ID,
     UMAMI_URL: "https://analytics.example/ignored",
@@ -24,7 +24,7 @@ test("l'origine seule est conservée, pas le chemin ni l'identifiant en dur", ()
   assert.deepEqual(config, { websiteId: ID, upstream: "https://analytics.example" });
 });
 
-test("les adresses de liste, de compte et d'invitation ne partent pas", () => {
+test("list, account and invite addresses are not sent", () => {
   assert.equal(analyticsCollectAllowed("/"), true);
   assert.equal(analyticsCollectAllowed("/en/faq"), true);
   assert.equal(analyticsCollectAllowed("/l/secret"), false);
@@ -38,7 +38,7 @@ test("les adresses de liste, de compte et d'invitation ne partent pas", () => {
   assert.equal(analyticsCollectAllowed("/u/script.js"), false);
 });
 
-test("le script de filtre ne contient pas d'identifiant d'instance", () => {
+test("the filter script contains no instance identifier", () => {
   const source = analyticsBeforeSendSource();
   assert.match(source, /wishlist-analytics-optout/);
   assert.match(source, /\/reinitialiser/);
@@ -46,7 +46,7 @@ test("le script de filtre ne contient pas d'identifiant d'instance", () => {
   assert.doesNotMatch(source, /UMAMI_URL|website-id|analytics\.example/);
 });
 
-test("le serveur n'envoie pas une liste et impose le site configuré", () => {
+test("the server does not forward a list and enforces the configured site", () => {
   const page = JSON.stringify({
     type: "event",
     payload: {
@@ -70,7 +70,7 @@ test("le serveur n'envoie pas une liste et impose le site configuré", () => {
   assert.equal(prepareAnalyticsEvent("{", ID, "h"), "invalid");
 });
 
-test("l'adresse IP et le cookie ne sont pas relayés", () => {
+test("the IP address and the cookie are not relayed", () => {
   const headers = analyticsUpstreamHeaders(
     {
       get(name: string) {

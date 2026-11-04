@@ -14,7 +14,7 @@ import { Field } from "@/ui/Field";
 import { Input } from "@/ui/Input";
 import { NetworkNote } from "@/ui/NetworkNote";
 
-/** Connexion, d'après `02-connexion.png` (FR-001). */
+/** Sign-in, from `02-connexion.png` (FR-001). */
 export default function Login() {
   const { t } = useTranslation(["auth", "mobile"]);
   const session = useSession();

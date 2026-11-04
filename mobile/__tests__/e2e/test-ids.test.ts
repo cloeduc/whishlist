@@ -9,13 +9,13 @@ function files(dir: string, extension: string): string[] {
     .map((entry) => join(entry.parentPath, entry.name));
 }
 
-/** testID du code : littéraux (`testID="a"`, `testID={"a"}`) et préfixes des identifiants dynamiques (`` `a-${x}` ``). */
+/** testIDs of the code: literals (`testID="a"`, `testID={"a"}`) and prefixes of dynamic identifiers (`` `a-${x}` ``). */
 function declaredIds() {
   const literals = new Set<string>();
   const prefixes = new Set<string>();
   for (const file of [...files(join(mobile, "app"), ".tsx"), ...files(join(mobile, "src"), ".tsx")]) {
     const source = readFileSync(file, "utf8");
-    // `testID`, et les props qui le transmettent à un élément interne (`errorTestID` de `Field`).
+    // `testID`, and the props that pass it on to an inner element (`errorTestID` of `Field`).
     for (const match of source.matchAll(/\b(?:testID|[a-z]\w*TestID)=(?:"([^"]+)"|\{\s*"([^"]+)"\s*\}|\{\s*`([^`]+)`\s*\})/g)) {
       const template = match[3];
       if (template === undefined) literals.add(match[1] ?? match[2]);
@@ -25,13 +25,13 @@ function declaredIds() {
   return { literals, prefixes };
 }
 
-/** `id:` des parcours et sous-parcours, avec leur fichier. */
+/** `id:` values of the flows and subflows, with their file. */
 function usedIds() {
   const used: { id: string; file: string }[] = [];
   for (const dir of ["flows", "subflows"]) {
     for (const file of files(join(mobile, ".maestro", dir), ".yaml")) {
       for (const match of readFileSync(file, "utf8").matchAll(/^\s*id:\s*["']?([^"'\s#]+)/gm)) {
-        // Un `id:` est une regex : on retire ses échappements (`lists\\.card-…`) avant de le comparer.
+        // An `id:` is a regex: we strip its escapes (`lists\\.card-…`) before comparing it.
         used.push({ id: match[1].replace(/\\/g, ""), file: relative(mobile, file) });
       }
     }
@@ -39,19 +39,19 @@ function usedIds() {
   return used;
 }
 
-// Éléments du système (feuille de partage iOS, Safari) et du dev client (menu développeur), absents du code de l'app.
+// System elements (iOS share sheet, Safari) and dev client elements (developer menu), absent from the app's code.
 const systemIds = new Set(["ShareSheet.RemoteContainerView", "PopoverDismissRegion", "shareCell", "MoreMenuButton", "ShareButton", "xmark"]);
 
 test("every id: used by a flow is a testID of the app", () => {
   const { literals, prefixes } = declaredIds();
   const known = (id: string) =>
     systemIds.has(id) ||
-    // Identifiants d'Android (`<paquet>:id/<nom>`), propres au système.
+    // Android identifiers (`<package>:id/<name>`), specific to the system.
     id.includes(":id/") ||
     literals.has(id) ||
-    // `Button` pose `<testID>-box` sur sa boîte, `ConfirmDialog` `<testID>-keep` sur « Conserver »,
-    // `CollapsibleCard` `<testID>-toggle` sur son en-tête, `-chevron` sur l'indicateur et `-content` sur son contenu,
-    // `PasswordForm` `<testID>-current`, `-next`, `-confirm` et `-submit` sur ses champs et son bouton.
+    // `Button` sets `<testID>-box` on its box, `ConfirmDialog` `<testID>-keep` on « Conserver »,
+    // `CollapsibleCard` `<testID>-toggle` on its header, `-chevron` on the indicator and `-content` on its content,
+    // `PasswordForm` `<testID>-current`, `-next`, `-confirm` and `-submit` on its fields and its button.
     ["-box", "-keep", "-toggle", "-chevron", "-content", "-current", "-next", "-confirm", "-submit"].some((suffix) => id.endsWith(suffix) && literals.has(id.slice(0, -suffix.length))) ||
     [...prefixes].some((prefix) => id.startsWith(prefix) && id.length > prefix.length);
   const used = usedIds();

@@ -2,7 +2,7 @@ import { clone, findMembership } from "./access";
 import { hashPassword, verifyPassword } from "./passwords";
 import type { Database, Wishlist } from "./types";
 
-/** Mot de passe de lecture : réservé au propriétaire, plus court que le compte. */
+/** Read password: set by the owner only, shorter than the account password. */
 export const MIN_READ_PASSWORD_LENGTH = 8;
 
 export function hasReadPassword(list: Wishlist): boolean {

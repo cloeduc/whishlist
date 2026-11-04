@@ -8,7 +8,7 @@ import { intlLocale, type Locale } from "../../i18n/config";
 import { withLocale } from "../../i18n/locale-path";
 import { emailVerificationRequired } from "../mail";
 
-/** Formes JSON du contrat (`specs/004-mobile-api/contracts/openapi.yaml`). */
+/** JSON shapes of the contract (`specs/004-mobile-api/contracts/openapi.yaml`). */
 
 export type CategoryView = { id: string; label: string; sortOrder: number };
 export type LabelView = { id: string; label: string };
@@ -70,7 +70,7 @@ function itemBase(item: Item, locale: Locale) {
   };
 }
 
-/** Même contenu que la page publique : idées libres, plus celles de ce client. */
+/** Same content as the public page: free ideas, plus this client's. */
 export function toPublicListView(
   doc: Database,
   wishlist: Wishlist,
@@ -105,9 +105,9 @@ export type MeView = {
   email: string;
   displayName: string;
   mustChangePassword: boolean;
-  /** Faux seulement si la validation est exigée et l'adresse pas encore confirmée (010). */
+  /** False only if validation is required and the address is not confirmed yet (010). */
   emailVerified: boolean;
-  /** Nouvelle adresse en attente de confirmation (010, US3). */
+  /** New address awaiting confirmation (010, US3). */
   pendingEmail: string | null;
 };
 
@@ -116,7 +116,7 @@ export type SessionView = { token: string; expiresAt: string; user: MeView };
 export type ListSummaryView = {
   id: string;
   title: string;
-  /** Depuis 1.1.0 : ce qu'affiche la carte de « Mes listes » (couverture, sous-titre). */
+  /** Since 1.1.0: what the « Mes listes » card shows (cover, subtitle). */
   subtitle: string | null;
   coverImageUrl: string | null;
   theme: WishlistTheme;
@@ -164,7 +164,7 @@ export type MemberListView = {
   members: { userId: string; displayName: string; role: Role }[];
 };
 
-/** `pendingEmail` : `pendingEmailChange(doc, user.id)` de la base que l'appelant a lue. */
+/** `pendingEmail`: `pendingEmailChange(doc, user.id)` from the database the caller read. */
 export function toMe(user: User, pendingEmail: string | null): MeView {
   return {
     id: user.id,
@@ -176,7 +176,7 @@ export function toMe(user: User, pendingEmail: string | null): MeView {
   };
 }
 
-/** Lien absolu dans la langue du client : `https://…/en/l/<token>`. */
+/** Absolute link in the client's language: `https://…/en/l/<token>`. */
 function siteUrl(origin: string, locale: Locale, pathname: string): string {
   return `${origin}${withLocale(locale, pathname)}`;
 }

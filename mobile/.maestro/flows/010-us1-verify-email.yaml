@@ -1,7 +1,7 @@
-# 010 US1 : un nouveau compte voit le rappel et ne peut pas créer de liste ; il ouvre le lien reçu
-# (MailDev), confirme dans le navigateur, et l'app le débloque à son retour au premier plan.
+# 010 US1: a new account sees the reminder and cannot create a list; it opens the received link
+# (MailDev), confirms in the browser, and the app unlocks it when it comes back to the foreground.
 appId: app.ohyoushouldnt.mobile
-name: "010 US1 — Confirmer son adresse après l'inscription"
+name: "010 US1 — Confirm your address after signing up"
 tags:
   - 010-us1
 ---
@@ -9,7 +9,7 @@ tags:
 - runScript: ../scripts/strings.generated.js
 - runFlow: ../subflows/register-unconfirmed.yaml
 
-# Adresse pas encore confirmée : rappel, et « Créer une liste » désactivé avec la raison.
+# Address not confirmed yet: reminder, and « Créer une liste » disabled with the reason.
 - assertVisible:
     id: verify.banner
 - assertVisible:
@@ -18,7 +18,7 @@ tags:
     id: lists.new
     enabled: false
 
-# Lien reçu par e-mail, confirmé sur le site.
+# Link received by email, confirmed on the site.
 - runFlow:
     file: ../subflows/confirm-email.yaml
     env:

@@ -4,7 +4,7 @@ import { isSiteLink } from "../../src/site/dev-link";
 
 const ORIGIN = "http://localhost:3010";
 
-test("lien de dev : seulement une page de ce site, du bon type", () => {
+test("dev link: only a page of this site, of the right type", () => {
   assert.equal(isSiteLink(`${ORIGIN}/confirmer-email/abc?suite=%2F`, ORIGIN, "/confirmer-email/"), true);
   assert.equal(isSiteLink(`${ORIGIN}/en/confirmer-email/abc`, ORIGIN, "/confirmer-email/"), true);
   assert.equal(isSiteLink(`${ORIGIN}/reinitialiser/abc`, ORIGIN, "/reinitialiser/"), true);

@@ -1,12 +1,12 @@
-/** Couleurs d'une wishlist — alignées sur le favicon cadeau. */
+/** Colors of a wishlist — matching the gift favicon. */
 export interface WishlistTheme {
-  /** Corps du cadeau / boutons principaux */
+  /** Gift body / primary buttons */
   primary: string;
-  /** Couvercle / destructive */
+  /** Lid / destructive */
   accent: string;
-  /** Ruban / étoiles / badges */
+  /** Ribbon / stars / badges */
   highlight: string;
-  /** Fond de la page publique */
+  /** Public page background */
   background: string;
 }
 
@@ -52,7 +52,7 @@ export function contrastRatio(foreground: string, background: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-/** Assombrit jusqu'à un texte blanc ≥ 4,5:1. La couleur d'origine reste stockée. */
+/** Darkens until white text reaches ≥ 4.5:1. The original color stays stored. */
 export function darkenForWhiteText(hex: string, min = 4.5): string {
   let [r, g, b] = channels(hex);
   let current = normalizeHex(hex);
@@ -66,7 +66,7 @@ export function darkenForWhiteText(hex: string, min = 4.5): string {
   return current;
 }
 
-/** Merge partiel + defaults ; ignore les valeurs invalides. */
+/** Partial merge + defaults; ignores invalid values. */
 export function resolveTheme(partial?: Partial<WishlistTheme> | null): WishlistTheme {
   const next: WishlistTheme = { ...DEFAULT_WISHLIST_THEME };
   if (!partial) return next;
@@ -79,7 +79,7 @@ export function resolveTheme(partial?: Partial<WishlistTheme> | null): WishlistT
   return next;
 }
 
-/** Variables CSS à injecter sur le wrapper de la page publique / preview. */
+/** CSS variables to inject on the wrapper of the public page / preview. */
 export function themeToCssVars(theme: WishlistTheme): Record<string, string> {
   return {
     "--gift-blue": theme.primary,

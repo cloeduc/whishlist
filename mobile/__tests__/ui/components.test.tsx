@@ -18,7 +18,7 @@ function style(testID: string) {
   return StyleSheet.flatten(screen.getByTestId(testID).props.style);
 }
 
-/** L'ombre du site : une vue noire pleine, décalée de 4/4. */
+/** The site's shadow: a solid black view, offset by 4/4. */
 function expectShadow(testID: string) {
   expect(style(`${testID}-shadow`)).toMatchObject({
     position: "absolute",
@@ -154,7 +154,7 @@ describe("CollapsibleCard", () => {
     expect(toggle.props.accessibilityState).toMatchObject({ expanded: !collapsed });
     expect(toggle.props.accessibilityHint).toBe(collapsed ? "Déplier" : "Replier");
     const content = screen.getByTestId("card-content", { includeHiddenElements: true });
-    // Caché aux lecteurs d'écran : introuvable pour une requête qui imite un lecteur d'écran.
+    // Hidden from screen readers: not found by a query that mimics a screen reader.
     expect(screen.queryByLabelText("Nom")).toBe(collapsed ? null : screen.getByLabelText("Nom"));
     expect(content.props.accessibilityElementsHidden).toBe(collapsed);
     expect(content.props.importantForAccessibility).toBe(collapsed ? "no-hide-descendants" : "auto");

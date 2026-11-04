@@ -5,7 +5,7 @@ import { registerUser } from "../../src/domain/users";
 import { readDocument, updateDocument } from "../../src/store/db";
 import { withTempDataPath } from "./helpers/temp-store";
 
-test("e-mail unique, casse, nom vide, hash", async () => {
+test("unique email, case, empty name, hash", async () => {
   const first = await registerUser(emptyDatabase(), {
     email: " Ada@Example.com ",
     password: "secret-ok!!",
@@ -14,7 +14,7 @@ test("e-mail unique, casse, nom vide, hash", async () => {
   assert.equal(first.ok, true);
   if (!first.ok) return;
   assert.equal(first.value.email, "ada@example.com");
-  // Nouveau compte : adresse à confirmer (010).
+  // New account: address to confirm (010).
   assert.equal(first.value.emailVerifiedAt, null);
   assert.notEqual(first.value.passwordHash, "secret-ok!!");
   const second = await registerUser(first.doc, {
@@ -38,7 +38,7 @@ test("e-mail unique, casse, nom vide, hash", async () => {
   if (!short.ok) assert.equal(short.error, "passwordTooShort");
 });
 
-test("deux inscriptions simultanées du même e-mail", async () => {
+test("two simultaneous sign-ups with the same email", async () => {
   await withTempDataPath(async () => {
     const input = { email: "same@example.com", password: "secret-ok!!", displayName: "Sam" };
     await Promise.all([

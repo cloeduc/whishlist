@@ -1,4 +1,4 @@
-# Sur l'onglet Idées : ajoute l'idée NAME (catégorie et « qui » par défaut), revient à la liste.
+# On the Ideas tab: adds the idea NAME (default category and « qui »), goes back to the list.
 appId: app.ohyoushouldnt.mobile
 ---
 - runFlow: open-new-item.yaml

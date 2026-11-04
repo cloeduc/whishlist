@@ -6,18 +6,18 @@ type ItemInput = components["schemas"]["ItemInput"];
 type CreateListBody = paths["/lists"]["post"]["requestBody"]["content"]["application/json"];
 type PatchItemBody = paths["/lists/{listId}/items/{itemId}"]["patch"]["requestBody"]["content"]["application/json"];
 type ItemTransfer = components["schemas"]["ItemTransfer"];
-/** L'idée telle qu'elle était au moment du changement : de quoi l'afficher dans la liste d'arrivée avant l'envoi. Jamais envoyée. */
+/** The idea as it was at the time of the change: enough to show it in the target list before sending. Never sent. */
 type TransferPreview = { preview: components["schemas"]["MemberItem"] };
 
 /**
- * Valeurs par défaut calculées sur le téléphone à la création d'une liste (data/lists.ts), pour la vue
- * hors ligne des champs laissés vides. Jamais envoyées : le serveur calcule les siennes, qui priment.
+ * Default values computed on the phone when a list is created (data/lists.ts), for the offline
+ * view of fields left empty. Never sent: the server computes its own, which win.
  */
 export type ListPreview = { title: string; category: string; person: string };
 
-/** Corps envoyé pour chaque sorte de changement, au format du contrat (sauf `preview`, gardé sur le téléphone). */
+/** Body sent for each kind of change, in the contract format (except `preview`, kept on the phone). */
 export type ChangePayloads = {
-  // Les champs restent tels que saisis, vides compris : le serveur remplit les vides (contrat, POST /lists).
+  // Fields stay as typed, empty ones included: the server fills the empty ones (contract, POST /lists).
   createList: CreateListBody & { title: string; category: string; person: string; id: string; categoryId: string; personId: string; preview?: ListPreview };
   createItem: ItemInput & { id: string };
   updateItem: ItemInput;
@@ -28,7 +28,7 @@ export type ChangePayloads = {
 };
 export type ChangeKind = keyof ChangePayloads;
 
-/** Corps de `POST /lists` : la création telle que saisie, sans l'aperçu local. */
+/** Body of `POST /lists`: the creation as typed, without the local preview. */
 export function createListBody(payload: ChangePayloads["createList"]): CreateListBody {
   const { title, category, person, id, categoryId, personId } = payload;
   return { title, category, person, id, categoryId, personId };
@@ -40,7 +40,7 @@ export type NewChange = {
 
 export type ChangeState = "pending" | "sending" | "rejected";
 
-/** Un changement de la file (data-model.md, « outbox »). */
+/** A change in the queue (data-model.md, « outbox »). */
 export type Change = NewChange & {
   seq: number;
   state: ChangeState;
@@ -53,7 +53,7 @@ type Row = Omit<Change, "payload"> & { payload: string };
 
 const listeners = new Set<() => void>();
 
-/** Prévient les écrans et la synchronisation qu'un changement a été ajouté ou traité. */
+/** Notifies the screens and the sync that a change was added or processed. */
 export function onOutboxChange(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
@@ -74,8 +74,8 @@ export async function listChanges(): Promise<Change[]> {
 }
 
 /**
- * Un changement dépend d'un plus ancien qui vise le même objet, ou qui crée sa liste.
- * Si celui-là est refusé, celui-ci l'est aussi (FR-029a).
+ * A change depends on an older one that targets the same object, or that creates its list.
+ * If that one is rejected, this one is too (FR-029a).
  */
 export function dependsOn(change: Pick<Change, "listId" | "targetId">, earlier: Pick<Change, "kind" | "targetId">): boolean {
   return earlier.targetId === change.targetId || (earlier.kind === "createList" && earlier.targetId === change.listId);
@@ -94,12 +94,12 @@ async function setPayload(db: Db, seq: number, payload: unknown) {
 }
 
 /**
- * Ajoute un changement à la fin de la file, en compactant les changements encore `pending`
- * de la même idée (data-model.md, « Compaction ») :
- * - `updateItem` remplace un `updateItem` en attente ; `patchItem` se fond dans un `patchItem` en attente ;
- * - après un `createItem` en attente, une modification se fond dans la création ;
- * - `deleteItem` après un `createItem` en attente : les deux disparaissent.
- * Rend le `seq` du changement qui porte l'état final (null si plus rien n'est à envoyer).
+ * Adds a change at the end of the queue, compacting the still `pending` changes
+ * of the same idea (data-model.md, « Compaction »):
+ * - `updateItem` replaces a pending `updateItem`; `patchItem` merges into a pending `patchItem`;
+ * - after a pending `createItem`, an edit merges into the creation;
+ * - `deleteItem` after a pending `createItem`: both disappear.
+ * Returns the `seq` of the change that carries the final state (null if nothing is left to send).
  */
 export async function enqueue(change: NewChange): Promise<number | null> {
   const db = await getDb();
@@ -115,10 +115,10 @@ export async function enqueue(change: NewChange): Promise<number | null> {
     const created = sameItem.find((row) => row.kind === "createItem");
 
     if (change.kind === "deleteItem") {
-      // Un déplacement en attente reste : la suppression vise l'idée dans sa liste d'arrivée.
+      // A pending move stays: the deletion targets the idea in its target list.
       const dropped = created ? sameItem : sameItem.filter((row) => row.kind !== "moveItem");
       for (const row of dropped) await db.run("DELETE FROM outbox WHERE seq = ?", [row.seq]);
-      // Une idée jamais envoyée : rien à supprimer sur le serveur.
+      // An idea never sent: nothing to delete on the server.
       if (!created) seq = await insert(db, change, "pending", null);
       return;
     }
@@ -151,7 +151,7 @@ export async function getChange(seq: number): Promise<Change | null> {
   return row ? fromRow(row) : null;
 }
 
-/** Prochain changement à envoyer, dans l'ordre. */
+/** Next change to send, in order. */
 export async function nextPending(): Promise<Change | null> {
   const db = await getDb();
   const row = await db.first<Row>("SELECT * FROM outbox WHERE state = 'pending' ORDER BY seq LIMIT 1");
@@ -163,20 +163,20 @@ export async function markSending(seq: number): Promise<void> {
   await db.run("UPDATE outbox SET state = 'sending', attempts = attempts + 1 WHERE seq = ?", [seq]);
 }
 
-/** Accepté par le serveur : retiré de la file. */
+/** Accepted by the server: removed from the queue. */
 export async function markSent(seq: number): Promise<void> {
   const db = await getDb();
   await db.run("DELETE FROM outbox WHERE seq = ?", [seq]);
   emit();
 }
 
-/** Pas de réponse (réseau, 5xx, 401) : il repart en attente, pour un nouvel essai. */
+/** No answer (network, 5xx, 401): it goes back to pending, for a new attempt. */
 export async function markPending(seq: number): Promise<void> {
   const db = await getDb();
   await db.run("UPDATE outbox SET state = 'pending' WHERE seq = ?", [seq]);
 }
 
-/** Refus du serveur : le changement et ceux qui en dépendent passent `rejected` avec le même code. */
+/** Server refusal: the change and those that depend on it become `rejected` with the same code. */
 export async function reject(seq: number, errorCode: string): Promise<void> {
   const db = await getDb();
   await db.transaction(async () => {
@@ -191,14 +191,14 @@ export async function reject(seq: number, errorCode: string): Promise<void> {
   emit();
 }
 
-/** Changements refusés à cause de `seq` (même code, plus récents, dépendants). */
+/** Changes rejected because of `seq` (same code, newer, dependent). */
 function followers(all: Change[], parent: Change): Change[] {
   return all.filter(
     (row) => row.seq > parent.seq && row.state === "rejected" && row.errorCode === parent.errorCode && dependsOn(row, parent),
   );
 }
 
-/** « Corriger » : le changement refusé repart avec un corps modifié, et ceux qui en dépendaient avec lui. */
+/** « Corriger »: the rejected change is sent again with an edited body, and those that depended on it with it. */
 export async function retry(seq: number, payload: NewChange["payload"]): Promise<void> {
   const db = await getDb();
   await db.transaction(async () => {
@@ -213,7 +213,7 @@ export async function retry(seq: number, payload: NewChange["payload"]): Promise
   emit();
 }
 
-/** « Abandonner » : le changement refusé disparaît, avec ceux qui en dépendaient. */
+/** « Abandonner »: the rejected change disappears, with those that depended on it. */
 export async function discard(seq: number): Promise<void> {
   const db = await getDb();
   await db.transaction(async () => {
@@ -225,7 +225,7 @@ export async function discard(seq: number): Promise<void> {
   emit();
 }
 
-/** Au démarrage : un envoi interrompu (app tuée) repart en attente ; le renvoi est sans risque (R5). */
+/** At startup: an interrupted send (app killed) goes back to pending; resending is safe (R5). */
 export async function resetSending(): Promise<void> {
   const db = await getDb();
   await db.run("UPDATE outbox SET state = 'pending' WHERE state = 'sending'");

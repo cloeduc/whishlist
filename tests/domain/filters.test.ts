@@ -38,7 +38,7 @@ function doc() {
   return created.doc;
 }
 
-test("filtres du seed de test", () => {
+test("filters on the test seed", () => {
   const data = doc();
   const names = (view: string) => applyView(data, "w", `w:${view}`).map((item) => item.name);
   const maison = names("maison");
@@ -53,7 +53,7 @@ test("filtres du seed de test", () => {
   assert.equal(applyView(data, "w", "w:unknown").length, seed.items.length);
 });
 
-test("filtre par budget", () => {
+test("filter by budget", () => {
   const data = doc();
   const all = applyView(data, "w", null);
   const names = (budget: Parameters<typeof applyBudget>[1]) =>
@@ -71,7 +71,7 @@ test("filtre par budget", () => {
   assert.equal(applyBudget(all, parseBudget("nope")).length, seed.items.length);
 });
 
-test("qui se combine avec le type", () => {
+test("person combines with the type", () => {
   const data = doc();
   const maison = applyView(data, "w", "w:maison");
   const alex = applyPerson(maison, "w:alex").map((item) => item.name);
@@ -83,7 +83,7 @@ test("qui se combine avec le type", () => {
   assert.equal(applyPerson(maison, null).length, maison.length);
 });
 
-test("tri par priorité dans une vue filtrée", () => {
+test("sort by priority in a filtered view", () => {
   const data = doc();
   const maison = sortByPriority(applyView(data, "w", "w:maison"));
   assert.ok(maison.length >= 2);
@@ -94,7 +94,7 @@ test("tri par priorité dans une vue filtrée", () => {
   }
 });
 
-test("groupement par catégorie selon sortOrder", () => {
+test("grouping by category according to sortOrder", () => {
   const data = doc();
   const items = sortByPriority(applyView(data, "w", null));
   const types = data.types.filter((type) => type.wishlistId === "w");
@@ -116,8 +116,8 @@ test("groupement par catégorie selon sortOrder", () => {
   );
 });
 
-test("filterAndSortPublicItems : priorité d'abord, ordre du propriétaire à priorité égale, puis filtres", () => {
-  // Ordre rendu par l'API (sortOrder du propriétaire), volontairement pas alphabétique.
+test("filterAndSortPublicItems: priority first, owner order at equal priority, then filters", () => {
+  // Order returned by the API (owner's sortOrder), on purpose not alphabetical.
   const items = [
     { id: "a", name: "Zèbre", personId: "p1", priceCents: 1500, priority: "3" },
     { id: "b", name: "Abeille", personId: "p2", priceCents: 4000, priority: "5" },

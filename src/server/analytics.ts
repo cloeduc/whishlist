@@ -4,7 +4,7 @@ const WEBSITE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12
 
 export type AnalyticsConfig = { websiteId: string; upstream: string };
 
-/** Actif seulement si l'instance a fourni un identifiant et une origine Umami. */
+/** Active only if the instance provided an Umami identifier and origin. */
 export function analyticsConfig(env: NodeJS.Dict<string> = process.env): AnalyticsConfig | null {
   const websiteId = env.UMAMI_WEBSITE_ID?.trim() ?? "";
   const raw = env.UMAMI_URL?.trim() ?? "";
@@ -26,7 +26,7 @@ export function analyticsConfigured(): boolean {
 
 const PASS_HEADERS = ["content-type", "user-agent", "accept", "accept-language"] as const;
 
-/** N'envoie pas l'adresse IP ni le cookie de session vers l'outil de mesure. */
+/** Does not send the IP address or the session cookie to the analytics tool. */
 export function analyticsUpstreamHeaders(
   input: { get(name: string): string | null },
   websiteId: string,
@@ -45,8 +45,8 @@ export function analyticsUpstreamHeaders(
 export const ANALYTICS_PATHS = new Set(["script.js", "api/send"]);
 
 /**
- * Ne relaie qu'une vue de page publique.
- * L'identifiant du site est imposé : le corps reçu ne choisit pas la cible.
+ * Relays only a public page view.
+ * The site identifier is fixed: the received body does not choose the target.
  */
 export function prepareAnalyticsEvent(
   raw: string,

@@ -32,9 +32,9 @@ function Arrow({ up, label, disabled, onPress }: { up: boolean; label: string; d
 }
 
 /**
- * Catégories en accordéon, comme `components/site/ideas-accordion.tsx` : flèches pour l'ordre,
- * nom en gras, nombre d'idées, chevron ; ouverte (avec l'animation de `@/ui/Accordion`), elle montre ses idées.
- * Réordonner exige le serveur (réglage de liste, FR-029b).
+ * Categories as an accordion, like `components/site/ideas-accordion.tsx`: arrows for the order,
+ * bold name, idea count, chevron; when open (with the `@/ui/Accordion` animation), it shows its ideas.
+ * Reordering requires the server (list setting, FR-029b).
  */
 export function IdeasAccordion({ list }: { list: ViewList }) {
   const { t } = useTranslation("list");
@@ -79,7 +79,7 @@ export function IdeasAccordion({ list }: { list: ViewList }) {
   );
 }
 
-/** Une catégorie : flèches d'ordre, en-tête qui déplie (animé, voir `@/ui/Accordion`), ses idées. */
+/** One category: order arrows, header that expands (animated, see `@/ui/Accordion`), its ideas. */
 function CategorySection({
   list,
   category,
@@ -119,7 +119,7 @@ function CategorySection({
           <AccordionChevron progress={progress} color={tokens.colors.black} testID={`list.category-${category.id}-chevron`} />
         </AccordionTrigger>
       </View>
-      {/* Les idées ne sont montées que dépliées : une longue liste reste légère, et aucun bouton caché. */}
+      {/* Ideas are mounted only when expanded: a long list stays light, and no button is hidden. */}
       <AccordionContent
         expanded={expanded}
         progress={progress}

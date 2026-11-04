@@ -3,11 +3,11 @@ import { useEffect, useState } from "react";
 import { api, NetworkError, ok } from "@/api/client";
 import { getSnapshot, putSnapshot } from "@/offline/snapshot";
 
-// `analytics` manque dans une copie gardée avant 1.2.0.
+// `analytics` is missing from a copy saved before 1.2.0.
 export type Capabilities = { apiVersion: string; enrich: boolean; mail: boolean; analytics?: boolean };
 const CAPABILITIES = "capabilities";
 
-/** Services optionnels du serveur ; la dernière réponse connue sert hors ligne. */
+/** Optional server services; the last known response is used offline. */
 export function useCapabilities(): Capabilities | null {
   const [capabilities, setCapabilities] = useState<Capabilities | null>(null);
   useEffect(() => {

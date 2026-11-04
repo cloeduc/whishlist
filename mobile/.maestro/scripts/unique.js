@@ -1,2 +1,2 @@
-// Suffixe unique des comptes, listes et idées créés par un parcours (R6) : horodatage + aléa, en minuscules.
+// Unique suffix for the accounts, lists and ideas created by a flow (R6): timestamp + random, lowercase.
 output.unique = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);

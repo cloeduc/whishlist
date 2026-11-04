@@ -23,9 +23,9 @@ type Preview =
   | { status: "failed"; message: string; retry: boolean };
 
 /**
- * Lien d'invitation ouvert dans l'app (011, US2), comme `/inviter/{token}` du site. Sans session, le lien
- * est gardé pendant la connexion ou l'inscription, puis l'écran revient ici (R5). Connecté : le titre de
- * la liste et « Rejoindre » ; un compte déjà membre arrive directement sur la liste.
+ * Invite link opened in the app (011, US2), like the site's `/inviter/{token}`. Without a session, the link
+ * is kept during sign-in or sign-up, then the screen comes back here (R5). Signed in: the title of
+ * the list and « Rejoindre »; an account that is already a member goes straight to the list.
  */
 export default function InviteLink() {
   const { t } = useTranslation(["public", "auth", "mobile"]);
@@ -47,7 +47,7 @@ export default function InviteLink() {
     else if (signedIn) clearPendingLink();
   }, [session.status, signedIn, self]);
 
-  // Relu à l'ouverture une fois connecté, et à chaque « Réessayer ». L'état de départ est « loading ».
+  // Read on open once signed in, and on each « Réessayer ». The initial state is « loading ».
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     if (!signedIn) return;

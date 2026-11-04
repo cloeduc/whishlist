@@ -4,10 +4,10 @@ import { cookieSecure } from "./current";
 import { sessionSecret } from "./session";
 import type { Wishlist } from "../domain/types";
 
-const TTL_SEC = 60 * 60 * 24 * 14; // 14 jours
+const TTL_SEC = 60 * 60 * 24 * 14; // 14 days
 
 function cookieName(readToken: string): string {
-  // Nom court stable (tokens trop longs pour un cookie name).
+  // Short stable name (tokens too long for a cookie name).
   const digest = createHmac("sha256", "wl-read-name").update(readToken).digest("base64url").slice(0, 16);
   return `wl_ru_${digest}`;
 }
@@ -23,10 +23,10 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(left, right);
 }
 
-/** Durée d'un déverrouillage, cookie du site comme jeton de l'API. */
+/** Lifetime of an unlock, for the site cookie as for the API token. */
 export const READ_UNLOCK_TTL_SEC = TTL_SEC;
 
-/** Preuve de déverrouillage `iat.mac`, liée au hash courant (invalide si le MDP change). */
+/** Unlock proof `iat.mac`, bound to the current hash (invalid if the password changes). */
 export function signReadUnlock(list: Wishlist, secret: string, nowMs = Date.now()): string {
   const iat = Math.floor(nowMs / 1000);
   return `${iat}.${macUnlock(list.readToken, list.readPasswordHash ?? "", secret)}`;

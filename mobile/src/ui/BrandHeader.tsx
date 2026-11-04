@@ -6,7 +6,7 @@ import { tokens } from "@/theme/tokens";
 import { GiftMark } from "./GiftMark";
 import { Text } from "./Text";
 
-/** En-tête du site : cadeau encadré + nom du produit en gras. */
+/** Site header: framed gift + product name in bold. */
 export function BrandHeader() {
   const { t } = useTranslation("common");
   return (

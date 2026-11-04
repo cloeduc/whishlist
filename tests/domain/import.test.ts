@@ -32,7 +32,7 @@ function imported(id: string) {
   return created;
 }
 
-test("seed de test : idées préfixées, types et personnes", () => {
+test("test seed: prefixed ideas, types and people", () => {
   const created = imported("w1");
   const items = created.doc.items.filter((item) => item.wishlistId === "w1");
   assert.equal(items.length, seed.items.length);
@@ -43,7 +43,7 @@ test("seed de test : idées préfixées, types et personnes", () => {
   assert.ok(created.doc.people.some((person) => person.id === "w1:alex" && person.label === "Alex"));
 });
 
-test("deux imports ne partagent pas d'ids", () => {
+test("two imports do not share ids", () => {
   const first = imported("w1");
   const second = createWishlist(first.doc, {
     ownerId: "u",

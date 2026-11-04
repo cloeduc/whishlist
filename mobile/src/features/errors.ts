@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 import { ApiError, NetworkError } from "@/api/client";
 import { i18n, translateError } from "@/i18n";
 
-/** Message affichable pour toute erreur : code du serveur traduit, ou serveur injoignable (SC-007). */
+/** Displayable message for any error: translated server code, or server unreachable (SC-007). */
 export function errorText(error: unknown): string {
   if (error instanceof NetworkError) return i18n.t("mobile:offline.unreachable");
   if (error instanceof ApiError) return translateError(error.code);
@@ -11,8 +11,8 @@ export function errorText(error: unknown): string {
 }
 
 /**
- * Action qui exige le serveur (connexion, compte, réglages…) : occupée pendant l'appel,
- * et son erreur traduite gardée pour l'afficher sous le formulaire, champs conservés (FR-014).
+ * Action that requires the server (sign-in, account, settings…): busy during the call,
+ * and its translated error kept to show it below the form, fields kept (FR-014).
  */
 export function useServerAction<A extends unknown[]>(action: (...args: A) => Promise<void>) {
   const [busy, setBusy] = useState(false);

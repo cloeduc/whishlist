@@ -5,7 +5,7 @@ import type { components, paths } from "./schema";
 
 export type Schemas = components["schemas"];
 
-/** Refus du serveur : `{ error: { code, message } }` (contrat 004). */
+/** Server refusal: `{ error: { code, message } }` (contract 004). */
 export class ApiError extends Error {
   constructor(
     readonly code: string,
@@ -18,7 +18,7 @@ export class ApiError extends Error {
   }
 }
 
-/** Serveur injoignable (pas de réseau, délai dépassé). */
+/** Server unreachable (no network, timeout). */
 export class NetworkError extends Error {
   constructor(cause?: unknown) {
     super("network", { cause });
@@ -40,12 +40,12 @@ const hooks: ClientHooks = {
   onUpgradeRequired: () => {},
 };
 
-/** Branche la session, la langue et les écrans globaux (401, 410) sur le client. */
+/** Plugs the session, the language and the global screens (401, 410) into the client. */
 export function configureClient(next: Partial<ClientHooks>): void {
   Object.assign(hooks, next);
 }
 
-/** Adresse du site, fixée au build (`EXPO_PUBLIC_API_URL`). */
+/** Site address, set at build time (`EXPO_PUBLIC_API_URL`). */
 export function siteOrigin(): string {
   const configured = Constants.expoConfig?.extra?.apiUrl;
   const origin = typeof configured === "string" && configured ? configured : "http://localhost:3000";
@@ -82,7 +82,7 @@ function isErrorBody(value: unknown): value is Schemas["Error"] & { title?: unkn
   return typeof error === "object" && error !== null && "code" in error && typeof error.code === "string";
 }
 
-/** Erreur du serveur à partir de la réponse (et du corps déjà lu par openapi-fetch, s'il y en a un). */
+/** Server error built from the response (and from the body already read by openapi-fetch, if there is one). */
 export async function apiErrorFrom(response: Response, body: unknown): Promise<ApiError> {
   let parsed = body;
   if (parsed === undefined) parsed = await response.json().catch(() => undefined);
@@ -95,14 +95,14 @@ export async function apiErrorFrom(response: Response, body: unknown): Promise<A
 
 type Answer<T> = { data?: T; error?: unknown; response: Response };
 
-/** Rend le corps d'une réponse réussie, ou lève l'`ApiError` du serveur. */
+/** Returns the body of a successful response, or throws the server's `ApiError`. */
 export async function ok<T>(request: Promise<Answer<T>>): Promise<T> {
   const { data, error, response } = await request;
   if (!response.ok || data === undefined) throw await apiErrorFrom(response, error);
   return data;
 }
 
-/** Pour les réponses sans corps (204). */
+/** For responses without a body (204). */
 export async function done(request: Promise<{ error?: unknown; response: Response }>): Promise<Response> {
   const { error, response } = await request;
   if (!response.ok) throw await apiErrorFrom(response, error);

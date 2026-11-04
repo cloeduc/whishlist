@@ -13,7 +13,7 @@ before(ensurePasswordHash);
 
 type ToolResult = { content: { type: string; text: string }[]; isError?: boolean };
 
-/** Un appel JSON-RPC comme le ferait un assistant (transport HTTP sans état). */
+/** A JSON-RPC call as an assistant would make it (stateless HTTP transport). */
 function client(user: User) {
   const handler = createMcpHandler(() => buildMcpServer(ctx(user)));
   async function rpc(method: string, params: unknown): Promise<{ result?: unknown; error?: { message: string } }> {
@@ -37,7 +37,7 @@ function client(user: User) {
 
 const json = (result: ToolResult) => JSON.parse(result.content[0]!.text);
 
-test("outils proposés : listes, idées, catégories et « qui », remplir depuis un lien ; rien pour le compte", async () => {
+test("offered tools: lists, ideas, categories and « qui », fill from a link; nothing for the account", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const tools = await client(doc.users[0]!).tools();
@@ -64,7 +64,7 @@ test("outils proposés : listes, idées, catégories et « qui », remplir depui
   });
 });
 
-test("annotations : seuls les outils delete_* se disent destructifs ; les lectures se disent sans écriture", async () => {
+test("annotations: only the delete_* tools say they are destructive; reads say they do not write", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     for (const tool of await client(doc.users[0]!).listed()) {
@@ -75,7 +75,7 @@ test("annotations : seuls les outils delete_* se disent destructifs ; les lectur
   });
 });
 
-test("list_lists et get_list : les listes du compte ; une idée dit si elle est réservée, jamais par qui ni le mot", async () => {
+test("list_lists and get_list: the account's lists; an idea says whether it is reserved, never by whom nor the note", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -89,7 +89,7 @@ test("list_lists et get_list : les listes du compte ; une idée dit si elle est 
   });
 });
 
-test("get_list d'une liste dont on n'est pas membre : refus traduit, comme l'API", async () => {
+test("get_list of a list the account is not a member of: translated refusal, like the API", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const result = await client(doc.users[1]!).call("get_list", { listId: "w" });
@@ -98,7 +98,7 @@ test("get_list d'une liste dont on n'est pas membre : refus traduit, comme l'API
   });
 });
 
-test("add_idea : catégorie et « qui » par leur nom (casse ignorée), sinon les premiers ; nom inconnu → la liste des noms", async () => {
+test("add_idea: category and « qui » by name (case ignored), else the first ones; unknown name → the list of names", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -114,7 +114,7 @@ test("add_idea : catégorie et « qui » par leur nom (casse ignorée), sinon le
   });
 });
 
-test("update_idea : seuls les champs donnés changent ; priority 0 retire les étoiles", async () => {
+test("update_idea: only the given fields change; priority 0 removes the stars", async () => {
   const doc = apiDoc();
   doc.items.find((item) => item.id === "gift")!.priority = "3";
   doc.items.find((item) => item.id === "gift")!.url = "https://shop.example.test/a";
@@ -130,7 +130,7 @@ test("update_idea : seuls les champs donnés changent ; priority 0 retire les é
   });
 });
 
-test("description et « occasion acceptée » : lues par get_list, posées par add_idea, gardées ou changées par update_idea", async () => {
+test("description and « occasion acceptée »: read by get_list, set by add_idea, kept or changed by update_idea", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -150,7 +150,7 @@ test("description et « occasion acceptée » : lues par get_list, posées par a
   });
 });
 
-test("archive_idea, add_category, add_person : mêmes règles que le site (un doublon de nom est refusé par la règle)", async () => {
+test("archive_idea, add_category, add_person: same rules as the site (a duplicate name is refused by the rule)", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -163,7 +163,7 @@ test("archive_idea, add_category, add_person : mêmes règles que le site (un do
   });
 });
 
-test("delete_idea : supprime ; une idée réservée est refusée, comme sur le site", async () => {
+test("delete_idea: deletes; a reserved idea is refused, as on the site", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -176,7 +176,7 @@ test("delete_idea : supprime ; une idée réservée est refusée, comme sur le s
   });
 });
 
-/** Alex devient membre de la liste de Camille, qui a aussi une catégorie « jeux ». */
+/** Alex becomes a member of Camille's list, which also has a « jeux » category. */
 function transferDoc() {
   const doc = apiDocWithSecondList();
   doc.memberships.push({ wishlistId: "w-camille", userId: "alex", role: "member", joinedAt: "2026-01-06T00:00:00.000Z" });
@@ -184,7 +184,7 @@ function transferDoc() {
   return doc;
 }
 
-test("move_idea : catégorie de même nom, sinon la première ; « qui » donné par nom ; nom inconnu → la liste des noms", async () => {
+test("move_idea: category with the same name, else the first; « qui » given by name; unknown name → the list of names", async () => {
   const doc = transferDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -200,7 +200,7 @@ test("move_idea : catégorie de même nom, sinon la première ; « qui » donné
   });
 });
 
-test("move_idea : une idée réservée ne part pas ; il faut être membre des deux listes", async () => {
+test("move_idea: a reserved idea does not move; the account must be a member of both lists", async () => {
   const doc = transferDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -213,7 +213,7 @@ test("move_idea : une idée réservée ne part pas ; il faut être membre des de
   });
 });
 
-test("copy_idea : copie sans réservation ni archivage, vers une autre liste ou la même ; non-membre refusé", async () => {
+test("copy_idea: copies without reservation or archiving, to another list or the same one; non-member refused", async () => {
   const doc = transferDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -230,7 +230,7 @@ test("copy_idea : copie sans réservation ni archivage, vers une autre liste ou 
   });
 });
 
-test("rename_* et delete_* : catégorie et « qui » par leur nom ; un libellé encore utilisé n'est pas retiré", async () => {
+test("rename_* and delete_*: category and « qui » by name; a label still in use is not removed", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -249,7 +249,7 @@ test("rename_* et delete_* : catégorie et « qui » par leur nom ; un libellé 
   });
 });
 
-test("create_list, rename_list, delete_list : seul le propriétaire supprime ; un non-membre ne voit pas la liste", async () => {
+test("create_list, rename_list, delete_list: only the owner deletes; a non-member does not see the list", async () => {
   const doc = apiDoc();
   doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-01T00:00:00.000Z" });
   await withStore(doc, async () => {
@@ -267,7 +267,7 @@ test("create_list, rename_list, delete_list : seul le propriétaire supprime ; u
   });
 });
 
-test("accès au serveur : une clé valide seulement ; ni jeton de session, ni clé révoquée, ni page d'un autre site", async () => {
+test("server access: a valid key only; no session token, no revoked key, no page from another site", async () => {
   const doc = apiDoc();
   const created = createApiKey(doc, doc.users[0]!, { name: "Claude" });
   assert.ok(created.ok);
@@ -291,7 +291,7 @@ test("accès au serveur : une clé valide seulement ; ni jeton de session, ni cl
   });
 });
 
-test("accès au serveur : au-delà de 120 requêtes par minute, la clé reçoit rateLimited", async () => {
+test("server access: beyond 120 requests per minute, the key gets rateLimited", async () => {
   const doc = apiDoc();
   const created = createApiKey(doc, doc.users[0]!, { name: "Claude" });
   assert.ok(created.ok);
@@ -303,7 +303,7 @@ test("accès au serveur : au-delà de 120 requêtes par minute, la clé reçoit 
   });
 });
 
-test("rename_* et delete_* : un nom vide est refusé, jamais « le premier » de la liste", async () => {
+test("rename_* and delete_*: an empty name is refused, never « the first » of the list", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -321,7 +321,7 @@ test("rename_* et delete_* : un nom vide est refusé, jamais « le premier » de
   });
 });
 
-test("update_idea : une catégorie ou un « qui » vide garde ceux de l'idée", async () => {
+test("update_idea: an empty category or « qui » keeps the idea's ones", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -336,7 +336,7 @@ test("update_idea : une catégorie ou un « qui » vide garde ceux de l'idée", 
   });
 });
 
-test("get_list : le prix en euros, tel que update_idea le reprend", async () => {
+test("get_list: the price in euros, as update_idea takes it back", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -347,7 +347,7 @@ test("get_list : le prix en euros, tel que update_idea le reprend", async () => 
   });
 });
 
-test("entrées bornées : un nom trop long est refusé avant la commande", async () => {
+test("bounded inputs: a too long name is refused before the command", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
@@ -357,7 +357,7 @@ test("entrées bornées : un nom trop long est refusé avant la commande", async
   });
 });
 
-test("fill_from_url : un non-membre reçoit listMissing ; une adresse qui n'est pas un lien web est refusée", async () => {
+test("fill_from_url: a non-member gets listMissing; an address that is not a web link is refused", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
     assert.match((await client(doc.users[1]!).call("fill_from_url", { listId: "w", url: "https://shop.example.test/a" })).content[0]!.text, /listMissing/);

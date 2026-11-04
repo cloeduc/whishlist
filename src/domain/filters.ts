@@ -17,7 +17,7 @@ export function parseBudget(value: string | undefined): BudgetId | null {
   return BUDGETS.some((budget) => budget.id === value) ? (value as BudgetId) : null;
 }
 
-/** Tri après filtres : ★★★★★ d'abord, sans priorité en bas. */
+/** Sort after filters: ★★★★★ first, no priority at the bottom. */
 export function sortByPriority(items: Item[]): Item[] {
   return [...items].sort((a, b) => {
     const pa = parsePriority(a.priority) ?? 0;
@@ -32,7 +32,7 @@ export interface CategoryGroup {
   items: Item[];
 }
 
-/** Groupes par type, dans l’ordre des catégories (sortOrder) puis libellé. */
+/** Groups by type, in category order (sortOrder) then label. */
 export function groupByCategory(
   items: Item[],
   types: { id: string; label: string; sortOrder?: number }[],
@@ -76,9 +76,9 @@ export function matchesBudget(cents: number | null, budget: BudgetId): boolean {
 }
 
 /**
- * Filtre et tri des idées d'une liste publique telles que l'API les rend (app mobile).
- * L'API les rend déjà dans l'ordre du propriétaire (`sortOrder`) : le tri, stable, ne compare que la
- * priorité, pour garder cet ordre à priorité égale comme `sortByPriority` sur le site.
+ * Filters and sorts the ideas of a public list as the API returns them (mobile app).
+ * The API already returns them in the owner's order (`sortOrder`): the stable sort only compares
+ * priority, to keep that order at equal priority like `sortByPriority` on the site.
  */
 export function filterAndSortPublicItems<
   T extends { personId: string; priceCents: number | null; priority: string | null },

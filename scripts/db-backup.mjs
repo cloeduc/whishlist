@@ -1,6 +1,6 @@
-// Sauvegarde à chaud, cohérente, de la base en marche : `node scripts/db-backup.mjs <destination>`.
-// En prod : `docker exec whishlist node scripts/db-backup.mjs /data/.backup-<date>.db` (deploy/backup-whishlist.sh).
-// JS simple (sans tsx) pour tourner dans l'image ; même règle de chemin que `databaseFilePath()`.
+// Hot, consistent backup of the running database: `node scripts/db-backup.mjs <destination>`.
+// In prod: `docker exec whishlist node scripts/db-backup.mjs /data/.backup-<date>.db` (deploy/backup-whishlist.sh).
+// Plain JS (no tsx) to run in the image; same path rule as `databaseFilePath()`.
 import Database from "better-sqlite3";
 import { chmodSync, existsSync, statSync } from "node:fs";
 import path from "node:path";
@@ -15,7 +15,7 @@ if (!destination) {
 const dataPath = process.env.WISHLIST_DATA_PATH ?? path.join(process.cwd(), "data", "wishlist.json");
 const source = dataPath.endsWith(".db") ? dataPath : `${dataPath.replace(/\.json$/, "")}.db`;
 if (!existsSync(source)) {
-  console.error(`Base absente : ${source}`);
+  console.error(`Database missing: ${source}`);
   process.exit(1);
 }
 
@@ -29,6 +29,6 @@ try {
 try {
   chmodSync(destination, 0o600);
 } catch {
-  // FS sans chmod — ignore
+  // FS without chmod — ignore
 }
-console.log(`${destination} (${statSync(destination).size} octets)`);
+console.log(`${destination} (${statSync(destination).size} bytes)`);

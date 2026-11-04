@@ -6,7 +6,7 @@ import { ListScreen } from "@/features/lists/ListScreen";
 import { RejectedAlert } from "@/ui/RejectedAlert";
 import { Button } from "@/ui/Button";
 
-/** Onglet Idées, d'après `06-liste-idees.png` (FR-012). */
+/** Ideas tab, from `06-liste-idees.png` (FR-012). */
 export default function Ideas() {
   const { t } = useTranslation("list");
   return (

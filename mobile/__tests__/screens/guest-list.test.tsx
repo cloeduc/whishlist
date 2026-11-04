@@ -33,7 +33,7 @@ beforeEach(async () => {
   jest.mocked(router.push).mockClear();
 });
 
-test("sans compte : la liste, ses catégories, et « Réserver ce cadeau » mène au formulaire", async () => {
+test("without an account: the list, its categories, and « Réserver ce cadeau » leads to the form", async () => {
   const { calls } = fakeFetch({ "GET /public/lists/rt": () => json(200, publicList()) });
   await render(<GuestList />);
   expect(await screen.findByTestId("guest.title")).toHaveTextContent("Liste d'Alex");
@@ -44,7 +44,7 @@ test("sans compte : la liste, ses catégories, et « Réserver ce cadeau » mèn
   expect(calls).toEqual(["GET /public/lists/rt"]);
 });
 
-test("filtre par catégorie, aussi depuis le lien /l/<t>/types?typeId=", async () => {
+test("filters by category, also from the /l/<t>/types?typeId= link", async () => {
   params.typeId = "t2";
   fakeFetch({ "GET /public/lists/rt": () => json(200, publicList()) });
   await render(<GuestList />);
@@ -55,7 +55,7 @@ test("filtre par catégorie, aussi depuis le lien /l/<t>/types?typeId=", async (
   expect(screen.getByText("Idée i1")).toBeOnTheScreen();
 });
 
-test("membre de la liste : sa vue membre, sans lire la liste publique, sauf depuis « Voir comme un invité »", async () => {
+test("list member: their member view, without reading the public list, except from « Voir comme un invité »", async () => {
   await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
   await putSnapshot("lists", [{ id: "w", readUrl: "https://api.example.test/l/rt" }]);
   const { calls } = fakeFetch({ "GET /public/lists/rt": () => json(200, publicList()) });
@@ -70,7 +70,7 @@ test("membre de la liste : sa vue membre, sans lire la liste publique, sauf depu
   expect(router.replace).not.toHaveBeenCalled();
 });
 
-test("liste protégée : mot de passe faux refusé, le bon déverrouille et reste gardé", async () => {
+test("protected list: a wrong password is refused, the right one unlocks and stays stored", async () => {
   let unlocked = false;
   fakeFetch({
     "GET /public/lists/rt": (request) =>
@@ -112,7 +112,7 @@ test("lien inconnu : « liste introuvable » ; serveur injoignable : « Réessay
   expect(await screen.findByTestId("guest.title")).toBeOnTheScreen();
 });
 
-test("sa propre réservation : annulée avec son claim, puis l'idée redevient réservable", async () => {
+test("own reservation: cancelled with its claim, then the idea can be reserved again", async () => {
   await saveClaim("rt", "r1", "claim-1");
   let reserved = true;
   let claimsHeader: string | null = null;
@@ -134,7 +134,7 @@ test("sa propre réservation : annulée avec son claim, puis l'idée redevient r
   expect(await claimsFor("rt")).toEqual([]);
 });
 
-test("jeton de déverrouillage refusé (mot de passe changé) : oublié, et le mot de passe est redemandé", async () => {
+test("unlock token refused (password changed): forgotten, and the password is asked again", async () => {
   await saveUnlock("rt", "ancien-jeton", "2099-01-01T00:00:00.000Z");
   let sent: string | null = null;
   fakeFetch({
@@ -149,7 +149,7 @@ test("jeton de déverrouillage refusé (mot de passe changé) : oublié, et le m
   expect(await unlockTokenFor("rt")).toBeNull();
 });
 
-test("lien d'une idée : seul un lien web s'ouvre (011)", async () => {
+test("idea link: only a web link opens (011)", async () => {
   fakeFetch({
     "GET /public/lists/rt": () =>
       json(200, publicList([item("i1", "t1", { url: "https://exemple.test/jeu" }), item("i2", "t1", { url: "tel:0600000000" })])),
@@ -160,7 +160,7 @@ test("lien d'une idée : seul un lien web s'ouvre (011)", async () => {
   expect(screen.queryByTestId("guest.link-1")).toBeNull();
 });
 
-// 012 : suivre une liste depuis sa vue, la relire hors ligne, la quitter même verrouillée.
+// 012: follow a list from its view, read it again offline, leave it even when locked.
 
 const signedIn = () => signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
 
@@ -177,7 +177,7 @@ const summary = {
   locked: false,
 };
 
-test("avec un compte : suivre la liste, puis ne plus la suivre après confirmation", async () => {
+test("with an account: follow the list, then unfollow it after confirmation", async () => {
   await signedIn();
   let subscribed = false;
   let body: unknown = null;
@@ -203,7 +203,7 @@ test("avec un compte : suivre la liste, puis ne plus la suivre après confirmati
   expect(subscribed).toBe(false);
 });
 
-test("suivre une liste déverrouillée sur ce téléphone envoie sa preuve de déverrouillage", async () => {
+test("following a list unlocked on this phone sends its unlock proof", async () => {
   await signedIn();
   await saveUnlock("rt", "unlock-1", "2099-01-01T00:00:00.000Z");
   let proof: string | null = null;
@@ -220,7 +220,7 @@ test("suivre une liste déverrouillée sur ce téléphone envoie sa preuve de d�
   await waitFor(() => expect(proof).toBe("unlock-1"));
 });
 
-test("pas de bouton « Suivre » sans compte, ni pour un membre qui regarde en invité", async () => {
+test("no « Suivre » button without an account, nor for a member viewing as a guest", async () => {
   fakeFetch({ "GET /public/lists/rt": () => json(200, publicList()) });
   await render(<GuestList />);
   await screen.findByTestId("guest.title");
@@ -235,7 +235,7 @@ test("pas de bouton « Suivre » sans compte, ni pour un membre qui regarde en i
   expect(screen.queryByTestId("guest.unfollow")).toBeNull();
 });
 
-test("une liste suivie se relit hors ligne ; une liste seulement ouverte par son lien, non", async () => {
+test("a followed list can be read again offline; a list only opened from its link cannot", async () => {
   await signedIn();
   fakeFetch({ "GET /public/lists/rt": () => json(200, { ...publicList(), subscribed: true }) });
   await render(<GuestList />);
@@ -248,7 +248,7 @@ test("une liste suivie se relit hors ligne ; une liste seulement ouverte par son
   await render(<GuestList />);
   expect(await screen.findByText("Idée i1")).toBeOnTheScreen();
 
-  // Ne plus la suivre (ici, la relire non suivie) efface la copie : hors ligne, plus rien à montrer.
+  // No longer following it (here, reading it again unfollowed) clears the copy: offline, nothing left to show.
   fakeFetch({ "GET /public/lists/rt": () => json(200, publicList()) });
   await render(<GuestList />);
   await screen.findByTestId("guest.title");
@@ -260,7 +260,7 @@ test("une liste suivie se relit hors ligne ; une liste seulement ouverte par son
   expect(await screen.findByTestId("guest.retry")).toBeOnTheScreen();
 });
 
-test("filtres « Pour qui ? » et budget, idées triées par envie puis dans l'ordre du propriétaire", async () => {
+test("« Pour qui ? » and budget filters, ideas sorted by priority then in the owner's order", async () => {
   const list = {
     ...publicList([
       item("i1", "t1", { priority: "2", personId: "p" }),
@@ -291,7 +291,7 @@ test("filtres « Pour qui ? » et budget, idées triées par envie puis dans l'o
   expect(screen.getByTestId("guest.empty")).toHaveTextContent(/Aucune idée ne correspond à ces filtres/);
 });
 
-test("liste suivie dont le mot de passe a changé : on peut ne plus la suivre sans la déverrouiller", async () => {
+test("followed list whose password changed: it can be unfollowed without unlocking it", async () => {
   await signedIn();
   await putSnapshot("subscriptions", [{ ...summary, locked: true }]);
   let deleted = false;
@@ -312,13 +312,13 @@ test("liste suivie dont le mot de passe a changé : on peut ne plus la suivre sa
   expect(deleted).toBe(true);
 });
 
-test("de retour sur la liste (après une réservation) : elle est relue", async () => {
+test("back on the list (after a reservation): it is reloaded", async () => {
   const { calls } = fakeFetch({ "GET /public/lists/rt": () => json(200, publicList()) });
   await render(<GuestList />);
   await screen.findByTestId("guest.title");
   expect(calls).toEqual(["GET /public/lists/rt"]);
   const onFocus = jest.mocked(useFocusEffect).mock.lastCall![0];
-  onFocus(); // première prise de focus, à l'ouverture : déjà lue
-  onFocus(); // retour sur l'écran
+  onFocus(); // first focus, on opening: already read
+  onFocus(); // back on the screen
   await waitFor(() => expect(calls).toEqual(["GET /public/lists/rt", "GET /public/lists/rt"]));
 });

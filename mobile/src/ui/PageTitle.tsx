@@ -5,7 +5,7 @@ import { tokens } from "@/theme/tokens";
 
 import { Text } from "./Text";
 
-/** Titre d'écran du site (`h1 text-2xl font-medium`), avec son texte d'introduction et une action à droite. */
+/** Site screen title (`h1 text-2xl font-medium`), with its intro text and an action on the right. */
 export function PageTitle({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
     <View style={{ gap: tokens.space[2] }}>

@@ -5,7 +5,7 @@ import { resendEmailVerification } from "@/src/server/commands/email";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Renvoie le lien de confirmation de l'adresse ; le précédent ne vaut plus rien (010, US2). */
+/** Resends the address confirmation link; the previous one is no longer valid (010, US2). */
 export const POST = withApi(async (api) => {
   const result = await resendEmailVerification(await commandContext(api));
   if (!result.ok) return apiError(result.error, api.locale, api.cors);

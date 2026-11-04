@@ -15,12 +15,12 @@ export function distinctTokens(): { readToken: string; inviteToken: string } {
   return { readToken, inviteToken };
 }
 
-/** Jeton secret de 256 bits (reset de mot de passe, session d'API). */
+/** 256-bit secret token (password reset, API session). */
 export function newSecretToken(): string {
   return randomBytes(32).toString("base64url");
 }
 
-/** Empreinte stockée d'un jeton secret : SHA-256 suffit pour 256 bits d'entropie. */
+/** Stored hash of a secret token: SHA-256 is enough for 256 bits of entropy. */
 export function hashSecretToken(token: string): string {
   return createHash("sha256").update(token).digest("base64url");
 }

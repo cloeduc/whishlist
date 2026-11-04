@@ -1,6 +1,6 @@
-# Ouvre le dernier lien de confirmation reçu par TO (lu dans MailDev), appuie sur « Confirmer » dans le
-# navigateur, attend DONE (texte de réussite de la page), puis revient à l'app sans la relancer :
-# au retour au premier plan, l'app relit le compte (010).
+# Opens the last confirmation link received by TO (read in MailDev), taps « Confirmer » in the
+# browser, waits for DONE (the page's success text), then goes back to the app without relaunching it:
+# when it comes back to the foreground, the app reloads the account (010).
 appId: app.ohyoushouldnt.mobile
 ---
 - retry:

@@ -4,14 +4,14 @@ import { cn } from "@/lib/utils";
 const insetPanelClasses = "rounded-base border-2 border-border bg-secondary-background p-3 shadow-shadow";
 
 /**
- * Encadré d'une ligne à l'intérieur d'une carte (une offre, une clé d'API) : bordure, fond et ombre de la
- * carte, avec un padding plus serré. La mise en page (flex, gap) reste à l'appelant.
+ * One-line box inside a card (an offer, an API key): the card's border, background and shadow,
+ * with tighter padding. The layout (flex, gap) is left to the caller.
  */
 export function InsetPanel({ className, ...props }: ComponentProps<"div">) {
   return <div className={cn(insetPanelClasses, className)} {...props} />;
 }
 
-/** Même encadré, en élément de liste (`<li>`). */
+/** Same box, as a list element (`<li>`). */
 export function InsetPanelItem({ className, ...props }: ComponentProps<"li">) {
   return <li className={cn(insetPanelClasses, className)} {...props} />;
 }

@@ -4,13 +4,13 @@ import { normalizeDescription } from "../../../src/domain/description";
 import { formatPrice, parsePrice } from "../../../src/domain/price";
 import type { Change, ChangePayloads } from "./outbox";
 
-/** État d'envoi d'un objet affiché : en attente, ou refusé avec la raison du serveur. */
+/** Send state of a displayed object: pending, or rejected with the server's reason. */
 export type Sync = { pending: boolean; rejected: { seq: number; errorCode: string; kind: Change["kind"] } | null };
 
 export type ViewItem = Schemas["MemberItem"] & Sync;
 export type ViewList = Omit<Schemas["MemberList"], "items"> & Sync & {
   items: ViewItem[];
-  /** Pas encore sur le serveur (création hors ligne) : pas de lien public. */
+  /** Not on the server yet (created offline): no public link. */
   localOnly: boolean;
 };
 export type ViewListSummary = Schemas["ListSummary"] & Sync & { localOnly: boolean };
@@ -23,14 +23,14 @@ function syncOf(change: Change): Sync {
     : { pending: true, rejected: null };
 }
 
-/** Prix affiché d'une idée pas encore envoyée : même règle et même format que le serveur. */
+/** Displayed price of an idea not sent yet: same rule and same format as the server. */
 function priceFields(input: ChangePayloads["updateItem"], intlLocale: string) {
   const cents = parsePrice(input.price ?? "");
   const priceCents = cents === "invalid" ? null : cents;
   return { priceCents, priceLabel: formatPrice(priceCents, intlLocale) };
 }
 
-/** `keep` : la description affichée quand le changement n'en porte pas (file écrite avant ce champ). */
+/** `keep`: the description shown when the change does not carry one (queue written before this field). */
 function itemFields(input: ChangePayloads["updateItem"], intlLocale: string, keep: string | null = null) {
   return {
     name: input.name.trim(),
@@ -52,9 +52,9 @@ function replaceAt<T>(items: T[], index: number, value: T): T[] {
 type Transfer = Extract<Change, { kind: "moveItem" | "copyItem" }>;
 
 /**
- * Déplacement ou copie vus depuis `listId` : l'idée quitte la liste de départ (un refus la laisse, avec l'alerte)
- * et arrive dans la liste d'arrivée, d'après l'aperçu gardé dans le changement. Une copie dans la même liste
- * s'affiche juste après l'original.
+ * Move or copy seen from `listId`: the idea leaves the source list (a refusal keeps it there, with the alert)
+ * and arrives in the target list, from the preview kept in the change. A copy in the same list
+ * shows right after the original.
  */
 function applyTransfer(items: ViewItem[], change: Transfer, listId: string): ViewItem[] {
   const { targetListId, typeId, personId, preview } = change.payload;
@@ -76,8 +76,8 @@ function applyTransfer(items: ViewItem[], change: Transfer, listId: string): Vie
 }
 
 /**
- * Liste créée sur le téléphone et pas encore acceptée : ce que l'on sait d'elle. Un champ laissé vide
- * montre la valeur par défaut calculée sur le téléphone (`preview`) ; le serveur la remplace à l'envoi.
+ * List created on the phone and not accepted yet: what we know about it. A field left empty
+ * shows the default value computed on the phone (`preview`); the server replaces it when sent.
  */
 function localList(change: Extract<Change, { kind: "createList" }>): ViewList {
   const { payload } = change;
@@ -103,8 +103,8 @@ function localList(change: Extract<Change, { kind: "createList" }>): ViewList {
 }
 
 /**
- * Vue d'une liste = copie du serveur + changements de la file appliqués dans l'ordre
- * (data-model.md, « Vue optimiste »). Rend null si la liste n'existe ni d'un côté ni de l'autre.
+ * View of a list = server copy + queue changes applied in order
+ * (data-model.md, « Vue optimiste »). Returns null if the list exists on neither side.
  */
 export function viewList(
   snapshot: Schemas["MemberList"] | null,
@@ -147,7 +147,7 @@ export function viewList(
         if (current) next = replaceAt(items, index, { ...current, ...change.payload, ...syncOf(change) });
         break;
       case "deleteItem":
-        // Une suppression refusée laisse l'idée visible, avec l'alerte.
+        // A rejected deletion leaves the idea visible, with the alert.
         next =
           change.state === "rejected"
             ? items.map((item) => (item.id === change.targetId ? { ...item, ...syncOf(change) } : item))
@@ -159,7 +159,7 @@ export function viewList(
   return list;
 }
 
-/** « Mes listes » = copie du serveur + listes créées sur le téléphone. */
+/** « Mes listes » = server copy + lists created on the phone. */
 export function viewLists(snapshot: Schemas["ListSummary"][] | null, changes: Change[]): ViewListSummary[] {
   const lists: ViewListSummary[] = (snapshot ?? []).map((list) => ({ ...list, localOnly: false, ...synced }));
   for (const change of changes) {

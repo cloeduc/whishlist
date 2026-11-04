@@ -10,9 +10,9 @@ import { LiveGiftMark } from "@/ui/LiveGiftMark";
 import { Screen } from "@/ui/Screen";
 
 /**
- * Ajouter une idée (FR-013) ; marche hors ligne, l'idée passe « en attente » (FR-026).
- * Depuis un partage (`from=share`) : `url` et `name` pré-remplissent le formulaire, `fill` lance « Remplir depuis le
- * lien », et l'idée enregistrée ouvre la liste (l'écran d'avant était « Ajouter à une liste », ou rien à froid).
+ * Add an idea (FR-013); works offline, the idea becomes « en attente » (FR-026).
+ * From a share (`from=share`): `url` and `name` prefill the form, `fill` runs « Remplir depuis le
+ * lien », and the saved idea opens the list (the previous screen was « Ajouter à une liste », or nothing on cold start).
  */
 export default function NewItem() {
   const { t } = useTranslation("list");

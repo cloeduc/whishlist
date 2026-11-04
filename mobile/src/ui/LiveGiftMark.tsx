@@ -8,8 +8,8 @@ import { useReduceMotion } from "@/theme/motion";
 import { GiftMark } from "./GiftMark";
 
 /**
- * Indicateur de chargement : le cadeau du site qui se balance doucement, plutôt qu'un spinner
- * (design-reference.md, « Chargement »). Immobile si le téléphone demande moins d'animations.
+ * Loading indicator: the site's gift gently swaying, rather than a spinner
+ * (design-reference.md, « Chargement »). Still if the phone asks for fewer animations.
  */
 export function LiveGiftMark({ size = 72 }: { size?: number }) {
   const { t } = useTranslation("mobile");

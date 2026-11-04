@@ -19,8 +19,8 @@ import { Text } from "@/ui/Text";
 import { fixableInForm } from "./draft";
 
 /**
- * Une idée dans sa catégorie, comme l'`article` de `components/site/ideas-accordion.tsx` :
- * nom, description (trois lignes au plus), étoiles, badges « qui » et prix, puis Modifier, le choix de catégorie et Archiver, en bout de rangée.
+ * An idea in its category, like the `article` of `components/site/ideas-accordion.tsx`:
+ * name, description (three lines at most), stars, « qui » and price badges, then Edit, the category choice and Archive, at the end of the row.
  */
 export function ItemCard({ list, item }: { list: ViewList; item: ViewItem }) {
   const { t } = useTranslation("list");

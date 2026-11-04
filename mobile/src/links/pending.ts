@@ -4,9 +4,9 @@ import { useEffect } from "react";
 import { appPathForUrl } from "./routes";
 
 /**
- * Lien qui demande d'être connecté (invitation), gardé pendant la connexion ou l'inscription (feature 011, R5).
- * En mémoire : après un arrêt de l'app, la personne rouvre le lien. Le dernier lien ouvert gagne.
- * Les gardes de session le lisent pendant le rendu (sans le vider) ; l'écran du lien l'efface en arrivant.
+ * Link that requires being signed in (invitation), kept during sign-in or sign-up (feature 011, R5).
+ * In memory: after the app is killed, the person opens the link again. The last opened link wins.
+ * Session guards read it during render (without clearing it); the link screen clears it on arrival.
  */
 let pending: string | null = null;
 
@@ -14,7 +14,7 @@ export function setPendingLink(path: string): void {
   pending = path;
 }
 
-/** Où aller une fois la session ouverte : le lien en attente, sinon l'accueil. */
+/** Where to go once the session is open: the pending link, otherwise home. */
 export function afterSignIn(): Href {
   return (pending ?? "/") as Href;
 }
@@ -24,8 +24,8 @@ export function clearPendingLink(): void {
 }
 
 /**
- * Connexion ou inscription ouvertes par `/connexion?next=/inviter/…` (lien du site) : l'invitation est gardée,
- * comme si son lien avait été ouvert. Les autres valeurs de `next` sont ignorées.
+ * Sign-in or sign-up opened by `/connexion?next=/inviter/…` (site link): the invitation is kept,
+ * as if its link had been opened. Other `next` values are ignored.
  */
 export function useNextLink(): void {
   const { next } = useLocalSearchParams<{ next?: string }>();

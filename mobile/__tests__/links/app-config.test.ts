@@ -5,7 +5,7 @@ import type { ExpoConfig } from "expo/config";
 
 import { androidPathPrefixes } from "../../../src/site/app-links";
 
-/** Config Expo calculée avec ces variables d'environnement (lues au chargement du fichier). */
+/** Expo config computed with these environment variables (read when the file loads). */
 function configWith(env: { EXPO_PUBLIC_API_URL?: string; APP_VARIANT?: string }): ExpoConfig {
   const saved = { ...process.env };
   Object.assign(process.env, env);
@@ -21,8 +21,8 @@ function configWith(env: { EXPO_PUBLIC_API_URL?: string; APP_VARIANT?: string })
   }
 }
 
-describe("liens du site ouverts par l'app (011)", () => {
-  it("serveur HTTPS : domaine associé sur iOS, chaque préfixe de la table sur Android", () => {
+describe("site links opened by the app (011)", () => {
+  it("HTTPS server: associated domain on iOS, each prefix of the table on Android", () => {
     const config = configWith({ EXPO_PUBLIC_API_URL: "https://ohyoushouldnt.app", APP_VARIANT: "production" });
     expect(config.ios?.associatedDomains).toEqual(["applinks:ohyoushouldnt.app"]);
     const filter = config.android?.intentFilters?.[0];
@@ -32,7 +32,7 @@ describe("liens du site ouverts par l'app (011)", () => {
     expect(data.every((entry) => entry.scheme === "https" && entry.host === "ohyoushouldnt.app")).toBe(true);
   });
 
-  it("serveur local en HTTP, ou variante de développement : rien n'est déclaré", () => {
+  it("local HTTP server or development variant: nothing is declared", () => {
     for (const env of [
       { EXPO_PUBLIC_API_URL: "http://localhost:3010", APP_VARIANT: "production" },
       { EXPO_PUBLIC_API_URL: "https://ohyoushouldnt.app", APP_VARIANT: "development" },
@@ -44,9 +44,9 @@ describe("liens du site ouverts par l'app (011)", () => {
   });
 });
 
-// Le chargeur de config d'Expo (celui d'`expo run` et des builds EAS) ne compile pas le TypeScript importé
-// hors de mobile/, contrairement à jest : on le lance pour de vrai.
-it("le vrai chargeur d'Expo lit app.config.ts, avec les liens de l'app en production", () => {
+// Expo's config loader (the one used by `expo run` and EAS builds) does not compile TypeScript imported
+// from outside mobile/, unlike jest: we run it for real.
+it("Expo's real loader reads app.config.ts, with the app links in production", () => {
   const root = join(__dirname, "../..");
   const output = execFileSync(join(root, "node_modules/.bin/expo"), ["config", "--json"], {
     cwd: root,

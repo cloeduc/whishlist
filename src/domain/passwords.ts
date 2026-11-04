@@ -14,7 +14,7 @@ function scryptAsync(
   });
 }
 
-/** 2^17, r=8, p=1. Les hash déjà stockés gardent leur coût d'origine. */
+/** 2^17, r=8, p=1. Hashes already stored keep their original cost. */
 const N = 131072;
 const r = 8;
 const p = 1;
@@ -29,7 +29,7 @@ function storedParams(n: number, rr: number, pp: number): { N: number; r: number
 
 export const MIN_PASSWORD_LENGTH = 10;
 
-/** `null` si OK, sinon code d'erreur i18n. */
+/** `null` if OK, otherwise an i18n error code. */
 export function passwordPolicyError(password: string): string | null {
   if (!password) return "passwordRequired";
   if (password.length < MIN_PASSWORD_LENGTH) return "passwordTooShort";

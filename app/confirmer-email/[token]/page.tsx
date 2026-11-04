@@ -20,8 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Page du lien reçu par e-mail. La confirmation passe par le bouton (POST), jamais par l'ouverture du lien :
- * les antivirus de messagerie ouvrent les liens avant la personne.
+ * Page of the link received by email. Confirmation goes through the button (POST), never by opening the link:
+ * email antivirus software opens links before the person does.
  */
 export default async function ConfirmEmailPage({
   params,
@@ -40,7 +40,7 @@ export default async function ConfirmEmailPage({
       <ConfirmCard title={t("confirmEmail.title")}>
         <Alert>
           <AlertDescription>
-            {/* L'adresse vient de la session, jamais de l'URL : seul son propre compte s'affiche. */}
+            {/* The address comes from the session, never from the URL: only one's own account is shown. */}
             {user && query.compte === "1" ? t("confirmEmail.changedTo", { email: user.email }) : t("confirmEmail.changed")}
           </AlertDescription>
         </Alert>
@@ -69,7 +69,7 @@ export default async function ConfirmEmailPage({
   if (!preview || !preview.ok) {
     const code = query.e ?? (preview && !preview.ok ? preview.error : "confirmationLinkInvalid");
     const message = code === "rate" ? t("confirmEmail.rateLimited") : await translateError(code);
-    // Compte connecté encore à confirmer : un nouveau lien, sans repasser par le bandeau (US2).
+    // Signed-in account still to confirm: a new link, without going back through the banner (US2).
     const canResend = Boolean(user && emailConfirmationPending(user));
     return (
       <ConfirmCard title={t("confirmEmail.invalidTitle")}>

@@ -1,8 +1,8 @@
-# 005 US5 : sans réseau, la liste reste lisible ; ajouts et modification sont « en attente », survivent à un
-# redémarrage ; la déconnexion prévient qu'ils seraient perdus ; tout part au retour du réseau, sans doublon.
-# Mode avion : Android seulement (R9).
+# 005 US5: without network, the list stays readable; additions and edit are « en attente », survive a
+# restart; logout warns that they would be lost; everything is sent when the network is back, without duplicates.
+# Airplane mode: Android only (R9).
 appId: app.ohyoushouldnt.mobile
-name: "005 US5 — Continuer sans réseau"
+name: "005 US5 — Keep working without a network"
 tags:
   - 005-us5
   - android-only
@@ -24,7 +24,7 @@ tags:
       id: offline-banner
     timeout: 20000
 
-# Deux idées ajoutées hors ligne : visibles tout de suite, marquées « en attente ».
+# Two ideas added offline: visible right away, marked « en attente ».
 - runFlow:
     file: ../subflows/add-item.yaml
     env:
@@ -42,7 +42,7 @@ tags:
 - assertVisible:
     id: pending-badge
 
-# Une idée modifiée hors ligne : le nouveau nom tout de suite, marqué « en attente ».
+# An idea edited offline: the new name right away, marked « en attente ».
 - tapOn:
     id: item-card.edit
     index: 0
@@ -67,7 +67,7 @@ tags:
 - assertVisible:
     id: pending-badge
 
-# Redémarrage, toujours hors ligne : les changements sont toujours là.
+# Restart, still offline: the changes are still there.
 - runFlow: ../subflows/relaunch.yaml
 - extendedWaitUntil:
     visible:
@@ -76,7 +76,7 @@ tags:
 - assertVisible:
     id: offline-banner
 
-# Se déconnecter avec des changements en attente : l'app prévient, on garde la session.
+# Logging out with pending changes: the app warns, we keep the session.
 - tapOn:
     id: open-account
 - scrollUntilVisible:
@@ -115,7 +115,7 @@ tags:
 - assertVisible:
     id: pending-badge
 
-# Retour du réseau : tout part, plus rien en attente, et chaque idée une seule fois.
+# Network back: everything is sent, nothing pending any more, and each idea only once.
 - setAirplaneMode: disabled
 - extendedWaitUntil:
     notVisible:

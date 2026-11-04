@@ -37,6 +37,6 @@ tmp/
 mobile/.maestro/scripts/strings.generated.js
 public/instance/
 
-# Notes locales (ne pas versionner)
+# Local notes (do not commit)
 Audit_wording_*.md
 

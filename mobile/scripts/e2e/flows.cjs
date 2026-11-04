@@ -1,5 +1,5 @@
-// En-tête d'un parcours Maestro (avant `---`) : `name` et `tags`, lus par le runner (parcours à ne pas jouer
-// sur iOS) et par le test de couverture des stories. Lecture ligne à ligne, sans dépendance YAML.
+// Header of a Maestro flow (before `---`): `name` and `tags`, read by the runner (flows not to run
+// on iOS) and by the story coverage test. Read line by line, without a YAML dependency.
 const { existsSync, readdirSync, readFileSync } = require("node:fs");
 const path = require("node:path");
 
@@ -25,8 +25,8 @@ function readFlowHeader(file) {
 }
 
 /**
- * Parcours à jouer : sans argument, tous ceux de `flowsDir` (triés) ; sinon les fichiers donnés,
- * relatifs à `mobileRoot` ou absolus. Un fichier introuvable arrête tout (code 2 dans le runner).
+ * Flows to run: with no argument, all those of `flowsDir` (sorted); otherwise the given files,
+ * relative to `mobileRoot` or absolute. A missing file stops everything (code 2 in the runner).
  * @param {string[]} args  @param {{ mobileRoot: string, flowsDir: string }} dirs
  * @returns {{ ok: true, files: string[] } | { ok: false, message: string }}
  */
@@ -41,18 +41,18 @@ function resolveFlowPaths(args, { mobileRoot, flowsDir }) {
   const files = [];
   for (const arg of args) {
     const file = path.isAbsolute(arg) ? arg : path.resolve(mobileRoot, arg);
-    if (!existsSync(file)) return { ok: false, message: `Parcours introuvable : ${arg}` };
+    if (!existsSync(file)) return { ok: false, message: `Flow not found: ${arg}` };
     files.push(file);
   }
   return { ok: true, files };
 }
 
-/** Tag des parcours à ne pas jouer sur cette plateforme : `android-only` sur iOS, `ios-only` sur Android. */
+/** Tag of the flows not to run on this platform: `android-only` on iOS, `ios-only` on Android. */
 function excludedTag(platform) {
   return platform === "ios" ? "android-only" : "ios-only";
 }
 
-/** Parcours qui ne tournent pas sur cette plateforme. */
+/** Flows that do not run on this platform. */
 function skippedOn(platform, flows) {
   return flows.filter((flow) => flow.tags.includes(excludedTag(platform)));
 }

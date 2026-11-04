@@ -4,7 +4,7 @@ import { findSubscription, isSubscriptionUnlocked } from "../domain/subscription
 import type { Database, User, Wishlist } from "../domain/types";
 import { hasReadUnlock } from "./read-unlock";
 
-/** Accès page publique : pas de MDP, ou déverrouillage prouvé, ou membre connecté, ou abonné à jour. */
+/** Public page access: no password, or proven unlock, or signed-in member, or up-to-date subscriber. */
 export async function canAccessPublicListWith(
   doc: Database,
   list: Wishlist,
@@ -20,7 +20,7 @@ export async function canAccessPublicListWith(
   return isUnlocked(list);
 }
 
-/** Version site : le déverrouillage vient du cookie. */
+/** Site version: the unlock comes from the cookie. */
 export async function canAccessPublicList(
   doc: Database,
   list: Wishlist,

@@ -2,7 +2,7 @@ import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 
 import { replaceDb, type Db, type SqlValue } from "@/offline/db";
 
-/** Base SQLite en mémoire (node:sqlite) qui remplace expo-sqlite dans les tests. */
+/** In-memory SQLite database (node:sqlite) that replaces expo-sqlite in the tests. */
 export function memoryDb(): Db {
   const database = new DatabaseSync(":memory:");
   const values = (params: SqlValue[] = []): SQLInputValue[] => params;

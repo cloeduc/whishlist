@@ -1,7 +1,7 @@
-# 006 US3 : « Télécharger mes données » ouvre la feuille de partage avec le fichier, sans erreur.
-# Le contenu du fichier se vérifie à la main (exclusions.md).
+# 006 US3: « Télécharger mes données » opens the share sheet with the file, without error.
+# The file content is checked by hand (exclusions.md).
 appId: app.ohyoushouldnt.mobile
-name: "006 US3 — Récupérer ses données"
+name: "006 US3 — Download your data"
 tags:
   - 006-us3
 ---
@@ -17,8 +17,8 @@ tags:
     id: account.export
 - runFlow:
     file: ../subflows/close-share-sheet.yaml
-# Sur iOS, l'appui qui ferme la feuille peut toucher l'en-tête de la carte dessous et la replier :
-# on la redéplie pour vérifier l'absence d'erreur.
+# On iOS, the tap that closes the sheet can hit the header of the card below and collapse it:
+# we expand it again to check there is no error.
 - runFlow:
     when:
       notVisible:

@@ -14,7 +14,7 @@ test("resolveTheme merge + defaults", () => {
   assert.equal(resolveTheme({ primary: "nope" }).primary, DEFAULT_WISHLIST_THEME.primary);
 });
 
-test("parseThemeForm valide ou rejette", () => {
+test("parseThemeForm validates or rejects", () => {
   const ok = parseThemeForm({
     primary: "#1E60FF",
     accent: "#f00",
@@ -30,7 +30,7 @@ test("parseThemeForm valide ou rejette", () => {
   assert.equal(bad.ok, false);
 });
 
-test("themeToCssVars mappe les tokens", () => {
+test("themeToCssVars maps the tokens", () => {
   const vars = themeToCssVars(DEFAULT_WISHLIST_THEME);
   assert.equal(vars["--main"], DEFAULT_WISHLIST_THEME.primary);
   assert.equal(vars["--gift-red"], DEFAULT_WISHLIST_THEME.accent);
@@ -38,7 +38,7 @@ test("themeToCssVars mappe les tokens", () => {
   assert.equal(vars["--highlight"], DEFAULT_WISHLIST_THEME.highlight);
 });
 
-test("parseThemeForm refuse un bouton ou un fond illisible", () => {
+test("parseThemeForm refuses an unreadable button or background", () => {
   const bright = parseThemeForm({ primary: "#ffff00" });
   assert.equal(bright.ok, false);
   if (!bright.ok) assert.equal(bright.error, "themeContrast");

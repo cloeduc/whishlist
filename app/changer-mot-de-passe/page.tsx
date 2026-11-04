@@ -5,7 +5,7 @@ import { withLocale } from "@/src/i18n/locale-path";
 export const dynamic = "force-dynamic";
 
 /** Ancienne URL — redirige vers Mon compte. */
-export default async function ChangerMotDePassePage({
+export default async function ChangePasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{ e?: string; ok?: string }>;

@@ -9,14 +9,14 @@ export type McpAccess =
   | { ok: false; error: "originNotAllowed" | "unauthorized" | "rateLimited" };
 
 /**
- * Qui peut ouvrir le serveur MCP : une clé d'API valide (`Bearer oys_…`), jamais un jeton de session de l'app,
- * et pas depuis la page d'un autre site (même règle d'origine que l'API, sans origine déclarée).
+ * Who can open the MCP server: a valid API key (`Bearer oys_…`), never an app session token,
+ * and not from another site's page (same origin rule as the API, with no declared origin).
  */
 export async function mcpAccess(input: {
   origin: string | null;
   siteOrigin: string;
   authorization: string | null;
-  /** IP de confiance du client : les clés inconnues ou révoquées y comptent des échecs (`apiKeyUser`). */
+  /** Trusted client IP: unknown or revoked keys count failures against it (`apiKeyUser`). */
   ip?: string | null;
 }): Promise<McpAccess> {
   if (originDecision({ origin: input.origin, siteOrigin: input.siteOrigin, allowed: [] }) === "deny") {

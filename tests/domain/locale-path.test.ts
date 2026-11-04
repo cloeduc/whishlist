@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { decideLocaleRoute, internalPath, stripLocalePrefix, withLocale } from "../../src/i18n/locale-path";
 
-test("withLocale ne double pas le préfixe", () => {
+test("withLocale does not double the prefix", () => {
   assert.equal(withLocale("fr", "/faq"), "/faq");
   assert.equal(withLocale("en", "/faq"), "/en/faq");
   assert.equal(withLocale("en", "/"), "/en");
@@ -13,7 +13,7 @@ test("withLocale ne double pas le préfixe", () => {
   assert.deepEqual(stripLocalePrefix("/en/l/demo"), { locale: "en", path: "/l/demo" });
 });
 
-test("?lang= mène à l'adresse canonique et garde les autres paramètres", () => {
+test("?lang= leads to the canonical address and keeps the other parameters", () => {
   assert.deepEqual(decideLocaleRoute({ pathname: "/faq", search: "?lang=en&x=1", nextUrl: null }), {
     type: "redirect",
     status: 301,
@@ -30,7 +30,7 @@ test("?lang= mène à l'adresse canonique et garde les autres paramètres", () =
   });
 });
 
-test("/fr redirige vers le français sans préfixe, /en est réécrit", () => {
+test("/fr redirects to unprefixed French, /en is rewritten", () => {
   const frenchPrefix = decideLocaleRoute({ pathname: "/fr/guide", search: "", nextUrl: null });
   assert.equal(frenchPrefix.type, "redirect");
   if (frenchPrefix.type === "redirect") assert.equal(frenchPrefix.pathname, "/guide");
@@ -48,7 +48,7 @@ test("/fr redirige vers le français sans préfixe, /en est réécrit", () => {
   });
 });
 
-test("une navigation depuis /en garde le préfixe, une adresse française reste française", () => {
+test("navigating from /en keeps the prefix, a French address stays French", () => {
   assert.deepEqual(decideLocaleRoute({ pathname: "/guide", search: "", nextUrl: "/en/faq" }), {
     type: "redirect",
     status: 307,
@@ -63,7 +63,7 @@ test("une navigation depuis /en garde le préfixe, une adresse française reste 
   assert.equal(decideLocaleRoute({ pathname: "/faq", search: "", nextUrl: "https://evil.example/en" }).type, "continue");
 });
 
-test("internalPath : un chemin du site seulement, jamais une autre origine", () => {
+test("internalPath: a site path only, never another origin", () => {
   assert.equal(internalPath("/inviter/abc?x=1"), "/inviter/abc?x=1");
   assert.equal(internalPath("/"), "/");
   for (const value of ["//ailleurs.example", "/\\ailleurs.example", "https://ailleurs.example", "inviter", "", null, 3]) {

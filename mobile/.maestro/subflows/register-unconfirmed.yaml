@@ -1,8 +1,8 @@
-# Nouveau compte e2e-<unique>@example.test (R6), mot de passe DEMO_PASSWORD, depuis l'écran de connexion,
-# sans confirmer son adresse (010). Rend l'adresse dans output.email ; attend « Mes listes ».
+# New account e2e-<unique>@example.test (R6), password DEMO_PASSWORD, from the login screen,
+# without confirming its address (010). Returns the address in output.email; waits for « Mes listes ».
 appId: app.ohyoushouldnt.mobile
 ---
-# Avant de créer un compte : preuve que l'app parle au serveur local de la suite (voir login.yaml).
+# Before creating an account: proof that the app talks to the suite's local server (see login.yaml).
 - runFlow:
     file: login.yaml
     env:

@@ -1,7 +1,7 @@
-# 006 US4 : version de l'app et licences des logiciels libres, en bas de « Mon compte ».
-# Le lien « Nous écrire » se vérifie à la main (pas d'app Mail sur le simulateur iOS).
+# 006 US4: app version and open source licenses, at the bottom of « Mon compte ».
+# The « Nous écrire » link is checked by hand (no Mail app on the iOS simulator).
 appId: app.ohyoushouldnt.mobile
-name: "006 US4 — Version, licences et contact"
+name: "006 US4 — Version, licenses and contact"
 tags:
   - 006-us4
 ---
@@ -27,5 +27,5 @@ tags:
     visible:
       id: legal-licenses.screen
     timeout: 10000
-# Chaque licence est une ligne « version · licence » (liste longue : on regarde le haut).
+# Each license is a « version · licence » line (long list: we look at the top).
 - assertVisible: .*\d+\.\d+.* · .*

@@ -15,8 +15,8 @@ function validUrl(url: string | null): boolean {
 }
 
 /**
- * Même libellé dans la liste (casse et espaces autour ignorés) ; `exceptId` : l'entrée qu'on renomme.
- * `toLowerCase` et non `toLocaleLowerCase` : le résultat ne dépend pas de la langue du serveur (i turc).
+ * Same label in the list (case and surrounding spaces ignored); `exceptId`: the entry being renamed.
+ * `toLowerCase` and not `toLocaleLowerCase`: the result does not depend on the server's language (Turkish i).
  */
 function labelTaken(
   entries: { id: string; wishlistId: string; label: string }[],
@@ -105,9 +105,9 @@ export function updateItem(
     imageUrl?: string | null;
     priceCents?: number | null;
     priority?: string | null;
-    /** Absent : la valeur enregistrée est gardée (client qui ne connaît pas encore ce champ). */
+    /** Absent: the stored value is kept (client that does not know this field yet). */
     secondHandOk?: boolean;
-    /** Absent : la description enregistrée est gardée (client qui ne connaît pas encore ce champ). */
+    /** Absent: the stored description is kept (client that does not know this field yet). */
     description?: string | null;
   },
 ): { ok: true; doc: Database } | { ok: false; error: string } {
@@ -183,14 +183,14 @@ type TransferInput = {
   wishlistId: string;
   actorId: string;
   itemId: string;
-  /** Liste d'arrivée (peut être la même pour une copie). */
+  /** Target list (can be the same one for a copy). */
   targetWishlistId: string;
-  /** Catégorie et « pour qui » de la liste d'arrivée. */
+  /** Category and « pour qui » of the target list. */
   typeId: string;
   personId: string;
 };
 
-/** Droits sur les deux listes, idée de départ, catégorie et « pour qui » pris dans la liste d'arrivée. */
+/** Rights on both lists, source idea, category and « pour qui » taken from the target list. */
 function checkTransfer(doc: Database, input: TransferInput): { ok: true; item: Item } | { ok: false; error: string } {
   if (!findMembership(doc, input.wishlistId, input.actorId)) return { ok: false, error: "notMember" };
   if (!findMembership(doc, input.targetWishlistId, input.actorId)) return { ok: false, error: "notMember" };
@@ -210,8 +210,8 @@ function lastSortOrder(doc: Database, wishlistId: string): number {
 }
 
 /**
- * Change l'idée de liste (elle garde son identifiant). Refusé si elle est réservée : la personne qui a
- * réservé ne peut annuler que depuis le lien de la liste d'origine, elle perdrait sa réservation.
+ * Moves the idea to another list (it keeps its id). Refused if it is reserved: the person who
+ * reserved can only cancel from the original list's link, they would lose their reservation.
  */
 export function moveItem(doc: Database, input: TransferInput): { ok: true; doc: Database } | { ok: false; error: string } {
   const checked = checkTransfer(doc, input);
@@ -227,8 +227,8 @@ export function moveItem(doc: Database, input: TransferInput): { ok: true; doc: 
 }
 
 /**
- * Copie de l'idée, sans sa réservation. Tous les champs suivent (l'idée est clonée, un champ ajouté plus
- * tard suit aussi). Dans la même liste, la copie se place juste après l'original.
+ * Copy of the idea, without its reservation. All fields are copied (the idea is cloned, a field added
+ * later is copied too). In the same list, the copy is placed right after the original.
  */
 export function copyItem(
   doc: Database,
@@ -274,9 +274,9 @@ export function deleteItem(
 }
 
 /**
- * Une saisie → un ou plusieurs libellés. « Wilh, Nathan, Nous deux » en fait trois.
- * Sépare sur la virgule, le point-virgule et le retour à la ligne ; ignore les blancs et les
- * doublons (sans tenir compte de la casse), en gardant l'ordre de saisie.
+ * One input → one or more labels. « Wilh, Nathan, Nous deux » makes three.
+ * Splits on comma, semicolon and line break; ignores blanks and
+ * duplicates (case-insensitive), keeping the input order.
  */
 export function splitLabels(raw: string): string[] {
   const seen = new Set<string>();
@@ -509,7 +509,7 @@ export function cancelReservation(
   return { ok: true, doc: next };
 }
 
-/** Annulation par le réservant (compte lié ou claim cookie). */
+/** Cancellation by the person who reserved (linked account or claim cookie). */
 export function cancelOwnReservation(
   doc: Database,
   input: {

@@ -19,7 +19,7 @@ async function protectedDoc() {
   return saved.ok ? saved.doc : apiDoc();
 }
 
-test("la lecture publique montre les idées libres, sans donnée privée", async () => {
+test("the public view shows available ideas, without private data", async () => {
   await withStore(apiDoc(), async () => {
     const result = await readPublicList(ctx(), { readToken: "rt", isUnlocked: noUnlock, claimedIds: none });
     assert.equal(result.ok, true);
@@ -38,14 +38,14 @@ test("la lecture publique montre les idées libres, sans donnée privée", async
   });
 });
 
-test("un lien inconnu donne listMissing", async () => {
+test("an unknown link gives listMissing", async () => {
   await withStore(apiDoc(), async () => {
     const result = await readPublicList(ctx(), { readToken: "inconnu", isUnlocked: noUnlock, claimedIds: none });
     assert.deepEqual(result, { ok: false, error: "listMissing" });
   });
 });
 
-test("une liste protégée demande le mot de passe, sauf aux membres", async () => {
+test("a protected list asks for the password, except to members", async () => {
   const doc = await protectedDoc();
   await withStore(doc, async () => {
     const locked = await readPublicList(ctx(), { readToken: "rt", isUnlocked: noUnlock, claimedIds: none });
@@ -61,7 +61,7 @@ test("une liste protégée demande le mot de passe, sauf aux membres", async () 
   });
 });
 
-test("le bon mot de passe rend un déverrouillage valable", async () => {
+test("the right password returns a valid unlock", async () => {
   await withStore(await protectedDoc(), async () => {
     const bad = await unlockPublicList(ctx(), { readToken: "rt", password: "faux-mot-de-passe" });
     assert.deepEqual(bad, { ok: false, error: "badPassword" });
@@ -80,14 +80,14 @@ test("le bon mot de passe rend un déverrouillage valable", async () => {
   });
 });
 
-test("21 essais de déverrouillage en 15 minutes : le 21e est refusé", async () => {
+test("21 unlock attempts in 15 minutes: the 21st is refused", async () => {
   await withStore(await protectedDoc(), async () => {
     for (let i = 0; i < 20; i += 1) await unlockPublicList(ctx(), { readToken: "rt", password: "faux" });
     await assert.rejects(unlockPublicList(ctx(), { readToken: "rt", password: "faux" }), isRateLimitError);
   });
 });
 
-test("réserver rend un claim, et l'idée devient « mienne »", async () => {
+test("reserving returns a claim, and the idea becomes « mienne »", async () => {
   await withStore(apiDoc(), async () => {
     const result = await reserve(ctx(), { readToken: "rt", itemId: "gift", fromName: "Sam", note: "Bravo", isUnlocked: noUnlock });
     assert.equal(result.ok, true);
@@ -106,10 +106,10 @@ test("réserver rend un claim, et l'idée devient « mienne »", async () => {
   });
 });
 
-test("réserver une idée déjà réservée, archivée ou absente est refusé", async () => {
+test("reserving an idea that is already reserved, archived or missing is refused", async () => {
   await withStore(apiDoc(), async () => {
     assert.equal((await reserve(ctx(), { readToken: "rt", itemId: "gift", isUnlocked: noUnlock })).ok, true);
-    // Le domaine archive l'idée réservée ; la commande dit pourquoi elle n'est plus proposable.
+    // The domain archives the reserved idea; the command says why it can no longer be offered.
     assert.deepEqual(await reserve(ctx(), { readToken: "rt", itemId: "gift", isUnlocked: noUnlock }), {
       ok: false,
       error: "itemAlreadyReserved",
@@ -128,7 +128,7 @@ test("réserver une idée déjà réservée, archivée ou absente est refusé", 
   });
 });
 
-test("le nom et le petit mot ont une longueur maximale", async () => {
+test("the name and the note have a maximum length", async () => {
   await withStore(apiDoc(), async () => {
     const longName = await reserve(ctx(), { readToken: "rt", itemId: "gift", fromName: "x".repeat(201), isUnlocked: noUnlock });
     assert.deepEqual(longName, { ok: false, error: "fieldTooLong" });
@@ -137,14 +137,14 @@ test("le nom et le petit mot ont une longueur maximale", async () => {
   });
 });
 
-test("une liste protégée ne se réserve pas sans déverrouillage", async () => {
+test("a protected list cannot be reserved without unlocking", async () => {
   await withStore(await protectedDoc(), async () => {
     const result = await reserve(ctx(), { readToken: "rt", itemId: "gift", isUnlocked: noUnlock });
     assert.deepEqual(result, { ok: false, error: "readPasswordRequired" });
   });
 });
 
-test("20 réservations simultanées de la même idée : une seule réussit", async () => {
+test("20 simultaneous reservations of the same idea: only one succeeds", async () => {
   await withStore(apiDoc(), async () => {
     const results = await Promise.all(
       Array.from({ length: 20 }, (_, i) =>
@@ -157,7 +157,7 @@ test("20 réservations simultanées de la même idée : une seule réussit", asy
   });
 });
 
-test("seul le réservant annule : par son claim ou par son compte", async () => {
+test("only the reserver cancels: by their claim or by their account", async () => {
   await withStore(apiDoc(), async () => {
     const guest = await reserve(ctx(), { readToken: "rt", itemId: "gift", isUnlocked: noUnlock });
     assert.equal(guest.ok, true);
@@ -183,7 +183,7 @@ test("seul le réservant annule : par son claim ou par son compte", async () => 
   });
 });
 
-test("un compte qui doit changer son mot de passe agit en invité", async () => {
+test("an account that must change its password acts as a guest", async () => {
   const doc = await protectedDoc();
   const forced = { ...doc.users[0]!, mustChangePassword: true };
   await withStore(doc, async () => {

@@ -3,7 +3,7 @@ import { manageLabel } from "../commands/labels";
 import { commandContext } from "./context";
 import { apiError, apiJson, apiNoContent, readJsonBody, text, withApi } from "./http";
 
-/** Routes `types` et `people` : mêmes opérations sur une catégorie ou un « qui ». */
+/** `types` and `people` routes: same operations on a category or a « qui ». */
 export function labelCollectionRoute(kind: LabelInput["kind"]) {
   return withApi<{ listId: string }>(async (api, { listId }) => {
     const body = await readJsonBody(api.req);

@@ -63,7 +63,7 @@ export function updateWishlistSettings(
   return { ok: true, doc: next, wishlist: target };
 }
 
-/** Efface une liste et tout ce qui lui appartient (sur un document déjà cloné). */
+/** Deletes a list and everything that belongs to it (on an already cloned document). */
 export function wipeWishlist(doc: Database, wishlistId: string): void {
   doc.wishlists = doc.wishlists.filter((w) => w.id !== wishlistId);
   doc.memberships = doc.memberships.filter((m) => m.wishlistId !== wishlistId);
@@ -75,7 +75,7 @@ export function wipeWishlist(doc: Database, wishlistId: string): void {
   doc.reservations = doc.reservations.filter((r) => r.wishlistId !== wishlistId);
 }
 
-/** Liste du lien d'invitation, ou `undefined` (jeton vide, inconnu ou régénéré). */
+/** List of the invite link, or `undefined` (empty, unknown or regenerated token). */
 export function findWishlistByInvite(doc: Database, token: string): Wishlist | undefined {
   return token ? doc.wishlists.find((w) => w.inviteToken === token) : undefined;
 }
@@ -146,7 +146,7 @@ export function removeMember(
   return { ok: true, doc: next };
 }
 
-/** Membre qui reprend la liste quand `leavingUserId` part : le plus ancien (`joinedAt`, puis `userId`). */
+/** Member who takes over the list when `leavingUserId` leaves: the oldest (`joinedAt`, then `userId`). */
 export function pickHeir(doc: Database, wishlistId: string, leavingUserId: string): Membership | null {
   const others = doc.memberships
     .filter((m) => m.wishlistId === wishlistId && m.userId !== leavingUserId)

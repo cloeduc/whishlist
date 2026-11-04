@@ -19,7 +19,7 @@ import { Screen } from "@/ui/Screen";
 function EditItem({ listId, item }: { listId: string; item: ViewItem }) {
   const { t } = useTranslation("list");
   const { list } = useList();
-  // « Corriger » un changement refusé : on reprend le même changement, avec son erreur.
+  // « Corriger » a refused change: take up the same change again, with its error.
   const fixable = fixableInForm(item);
   const save = useItemSave(listId, {
     itemId: item.id,
@@ -74,7 +74,7 @@ function EditItem({ listId, item }: { listId: string; item: ViewItem }) {
   );
 }
 
-/** Modifier ou supprimer une idée (FR-013). */
+/** Edit or delete an idea (FR-013). */
 export default function ItemScreen() {
   const { t } = useTranslation("errors");
   const { itemId } = useLocalSearchParams<{ itemId: string }>();

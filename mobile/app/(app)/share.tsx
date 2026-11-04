@@ -18,9 +18,9 @@ import { Screen } from "@/ui/Screen";
 import { Text } from "@/ui/Text";
 
 /**
- * « Ajouter à une liste » : un lien (ou un texte) partagé depuis une autre app devient une idée.
- * On choisit la liste (écran sauté s'il n'y en a qu'une), puis le formulaire s'ouvre, lien rempli,
- * et se remplit tout seul depuis le lien s'il y a du réseau.
+ * « Ajouter à une liste »: a link (or a text) shared from another app becomes an idea.
+ * The list is chosen (screen skipped if there is only one), then the form opens, link filled in,
+ * and fills itself from the link if there is a network.
  */
 export default function ShareScreen() {
   const { t } = useTranslation(["mobile", "list"]);
@@ -28,7 +28,7 @@ export default function ShareScreen() {
   const idea = sharedIdea(payloads);
   const { lists, loaded } = useMyLists();
 
-  // Arrivé ici (après la connexion s'il le fallait) : le lien en attente est servi.
+  // Arrived here (after sign-in if needed): the pending link is consumed.
   useEffect(() => clearPendingLink(), []);
 
   function open(listId: string) {
@@ -48,7 +48,7 @@ export default function ShareScreen() {
   const only = loaded && lists.length === 1 ? lists[0] : undefined;
   useEffect(() => {
     if (only && idea) open(only.id);
-    // Une seule liste : on y va directement, une fois.
+    // A single list: go straight to it, once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [only?.id, idea?.url, idea?.name]);
 

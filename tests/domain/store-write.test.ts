@@ -27,7 +27,7 @@ function item(id: string, sortOrder: number): Item {
   };
 }
 
-test("une modification en place et un nouvel objet sont tous deux enregistrés", async () => {
+test("an in-place change and a new object are both saved", async () => {
   await withStore(apiDoc(), async () => {
     await updateDocument((doc) => {
       doc.wishlists[0].title = "Titre en place";
@@ -43,7 +43,7 @@ test("une modification en place et un nouvel objet sont tous deux enregistrés",
   });
 });
 
-test("une réservation ajoutée n'écrit qu'une ligne", async () => {
+test("an added reservation writes only one row", async () => {
   await withStore(apiDoc(), async () => {
     const before = totalChanges();
     await updateDocument((doc) => {
@@ -62,7 +62,7 @@ test("une réservation ajoutée n'écrit qu'une ligne", async () => {
   });
 });
 
-test("un mutate qui lève : rien n'est écrit et l'erreur remonte", async () => {
+test("a mutate that throws: nothing is written and the error propagates", async () => {
   await withStore(apiDoc(), async () => {
     await assert.rejects(
       updateDocument((doc) => {
@@ -73,7 +73,7 @@ test("un mutate qui lève : rien n'est écrit et l'erreur remonte", async () => 
       /boom/,
     );
     assert.deepStrictEqual(await readDocument(), apiDoc());
-    // La base reste utilisable après l'échec.
+    // The database stays usable after the failure.
     await updateDocument((doc) => {
       doc.wishlists[0].title = "Après";
       return { doc, result: null };
@@ -82,7 +82,7 @@ test("un mutate qui lève : rien n'est écrit et l'erreur remonte", async () => 
   });
 });
 
-test("une clé étrangère cassée est refusée au COMMIT, rien n'est écrit", async () => {
+test("a broken foreign key is refused at COMMIT, nothing is written", async () => {
   await withStore(apiDoc(), async () => {
     await assert.rejects(
       updateDocument((doc) => {
@@ -96,20 +96,20 @@ test("une clé étrangère cassée est refusée au COMMIT, rien n'est écrit", a
   });
 });
 
-test("deux lignes de même clé : erreur, au lieu d'en perdre une en silence", async () => {
+test("two rows with the same key: an error, instead of silently losing one", async () => {
   await withStore(apiDoc(), async () => {
     await assert.rejects(
       updateDocument((doc) => {
         doc.items.push({ ...item("gift", 9), name: "Doublon" });
         return { doc, result: null };
       }),
-      /items: deux enregistrements avec la même clé \(gift\)/,
+      /items: two records with the same key \(gift\)/,
     );
     assert.deepStrictEqual(await readDocument(), apiDoc());
   });
 });
 
-test("l'index unique refuse une deuxième réservation de la même idée, même sans la règle du domaine", async () => {
+test("the unique index refuses a second reservation of the same idea, even without the domain rule", async () => {
   await withStore(apiDoc(), async () => {
     await assert.rejects(
       updateDocument((doc) => {
@@ -123,7 +123,7 @@ test("l'index unique refuse une deuxième réservation de la même idée, même 
   });
 });
 
-test("ordre : les ajouts sortent dans l'ordre d'ajout, une modification garde sa place", async () => {
+test("order: additions come out in insertion order, an update keeps its place", async () => {
   await withStore(apiDoc(), async () => {
     for (const [id, order] of [
       ["a3", 3],
@@ -146,7 +146,7 @@ test("ordre : les ajouts sortent dans l'ordre d'ajout, une modification garde sa
   });
 });
 
-test("une lecture pendant une écriture en attente voit l'état d'avant, sans attendre", async () => {
+test("a read during a pending write sees the previous state, without waiting", async () => {
   await withStore(apiDoc(), async () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => (release = resolve));
@@ -166,7 +166,7 @@ test("une lecture pendant une écriture en attente voit l'état d'avant, sans at
   });
 });
 
-test("la base et ses fichiers annexes sont en mode 600", { skip: process.platform === "win32" }, async () => {
+test("the database and its side files have mode 600", { skip: process.platform === "win32" }, async () => {
   await withStore(apiDoc(), async () => {
     const file = databaseFilePath();
     for (const suffix of ["", "-wal", "-shm"]) {

@@ -10,16 +10,16 @@ import { readGuestList } from "./api";
 export type GuestState =
   | { status: "loading" }
   | { status: "locked" }
-  /** `fetchedAt` : copie hors ligne d'une liste suivie, lue quand le serveur ne répond pas ; `null` en ligne. */
+  /** `fetchedAt`: offline copy of a followed list, read when the server does not answer; `null` online. */
   | { status: "ready"; list: Schemas["PublicList"]; fetchedAt: string | null }
   | { status: "missing" }
   | { status: "failed"; message: string };
 
 /**
- * Liste vue en invité, relue à l'ouverture (dès que `enabled`) et par `reload` (011, data-model « Écran invité »).
- * Seule une liste suivie (`subscribed`, 012) garde une copie hors ligne, pour la consulter sans réseau.
- * Une liste ouverte par un lien n'en garde pas : une copie des idées libres pousserait à réserver une idée
- * déjà prise. La réservation reste toujours en ligne.
+ * List seen as a guest, read again on open (as soon as `enabled`) and by `reload` (011, data-model « Écran invité »).
+ * Only a followed list (`subscribed`, 012) keeps an offline copy, to view it without network.
+ * A list opened from a link keeps none: a copy of the free ideas would lead to reserving an idea
+ * already taken. Reserving always stays online.
  */
 export function useGuestList(readToken: string, enabled = true): { state: GuestState; reload: () => void } {
   const [state, setState] = useState<GuestState>({ status: "loading" });
@@ -59,7 +59,7 @@ export function useGuestList(readToken: string, enabled = true): { state: GuestS
   return { state, reload };
 }
 
-/** Liste de ce compte dont le lien public porte ce jeton (copie locale de « Mes listes »), sinon `null`. */
+/** List of this account whose public link carries this token (local copy of « Mes listes »), otherwise `null`. */
 export async function memberListIdFor(readToken: string): Promise<string | null> {
   const lists = await getSnapshot<Schemas["ListSummary"][]>(listsKey);
   const guestPath = `/guest/${encodeURIComponent(readToken)}`;

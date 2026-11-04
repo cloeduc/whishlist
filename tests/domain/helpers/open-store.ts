@@ -1,5 +1,5 @@
-// Processus séparé pour les tests : ouvre la base de `argv[2]` (même chemin que WISHLIST_DATA_PATH)
-// et affiche le nombre de comptes et de marqueurs d'import.
+// Separate process for tests: opens the database of `argv[2]` (same path as WISHLIST_DATA_PATH)
+// and prints the number of accounts and import markers.
 import { openStore } from "../../../src/store/connection";
 
 const store = openStore(process.argv[2]);

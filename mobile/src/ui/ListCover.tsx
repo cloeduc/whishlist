@@ -7,7 +7,7 @@ import { tokens } from "@/theme/tokens";
 import { GiftMark } from "./GiftMark";
 import { Shadow } from "./Shadow";
 
-/** `components/site/wishlist-cover.tsx` : l'image de la liste, ou le cadeau à ses couleurs. */
+/** `components/site/wishlist-cover.tsx`: the list's image, or the gift in its colors. */
 export function ListCover({
   coverImageUrl,
   theme,

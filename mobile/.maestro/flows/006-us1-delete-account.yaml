@@ -1,7 +1,7 @@
-# 006 US1 : supprimer son propre compte (créé par le parcours) : résumé, mauvais mot de passe refusé,
-# suppression, retour à la connexion, ancien mot de passe refusé, puis compte neuf possible avec la même adresse. Voir specs/006-mobile-legal-account/spec.md.
+# 006 US1: delete one's own account (created by the flow): summary, wrong password refused,
+# deletion, back to login, old password refused, then a new account possible with the same address. See specs/006-mobile-legal-account/spec.md.
 appId: app.ohyoushouldnt.mobile
-name: "006 US1 — Supprimer son compte"
+name: "006 US1 — Delete your account"
 tags:
   - 006-us1
 ---
@@ -32,7 +32,7 @@ tags:
     timeout: 10000
 - assertVisible: .*À supprimer ${output.unique}.*
 
-# Mauvais mot de passe : refusé, le compte reste.
+# Wrong password: refused, the account stays.
 - tapOn:
     id: delete-account.password
 - inputText: mauvais-mot-de-passe
@@ -49,7 +49,7 @@ tags:
     timeout: 10000
 - assertVisible: ${output.t.errors.wrongCurrentPassword}
 
-# Bon mot de passe : compte supprimé, retour à la connexion avec le message.
+# Right password: account deleted, back to login with the message.
 - tapOn:
     id: delete-account.password
 - eraseText: 40
@@ -67,7 +67,7 @@ tags:
     timeout: 20000
 - assertVisible: ${output.t.auth.account.deleted}
 
-# L'ancien mot de passe ne connecte plus.
+# The old password no longer logs in.
 - runFlow:
     file: ../subflows/submit-login.yaml
     env:
@@ -79,7 +79,7 @@ tags:
     timeout: 10000
 - assertVisible: ${output.t.errors.invalidCredentials}
 
-# La même adresse peut créer un compte neuf, sans aucune liste.
+# The same address can create a new account, with no list.
 - runFlow:
     file: ../subflows/submit-register.yaml
     env:

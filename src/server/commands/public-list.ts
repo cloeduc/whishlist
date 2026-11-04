@@ -25,7 +25,7 @@ import {
 import { rateLimitForIp } from "../rate-limit";
 import { activeUser, publicAccount, type CommandContext, type CommandResult } from "./context";
 
-/** Le déverrouillage vient du cookie (site) ou de l'en-tête `X-Read-Unlock` (API). */
+/** The unlock comes from the cookie (site) or from the `X-Read-Unlock` header (API). */
 type IsUnlocked = (list: Wishlist) => boolean | Promise<boolean>;
 
 export async function readPublicList(
@@ -55,8 +55,8 @@ export async function unlockPublicList(
   const account = publicAccount(ctx);
   const subscription = account ? findSubscription(doc, wishlist.id, account.id) : null;
   if (account && subscription && subscription.readPasswordHash !== wishlist.readPasswordHash) {
-    // L'empreinte vérifiée est celle de `wishlist` : si le mot de passe change pendant la vérification,
-    // l'abonnement ne mémorise pas la nouvelle empreinte.
+    // The checked hash is the one from `wishlist`: if the password changes during the check,
+    // the subscription does not store the new hash.
     await updateDocument((current) => ({
       doc: syncSubscriptionUnlock(current, {
         wishlistId: wishlist.id,
@@ -121,7 +121,7 @@ export async function subscribeToList(
     | { ok: true; subscription: SubscribedListSummaryView; replayed: boolean }
     | { ok: false; error: string };
   const saved = await updateDocument<Saved>((current) => {
-    // L'accès a été vérifié contre `wishlist.readPasswordHash` : le domaine refuse si elle a changé depuis.
+    // Access was checked against `wishlist.readPasswordHash`: the domain refuses if it has changed since.
     const result = subscribeWishlist(current, {
       wishlistId: wishlist.id,
       userId: active.user.id,

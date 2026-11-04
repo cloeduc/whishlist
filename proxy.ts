@@ -21,7 +21,7 @@ function withLocaleCookie(response: NextResponse, request: NextRequest, locale: 
   });
 }
 
-/** L'adresse porte la langue (pas pour `/api/`, qui suit `Accept-Language`). Le français n'a pas de préfixe, l'anglais est sous `/en`. */
+/** The URL carries the language (not for `/api/`, which follows `Accept-Language`). French has no prefix, English is under `/en`. */
 export function proxy(request: NextRequest) {
   const { requestHeaders, value } = cspHeaders(request);
   const moved = legacyHostRedirect(
