@@ -4,15 +4,15 @@ import { useCallback, useState, type ComponentProps } from "react";
 import { useTranslation } from "react-i18next";
 import { Pressable } from "react-native";
 
+import { passwordReveal } from "../../../src/site/password-reveal";
 import { tokens } from "@/theme/tokens";
 
 import { useAccordionExpanded } from "./Accordion";
 import { Input } from "./Input";
 
-type PasswordInputProps = Omit<ComponentProps<typeof Input>, "secureTextEntry" | "autoCapitalize" | "autoCorrect" | "spellCheck" | "trailing">;
+const EYE_SLOP = Math.max(0, (tokens.touchTarget - tokens.controlHeight.default) / 2);
 
-/** Touch area of the eye: 44 × 44 at least (FR-006), in a box 40 high. */
-const EYE_SIZE = 44;
+type PasswordInputProps = Omit<ComponentProps<typeof Input>, "secureTextEntry" | "autoCapitalize" | "autoCorrect" | "spellCheck" | "trailing">;
 
 /**
  * The one password field of the app (spec 016), `components/ui/password-input.tsx` on the site:
@@ -31,7 +31,12 @@ export function PasswordInput({ value, onChangeText, testID, ...props }: Passwor
   const expanded = useAccordionExpanded();
 
   useFocusEffect(useCallback(() => () => setVisible(false), []));
-  if (visible && (!expanded || (value === "" && typed !== ""))) setVisible(false);
+  if (visible && !expanded) setVisible(false);
+  if (value === "" && typed !== "") {
+    // Emptied by the screen: masked again, once (the eye works again on the empty field).
+    setVisible(false);
+    setTyped("");
+  }
 
   const Icon = visible ? EyeOffIcon : EyeIcon;
   return (
@@ -51,10 +56,11 @@ export function PasswordInput({ value, onChangeText, testID, ...props }: Passwor
         <Pressable
           testID={testID ? `${testID}-reveal` : undefined}
           accessibilityRole="button"
-          accessibilityLabel={visible ? t("passwordField.hide") : t("passwordField.show")}
+          accessibilityLabel={t(passwordReveal(visible).labelKey)}
           onPress={() => setVisible((shown) => !shown)}
-          hitSlop={{ top: 4, bottom: 4 }}
-          style={{ width: EYE_SIZE, alignSelf: "stretch", alignItems: "center", justifyContent: "center" }}
+          // Touch area of at least 44 × 44 (FR-006): the box is 40 high, like `Button`.
+          hitSlop={{ top: EYE_SLOP, bottom: EYE_SLOP }}
+          style={{ width: tokens.touchTarget, alignSelf: "stretch", alignItems: "center", justifyContent: "center" }}
         >
           <Icon size={16} color={tokens.colors.black} />
         </Pressable>

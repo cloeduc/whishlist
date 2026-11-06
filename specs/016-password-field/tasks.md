@@ -71,14 +71,14 @@ Aucune tâche bloquante : les composants naissent dans l'US1 et s'enrichissent d
 
 - [X] T012 [P] [US2] Ajouter `passwordField.show` / `passwordField.hide` à `locales/fr/common.json` (« Afficher le mot de passe » / « Masquer le mot de passe ») et `locales/en/common.json` (« Show password » / « Hide password »)
 - [X] T013 [US2] Site : état `visible` dans `components/ui/password-input.tsx`, conteneur `relative`, `Input` en `pr-11`, `<button type="button">` à droite avec `Eye` / `EyeOff` (`lucide-react`), `aria-label` traduit (`common`), `aria-controls`
-- [X] T014 [P] [US2] Site : masquer le bouton natif d'Edge, `input::-ms-reveal { display: none }`, dans `app/globals.css`
+- [X] T014 [P] [US2] Site : masquer le bouton natif d'Edge, `input::-ms-reveal { display: none }`, dans `app/globals.css` (plus `::-ms-clear` sur les seuls champs de `PasswordInput` : Edge l'ajoute au champ affiché en texte, à côté de l'œil)
 - [X] T015 [US2] App : prop `trailing` dans `mobile/src/ui/Input.tsx` (élément à droite du `TextInput`, dans la boîte, ligne `flexDirection: "row"`, `TextInput` en `flex: 1`)
 - [X] T016 [US2] App : état `visible` dans `mobile/src/ui/PasswordInput.tsx`, `secureTextEntry={!visible}`, œil `Pressable` 44 × 44 (`EyeIcon` / `EyeOffIcon`), testID `<testID>-reveal`, libellé traduit ; re-masquage par `useFocusEffect` (expo-router) et quand la valeur passe à `""` sans saisie
 - [X] T017 [US2] Ajouter `useFocusEffect: jest.fn()` aux simulations d'`expo-router` des tests d'écrans qui rendent un champ mot de passe (`mobile/__tests__/screens/*.test.tsx`)
 - [X] T018 [US2] Accepter le suffixe `-reveal` dans `mobile/__tests__/e2e/test-ids.test.ts`
-- [X] T019 [US2] Parcours Maestro `mobile/.maestro/flows/016-us2-show-password.yaml` (tag `016-us2`) : Connexion, saisie masquée, œil → saisie lisible et libellé « Masquer… », œil → masquée, re-masquée au retour d'Inscription ; ajouter `"016"` aux specs de `mobile/__tests__/e2e/coverage.test.ts`
+- [X] T019 [US2] Parcours Maestro `mobile/.maestro/flows/016-us2-show-password.yaml` (tag `016-us2`) : Connexion, saisie masquée, œil → saisie lisible et libellé « Masquer… », œil → masquée (le re-masquage au retour d'un autre écran est dans `exclusions.md`, couvert par le test du composant) ; ajouter `"016"` aux specs de `mobile/__tests__/e2e/coverage.test.ts`
 - [X] T020 [US2] Exclusions de la story dans `mobile/.maestro/exclusions.md` : annonce VoiceOver / TalkBack, œil hors ligne (mode avion)
-- [ ] T021 [US2] Commit de la story : contrôles verts, puis `feat: show or hide the password with an eye button (US2)`, sans demander
+- [X] T021 [US2] Commit de la story : contrôles verts, puis `feat: show or hide the password with an eye button (US2)`, sans demander
 
 **Checkpoint**: US1 et US2 marchent.
 

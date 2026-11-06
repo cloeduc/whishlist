@@ -106,9 +106,9 @@ test("the eye is at least 44 × 44 to touch (FR-006)", async () => {
   await render(<PasswordInput testID="login.password" />);
   const style = StyleSheet.flatten(eye().props.style);
   const slop = eye().props.hitSlop ?? {};
-  expect(style.width).toBeGreaterThanOrEqual(44);
-  // Its height is the box's (40 minus the borders), completed by the hit slop.
-  expect(tokens.controlHeight.default - 2 * tokens.borderWidth + (slop.top ?? 0) + (slop.bottom ?? 0)).toBeGreaterThanOrEqual(44);
+  expect(style.width).toBeGreaterThanOrEqual(tokens.touchTarget);
+  // Its height is the box's (40, borders included), completed by the hit slop.
+  expect(tokens.controlHeight.default + (slop.top ?? 0) + (slop.bottom ?? 0)).toBeGreaterThanOrEqual(tokens.touchTarget);
 });
 
 test("a field that cannot be edited (offline) keeps a working eye", async () => {
@@ -135,6 +135,10 @@ test("emptied by the screen after a submit: masked again; erased by the person: 
   await fireEvent.changeText(field(), "nouveau");
   await fireEvent.press(screen.getByTestId("login.password-clear"));
   expect(field().props).toMatchObject({ secureTextEntry: true, value: "" });
+  // The eye works again on the emptied field, before anything is typed.
+  await fireEvent.press(eye());
+  expect(field().props.secureTextEntry).toBe(false);
+  expect(screen.getByRole("button", { name: "Masquer le mot de passe" })).toBe(eye());
 });
 
 test("collapsing the card that holds the field masks it again (FR-005)", async () => {

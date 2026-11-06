@@ -53,10 +53,21 @@ test("the eye's label in English (FR-003)", () => {
   assert.equal(attributes(render({ id: "password" }, "en"), "button").get("aria-label"), "Show password");
 });
 
-test("the hide label exists in both languages", async () => {
+test("the eye's two states: the field type and the label, in French and in English (FR-002, FR-003)", async () => {
+  const { createInstance } = await import("i18next");
   const { resources } = await import("../../src/i18n/resources");
-  assert.equal(resources.fr.common.passwordField.hide, "Masquer le mot de passe");
-  assert.equal(resources.en.common.passwordField.hide, "Hide password");
+  const { passwordReveal } = await import("../../src/site/password-reveal");
+  const i18n = createInstance();
+  await i18n.init({ lng: "fr", resources, defaultNS: "common" });
+  const masked = passwordReveal(false);
+  const shown = passwordReveal(true);
+  assert.equal(masked.type, "password");
+  assert.equal(shown.type, "text");
+  assert.equal(i18n.t(masked.labelKey), "Afficher le mot de passe");
+  assert.equal(i18n.t(shown.labelKey), "Masquer le mot de passe");
+  await i18n.changeLanguage("en");
+  assert.equal(i18n.t(masked.labelKey), "Show password");
+  assert.equal(i18n.t(shown.labelKey), "Hide password");
 });
 
 // Spec 016, FR-009: every password field of the site goes through `PasswordInput`.

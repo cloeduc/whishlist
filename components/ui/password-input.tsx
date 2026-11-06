@@ -5,6 +5,7 @@ import { EyeIcon, EyeOffIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Input } from "@/components/ui/input"
 import { cn } from "cn"
+import { passwordReveal } from "@/src/site/password-reveal"
 
 /**
  * The one password field of the site (spec 016): the keyboard neither capitalises nor corrects
@@ -15,12 +16,13 @@ import { cn } from "cn"
 function PasswordInput({ className, ...props }: Omit<React.ComponentProps<"input">, "type">) {
   const { t } = useTranslation("common")
   const [visible, setVisible] = React.useState(false)
+  const { type, labelKey } = passwordReveal(visible)
   const Icon = visible ? EyeOffIcon : EyeIcon
   return (
     <div data-slot="password-input" className="relative w-full">
       <Input
         {...props}
-        type={visible ? "text" : "password"}
+        type={type}
         autoCapitalize="none"
         autoCorrect="off"
         spellCheck={false}
@@ -30,7 +32,7 @@ function PasswordInput({ className, ...props }: Omit<React.ComponentProps<"input
       <button
         type="button"
         aria-controls={props.id}
-        aria-label={visible ? t("passwordField.hide") : t("passwordField.show")}
+        aria-label={t(labelKey)}
         onClick={() => setVisible((shown) => !shown)}
         className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-base text-foreground transition-all outline-none peer-focus-visible:translate-x-boxShadowX peer-focus-visible:translate-y-boxShadowY focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset"
       >

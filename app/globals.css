@@ -182,10 +182,10 @@
   html {
     @apply font-sans;
   }
-  /* Edge adds its own reveal button (and, once shown, a clear button) to password fields:
-     `PasswordInput` already has an eye (016). */
+  /* Edge adds its own reveal button to password fields, and a clear button once one is shown
+     as text: `PasswordInput` already has an eye (016). */
   input::-ms-reveal,
-  input::-ms-clear {
+  [data-slot="password-input"] input::-ms-clear {
     display: none;
   }
   h1, h2, h3, h4, h5, h6 {
