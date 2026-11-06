@@ -1,5 +1,6 @@
 "use server";
 
+import { refresh } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect as navigationRedirect } from "next/navigation";
 import { cookieSecure, currentUser } from "../auth/current";
@@ -10,6 +11,23 @@ import {
 } from "../auth/reservation-claim";
 import { grantReadUnlock, hasReadUnlock } from "../auth/read-unlock";
 import { SESSION_COOKIE, SESSION_TTL_SEC, sessionSecret, signSession } from "../auth/session";
+import {
+  CHANGE_PASSWORD_KEPT_FIELDS,
+  DISPLAY_NAME_KEPT_FIELDS,
+  EMAIL_CHANGE_KEPT_FIELDS,
+  FORGOT_PASSWORD_KEPT_FIELDS,
+  INVITE_EMAIL_KEPT_FIELDS,
+  LIST_SETTINGS_KEPT_FIELDS,
+  LOGIN_KEPT_FIELDS,
+  NEW_LIST_KEPT_FIELDS,
+  READ_PASSWORD_KEPT_FIELDS,
+  READ_UNLOCK_KEPT_FIELDS,
+  refusal,
+  REGISTER_KEPT_FIELDS,
+  RESERVATION_KEPT_FIELDS,
+  RESET_PASSWORD_KEPT_FIELDS,
+  type FormState,
+} from "./form-state";
 import { mailConfigured } from "./mail";
 import { isRateLimitError } from "./rate-limit";
 import { actionContext } from "./action-context";
@@ -106,24 +124,20 @@ async function openSession(userId: string, sessionVersion = 0) {
   });
 }
 
-export async function registerAction(formData: FormData) {
+export async function registerAction(prev: FormState, formData: FormData): Promise<FormState> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const displayName = String(formData.get("displayName") ?? "");
   const dest = nextPath(formData.get("next"));
+  const refused = (error: string) => refusal(prev, error, formData, REGISTER_KEPT_FIELDS);
   let result: Awaited<ReturnType<typeof register>>;
   try {
     result = await register(await actionContext(), { email, password, displayName, next: dest });
   } catch (error) {
-    if (isRateLimitError(error)) {
-      return localeRedirect(`/inscription?e=rate&next=${encodeURIComponent(dest)}`);
-    }
+    if (isRateLimitError(error)) return refused("rate");
     throw error;
   }
-  if (!result.ok) {
-    const code = result.error === "passwordTooShort" ? "password" : "fields";
-    return localeRedirect(`/inscription?e=${code}&next=${encodeURIComponent(dest)}`);
-  }
+  if (!result.ok) return refused(result.error === "passwordTooShort" ? "password" : "fields");
   // Email already registered: same screen, no sign-in (an email was sent).
   if (result.user) await openSession(result.user.id, result.user.sessionVersion ?? 0);
   // Never a plain link in production (the command does not return it).
@@ -132,7 +146,7 @@ export async function registerAction(formData: FormData) {
   return localeRedirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}${link}${failed}`);
 }
 
-export async function loginAction(formData: FormData) {
+export async function loginAction(prev: FormState, formData: FormData): Promise<FormState> {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const dest = nextPath(formData.get("next"));
@@ -140,25 +154,23 @@ export async function loginAction(formData: FormData) {
   try {
     checked = await checkCredentials(await actionContext(), { email, password });
   } catch (error) {
-    if (isRateLimitError(error)) {
-      return localeRedirect(`/connexion?e=rate&next=${encodeURIComponent(dest)}`);
-    }
+    if (isRateLimitError(error)) return refusal(prev, "rate", formData, LOGIN_KEPT_FIELDS);
     throw error;
   }
-  if (!checked.ok) return localeRedirect(`/connexion?e=1&next=${encodeURIComponent(dest)}`);
+  if (!checked.ok) return refusal(prev, "1", formData, LOGIN_KEPT_FIELDS);
   const user = checked.user;
   await openSession(user.id, user.sessionVersion ?? 0);
   if (user.mustChangePassword) return localeRedirect("/compte");
   return localeRedirect(dest);
 }
 
-export async function updateDisplayNameAction(formData: FormData) {
+export async function updateDisplayNameAction(prev: FormState, formData: FormData): Promise<FormState> {
   const user = await currentUser();
   if (!user) return localeRedirect("/connexion");
   if (user.mustChangePassword) return localeRedirect("/compte");
   const displayName = String(formData.get("displayName") ?? "");
   const result = await updateOwnDisplayName(await actionContext(), { displayName });
-  if (!result.ok) return localeRedirect(`/compte?e=${result.error}`);
+  if (!result.ok) return refusal(prev, result.error, formData, DISPLAY_NAME_KEPT_FIELDS);
   return localeRedirect("/compte?ok=name");
 }
 
@@ -185,20 +197,19 @@ export async function revokeApiKeyFormAction(formData: FormData) {
   return localeRedirect(result.ok ? "/compte?k=revoked#cles" : `/compte?k=${result.error}#cles`);
 }
 
-export async function changePasswordAction(formData: FormData) {
+export async function changePasswordAction(prev: FormState, formData: FormData): Promise<FormState> {
   const user = await currentUser();
   if (!user) return localeRedirect("/connexion");
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
   const currentPassword = String(formData.get("currentPassword") ?? "");
-  if (!password || password !== confirm) {
-    return localeRedirect("/compte?e=mismatch");
-  }
+  const refused = (error: string) => refusal(prev, error, formData, CHANGE_PASSWORD_KEPT_FIELDS);
+  if (!password || password !== confirm) return refused("mismatch");
   let result: Awaited<ReturnType<typeof changeOwnPassword>>;
   try {
     result = await changeOwnPassword(await actionContext(), { password, currentPassword });
   } catch (error) {
-    if (isRateLimitError(error)) return localeRedirect("/compte?e=rateLimited");
+    if (isRateLimitError(error)) return refused("rateLimited");
     throw error;
   }
   if (!result.ok) {
@@ -208,7 +219,7 @@ export async function changePasswordAction(formData: FormData) {
         : result.error === "passwordTooShort"
           ? "password"
           : "1";
-    return localeRedirect(`/compte?e=${code}`);
+    return refused(code);
   }
   await openSession(user.id, result.user.sessionVersion ?? 0);
   return localeRedirect(user.mustChangePassword ? "/" : "/compte?ok=1");
@@ -238,13 +249,13 @@ export async function logoutAction() {
   return localeRedirect("/");
 }
 
-export async function requestPasswordResetAction(formData: FormData) {
+export async function requestPasswordResetAction(prev: FormState, formData: FormData): Promise<FormState> {
   const email = String(formData.get("email") ?? "");
   let result: Awaited<ReturnType<typeof requestPasswordReset>>;
   try {
     result = await requestPasswordReset(await actionContext(), { email });
   } catch (error) {
-    if (isRateLimitError(error)) return localeRedirect("/mot-de-passe-oublie?e=rate");
+    if (isRateLimitError(error)) return refusal(prev, "rate", formData, FORGOT_PASSWORD_KEPT_FIELDS);
     throw error;
   }
   // Never a plain link in production (the command does not return it).
@@ -254,19 +265,19 @@ export async function requestPasswordResetAction(formData: FormData) {
   return localeRedirect(`/mot-de-passe-oublie?ok=1${mailConfigured() ? "" : "&sansmail=1"}`);
 }
 
-export async function resetPasswordAction(formData: FormData) {
+export async function resetPasswordAction(prev: FormState, formData: FormData): Promise<FormState> {
   const token = String(formData.get("token") ?? "");
   const password = String(formData.get("password") ?? "");
   let result: Awaited<ReturnType<typeof resetPasswordWithLink>>;
   try {
     result = await resetPasswordWithLink(await actionContext(), { token, password, signIn: false });
   } catch (error) {
-    if (isRateLimitError(error)) return localeRedirect(`/reinitialiser/${encodeURIComponent(token)}?e=rate`);
+    if (isRateLimitError(error)) return refusal(prev, "rate", formData, RESET_PASSWORD_KEPT_FIELDS);
     throw error;
   }
   if (!result.ok) {
     const code = result.error === "passwordTooShort" ? "password" : "1";
-    return localeRedirect(`/reinitialiser/${encodeURIComponent(token)}?e=${code}`);
+    return refusal(prev, code, formData, RESET_PASSWORD_KEPT_FIELDS);
   }
   await openSession(result.userId, result.sessionVersion);
   return localeRedirect("/");
@@ -296,7 +307,7 @@ export async function resendEmailVerificationAction(formData: FormData) {
 }
 
 /** « Adresse de connexion » card of « Mon compte » (010, US3). */
-export async function requestEmailChangeAction(formData: FormData) {
+export async function requestEmailChangeAction(prev: FormState, formData: FormData): Promise<FormState> {
   const user = await currentUser();
   if (!user) return localeRedirect("/connexion");
   if (user.mustChangePassword) return localeRedirect("/compte");
@@ -307,10 +318,10 @@ export async function requestEmailChangeAction(formData: FormData) {
       currentPassword: String(formData.get("currentPassword") ?? ""),
     });
   } catch (error) {
-    if (isRateLimitError(error)) return localeRedirect("/compte?ee=rateLimited#email");
+    if (isRateLimitError(error)) return refusal(prev, "rateLimited", formData, EMAIL_CHANGE_KEPT_FIELDS);
     throw error;
   }
-  if (!result.ok) return localeRedirect(`/compte?ee=${encodeURIComponent(result.error)}#email`);
+  if (!result.ok) return refusal(prev, result.error, formData, EMAIL_CHANGE_KEPT_FIELDS);
   if (!result.me.pendingEmail) return localeRedirect("/compte?email=changed#email");
   // Never a plain link in production (the command does not return it).
   const link = result.confirmUrl ? `&lien=${encodeURIComponent(result.confirmUrl)}` : "";
@@ -346,7 +357,7 @@ export async function confirmEmailAction(formData: FormData) {
   return localeRedirect(`${page}?${query.toString()}`);
 }
 
-export async function createListAction(formData: FormData) {
+export async function createListAction(prev: FormState, formData: FormData): Promise<FormState> {
   const user = await currentUser();
   if (!user) return localeRedirect("/connexion");
   if (user.mustChangePassword) return localeRedirect("/compte");
@@ -355,7 +366,7 @@ export async function createListAction(formData: FormData) {
     category: String(formData.get("category") ?? ""),
     person: String(formData.get("person") ?? ""),
   });
-  if (!result.ok) return localeRedirect(`/listes/new?e=${encodeURIComponent(result.error)}`);
+  if (!result.ok) return refusal(prev, result.error, formData, NEW_LIST_KEPT_FIELDS);
   return localeRedirect(`/listes/${result.list.id}`);
 }
 
@@ -577,12 +588,13 @@ export async function regenerateInviteAction(formData: FormData) {
   return sharingResult(wishlistId, formData, await regenerateInvite(await actionContext(), { wishlistId }));
 }
 
-export async function setReadPasswordAction(formData: FormData) {
+export async function setReadPasswordAction(prev: FormState, formData: FormData): Promise<FormState> {
   await memberId();
   const wishlistId = String(formData.get("wishlistId") ?? "");
   const password = String(formData.get("password") ?? "");
   const result = await setReadPassword(await actionContext(), { wishlistId, password });
-  return sharingResult(wishlistId, formData, result, "readPassword");
+  if (!result.ok) return refusal(prev, result.error, formData, READ_PASSWORD_KEPT_FIELDS);
+  return redirectToList(wishlistId, formData, undefined, "readPassword");
 }
 
 export async function clearReadPasswordAction(formData: FormData) {
@@ -592,23 +604,20 @@ export async function clearReadPasswordAction(formData: FormData) {
   return sharingResult(wishlistId, formData, result, "readPasswordCleared");
 }
 
-export async function unlockPublicListAction(formData: FormData) {
+export async function unlockPublicListAction(prev: FormState, formData: FormData): Promise<FormState> {
   const readToken = String(formData.get("readToken") ?? "");
   const password = String(formData.get("password") ?? "");
   const wantSubscribe = String(formData.get("subscribe") ?? "") === "1";
-  const subSuffix = wantSubscribe ? "&subscribe=1" : "";
   let result: Awaited<ReturnType<typeof unlockPublicList>>;
   try {
     result = await unlockPublicList(await actionContext(), { readToken, password });
   } catch (error) {
-    if (isRateLimitError(error)) {
-      return localeRedirect(`/l/${readToken}?e=rateLimited${subSuffix}`);
-    }
+    if (isRateLimitError(error)) return refusal(prev, "rateLimited", formData, READ_UNLOCK_KEPT_FIELDS);
     throw error;
   }
   if (!result.ok) {
     if (result.error === "listMissing") return localeRedirect("/");
-    return localeRedirect(`/l/${readToken}?e=badPassword${subSuffix}`);
+    return refusal(prev, "badPassword", formData, READ_UNLOCK_KEPT_FIELDS);
   }
   await grantReadUnlock(result.wishlist);
   if (wantSubscribe) {
@@ -631,7 +640,7 @@ export async function unlockPublicListAction(formData: FormData) {
   return localeRedirect(`/l/${readToken}`);
 }
 
-export async function sendInviteAction(formData: FormData) {
+export async function sendInviteAction(prev: FormState, formData: FormData): Promise<FormState> {
   await memberId();
   const wishlistId = String(formData.get("wishlistId") ?? "");
   const email = String(formData.get("email") ?? "");
@@ -639,10 +648,11 @@ export async function sendInviteAction(formData: FormData) {
   try {
     result = await sendInvite(await actionContext(), { wishlistId, email });
   } catch (error) {
-    if (isRateLimitError(error)) return redirectToList(wishlistId, formData, "rateLimited");
+    if (isRateLimitError(error)) return refusal(prev, "rateLimited", formData, INVITE_EMAIL_KEPT_FIELDS);
     throw error;
   }
-  return sharingResult(wishlistId, formData, result, "invite");
+  if (!result.ok) return refusal(prev, result.error, formData, INVITE_EMAIL_KEPT_FIELDS);
+  return redirectToList(wishlistId, formData, undefined, "invite");
 }
 
 export async function removeMemberAction(formData: FormData) {
@@ -668,7 +678,7 @@ export async function deleteListAction(formData: FormData) {
   return localeRedirect("/");
 }
 
-export async function updateWishlistSettingsAction(formData: FormData) {
+export async function updateWishlistSettingsAction(prev: FormState, formData: FormData): Promise<FormState> {
   await memberId();
   const wishlistId = String(formData.get("wishlistId") ?? "");
   const result = await updateSettings(await actionContext(), {
@@ -683,11 +693,11 @@ export async function updateWishlistSettingsAction(formData: FormData) {
       background: String(formData.get("background") ?? ""),
     },
   });
-  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  if (!result.ok) return refusal(prev, result.error, formData, LIST_SETTINGS_KEPT_FIELDS);
   return redirectToList(wishlistId, formData);
 }
 
-export async function reserveAction(formData: FormData) {
+export async function reserveAction(prev: FormState, formData: FormData): Promise<FormState> {
   const readToken = String(formData.get("readToken") ?? "");
   const typeId = String(formData.get("typeId") ?? "");
   const itemId = String(formData.get("itemId") ?? "");
@@ -697,11 +707,10 @@ export async function reserveAction(formData: FormData) {
   if (String(formData.get("website") ?? "").trim()) {
     return localeRedirect(`/l/${readToken}?ok=1`);
   }
+  // The page is refreshed with the refusal: an idea taken in the meantime leaves the choices.
   const backToForm = (error: string) => {
-    const params = new URLSearchParams({ e: error });
-    if (typeId) params.set("typeId", typeId);
-    if (itemId) params.set("itemId", itemId);
-    return localeRedirect(`/l/${readToken}/reserver?${params}`);
+    refresh();
+    return refusal(prev, error, formData, RESERVATION_KEPT_FIELDS);
   };
   let result: Awaited<ReturnType<typeof reserve>>;
   try {

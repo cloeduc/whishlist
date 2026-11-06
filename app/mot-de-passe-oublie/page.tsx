@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import { origin } from "../../src/auth/current";
-import { requestPasswordResetAction } from "../../src/server/actions";
 import { DevLinkAlert } from "@/components/site/dev-link-alert";
+import { ForgotPasswordForm } from "@/components/site/forgot-password-form";
 import { LinkButton } from "@/components/site/link-button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { getTranslations } from "@/src/i18n/server";
 import { publicPageMetadata } from "@/src/site/seo";
 
@@ -25,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ForgotPasswordPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ok?: string; lien?: string; sansmail?: string; e?: string }>;
+  searchParams: Promise<{ ok?: string; lien?: string; sansmail?: string }>;
 }) {
   const query = await searchParams;
   const [t, siteOrigin] = await Promise.all([getTranslations("auth"), origin()]);
@@ -40,11 +37,6 @@ export default async function ForgotPasswordPage({
           <CardDescription>{t("forgot.description")}</CardDescription>
         </CardHeader>
         <CardContent>
-          {query.e === "rate" ? (
-            <Alert variant="destructive" className="mb-3">
-              <AlertDescription>{t("forgot.rateLimited")}</AlertDescription>
-            </Alert>
-          ) : null}
           {done ? (
             <div className="flex flex-col gap-3">
               <Alert>
@@ -59,15 +51,7 @@ export default async function ForgotPasswordPage({
               </LinkButton>
             </div>
           ) : (
-            <form action={requestPasswordResetAction}>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="email">{t("forgot.email")}</FieldLabel>
-                  <Input id="email" name="email" type="email" required autoComplete="email" />
-                </Field>
-                <Button type="submit">{t("forgot.submit")}</Button>
-              </FieldGroup>
-            </form>
+            <ForgotPasswordForm />
           )}
         </CardContent>
       </Card>

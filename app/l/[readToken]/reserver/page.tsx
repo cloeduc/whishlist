@@ -1,18 +1,16 @@
 import { currentUser } from "../../../../src/auth/current";
 import { canAccessPublicList } from "../../../../src/auth/public-list";
 import { availableItems } from "../../../../src/domain/reserve";
-import { reserveAction } from "../../../../src/server/actions";
 import { getDocument } from "../../../../src/store/db";
 import { LinkButton } from "@/components/site/link-button";
 import { ReadUnlockForm } from "@/components/site/read-unlock-form";
+import { ReservationForm } from "@/components/site/reservation-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import { Textarea } from "@/components/ui/textarea";
-import { getTranslations, translateError } from "@/src/i18n/server";
+import { getTranslations } from "@/src/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +19,7 @@ export default async function ReservePage({
   searchParams,
 }: {
   params: Promise<{ readToken: string }>;
-  searchParams: Promise<{ typeId?: string; itemId?: string; e?: string }>;
+  searchParams: Promise<{ typeId?: string; itemId?: string }>;
 }) {
   const { readToken } = await params;
   const query = await searchParams;
@@ -56,7 +54,6 @@ export default async function ReservePage({
       doc.items.find((item) => item.id === query.itemId && item.wishlistId === list.id)
     : null;
   const pickedAvailable = picked ? choices.some((item) => item.id === picked.id) : false;
-  const error = query.e ? await translateError(query.e) : null;
   return (
     <main className="flex flex-col gap-4">
       <div className="flex flex-col gap-2">
@@ -66,11 +63,6 @@ export default async function ReservePage({
           {t("reserve.back")}
         </LinkButton>
       </div>
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
       {query.itemId && !pickedAvailable ? (
         <Alert variant="destructive">
           <AlertDescription>{t("reserve.unavailable")}</AlertDescription>
@@ -82,28 +74,7 @@ export default async function ReservePage({
             <CardTitle>{t("reserve.offerTitle", { name: picked.name })}</CardTitle>
           </CardHeader>
           <CardContent>
-            <form action={reserveAction}>
-              <FieldGroup>
-                <input type="hidden" name="readToken" value={readToken} />
-                <input type="hidden" name="typeId" value="" />
-                <input type="hidden" name="itemId" value={picked.id} />
-                <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
-                  <label htmlFor="website-a">Website</label>
-                  <input id="website-a" name="website" type="text" tabIndex={-1} autoComplete="off" />
-                </div>
-                <Field>
-                  <FieldLabel htmlFor="fromName">{t("reserve.fromName")}</FieldLabel>
-                  <Input id="fromName" name="fromName" autoComplete="name" />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="note">{t("reserve.note")}</FieldLabel>
-                  <Textarea id="note" name="note" />
-                  <p className="text-sm text-muted-foreground">{t("reserve.privacyHint")}</p>
-                </Field>
-                <p className="text-sm text-muted-foreground">{t("reserve.noPurchaseHint")}</p>
-                <Button type="submit">{t("reserve.submit")}</Button>
-              </FieldGroup>
-            </form>
+            <ReservationForm readToken={readToken} typeId="" itemId={picked.id} choices={[]} />
           </CardContent>
         </Card>
       ) : (
@@ -135,40 +106,12 @@ export default async function ReservePage({
           </Card>
           <Card>
             <CardContent className="pt-6">
-              <form action={reserveAction}>
-                <FieldGroup>
-                  <input type="hidden" name="readToken" value={readToken} />
-                  <input type="hidden" name="typeId" value={typeId} />
-                  <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
-                    <label htmlFor="website-b">Website</label>
-                    <input id="website-b" name="website" type="text" tabIndex={-1} autoComplete="off" />
-                  </div>
-                  <Field>
-                    <FieldLabel htmlFor="itemId">{t("reserve.giftLabel")}</FieldLabel>
-                    <NativeSelect id="itemId" name="itemId" className="w-full" required defaultValue="">
-                      <NativeSelectOption value="" disabled>
-                        {t("reserve.choose")}
-                      </NativeSelectOption>
-                      {choices.map((item) => (
-                        <NativeSelectOption key={item.id} value={item.id}>
-                          {item.name}
-                        </NativeSelectOption>
-                      ))}
-                    </NativeSelect>
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="fromName">{t("reserve.fromName")}</FieldLabel>
-                    <Input id="fromName" name="fromName" autoComplete="name" />
-                  </Field>
-                  <Field>
-                    <FieldLabel htmlFor="note">{t("reserve.note")}</FieldLabel>
-                    <Textarea id="note" name="note" />
-                    <p className="text-sm text-muted-foreground">{t("reserve.privacyHint")}</p>
-                  </Field>
-                  <p className="text-sm text-muted-foreground">{t("reserve.noPurchaseHint")}</p>
-                  <Button type="submit">{t("reserve.submit")}</Button>
-                </FieldGroup>
-              </form>
+              <ReservationForm
+                readToken={readToken}
+                typeId={typeId}
+                itemId={null}
+                choices={choices.map((item) => ({ id: item.id, name: item.name }))}
+              />
             </CardContent>
           </Card>
         </>
