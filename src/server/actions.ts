@@ -183,7 +183,10 @@ export async function createApiKeyAction(input: {
   const name = typeof input?.name === "string" ? input.name : "";
   try {
     const result = await createMyApiKey(await actionContext(), { name });
-    return result.ok ? { ok: true, token: result.token, keyId: result.key.id } : { ok: false, error: result.error };
+    if (!result.ok) return { ok: false, error: result.error };
+    // The page comes back with the action's response: the key list is up to date without a second request.
+    refresh();
+    return { ok: true, token: result.token, keyId: result.key.id };
   } catch (error) {
     if (isRateLimitError(error)) return { ok: false, error: "rateLimited" };
     throw error;
@@ -499,6 +502,7 @@ export async function transferItemAction(
   const { mode, ...fields } = input;
   const result = mode === "move" ? await moveItem(await actionContext(), fields) : await copyItem(await actionContext(), fields);
   if (!result.ok) return { ok: false, error: result.error };
+  refresh();
   return { ok: true };
 }
 
@@ -547,6 +551,7 @@ export async function manageLabelAction(input: LabelInput): Promise<{ ok: true }
   await memberId();
   const result = await manageLabel(await actionContext(), input);
   if (!result.ok) return { ok: false, error: result.error };
+  refresh();
   return { ok: true };
 }
 

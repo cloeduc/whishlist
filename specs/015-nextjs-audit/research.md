@@ -85,3 +85,9 @@ La lecture ciblée de la base (étape 2 de la 008) est écartée (Clarifications
 - La console montre l'erreur React n° 441 : c'est le message masqué en production d'une erreur serveur (le `throw` de test), attendu.
 - Piège de test : en production, un `SESSION_SECRET` de moins de 32 caractères fait échouer le layout, donc toute page tombe sur la page générale.
 
+### US3 (2026-11-06)
+
+- Vérifié dans Chromium, en comptant les requêtes portant l'en-tête `Next-Action` ou `RSC` : une seule requête pour l'ajout d'une catégorie, le refus d'une catégorie en double, la suppression d'une catégorie, la copie d'une idée vers une autre liste et la création d'une clé d'API (avec ou sans `?k=revoked` dans l'adresse).
+- `label-chips.tsx` n'était pas vraiment optimiste avant (le `setChips(items)` du refus ne changeait rien). Avec `useOptimistic`, la puce s'affiche tout de suite et disparaît d'elle-même si le serveur refuse. L'ajout découpe la saisie comme le serveur : `splitLabels` est passé dans `src/domain/split-labels.ts`, un module pur, et `src/domain/items.ts` le réexporte. Le navigateur n'importe donc pas `items.ts`, qui tire `node:crypto`.
+- Clés d'API : l'avis `?k=…` s'affiche tant que `k` est dans l'adresse (`useSearchParams`). Après une création, `window.history.replaceState` retire `k`, ce qui masque l'avis sans nouvelle requête.
+

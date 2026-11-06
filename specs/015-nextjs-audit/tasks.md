@@ -140,7 +140,7 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
   - il n'importe rien de `src/store`, `src/auth` ni `src/server` (FR-007).
 - [X] T019 [P] [US2] Dans `app/error.tsx`, remplacer la prop `reset` par `retry` (`{ error: unknown; retry: () => void }`, `onClick={() => retry()}`), comme le recommande `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/error.md` (`retry` est stable depuis 16.3.0).
 - [X] T020 [US2] Dérouler [quickstart.md](quickstart.md), section US2 (`throw` temporaire dans `RootLayout`, puis dans `app/compte/page.tsx`, en `/` et en `/en`). Retirer les `throw`, puis noter dans `research.md` R3 s'il y a un avertissement d'hydratation en `/en`.
-- [ ] T021 [US2] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: a translated site page when the whole layout fails (US2)`, sans demander.
+- [X] T021 [US2] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: a translated site page when the whole layout fails (US2)`, sans demander.
 
 **Checkpoint**: les US1 et US2 marchent chacune seule.
 
@@ -152,19 +152,19 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
 
 **Independent Test**: [quickstart.md](quickstart.md), section US3 (onglet Réseau en « Slow 4G »).
 
-- [ ] T022 [US3] Dans `src/server/actions.ts`, importer `refresh` de `next/cache` et l'appeler juste avant le `return { ok: true … }` de succès de `transferItemAction`, `manageLabelAction` et `createApiKeyAction` (`03-api-reference/04-functions/refresh.md`).
-- [ ] T023 [P] [US3] Dans `components/site/label-chips.tsx` :
+- [X] T022 [US3] Dans `src/server/actions.ts`, importer `refresh` de `next/cache` et l'appeler juste avant le `return { ok: true … }` de succès de `transferItemAction`, `manageLabelAction` et `createApiKeyAction` (`03-api-reference/04-functions/refresh.md`).
+- [X] T023 [P] [US3] Dans `components/site/label-chips.tsx` :
   - retirer `useRouter` et `router.refresh()` ;
   - remplacer l'état local optimiste (`chips` / `setChips(items)` sur refus) par `useOptimistic(items, reducer)` : le reducer applique l'ajout, le renommage ou la suppression d'une puce, et l'état optimiste est posé dans la transition qui appelle `manageLabelAction` ;
   - sur un refus, l'état optimiste disparaît de lui-même et le message `errors:<code>` s'affiche ;
   - garder le brouillon (`draft`) et l'édition en cours (`editingId`) tels quels.
-- [ ] T024 [P] [US3] Dans `components/site/ideas-accordion.tsx`, retirer `router.refresh()` de `onTransferred` (et `useRouter` s'il ne sert plus). Vérifier que `components/site/move-copy-dialog.tsx` n'appelle pas non plus de rafraîchissement client.
-- [ ] T025 [P] [US3] Dans `components/site/api-keys-card.tsx` :
+- [X] T024 [P] [US3] Dans `components/site/ideas-accordion.tsx`, retirer `router.refresh()` de `onTransferred` (et `useRouter` s'il ne sert plus). Vérifier que `components/site/move-copy-dialog.tsx` n'appelle pas non plus de rafraîchissement client.
+- [X] T025 [P] [US3] Dans `components/site/api-keys-card.tsx` :
   - retirer `router.refresh()` ;
   - quand un avis est dans l'adresse, remplacer `router.replace(pathname, { scroll: false })` par `window.history.replaceState(null, "", pathname + window.location.hash)`, une API History native suivie par le routeur (`01-app/01-getting-started/04-linking-and-navigating.md`) ;
   - retirer `useRouter` s'il ne sert plus ;
   - la clé créée s'affiche toujours une fois, et la liste des clés vient de la page rafraîchie par l'action.
-- [ ] T026 [US3] Dérouler [quickstart.md](quickstart.md), section US3 : une requête par action, retour en arrière d'une catégorie en double, et l'avis `?k=revoked` qui disparaît sans second chargement.
+- [X] T026 [US3] Dérouler [quickstart.md](quickstart.md), section US3 : une requête par action, retour en arrière d'une catégorie en double, et l'avis `?k=revoked` qui disparaît sans second chargement.
 - [ ] T027 [US3] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: refresh the page with the action's response, in one round trip (US3)` (seulement les changements US3 de `src/server/actions.ts`), sans demander.
 
 **Checkpoint**: les US1, US2 et US3 marchent chacune seule.

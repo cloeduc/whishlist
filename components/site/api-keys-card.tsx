@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { ConfirmForm } from "@/components/site/confirm-form";
@@ -22,7 +22,6 @@ export type ApiKeyRow = { id: string; name: string; hint: string; created: strin
  */
 export function ApiKeysCard({ keys, mcpUrl, notice }: { keys: ApiKeyRow[]; mcpUrl: string; notice: string | null }) {
   const { t } = useTranslation(["auth", "errors"]);
-  const router = useRouter();
   const pathname = usePathname();
   const [name, setName] = useState("");
   const [created, setCreated] = useState<{ token: string; keyId: string; keysThen: ApiKeyRow[] } | null>(null);
@@ -32,6 +31,8 @@ export function ApiKeysCard({ keys, mcpUrl, notice }: { keys: ApiKeyRow[]; mcpUr
     created && (keys === created.keysThen || keys.some((key) => key.id === created.keyId)) ? created.token : null;
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // The notice of a previous action (« clé révoquée ») shows while `k` is in the URL.
+  const shownNotice = useSearchParams().has("k") ? notice : null;
 
   function create() {
     if (!name.trim() || pending) return;
@@ -44,17 +45,17 @@ export function ApiKeysCard({ keys, mcpUrl, notice }: { keys: ApiKeyRow[]; mcpUr
       }
       setCreated({ token: result.token, keyId: result.keyId, keysThen: keys });
       setName("");
-      // A notice from a previous action (« clé révoquée ») no longer applies: remove it from the URL.
-      if (notice) router.replace(pathname, { scroll: false });
-      else router.refresh();
+      // The action already refreshed the page. The old notice no longer applies: drop it from the URL
+      // with the native History API, which updates the router (and hides the notice) without a request.
+      if (notice) window.history.replaceState(null, "", pathname + window.location.hash);
     });
   }
 
   return (
     <div className="flex flex-col gap-4">
-      {notice ? (
+      {shownNotice ? (
         <Alert>
-          <AlertDescription>{notice}</AlertDescription>
+          <AlertDescription>{shownNotice}</AlertDescription>
         </Alert>
       ) : null}
       {token ? (
