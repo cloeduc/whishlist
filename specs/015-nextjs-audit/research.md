@@ -99,3 +99,7 @@ La lecture ciblée de la base (étape 2 de la 008) est écartée (Clarifications
 - **Démarrage** : `app.js` est supprimé. `postbuild` (`scripts/prepare-standalone.mjs`) complète `.next/standalone` et `npm start` (`scripts/start.mjs`) le lance. Vérifié avec `PORT=3020 WISHLIST_DATA_PATH=tmp/015-demo.json npm start` : la liste de démo, le CSS et `public/` répondent, et aucune base n'est créée dans `.next/standalone`. L'image se construit et le conteneur passe `healthy`. Avec `APP_ORIGIN=https://exemple.test` et `APPLE_TEAM_ID=ABCDE12345`, `/robots.txt` et `/.well-known/apple-app-site-association` reflètent ces valeurs.
 - **Écart découvert** : le traçage de Next copie `data/mail.log` (journal du dev local) dans `.next/standalone/data/`, et donc dans l'image : `.dockerignore` n'excluait que les `*.log` de la racine. Ajout de `data/*.log` à `.dockerignore`, puis vérifié dans l'image reconstruite.
 
+### Polish (2026-11-06)
+
+- `npm run typecheck`, `npm test` (396 tests), `npm run build` et `npm --prefix mobile test` (264 tests) passent. `npm run lint` signale 35 erreurs, toutes dans `.claude/worktrees/agent-ac1f606b0d49db6da/`, un worktree laissé par une autre session (branche `feat/api-keys-mcp`) que `eslint .` parcourt aussi ; `npx eslint . --ignore-pattern ".claude/**"` passe sans erreur.
+

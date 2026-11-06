@@ -234,7 +234,7 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
   - `PORT=3020 npm start` sur la base du dépôt ;
   - conteneur sur le port 3021, `healthy` ;
   - `APP_ORIGIN` et `APPLE_TEAM_ID` reflétés par `/robots.txt` et `.well-known`.
-- [ ] T040 [US4] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `chore: guard server code, drop redundant dynamic flags, one production start (US4)`, sans demander.
+- [X] T040 [US4] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `chore: guard server code, drop redundant dynamic flags, one production start (US4)`, sans demander.
 
 **Checkpoint**: toutes les stories marchent chacune seule.
 
@@ -242,8 +242,8 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T041 Lancer `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` et `npm --prefix mobile test`, pour vérifier que les modules partagés sont inchangés pour l'app. `tests/domain/code-language.test.ts` doit passer, ce qui veut dire que les nouveaux commentaires sont en anglais.
-- [ ] T042 Dans `specs/015-nextjs-audit/research.md`, ajouter une section « Écarts à l'implémentation », qui reprend les notes de T004, T020, T032 et T035. Mettre le `Status` de `spec.md` à `Implemented`. Si des fichiers ont changé, créer le commit `chore: implementation notes for the Next.js audit follow-ups`.
+- [X] T041 Lancer `npm run lint`, `npm run typecheck`, `npm test`, `npm run build` et `npm --prefix mobile test`, pour vérifier que les modules partagés sont inchangés pour l'app. `tests/domain/code-language.test.ts` doit passer, ce qui veut dire que les nouveaux commentaires sont en anglais.
+- [X] T042 Dans `specs/015-nextjs-audit/research.md`, ajouter une section « Écarts à l'implémentation », qui reprend les notes de T004, T020, T032 et T035. Mettre le `Status` de `spec.md` à `Implemented`. Si des fichiers ont changé, créer le commit `chore: implementation notes for the Next.js audit follow-ups`.
 
 ---
 
