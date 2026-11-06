@@ -23,7 +23,7 @@ Cette feature traite les points (a) à (f) de l'audit Next.js du 2026-11-03 ; le
 
 **Testing**: `node:test` + `tsx` (`tests/domain/`), désormais avec `--conditions=react-server` ; vérification à la main par [quickstart.md](quickstart.md) (le site n'a pas de test e2e)
 
-**Target Platform**: conteneur Docker Linux (Mac mini de prod), navigateurs récents, avec et sans JavaScript pour les formulaires
+**Target Platform**: conteneur Docker Linux (Mac mini de prod), navigateurs récents (avec JavaScript ; FR-003 abandonnée)
 
 **Project Type**: application web (Next.js), plus une app mobile Expo séparée, non touchée
 

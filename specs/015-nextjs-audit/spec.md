@@ -34,7 +34,7 @@ Formulaires concernés : inscription, connexion, mot de passe oublié, réinitia
 
 **Why this priority**: C'est le seul point de l'audit que les visiteurs remarquent à chaque erreur. Le cas le plus pénible est la réservation : un offreur qui a écrit un petit mot le perd si l'idée vient d'être prise ou s'il a fait trop de tentatives.
 
-**Independent Test**: Sur la base de démo, provoquer une erreur sur chaque formulaire de la liste ci-dessus (par exemple s'inscrire avec un mot de passe trop court) : le message d'erreur traduit s'affiche, les champs texte gardent leur valeur, les champs mot de passe sont vides. Refaire le parcours avec JavaScript désactivé : le résultat est le même.
+**Independent Test**: Sur la base de démo, provoquer une erreur sur chaque formulaire de la liste ci-dessus (par exemple s'inscrire avec un mot de passe trop court) : le message d'erreur traduit s'affiche, les champs texte gardent leur valeur, les champs mot de passe sont vides.
 
 **Acceptance Scenarios**:
 
@@ -42,7 +42,6 @@ Formulaires concernés : inscription, connexion, mot de passe oublié, réinitia
 2. **Given** un offreur qui a écrit son nom et un petit mot sur le formulaire de réservation, **When** la réservation est refusée (idée déjà réservée entre-temps, trop de tentatives), **Then** le message s'affiche et le nom et le petit mot sont toujours là.
 3. **Given** le formulaire de changement de mot de passe avec deux nouveaux mots de passe différents, **When** la personne l'envoie, **Then** le message « les mots de passe ne correspondent pas » s'affiche et aucun mot de passe n'est réaffiché.
 4. **Given** n'importe quel formulaire de la liste, **When** il est accepté, **Then** le site fait la même chose qu'aujourd'hui (même page d'arrivée, même message de confirmation, même cookie de session pour la connexion).
-5. **Given** un navigateur sans JavaScript, **When** un formulaire de la liste est refusé, **Then** le message s'affiche et la saisie est gardée comme avec JavaScript.
 6. **Given** le formulaire d'inscription rempli avec une adresse déjà utilisée, **When** la personne l'envoie, **Then** le site affiche le même écran « e-mail envoyé » qu'aujourd'hui, sans erreur : il ne révèle pas qu'un compte existe.
 
 ---
@@ -86,7 +85,7 @@ Une personne qui développe le site, ou un agent, est arrêtée à la constructi
 
 **Why this priority**: Aucun visiteur ne le voit ; cela évite des erreurs futures et prépare une évolution du cache.
 
-**Independent Test**: Ajouter temporairement l'import d'un module de la base dans un composant client : la construction échoue avec un message qui nomme le module. Chercher les déclarations de rendu forcé : il ne reste que celles du fichier robots, du plan du site et des fichiers `.well-known`, chacune commentée. Lancer la production avec la commande du dépôt puis avec l'image Docker : c'est le même serveur, qui répond sur le même port et respecte les mêmes variables (port, adresse d'écoute).
+**Independent Test**: Ajouter temporairement l'import d'un module de la base dans un composant client : la construction échoue avec un message qui nomme le module. Chercher les déclarations de rendu forcé : il ne reste que celles de la mise en page commune, du fichier robots, du plan du site et des fichiers `.well-known`, chacune commentée. Lancer la production avec la commande du dépôt puis avec l'image Docker : c'est le même serveur, qui répond sur le même port et respecte les mêmes variables (port, adresse d'écoute).
 
 **Acceptance Scenarios**:
 
@@ -116,7 +115,7 @@ Une personne qui développe le site, ou un agent, est arrêtée à la constructi
 
 - **FR-001**: Quand un formulaire de la liste de l'US1 est refusé, le site DOIT afficher le message d'erreur traduit et garder la valeur de chaque champ qui n'est pas un mot de passe.
 - **FR-002**: Le site NE DOIT réafficher aucun mot de passe après un refus, ni le faire passer par l'adresse de la page.
-- **FR-003**: Ces formulaires DOIVENT marcher sans JavaScript, avec le même message et la même saisie gardée.
+- **FR-003**: *Abandonnée le 2026-11-06.* Le site ne s'affiche pas sans JavaScript (`app/loading.tsx` met chaque page dans un bloc de streaming) ; les formulaires n'ont donc pas à marcher sans lui. Voir research.md R1.
 - **FR-004**: Quand un de ces formulaires est accepté, le site DOIT garder le comportement actuel (page d'arrivée, message de confirmation, cookies, limites de débit, champ anti-robot).
 - **FR-005**: Une adresse qui porte un ancien code d'erreur DOIT toujours s'ouvrir sans erreur.
 
@@ -141,7 +140,7 @@ Une personne qui développe le site, ou un agent, est arrêtée à la constructi
 
 ### Measurable Outcomes
 
-- **SC-001**: Sur les 13 formulaires de l'US1, un refus garde 100 % des champs non secrets, avec et sans JavaScript.
+- **SC-001**: Sur les 13 formulaires de l'US1, un refus garde 100 % des champs non secrets.
 - **SC-002**: Aucun mot de passe n'apparaît dans la page, l'adresse ou l'historique après un refus.
 - **SC-003**: Une panne de la mise en page commune affiche la page d'erreur du site dans la bonne langue, en français et en anglais.
 - **SC-004**: Chacune des actions de l'US3 fait une seule demande au serveur au lieu de deux.

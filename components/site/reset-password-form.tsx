@@ -2,12 +2,12 @@
 
 import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { resetPasswordAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 export function ResetPasswordForm({ token }: { token: string }) {
   const { t } = useTranslation(["auth", "errors"]);
@@ -23,11 +23,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
     <form key={state?.attempt ?? 0} action={formAction}>
       <FieldGroup>
         <input type="hidden" name="token" value={token} />
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal message={error} />
         <Field>
           <FieldLabel htmlFor="password">{t("reset.password")}</FieldLabel>
           <Input

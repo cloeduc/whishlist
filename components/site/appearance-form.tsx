@@ -4,7 +4,6 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { GiftMark } from "@/components/site/gift-mark";
 import { useWishlistTheme } from "@/components/site/wishlist-theme-scope";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -15,6 +14,7 @@ import {
   type WishlistTheme,
 } from "@/src/domain/theme";
 import { updateWishlistSettingsAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 type Props = {
   wishlistId: string;
@@ -72,11 +72,7 @@ export function AppearanceForm({
       <input type="hidden" name="wishlistId" value={wishlistId} />
       <input type="hidden" name="onglet" value="reglages" />
       <FieldGroup>
-        {state ? (
-          <Alert variant="destructive">
-            <AlertDescription>{t(`errors:${state.error}`, { defaultValue: state.error })}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal code={state?.error} />
         <Field>
           <FieldLabel htmlFor="list-title">{t("settings.listTitle")}</FieldLabel>
           <Input

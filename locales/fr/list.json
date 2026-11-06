@@ -93,6 +93,7 @@
     "inviteEmailTitle": "Inviter par e-mail",
     "inviteEmailDescription": "Cette personne recevra un lien pour rejoindre la liste et la modifier. Elle devra se connecter ou créer un compte.",
     "inviteEmail": "Adresse e-mail de la personne",
+    "inviteEmailPlaceholder": "prenom@exemple.fr",
     "sendInvite": "Envoyer l'invitation",
     "regenerate": "Remplacer le lien d'invitation",
     "regenerateHint": "L'ancien lien d'invitation ne fonctionnera plus. Les membres déjà présents ne sont pas affectés.",

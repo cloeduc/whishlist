@@ -2,11 +2,11 @@
 
 import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { createListAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 /** New list. The placeholders show what an empty field gives (computed by the page). */
 export function NewListForm({
@@ -19,11 +19,7 @@ export function NewListForm({
   return (
     <form key={state?.attempt ?? 0} action={formAction}>
       <FieldGroup>
-        {state ? (
-          <Alert variant="destructive">
-            <AlertDescription>{t(`errors:${state.error}`, { defaultValue: state.error })}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal code={state?.error} />
         <Field>
           <FieldLabel htmlFor="title">{t("newList.titleLabel")}</FieldLabel>
           <Input

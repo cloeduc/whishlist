@@ -22,7 +22,7 @@ Pour chaque ligne de [contracts/form-states.md](contracts/form-states.md), provo
 | 12 | Partage, invitation : une adresse invalide |
 | 13 | Partage, mot de passe de lecture : moins de 8 caractères |
 
-Refaire les lignes 1, 2 et 10 avec JavaScript désactivé (DevTools, « Disable JavaScript ») : le résultat doit être le même. **Constat du 2026-11-06** : sans JavaScript, aucune page du site ne s'affiche (dev comme prod), parce que `app/loading.tsx` met tout le contenu dans un bloc de streaming que seul JavaScript insère. Voir research R1.
+Pas de parcours sans JavaScript : FR-003 est abandonnée (le site ne s'affiche pas sans JavaScript, à cause de `app/loading.tsx` ; voir research R1).
 
 Vérifier aussi trois cas qui ne changent pas :
 
@@ -51,7 +51,7 @@ Dans DevTools, Réseau, avec le débit « Slow 4G », filtrer sur les requêtes 
 
 1. **server-only** : ajouter `import "@/src/store/db";` dans un composant client (p. ex. `components/site/label-chips.tsx`), lancer `npm run build`. La construction échoue, avec un message qui cite `server-only` et le module. Retirer l'import.
 2. **Rendu à la demande** : `npm run build` ; dans le tableau des routes, chaque page et chaque route d'API reste `ƒ` comme avant la feature (comparer à la sortie de `main`). `grep -rl force-dynamic app` ne liste que `layout.tsx`, `robots.ts`, `sitemap.ts` et les deux routes `.well-known`, chacun avec un commentaire.
-3. **Démarrage** : `npm run build && PORT=3020 npm start`. Le site répond sur <http://localhost:3020> avec les données de `data/wishlist.db` du dépôt. Puis `docker build -t whishlist:local . && docker run --rm -p 3021:3000 -e SESSION_SECRET=x whishlist:local` : le site répond sur <http://localhost:3021> et le contrôle de santé passe (`docker ps` affiche `healthy`).
+3. **Démarrage** : `npm run build && PORT=3020 npm start`. Le site répond sur <http://localhost:3020> avec les données de `data/wishlist.db` du dépôt. Puis `docker build -t whishlist:local . && docker run --rm -p 3021:3000 -e SESSION_SECRET=$(openssl rand -hex 32) whishlist:local` : le site répond sur <http://localhost:3021> et le contrôle de santé passe (`docker ps` affiche `healthy`).
 4. **`robots.txt` et `.well-known`** : relancer le conteneur avec `-e APP_ORIGIN=https://exemple.test -e APPLE_TEAM_ID=ABCDE12345`. `/robots.txt` cite `https://exemple.test/sitemap.xml`, et `/.well-known/apple-app-site-association` contient `ABCDE12345`. Leurs déclarations, déjà commentées, restent.
 
 ## Contrôles automatiques

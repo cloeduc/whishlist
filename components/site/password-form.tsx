@@ -2,12 +2,12 @@
 
 import { useActionState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { changePasswordAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 const ERROR_KEYS: Record<string, string> = {
   mismatch: "changePassword.errorMismatch",
@@ -24,11 +24,7 @@ export function PasswordForm({ forced, notice }: { forced: boolean; notice: Reac
     <form key={state?.attempt ?? 0} action={formAction}>
       <FieldGroup>
         {state ? null : notice}
-        {state ? (
-          <Alert variant="destructive">
-            <AlertDescription>{t(ERROR_KEYS[state.error] ?? "changePassword.errorGeneric")}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal message={state ? t(ERROR_KEYS[state.error] ?? "changePassword.errorGeneric") : null} />
         {!forced ? (
           <Field>
             <FieldLabel htmlFor="currentPassword">{t("changePassword.current")}</FieldLabel>

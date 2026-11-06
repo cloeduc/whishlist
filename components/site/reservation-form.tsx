@@ -2,13 +2,13 @@
 
 import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
 import { reserveAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 /**
  * « J'offre » form. `itemId` set: the idea is already picked (hidden field); otherwise the person
@@ -32,11 +32,7 @@ export function ReservationForm({
   return (
     <form key={state?.attempt ?? 0} action={formAction}>
       <FieldGroup>
-        {state ? (
-          <Alert variant="destructive">
-            <AlertDescription>{t(`errors:${state.error}`, { defaultValue: state.error })}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal code={state?.error} />
         <input type="hidden" name="readToken" value={readToken} />
         <input type="hidden" name="typeId" value={itemId ? "" : typeId} />
         {itemId ? <input type="hidden" name="itemId" value={itemId} /> : null}

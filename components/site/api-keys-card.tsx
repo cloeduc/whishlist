@@ -13,6 +13,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MAX_API_KEY_NAME } from "@/src/domain/api-key-limits";
 import { createApiKeyAction, revokeApiKeyFormAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 export type ApiKeyRow = { id: string; name: string; hint: string; created: string; lastUsed: string | null };
 
@@ -86,11 +87,7 @@ export function ApiKeysCard({ keys, mcpUrl, notice }: { keys: ApiKeyRow[]; mcpUr
           {t("apiKeys.create")}
         </Button>
       </div>
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
+      <FormRefusal message={error} />
 
       {keys.length === 0 ? (
         <Empty className="shadow-none">

@@ -34,16 +34,7 @@ import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import type { CSSProperties } from "react";
-
-function unlockErrorMessage(
-  e: string | undefined,
-  t: (key: string) => string,
-): string | null {
-  if (e === "bad" || e === "badPassword") return t("unlock.badPassword");
-  if (e === "rate" || e === "rateLimited") return t("unlock.rateLimited");
-  if (e === "readPasswordRequired") return t("unlock.passwordRequiredToFollow");
-  return null;
-}
+import { unlockErrorMessage } from "@/src/site/read-unlock";
 
 export async function generateMetadata({
   params,

@@ -93,6 +93,7 @@
     "inviteEmailTitle": "Invite by email",
     "inviteEmailDescription": "They’ll receive a link to join and edit the list. They’ll need to log in or create an account.",
     "inviteEmail": "Recipient’s email address",
+    "inviteEmailPlaceholder": "name@example.com",
     "sendInvite": "Send invitation",
     "regenerate": "Replace invitation link",
     "regenerateHint": "The previous invitation link will stop working. Existing members are not affected.",

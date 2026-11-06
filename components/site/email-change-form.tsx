@@ -2,11 +2,11 @@
 
 import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { requestEmailChangeAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 /** Account page, email card: ask for a new address. */
 export function EmailChangeForm() {
@@ -15,11 +15,7 @@ export function EmailChangeForm() {
   return (
     <form key={state?.attempt ?? 0} action={formAction}>
       <FieldGroup>
-        {state ? (
-          <Alert variant="destructive">
-            <AlertDescription>{t(`errors:${state.error}`, { defaultValue: state.error })}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal code={state?.error} />
         <Field>
           <FieldLabel htmlFor="new-email">{t("account.emailChange.newEmail")}</FieldLabel>
           <Input id="new-email" name="email" type="email" required autoComplete="email" defaultValue={state?.values.email} />

@@ -2,12 +2,12 @@
 
 import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { registerAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 const ERROR_KEYS: Record<string, string> = {
   password: "register.errorPassword",
@@ -23,11 +23,7 @@ export function RegisterForm({ next }: { next: string }) {
     <form key={state?.attempt ?? 0} action={formAction}>
       <FieldGroup>
         <input type="hidden" name="next" value={next} />
-        {error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal message={error} />
         <Field>
           <FieldLabel htmlFor="displayName">{t("register.name")}</FieldLabel>
           <Input

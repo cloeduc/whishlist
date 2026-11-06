@@ -3,12 +3,12 @@
 import { XIcon } from "lucide-react";
 import { useOptimistic, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { splitLabels } from "@/src/domain/split-labels";
 import { manageLabelAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 type Chip = { id: string; label: string };
 type LabelOp = Parameters<typeof manageLabelAction>[0];
@@ -159,11 +159,7 @@ export function LabelChips({
           {t("categories.add")}
         </Button>
       </div>
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
+      <FormRefusal message={error} />
     </div>
   );
 }

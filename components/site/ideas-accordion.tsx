@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 export type AccordionIdea = {
   id: string;
@@ -215,11 +216,7 @@ export function IdeasAccordion({
   return (
     <div className={`flex w-full flex-col gap-3 ${pending ? "opacity-90" : ""}`}>
       <p className="max-w-3xl text-sm text-muted-foreground">{t("accordion.hint")}</p>
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{t(`errors:${error}`, { defaultValue: error })}</AlertDescription>
-        </Alert>
-      ) : null}
+      <FormRefusal code={error} />
       {notice ? (
         <Alert role="status">
           <AlertDescription>

@@ -2,11 +2,11 @@
 
 import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { sendInviteAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 /** Sharing tab: invite someone by email. */
 export function InviteEmailForm({ wishlistId }: { wishlistId: string }) {
@@ -17,11 +17,7 @@ export function InviteEmailForm({ wishlistId }: { wishlistId: string }) {
       <FieldGroup>
         <input type="hidden" name="wishlistId" value={wishlistId} />
         <input type="hidden" name="onglet" value="partage" />
-        {state ? (
-          <Alert variant="destructive">
-            <AlertDescription>{t(`errors:${state.error}`, { defaultValue: state.error })}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal code={state?.error} />
         <Field>
           <FieldLabel htmlFor="invite-email">{t("share.inviteEmail")}</FieldLabel>
           <Input
@@ -30,7 +26,7 @@ export function InviteEmailForm({ wishlistId }: { wishlistId: string }) {
             type="email"
             required
             autoComplete="email"
-            placeholder="prenom@exemple.fr"
+            placeholder={t("share.inviteEmailPlaceholder")}
             defaultValue={state?.values.email}
           />
         </Field>

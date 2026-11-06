@@ -49,9 +49,9 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
 
 ## Phase 3: User Story 1 - Un formulaire refusé garde ce qui a été tapé (Priority: P1) 🎯 MVP
 
-**Goal**: les 13 formulaires de [contracts/form-states.md](contracts/form-states.md) affichent l'erreur à côté du formulaire et gardent les champs non secrets, avec et sans JavaScript (FR-001 à FR-005).
+**Goal**: les 13 formulaires de [contracts/form-states.md](contracts/form-states.md) affichent l'erreur à côté du formulaire et gardent les champs non secrets (FR-001 à FR-005 ; FR-003 abandonnée).
 
-**Independent Test**: [quickstart.md](quickstart.md), section US1 : le tableau des 13 refus, puis les lignes 1, 2 et 10 sans JavaScript, puis les trois cas qui ne changent pas.
+**Independent Test**: [quickstart.md](quickstart.md), section US1 : le tableau des 13 refus, puis les trois cas qui ne changent pas.
 
 ### Tests for User Story 1
 
@@ -65,16 +65,17 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
 ### Implementation for User Story 1
 
 - [X] T003 [US1] Créer `src/server/form-state.ts`, sans import de Next. Il contient :
-  - `export type FormState = { error: string; values: Record<string, string> } | null` ;
+  - `export type FormState = { error: string; values: Record<string, string>; attempt: number } | null` (`attempt` compte les refus et sert de `key` au formulaire) ;
+  - `export function refusal(prev, error, formData, fields)`, qui rend l'état d'un refus ;
   - `export function keptValues(formData: FormData, fields: readonly string[]): Record<string, string>` ;
-  - les 13 listes de champs gardés en constantes `as const`, en reprenant exactement la colonne « Champs gardés » du contrat : `REGISTER_KEPT_FIELDS = ["displayName", "email"]`, `LOGIN_KEPT_FIELDS = ["email"]`, `FORGOT_PASSWORD_KEPT_FIELDS = ["email"]`, `RESET_PASSWORD_KEPT_FIELDS = []`, `CHANGE_PASSWORD_KEPT_FIELDS = []`, `DISPLAY_NAME_KEPT_FIELDS = ["displayName"]`, `EMAIL_CHANGE_KEPT_FIELDS = ["email"]`, `NEW_LIST_KEPT_FIELDS = ["title", "category", "person"]`, `LIST_SETTINGS_KEPT_FIELDS = ["title", "subtitle", "coverImageUrl", "primary", "accent", "highlight", "background"]`, `RESERVATION_KEPT_FIELDS = ["fromName", "note"]`, `READ_UNLOCK_KEPT_FIELDS = []`, `INVITE_EMAIL_KEPT_FIELDS = ["email"]`, `READ_PASSWORD_KEPT_FIELDS = []`.
+  - les 13 listes de champs gardés en constantes `as const`, en reprenant exactement la colonne « Champs gardés » du contrat : `REGISTER_KEPT_FIELDS = ["displayName", "email"]`, `LOGIN_KEPT_FIELDS = ["email"]`, `FORGOT_PASSWORD_KEPT_FIELDS = ["email"]`, `RESET_PASSWORD_KEPT_FIELDS = []`, `CHANGE_PASSWORD_KEPT_FIELDS = []`, `DISPLAY_NAME_KEPT_FIELDS = ["displayName"]`, `EMAIL_CHANGE_KEPT_FIELDS = ["email"]`, `NEW_LIST_KEPT_FIELDS = ["title", "category", "person"]`, `LIST_SETTINGS_KEPT_FIELDS = ["title", "subtitle", "coverImageUrl", "primary", "accent", "highlight", "background"]`, `RESERVATION_KEPT_FIELDS = ["itemId", "fromName", "note"]`, `READ_UNLOCK_KEPT_FIELDS = []`, `INVITE_EMAIL_KEPT_FIELDS = ["email"]`, `READ_PASSWORD_KEPT_FIELDS = []`.
 
   T002 doit passer.
 - [X] T004 [US1] **Pilote : inscription.**
   - Dans `src/server/actions.ts`, `registerAction(_prev: FormState, formData)` rend `{ error: "rate" | "password" | "fields", values: keptValues(formData, REGISTER_KEPT_FIELDS) }` au lieu des deux `localeRedirect('/inscription?e=…')`. Le succès, y compris l'adresse déjà utilisée (succès silencieux), garde sa redirection `?ok=1…`.
   - Créer `components/site/register-form.tsx` (`"use client"`, `useActionState(registerAction, null)`). Il reprend le formulaire actuel de `app/inscription/page.tsx` : mêmes `Field`, `Input`, `Alert` et `Button`, champ caché `next`, `defaultValue={state?.values.displayName}` et `defaultValue={state?.values.email}`, mot de passe sans `defaultValue`, bouton désactivé pendant `pending`. Le message vient de `auth:register.errorPassword`, `auth:register.rateLimited` ou `auth:register.errorFields`.
   - Dans `app/inscription/page.tsx`, rendre `<RegisterForm next={next} />` et retirer la lecture de `query.e`.
-  - **Vérifier avant de continuer**, avec et sans JavaScript : après un refus, nom et adresse sont toujours remplis. React 19 remet le formulaire à zéro après l'action. Si les valeurs se perdent, ajouter au `<form>` une `key` qui change à chaque nouvel état (p. ex. un compteur dans l'état), puis appliquer la même solution aux tâches T005 à T013. Noter le résultat dans `research.md` R1.
+  - **Vérifier avant de continuer** : après un refus, nom et adresse sont toujours remplis. React 19 remet le formulaire à zéro après l'action. Si les valeurs se perdent, ajouter au `<form>` une `key` qui change à chaque nouvel état (p. ex. un compteur dans l'état), puis appliquer la même solution aux tâches T005 à T013. Noter le résultat dans `research.md` R1.
 - [X] T005 [US1] Connexion.
   - `loginAction(_prev, formData)` rend `{ error: "rate" | "1", values: keptValues(formData, LOGIN_KEPT_FIELDS) }`.
   - Créer `components/site/login-form.tsx` sur le modèle de T004. Les messages viennent de `auth:login.rateLimited` et `auth:login.badCredentials`.
@@ -118,7 +119,7 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
 - [X] T014 [US1] Contrôler le retrait des redirections d'erreur.
   - `grep -n "?e=\|?ee=" src/server/actions.ts` ne doit plus remonter aucune des 13 actions. Il doit rester celles de `cancelEmailChangeAction`, `confirmEmailAction`, `joinInviteAction`, `subscribeAction`, `cancelMyReservationAction` et `redirectToList`.
   - `npm run lint`, `npm run typecheck` et `npm test` passent.
-- [X] T015 [US1] Dérouler [quickstart.md](quickstart.md), section US1, sur la base de démo : les 13 refus, les lignes 1, 2 et 10 sans JavaScript, l'inscription avec une adresse déjà prise (écran « e-mail envoyé ») et l'ancienne adresse `/inscription?e=fields`. Noter les écarts dans `research.md` R1.
+- [X] T015 [US1] Dérouler [quickstart.md](quickstart.md), section US1, sur la base de démo : les 13 refus (le passage sans JavaScript est retiré avec FR-003), l'inscription avec une adresse déjà prise (écran « e-mail envoyé ») et l'ancienne adresse `/inscription?e=fields`. Noter les écarts dans `research.md` R1.
 - [X] T016 [US1] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: keep what was typed when a site form is refused (US1)` des fichiers de cette story (avec `specs/015-nextjs-audit/`), sans demander.
 
 **Checkpoint**: l'US1 est livrable seule.

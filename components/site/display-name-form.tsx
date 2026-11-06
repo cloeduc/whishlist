@@ -2,11 +2,11 @@
 
 import { useActionState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { updateDisplayNameAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 /** Account page, Profile card. `notice` is the success message rendered by the page. */
 export function DisplayNameForm({
@@ -24,11 +24,7 @@ export function DisplayNameForm({
     <form key={state?.attempt ?? 0} action={formAction} className="flex flex-col gap-4">
       <FieldGroup>
         {state ? null : notice}
-        {state ? (
-          <Alert variant="destructive">
-            <AlertDescription>{t(`errors:${state.error}`, { defaultValue: state.error })}</AlertDescription>
-          </Alert>
-        ) : null}
+        <FormRefusal code={state?.error} />
         <Field>
           <FieldLabel htmlFor="displayName">{t("account.displayName")}</FieldLabel>
           <Input
