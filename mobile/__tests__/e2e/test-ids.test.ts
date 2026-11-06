@@ -40,7 +40,7 @@ function usedIds() {
 }
 
 // System elements (iOS share sheet, Safari) and dev client elements (developer menu), absent from the app's code.
-const systemIds = new Set(["ShareSheet.RemoteContainerView", "PopoverDismissRegion", "shareCell", "MoreMenuButton", "ShareButton", "xmark"]);
+const systemIds = new Set(["ShareSheet.RemoteContainerView", "PopoverDismissRegion", "shareCell", "MoreMenuButton", "ShareButton", "xmark", "TipView", "xmark.circle.fill"]);
 
 test("every id: used by a flow is a testID of the app", () => {
   const { literals, prefixes } = declaredIds();

@@ -9,8 +9,13 @@ appId: com.apple.mobilesafari
 - openLink:
     link: ${URL}
     browser: true
-- tapOn:
-    id: MoreMenuButton
+# Safari's first-launch tip points at this menu and hides it while open: close it, then tap the menu.
+- retry:
+    maxRetries: 2
+    commands:
+      - runFlow: dismiss-safari-tip.yaml
+      - tapOn:
+          id: MoreMenuButton
 - tapOn:
     id: ShareButton
 - extendedWaitUntil:

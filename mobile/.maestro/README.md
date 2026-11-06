@@ -34,6 +34,8 @@ En build Debug, l'app contient le lanceur du dev client. Après l'effacement de 
 
 Sur iOS, `submit-register.yaml` ferme la feuille « Utiliser un mot de passe robuste ? » en appuyant sur la position de sa croix : cette feuille du système est invisible pour Maestro. Les sous-parcours refusent aussi « Enregistrer le mot de passe ? » (« Plus tard »).
 
+Sur un Safari neuf (simulateur effacé), iOS 26 ouvre au premier chargement une bulle « Afficher les signets, le menu Partager et les onglets ouverts » qui cache la page à Maestro : `subflows/dismiss-safari-tip.yaml` la ferme, et les sous-parcours qui passent par Safari (`confirm-email.yaml`, `share-from-safari.yaml`) l'appellent avant de taper dans la page.
+
 Laissez le Mac branché et capot ouvert pendant la suite : une mise en veille coupe Maestro (« Device became unreachable »).
 
 Next 16 n'autorise qu'un `next dev` par projet : si `npm run dev` tourne déjà sur une autre base, arrêtez-le, puis relancez-le avec la commande ci-dessus.
