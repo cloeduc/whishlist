@@ -90,11 +90,11 @@ Aucune tâche bloquante : les composants naissent dans l'US1 et s'enrichissent d
 
 **Independent Test**: quickstart, section US3.
 
-- [ ] T022 [P] [US3] Site : dans `tests/domain/password-input.test.ts`, parcourir `components/` et `app/` : aucun `type="password"` hors de `components/ui/password-input.tsx`
-- [ ] T023 [P] [US3] App : `mobile/__tests__/ui/password-fields.test.ts` parcourt `mobile/app/` et `mobile/src/` : aucun `secureTextEntry` hors de `mobile/src/ui/PasswordInput.tsx`, et 10 usages de `<PasswordInput` exactement
-- [ ] T024 [P] [US3] App : test d'apparence dans `mobile/__tests__/ui/password-input.test.tsx` : icône de 16 (`size-4` du site), couleur `tokens.colors.black`, même hauteur que `Input`
-- [ ] T025 [US3] Exclusions `016-us1` et `016-us3` (« story entière ») dans `mobile/.maestro/exclusions.md`, avec lien vers les sections du quickstart
-- [ ] T026 [US3] Commit de la story : contrôles verts, puis `feat: one password field everywhere, on the site and in the app (US3)`, sans demander
+- [X] T022 [P] [US3] Site : dans `tests/domain/password-input.test.ts`, parcourir `components/` et `app/` : aucun `type="password"` hors de `components/ui/password-input.tsx`
+- [X] T023 [P] [US3] App : `mobile/__tests__/ui/password-fields.test.ts` parcourt `mobile/app/` et `mobile/src/` : aucun `secureTextEntry` hors de `mobile/src/ui/PasswordInput.tsx`, et 10 usages de `<PasswordInput` exactement
+- [X] T024 [P] [US3] App : test d'apparence dans `mobile/__tests__/ui/password-input.test.tsx` : même hauteur, police et couleur que `Input` (fait en US1) ; la taille et la couleur de l'icône (16, noir, comme `size-4` du site) se comparent à l'œil (quickstart US3), la bibliothèque de test ne lisant pas les props de l'icône
+- [X] T025 [US3] (fait avec l'US2, que `coverage.test.ts` exigeait dès l'ajout de la 016) Exclusions `016-us1` et `016-us3` (« story entière ») dans `mobile/.maestro/exclusions.md`, avec lien vers les sections du quickstart
+- [X] T026 [US3] Commit de la story : contrôles verts, puis `feat: one password field everywhere, on the site and in the app (US3)`, sans demander
 
 ---
 

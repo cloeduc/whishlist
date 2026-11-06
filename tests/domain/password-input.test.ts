@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { join } from "node:path";
+import { readdirSync, readFileSync } from "node:fs";
+import { join, relative } from "node:path";
 import { test } from "node:test";
 
 const renderer = join(import.meta.dirname, "helpers/render-password-input.tsx");
@@ -56,4 +57,19 @@ test("the hide label exists in both languages", async () => {
   const { resources } = await import("../../src/i18n/resources");
   assert.equal(resources.fr.common.passwordField.hide, "Masquer le mot de passe");
   assert.equal(resources.en.common.passwordField.hide, "Hide password");
+});
+
+// Spec 016, FR-009: every password field of the site goes through `PasswordInput`.
+test("no password field outside PasswordInput, and the 10 fields of the spec use it", () => {
+  const root = join(import.meta.dirname, "../..");
+  const files = ["components", "app"].flatMap((dir) =>
+    readdirSync(join(root, dir), { withFileTypes: true, recursive: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith(".tsx"))
+      .map((entry) => relative(root, join(entry.parentPath, entry.name))),
+  );
+  const own = "components/ui/password-input.tsx";
+  const masked = files.filter((file) => file !== own && /type=["{]*password/.test(readFileSync(join(root, file), "utf8")));
+  assert.deepEqual(masked, []);
+  const uses = files.flatMap((file) => [...readFileSync(join(root, file), "utf8").matchAll(/<PasswordInput\b/g)].map(() => file));
+  assert.equal(uses.length, 10, uses.join("\n"));
 });
