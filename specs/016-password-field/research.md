@@ -11,6 +11,7 @@
 - **Decision** : le rendu serveur donne `type="password"` et le bouton. Sans JavaScript, le bouton ne fait rien (et `type="button"` n'envoie rien) ; le champ reste masqué et le formulaire s'envoie normalement (FR-010).
 - **Rationale** : le cas limite de la spec accepte « l'œil n'apparaît pas ou n'a pas d'effet ». Cacher le bouton jusqu'à l'hydratation ferait sauter le champ à l'affichage pour tout le monde.
 - **Alternatives** : bouton caché jusqu'au montage (refusé, ci-dessus) ; case à cocher CSS `:checked` (refusé : changer le `type` d'un champ demande du JavaScript).
+- **Constat à l'implémentation** : depuis la 015 (FR-003 abandonnée), le site ne s'affiche pas sans JavaScript (`app/loading.tsx`). FR-010 se vérifie donc au niveau du composant : son rendu serveur est un champ `type="password"` (test `tests/domain/password-input.test.ts`), pas par une connexion sans JavaScript.
 
 ## R3 — Site : attributs du clavier et remplissage automatique
 

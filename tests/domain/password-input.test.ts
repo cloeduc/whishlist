@@ -36,3 +36,24 @@ test("the password field keeps a new-password hint and ignores a type passed by 
   assert.equal(input.get("autocapitalize"), "none");
   assert.equal(input.get("autocomplete"), "new-password");
 });
+
+test("the eye is a button that never submits the form, labelled for the masked state, in French (FR-003, FR-004)", () => {
+  const html = render({ id: "password", name: "password" });
+  const button = attributes(html, "button");
+  assert.equal(button.get("type"), "button");
+  assert.equal(button.get("aria-controls"), "password");
+  assert.equal(button.get("aria-label"), "Afficher le mot de passe");
+  assert.equal(attributes(html, "svg").get("aria-hidden"), "true");
+  // The text stops before the eye (long password).
+  assert.match(attributes(html, "input").get("class") ?? "", /\bpr-11\b/);
+});
+
+test("the eye's label in English (FR-003)", () => {
+  assert.equal(attributes(render({ id: "password" }, "en"), "button").get("aria-label"), "Show password");
+});
+
+test("the hide label exists in both languages", async () => {
+  const { resources } = await import("../../src/i18n/resources");
+  assert.equal(resources.fr.common.passwordField.hide, "Masquer le mot de passe");
+  assert.equal(resources.en.common.passwordField.hide, "Hide password");
+});

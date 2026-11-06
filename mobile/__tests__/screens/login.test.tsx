@@ -14,6 +14,7 @@ import { freshDb } from "../helpers/memory-db";
 
 const params: { next?: string } = {};
 jest.mock("expo-router", () => ({
+  useFocusEffect: jest.fn(),
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true },
   useLocalSearchParams: () => params,
 }));

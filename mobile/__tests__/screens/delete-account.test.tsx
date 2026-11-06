@@ -13,7 +13,7 @@ import { getSnapshot, putSnapshot } from "@/offline/snapshot";
 import { fakeFetch, json, me } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
 
-jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
+jest.mock("expo-router", () => ({ useFocusEffect: jest.fn(), router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
 jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
 jest.mock("@/data/store", () => ({ ...jest.requireActual("@/data/store"), usePendingCount: jest.fn(() => 0) }));
 

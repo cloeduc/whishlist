@@ -49,7 +49,7 @@ Aucune tâche bloquante : les composants naissent dans l'US1 et s'enrichissent d
 - [X] T005 [P] [US1] Créer `mobile/src/ui/PasswordInput.tsx` : props d'`Input` sans `secureTextEntry`, `autoCapitalize`, `autoCorrect`, `spellCheck`, qu'il fixe (`secureTextEntry`, `"none"`, `false`, `false`)
 - [X] T006 [US1] Remplacer les 10 champs de l'app par `PasswordInput`, testID, `accessibilityLabel`, `autoComplete`, `textContentType`, `editable`, `invalid` inchangés : `mobile/app/(auth)/login.tsx`, `mobile/app/(auth)/register.tsx`, `mobile/app/links/reset-password/[token].tsx`, `mobile/src/features/account/PasswordForm.tsx` (3), `mobile/src/features/account/EmailCard.tsx`, `mobile/app/(app)/delete-account.tsx`, `mobile/app/guest/[readToken]/index.tsx`, `mobile/app/(app)/shared/follow.tsx`
 - [X] T007 [US1] Vérifier que les tests d'écrans existants (`mobile/__tests__/screens/*.test.tsx`) passent sans changement de testID
-- [ ] T008 [US1] Commit de la story : contrôles verts, puis `feat: password fields without auto-capitalisation or auto-correction (US1)`, sans demander
+- [X] T008 [US1] Commit de la story : contrôles verts, puis `feat: password fields without auto-capitalisation or auto-correction (US1)`, sans demander
 
 **Checkpoint**: US1 livrable seule (pas encore d'œil).
 
@@ -63,21 +63,21 @@ Aucune tâche bloquante : les composants naissent dans l'US1 et s'enrichissent d
 
 ### Tests for User Story 2
 
-- [ ] T009 [P] [US2] Compléter `tests/domain/password-input.test.ts` : bouton `type="button"` avec `aria-controls` = `id` du champ, `aria-label` « Afficher le mot de passe » (FR) et « Show password » (EN) à l'état initial, icône `aria-hidden`, champ `pr-11`
-- [ ] T010 [P] [US2] Compléter `mobile/__tests__/ui/password-input.test.tsx` : œil `<testID>-reveal`, rôle bouton, libellés FR/EN selon l'état, bascule sans changer la valeur, deux champs indépendants, zone de toucher ≥ 44 × 44, œil utilisable avec `editable={false}`, re-masqué au départ de l'écran (nettoyage de `useFocusEffect`) et quand l'écran vide la valeur, pas re-masqué quand la personne efface elle-même
-- [ ] T011 [P] [US2] Test d'écran : après un changement de mot de passe réussi dans `PasswordForm`, le champ affiché redevient masqué (`mobile/__tests__/screens/account.test.tsx`)
+- [X] T009 [P] [US2] Compléter `tests/domain/password-input.test.ts` : bouton `type="button"` avec `aria-controls` = `id` du champ, `aria-label` « Afficher le mot de passe » (FR) et « Show password » (EN) à l'état initial, icône `aria-hidden`, champ `pr-11`
+- [X] T010 [P] [US2] Compléter `mobile/__tests__/ui/password-input.test.tsx` : œil `<testID>-reveal`, rôle bouton, libellés FR/EN selon l'état, bascule sans changer la valeur, deux champs indépendants, zone de toucher ≥ 44 × 44, œil utilisable avec `editable={false}`, re-masqué au départ de l'écran (nettoyage de `useFocusEffect`) et quand l'écran vide la valeur, pas re-masqué quand la personne efface elle-même
+- [X] T011 [P] [US2] Test d'écran : après un changement de mot de passe réussi dans `PasswordForm`, le champ affiché redevient masqué (`mobile/__tests__/screens/account.test.tsx`)
 
 ### Implementation for User Story 2
 
-- [ ] T012 [P] [US2] Ajouter `passwordField.show` / `passwordField.hide` à `locales/fr/common.json` (« Afficher le mot de passe » / « Masquer le mot de passe ») et `locales/en/common.json` (« Show password » / « Hide password »)
-- [ ] T013 [US2] Site : état `visible` dans `components/ui/password-input.tsx`, conteneur `relative`, `Input` en `pr-11`, `<button type="button">` à droite avec `Eye` / `EyeOff` (`lucide-react`), `aria-label` traduit (`common`), `aria-controls`
-- [ ] T014 [P] [US2] Site : masquer le bouton natif d'Edge, `input::-ms-reveal { display: none }`, dans `app/globals.css`
-- [ ] T015 [US2] App : prop `trailing` dans `mobile/src/ui/Input.tsx` (élément à droite du `TextInput`, dans la boîte, ligne `flexDirection: "row"`, `TextInput` en `flex: 1`)
-- [ ] T016 [US2] App : état `visible` dans `mobile/src/ui/PasswordInput.tsx`, `secureTextEntry={!visible}`, œil `Pressable` 44 × 44 (`EyeIcon` / `EyeOffIcon`), testID `<testID>-reveal`, libellé traduit ; re-masquage par `useFocusEffect` (expo-router) et quand la valeur passe à `""` sans saisie
-- [ ] T017 [US2] Ajouter `useFocusEffect: jest.fn()` aux simulations d'`expo-router` des tests d'écrans qui rendent un champ mot de passe (`mobile/__tests__/screens/*.test.tsx`)
-- [ ] T018 [US2] Accepter le suffixe `-reveal` dans `mobile/__tests__/e2e/test-ids.test.ts`
-- [ ] T019 [US2] Parcours Maestro `mobile/.maestro/flows/016-us2-show-password.yaml` (tag `016-us2`) : Connexion, saisie masquée, œil → saisie lisible et libellé « Masquer… », œil → masquée, re-masquée au retour d'Inscription ; ajouter `"016"` aux specs de `mobile/__tests__/e2e/coverage.test.ts`
-- [ ] T020 [US2] Exclusions de la story dans `mobile/.maestro/exclusions.md` : annonce VoiceOver / TalkBack, œil hors ligne (mode avion)
+- [X] T012 [P] [US2] Ajouter `passwordField.show` / `passwordField.hide` à `locales/fr/common.json` (« Afficher le mot de passe » / « Masquer le mot de passe ») et `locales/en/common.json` (« Show password » / « Hide password »)
+- [X] T013 [US2] Site : état `visible` dans `components/ui/password-input.tsx`, conteneur `relative`, `Input` en `pr-11`, `<button type="button">` à droite avec `Eye` / `EyeOff` (`lucide-react`), `aria-label` traduit (`common`), `aria-controls`
+- [X] T014 [P] [US2] Site : masquer le bouton natif d'Edge, `input::-ms-reveal { display: none }`, dans `app/globals.css`
+- [X] T015 [US2] App : prop `trailing` dans `mobile/src/ui/Input.tsx` (élément à droite du `TextInput`, dans la boîte, ligne `flexDirection: "row"`, `TextInput` en `flex: 1`)
+- [X] T016 [US2] App : état `visible` dans `mobile/src/ui/PasswordInput.tsx`, `secureTextEntry={!visible}`, œil `Pressable` 44 × 44 (`EyeIcon` / `EyeOffIcon`), testID `<testID>-reveal`, libellé traduit ; re-masquage par `useFocusEffect` (expo-router) et quand la valeur passe à `""` sans saisie
+- [X] T017 [US2] Ajouter `useFocusEffect: jest.fn()` aux simulations d'`expo-router` des tests d'écrans qui rendent un champ mot de passe (`mobile/__tests__/screens/*.test.tsx`)
+- [X] T018 [US2] Accepter le suffixe `-reveal` dans `mobile/__tests__/e2e/test-ids.test.ts`
+- [X] T019 [US2] Parcours Maestro `mobile/.maestro/flows/016-us2-show-password.yaml` (tag `016-us2`) : Connexion, saisie masquée, œil → saisie lisible et libellé « Masquer… », œil → masquée, re-masquée au retour d'Inscription ; ajouter `"016"` aux specs de `mobile/__tests__/e2e/coverage.test.ts`
+- [X] T020 [US2] Exclusions de la story dans `mobile/.maestro/exclusions.md` : annonce VoiceOver / TalkBack, œil hors ligne (mode avion)
 - [ ] T021 [US2] Commit de la story : contrôles verts, puis `feat: show or hide the password with an eye button (US2)`, sans demander
 
 **Checkpoint**: US1 et US2 marchent.

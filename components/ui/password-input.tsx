@@ -1,21 +1,42 @@
 "use client"
 
 import * as React from "react"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Input } from "@/components/ui/input"
+import { cn } from "cn"
 
 /**
- * The one password field of the site (spec 016): masked, and the keyboard neither capitalises
- * nor corrects what is typed. Takes the props of `Input`, except `type`.
+ * The one password field of the site (spec 016): the keyboard neither capitalises nor corrects
+ * what is typed, and an eye on the right shows or masks it. Masked by default; the state is the
+ * field's own (a form refused by the server is remounted, hence masked). Without JavaScript, a
+ * plain masked field (the button does nothing). Takes the props of `Input`, except `type`.
  */
-function PasswordInput(props: Omit<React.ComponentProps<"input">, "type">) {
+function PasswordInput({ className, ...props }: Omit<React.ComponentProps<"input">, "type">) {
+  const { t } = useTranslation("common")
+  const [visible, setVisible] = React.useState(false)
+  const Icon = visible ? EyeOffIcon : EyeIcon
   return (
-    <Input
-      {...props}
-      type="password"
-      autoCapitalize="none"
-      autoCorrect="off"
-      spellCheck={false}
-    />
+    <div data-slot="password-input" className="relative w-full">
+      <Input
+        {...props}
+        type={visible ? "text" : "password"}
+        autoCapitalize="none"
+        autoCorrect="off"
+        spellCheck={false}
+        className={cn("peer pr-11", className)}
+      />
+      {/* Sinks with the field when it is focused, like the rest of its box. */}
+      <button
+        type="button"
+        aria-controls={props.id}
+        aria-label={visible ? t("passwordField.hide") : t("passwordField.show")}
+        onClick={() => setVisible((shown) => !shown)}
+        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center rounded-base text-foreground transition-all outline-none peer-focus-visible:translate-x-boxShadowX peer-focus-visible:translate-y-boxShadowY focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-inset"
+      >
+        <Icon aria-hidden="true" className="size-4" />
+      </button>
+    </div>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { createContext, useContext, useState, type ReactNode } from "react";
 import { ChevronDownIcon } from "lucide-react-native";
 import { useTranslation } from "react-i18next";
 import { Animated, Easing, Keyboard, Pressable, View, type StyleProp, type ViewStyle } from "react-native";
@@ -101,6 +101,13 @@ export function AccordionChevron({
  * list of ideas, a license text). Its natural height is measured (`<testID>-measure`) outside
  * the animated height, and followed when it changes (an alert that appears, an idea added).
  */
+/** `false` inside the content of a collapsed accordion, which stays mounted (`PasswordInput` masks itself). */
+const AccordionExpanded = createContext(true);
+
+export function useAccordionExpanded(): boolean {
+  return useContext(AccordionExpanded);
+}
+
 export function AccordionContent({
   expanded,
   progress,
@@ -136,7 +143,7 @@ export function AccordionContent({
         style={[{ position: "absolute", top: 0, left: 0, right: 0 }, style]}
         onLayout={(event) => setHeight(event.nativeEvent.layout.height)}
       >
-        {mounted ? children : null}
+        <AccordionExpanded.Provider value={expanded}>{mounted ? children : null}</AccordionExpanded.Provider>
       </View>
     </Animated.View>
   );

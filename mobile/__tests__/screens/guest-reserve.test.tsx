@@ -15,6 +15,7 @@ import { publicList } from "../helpers/public-list";
 
 const params: { readToken: string; itemId?: string; typeId?: string } = { readToken: "rt", itemId: "i1" };
 jest.mock("expo-router", () => ({
+  useFocusEffect: jest.fn(),
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: jest.fn(() => true) },
   useLocalSearchParams: () => params,
 }));

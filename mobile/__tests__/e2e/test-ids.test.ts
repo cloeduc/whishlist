@@ -51,8 +51,9 @@ test("every id: used by a flow is a testID of the app", () => {
     literals.has(id) ||
     // `Button` sets `<testID>-box` on its box, `ConfirmDialog` `<testID>-keep` on « Conserver »,
     // `CollapsibleCard` `<testID>-toggle` on its header, `-chevron` on the indicator and `-content` on its content,
-    // `PasswordForm` `<testID>-current`, `-next`, `-confirm` and `-submit` on its fields and its button.
-    ["-box", "-keep", "-toggle", "-chevron", "-content", "-current", "-next", "-confirm", "-submit"].some((suffix) => id.endsWith(suffix) && literals.has(id.slice(0, -suffix.length))) ||
+    // `PasswordForm` `<testID>-current`, `-next`, `-confirm` and `-submit` on its fields and its button,
+    // `PasswordInput` `<testID>-reveal` on its eye.
+    ["-box", "-keep", "-toggle", "-chevron", "-content", "-current", "-next", "-confirm", "-submit", "-reveal"].some((suffix) => id.endsWith(suffix) && literals.has(id.slice(0, -suffix.length))) ||
     [...prefixes].some((prefix) => id.startsWith(prefix) && id.length > prefix.length);
   const used = usedIds();
   expect(used.length).toBeGreaterThan(20);

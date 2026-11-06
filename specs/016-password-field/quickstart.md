@@ -48,7 +48,7 @@ Site en largeur de téléphone : outils de développement du navigateur, mode ap
 8. Site, connexion avec un mauvais mot de passe, saisie affichée : la page revient avec le message d'erreur, champ vide et masqué.
 9. Site, fenêtre « Supprimer mon compte » : afficher la saisie, Annuler, rouvrir : le champ est vide et masqué.
 10. **Edge** : un seul œil dans le champ. **Gestionnaire de mots de passe** (trousseau Safari, 1Password ou Bitwarden) : remplissage proposé et fait, l'œil reste cliquable.
-11. **Sans JavaScript** (outils de développement → désactiver JavaScript) : `/connexion` se connecte normalement, le champ est masqué.
+11. **Sans JavaScript** : le site ne s'affiche pas sans JavaScript depuis la 015 ; le rendu serveur du champ (masqué, `type="password"`) est vérifié par `tests/domain/password-input.test.ts`.
 12. Mot de passe long (60 caractères) dans l'app et sur le site, saisie affichée : le texte défile, il ne passe pas sous l'œil.
 
 ## US3 — Même champ partout, même apparence

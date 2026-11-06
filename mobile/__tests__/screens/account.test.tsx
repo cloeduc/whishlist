@@ -13,7 +13,7 @@ import { tokens } from "@/theme/tokens";
 import { fakeFetch, json, me } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
 
-jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
+jest.mock("expo-router", () => ({ useFocusEffect: jest.fn(), router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
 jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
 jest.mock("expo-constants", () => ({
   __esModule: true,
@@ -128,10 +128,17 @@ test("the password card opens collapsed, shows the error then the success in the
   await fireEvent.press(screen.getByTestId("account.password-submit"));
   expect(await screen.findByText("Mot de passe actuel incorrect.")).toBeOnTheScreen();
 
+  // The new password shown with its eye (016): the other two fields stay masked.
+  await fireEvent.press(screen.getByTestId("account.password-next-reveal"));
+  expect(screen.getByTestId("account.password-next").props.secureTextEntry).toBe(false);
+  expect(screen.getByTestId("account.password-confirm").props.secureTextEntry).toBe(true);
+
   await fireEvent.changeText(screen.getByTestId("account.password-current"), "bon-mot-de-passe");
   await fireEvent.press(screen.getByTestId("account.password-submit"));
   expect(await screen.findByText(i18n.t("auth:changePassword.success"))).toBeOnTheScreen();
   expect(screen.getByTestId("account.password-toggle").props.accessibilityState).toMatchObject({ expanded: true });
+  // Emptied after the change: masked again (016, FR-005).
+  expect(screen.getByTestId("account.password-next").props).toMatchObject({ value: "", secureTextEntry: true });
 });
 
 test("address not confirmed: the reminder shows at the top of « Mon compte » (010)", async () => {
