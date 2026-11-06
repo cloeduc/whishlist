@@ -1,3 +1,4 @@
+import "server-only";
 import type { LabelInput } from "../commands/labels";
 import { manageLabel } from "../commands/labels";
 import { commandContext } from "./context";

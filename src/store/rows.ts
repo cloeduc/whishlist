@@ -1,3 +1,4 @@
+import "server-only";
 import { and, eq, getTableColumns, sql, type SQL } from "drizzle-orm";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import type { SQLiteColumn, SQLiteTable } from "drizzle-orm/sqlite-core";

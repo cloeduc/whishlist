@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/
 import { requestPasswordReset } from "@/src/server/commands/auth";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** Always 202: the response does not tell whether the email has an account, and never contains the link. */
 export const POST = withApi(async (api) => {

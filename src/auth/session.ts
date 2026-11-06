@@ -1,3 +1,4 @@
+import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const SESSION_COOKIE = "wishlist_session";

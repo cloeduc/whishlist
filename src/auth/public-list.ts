@@ -1,3 +1,4 @@
+import "server-only";
 import { findMembership } from "../domain/access";
 import { hasReadPassword } from "../domain/read-password";
 import { findSubscription, isSubscriptionUnlocked } from "../domain/subscription";

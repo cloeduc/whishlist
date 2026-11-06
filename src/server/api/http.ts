@@ -1,3 +1,4 @@
+import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
 import { defaultLocale, type Locale } from "../../i18n/config";
 import { translateErrorFor } from "../../i18n/server";

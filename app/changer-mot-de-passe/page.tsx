@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import { getLocale } from "@/src/i18n/server";
 import { withLocale } from "@/src/i18n/locale-path";
 
-export const dynamic = "force-dynamic";
-
 /** Ancienne URL — redirige vers Mon compte. */
 export default async function ChangePasswordPage({
   searchParams,

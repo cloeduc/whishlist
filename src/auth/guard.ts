@@ -1,3 +1,4 @@
+import "server-only";
 import { redirect } from "next/navigation";
 import { currentUser } from "./current";
 import type { User } from "../domain/types";

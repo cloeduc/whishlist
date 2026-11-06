@@ -31,7 +31,7 @@ test("demo database: accounts are verified, usable without email", async () => {
   try {
     await promisify(execFile)(
       process.execPath,
-      ["--import", "tsx", "scripts/create-demo-data.mjs", path.join(dir, "demo.json")],
+      ["--conditions=react-server", "--import", "tsx", "scripts/create-demo-data.mjs", path.join(dir, "demo.json")],
       { env: { ...process.env, DEMO_PASSWORD: "demo-password-ok" } },
     );
     const db = new Database(path.join(dir, "demo.db"), { readonly: true });

@@ -1,3 +1,4 @@
+import "server-only";
 import { findMembership } from "../../domain/access";
 import { idTaken, isClientId } from "../../domain/client-ids";
 import { createWishlist } from "../../domain/import";

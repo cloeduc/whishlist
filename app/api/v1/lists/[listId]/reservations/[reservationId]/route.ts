@@ -3,7 +3,6 @@ import { apiError, apiNoContent, apiPreflight, withApi } from "@/src/server/api/
 import { cancelReservationAsMember } from "@/src/server/commands/items";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const DELETE = withApi<{ listId: string; reservationId: string }>(async (api, { listId, reservationId }) => {
   const result = await cancelReservationAsMember(await commandContext(api), { wishlistId: listId, reservationId });

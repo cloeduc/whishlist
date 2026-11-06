@@ -6,30 +6,25 @@ import { previewAccountDeletion } from "../../src/domain/account";
 import { pendingEmailChange } from "../../src/domain/email-confirmation";
 import {
   cancelEmailChangeAction,
-  changePasswordAction,
-  requestEmailChangeAction,
-  updateDisplayNameAction,
 } from "../../src/server/actions";
 import { getDocument } from "../../src/store/db";
 import { ApiKeysCard } from "@/components/site/api-keys-card";
 import { DeleteAccountDialog } from "@/components/site/delete-account-dialog";
 import { DevLinkAlert } from "@/components/site/dev-link-alert";
+import { DisplayNameForm } from "@/components/site/display-name-form";
+import { EmailChangeForm } from "@/components/site/email-change-form";
 import { InsetPanel } from "@/components/site/inset-panel";
 import { LinkButton } from "@/components/site/link-button";
+import { PasswordForm } from "@/components/site/password-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { intlLocale } from "@/src/i18n/config";
 import { withLocale } from "@/src/i18n/locale-path";
 import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import { emailVerificationRequired } from "@/src/server/mail";
-
-export const dynamic = "force-dynamic";
 
 export default async function AccountPage({
   searchParams,
@@ -38,7 +33,7 @@ export default async function AccountPage({
    * `e` / `ok`: profile and password; `email` / `ee` / `lien`: address change; `x`: export;
    * `d`: account deletion; `k`: API keys.
    */
-  searchParams: Promise<{ e?: string; ok?: string; x?: string; d?: string; email?: string; ee?: string; lien?: string; k?: string }>;
+  searchParams: Promise<{ ok?: string; x?: string; d?: string; email?: string; ee?: string; lien?: string; k?: string }>;
 }) {
   const user = await requireUser({ allowMustChangePassword: true });
   const query = await searchParams;
@@ -50,25 +45,6 @@ export default async function AccountPage({
   ]);
   const forced = user.mustChangePassword;
   const offers = forced ? [] : listMyOffers(doc, user.id, intlLocale(locale));
-  const passwordError =
-    query.e === "mismatch"
-      ? t("changePassword.errorMismatch")
-      : query.e === "current"
-        ? t("changePassword.errorCurrent")
-        : query.e === "password"
-          ? t("changePassword.errorPassword")
-          : query.e === "1"
-            ? t("changePassword.errorGeneric")
-            : null;
-  const profileError =
-    query.e &&
-    !passwordError &&
-    query.e !== "mismatch" &&
-    query.e !== "current" &&
-    query.e !== "password" &&
-    query.e !== "1"
-      ? await translateError(query.e)
-      : null;
   const profileOk = query.ok === "name";
   const exportError = query.x ? await translateError(query.x) : null;
   const deleteError = query.d ? await translateError(query.d) : null;
@@ -117,37 +93,17 @@ export default async function AccountPage({
             <CardDescription>{t("account.profileHint")}</CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={updateDisplayNameAction} className="flex flex-col gap-4">
-              <FieldGroup>
-                {profileOk ? (
+            <DisplayNameForm
+              displayName={user.displayName}
+              email={user.email}
+              notice={
+                profileOk ? (
                   <Alert>
                     <AlertDescription>{t("account.nameSaved")}</AlertDescription>
                   </Alert>
-                ) : null}
-                {profileError ? (
-                  <Alert variant="destructive">
-                    <AlertDescription>{profileError}</AlertDescription>
-                  </Alert>
-                ) : null}
-                <Field>
-                  <FieldLabel htmlFor="displayName">{t("account.displayName")}</FieldLabel>
-                  <Input
-                    id="displayName"
-                    name="displayName"
-                    required
-                    maxLength={80}
-                    defaultValue={user.displayName}
-                    autoComplete="nickname"
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="account-email">{t("account.email")}</FieldLabel>
-                  <Input id="account-email" value={user.email} readOnly className="bg-muted" />
-                  <p className="text-xs text-muted-foreground">{t("account.emailHint")}</p>
-                </Field>
-                <Button type="submit">{t("account.saveName")}</Button>
-              </FieldGroup>
-            </form>
+                ) : null
+              }
+            />
           </CardContent>
         </Card>
       )}
@@ -193,25 +149,7 @@ export default async function AccountPage({
                 </Button>
               </form>
             ) : null}
-            <form action={requestEmailChangeAction}>
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor="new-email">{t("account.emailChange.newEmail")}</FieldLabel>
-                  <Input id="new-email" name="email" type="email" required autoComplete="email" />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="email-current-password">{t("account.emailChange.currentPassword")}</FieldLabel>
-                  <Input
-                    id="email-current-password"
-                    name="currentPassword"
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                  />
-                </Field>
-                <Button type="submit">{t("account.emailChange.submit")}</Button>
-              </FieldGroup>
-            </form>
+            <EmailChangeForm />
           </CardContent>
         </Card>
       ) : null}
@@ -283,58 +221,16 @@ export default async function AccountPage({
           <CardTitle>{forced ? t("changePassword.titleForced") : t("changePassword.title")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={changePasswordAction}>
-            <FieldGroup>
-              {passwordOk ? (
+          <PasswordForm
+            forced={forced}
+            notice={
+              passwordOk ? (
                 <Alert>
                   <AlertDescription>{t("changePassword.success")}</AlertDescription>
                 </Alert>
-              ) : null}
-              {passwordError ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{passwordError}</AlertDescription>
-                </Alert>
-              ) : null}
-              {!forced ? (
-                <Field>
-                  <FieldLabel htmlFor="currentPassword">{t("changePassword.current")}</FieldLabel>
-                  <Input
-                    id="currentPassword"
-                    name="currentPassword"
-                    type="password"
-                    required
-                    autoComplete="current-password"
-                  />
-                </Field>
-              ) : null}
-              <Field>
-                <FieldLabel htmlFor="password">{t("changePassword.next")}</FieldLabel>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  minLength={MIN_PASSWORD_LENGTH}
-                  autoComplete="new-password"
-                />
-                <FieldDescription>{t("changePassword.nextHint")}</FieldDescription>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="confirm">{t("changePassword.confirm")}</FieldLabel>
-                <Input
-                  id="confirm"
-                  name="confirm"
-                  type="password"
-                  required
-                  minLength={MIN_PASSWORD_LENGTH}
-                  autoComplete="new-password"
-                />
-              </Field>
-              <Button type="submit">
-                {forced ? t("changePassword.submitForced") : t("changePassword.submit")}
-              </Button>
-            </FieldGroup>
-          </form>
+              ) : null
+            }
+          />
         </CardContent>
       </Card>
 

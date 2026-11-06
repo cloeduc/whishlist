@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { ArchiveIcon, ChevronDownIcon, ChevronUpIcon, GripVerticalIcon } from "lucide-react";
@@ -35,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 export type AccordionIdea = {
   id: string;
@@ -79,7 +79,6 @@ export function IdeasAccordion({
   llmEnabled?: boolean;
 }) {
   const { t, i18n } = useTranslation(["list", "errors", "common"]);
-  const router = useRouter();
   const locale = isLocale(i18n.language) ? i18n.language : "fr";
   const [board, setBoard] = useState(items);
   const [typeOrder, setTypeOrder] = useState(() =>
@@ -198,7 +197,6 @@ export function IdeasAccordion({
         : t(mode === "move" ? "transfer.moved" : "transfer.copied", { name: item.name, list: target.title }),
       href: here ? null : withLocale(locale, `/listes/${target.id}`),
     });
-    router.refresh();
   }
 
   function onArchive(itemId: string) {
@@ -218,11 +216,7 @@ export function IdeasAccordion({
   return (
     <div className={`flex w-full flex-col gap-3 ${pending ? "opacity-90" : ""}`}>
       <p className="max-w-3xl text-sm text-muted-foreground">{t("accordion.hint")}</p>
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{t(`errors:${error}`, { defaultValue: error })}</AlertDescription>
-        </Alert>
-      ) : null}
+      <FormRefusal code={error} />
       {notice ? (
         <Alert role="status">
           <AlertDescription>

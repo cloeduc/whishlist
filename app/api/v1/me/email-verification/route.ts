@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, withApi } from "@/src/server/api/http"
 import { resendEmailVerification } from "@/src/server/commands/email";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** Resends the address confirmation link; the previous one is no longer valid (010, US2). */
 export const POST = withApi(async (api) => {

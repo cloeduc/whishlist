@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/
 import { confirmEmailWithToken } from "@/src/server/commands/email";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /**
  * Confirms the link received by email, opened in the app (011). The optional bearer only serves `ownAccount`:

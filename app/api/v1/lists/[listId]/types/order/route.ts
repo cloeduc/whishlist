@@ -3,7 +3,6 @@ import { apiError, apiNoContent, apiPreflight, readJsonBody, withApi } from "@/s
 import { reorderTypes } from "@/src/server/commands/labels";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const PUT = withApi<{ listId: string }>(async (api, { listId }) => {
   const body = await readJsonBody(api.req);

@@ -298,7 +298,7 @@ test("a single import when two processes open the same new database", async () =
     await writeFile(dataPath, JSON.stringify(apiDoc()), "utf8");
     const helper = path.join(import.meta.dirname, "helpers", "open-store.ts");
     const outputs = await Promise.all(
-      [1, 2].map(() => run(process.execPath, ["--import", "tsx", helper, dataPath], { cwd: process.cwd() })),
+      [1, 2].map(() => run(process.execPath, ["--conditions=react-server", "--import", "tsx", helper, dataPath], { cwd: process.cwd() })),
     );
     for (const { stdout } of outputs) assert.deepEqual(JSON.parse(stdout.trim().split("\n").at(-1)!), { users: 2, markers: 1 });
     assert.equal((await readDocument()).users.length, 2);

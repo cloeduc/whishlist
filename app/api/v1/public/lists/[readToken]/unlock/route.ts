@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/
 import { unlockPublicList } from "@/src/server/commands/public-list";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const POST = withApi<{ readToken: string }>(async (api, { readToken }) => {
   const body = await readJsonBody(api.req);

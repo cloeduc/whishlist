@@ -1,3 +1,4 @@
+import "server-only";
 import { mustConfirmEmail } from "../../domain/email-confirmation";
 import type { User } from "../../domain/types";
 import type { Locale } from "../../i18n/config";

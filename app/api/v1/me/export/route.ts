@@ -4,7 +4,6 @@ import { exportFileName } from "@/src/domain/export-file";
 import { exportOwnAccount } from "@/src/server/commands/account";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const GET = withApi(async (api) => {
   const result = await exportOwnAccount(await commandContext(api));

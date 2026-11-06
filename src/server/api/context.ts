@@ -1,3 +1,4 @@
+import "server-only";
 import { origin } from "../../auth/current";
 import type { CommandContext } from "../commands/context";
 import type { ApiRequestContext } from "./http";
