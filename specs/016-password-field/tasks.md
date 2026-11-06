@@ -100,9 +100,9 @@ Aucune tâche bloquante : les composants naissent dans l'US1 et s'enrichissent d
 
 ## Phase 6: Polish
 
-- [ ] T027 Vérifier à la main le site (navigateur de la tâche) : connexion en largeur de téléphone, œil, Tab / Entrée / Espace sans envoi, erreur → champ vide et masqué ; captures pour la preuve
-- [ ] T028 Lancer le parcours `016-us2` et la suite e2e (inscription comprise) sur le simulateur iPhone 17 Pro Max iOS 26.5 si l'environnement le permet ; sinon le noter
-- [ ] T029 Commit Polish (si des fichiers ont changé) : `chore: …`
+- [X] T027 Vérifier à la main le site (navigateur de la tâche) : connexion en largeur de téléphone, œil, Tab / Entrée / Espace sans envoi, erreur → champ vide et masqué ; captures pour la preuve
+- [X] T028 Lancer le parcours `016-us2` et la suite e2e (inscription comprise) sur le simulateur iPhone 17 Pro Max iOS 26.5 si l'environnement le permet ; sinon le noter. Fait le 2026-11-06 : `016-us2` et `009-us2` passent ; l'inscription passe la feuille « mot de passe robuste » (croix à 92 %, 61 %) ; les parcours qui confirment une adresse s'arrêtent sur « Confirmer » dans Safari et les liens profonds sur l'invite « Ouvrir dans … ? » (bug e2e traité à part, WHIS-2)
+- [X] T029 Commit Polish (si des fichiers ont changé) : `chore: …`
 
 ---
 
