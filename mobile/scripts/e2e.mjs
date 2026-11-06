@@ -55,7 +55,7 @@ function parseArgs(argv) {
  */
 function resetDatabase() {
   mkdirSync(path.dirname(dataFile), { recursive: true });
-  const result = spawnSync("node", ["--import", "tsx", "scripts/create-demo-data.mjs", dataFile], {
+  const result = spawnSync("node", ["--conditions=react-server", "--import", "tsx", "scripts/create-demo-data.mjs", dataFile], {
     cwd: repoRoot,
     env: process.env,
     encoding: "utf8",
@@ -64,7 +64,7 @@ function resetDatabase() {
 }
 
 function apiSessionCount(userId) {
-  const result = spawnSync("node", ["--import", "tsx", "scripts/db-sessions.ts", dataFile, userId], { cwd: repoRoot, encoding: "utf8" });
+  const result = spawnSync("node", ["--conditions=react-server", "--import", "tsx", "scripts/db-sessions.ts", dataFile, userId], { cwd: repoRoot, encoding: "utf8" });
   return result.status === 0 ? Number(result.stdout.trim()) : 0;
 }
 

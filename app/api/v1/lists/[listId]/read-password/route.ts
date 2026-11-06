@@ -3,7 +3,6 @@ import { apiError, apiNoContent, apiPreflight, readJsonBody, text, withApi } fro
 import { clearReadPassword, setReadPassword } from "@/src/server/commands/sharing";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const PUT = withApi<{ listId: string }>(async (api, { listId }) => {
   const body = await readJsonBody(api.req);

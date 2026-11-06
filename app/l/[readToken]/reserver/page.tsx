@@ -12,8 +12,6 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { getTranslations } from "@/src/i18n/server";
 
-export const dynamic = "force-dynamic";
-
 export default async function ReservePage({
   params,
   searchParams,

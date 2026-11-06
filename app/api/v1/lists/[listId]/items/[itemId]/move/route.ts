@@ -4,7 +4,6 @@ import { toMemberItem } from "@/src/server/api/views";
 import { moveItem } from "@/src/server/commands/items";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** `{ targetListId, typeId, personId }`: the idea changes list and keeps its id. */
 export const POST = withApi<{ listId: string; itemId: string }>(async (api, { listId, itemId }) => {

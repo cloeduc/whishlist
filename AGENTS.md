@@ -9,7 +9,7 @@
 - Lint : `npm run lint`
 - Types : `npm run typecheck`
 - Tests : `npm test` (tous les fichiers `tests/domain/*.test.ts`)
-- Build prod : `npm run build`
+- Build prod : `npm run build` (le `postbuild` complète `.next/standalone`), puis `npm start` (le `server.js` de l'image Docker)
 - Données de démo : `npm run demo:data -- tmp/demo-wishlist.json` (écrit la base `tmp/demo-wishlist.db`, même règle de chemin que `WISHLIST_DATA_PATH`) puis `WISHLIST_DATA_PATH=tmp/demo-wishlist.json npm run dev` (`DEMO_PASSWORD` obligatoire)
 - Base SQLite : `npm run db:generate` après un changement de `src/store/schema.ts` (écrit une migration dans `drizzle/`, à relire et versionner) ; `npm run db:check -- <fichier.json|fichier.db> [--counts]` contrôle un fichier sans rien écrire ; `node scripts/db-backup.mjs <destination>` fait une sauvegarde à chaud
 - Captures du guide : `DEMO_BASE_URL=http://localhost:3010 npm run demo:capture` (écrit `public/guide/{fr,en}`) ; `-- --mobile` écrit les captures en largeur de téléphone dans `specs/005-mobile-list-app/design/web-mobile/`
@@ -32,6 +32,7 @@ La revue de code les ignore :
 - **Couches** :
   - `src/domain/` : règles métier en fonctions pures sur `Database`, testées.
   - `src/store/` : seul accès à la base SQLite (Drizzle, mode WAL). Une écriture passe par `updateDocument` (une transaction : tout ou rien), jamais par une requête directe hors de `src/store/`. Le schéma est dans `src/store/schema.ts`, les migrations dans `drizzle/`. Seule exception : `scripts/db-backup.mjs`, en JS simple parce qu'il tourne dans l'image sans `tsx`, ouvre la base lui-même et répète la règle de chemin de `databaseFilePath()` ; le garder aligné sur `src/store/connection.ts`.
+  - `import "server-only";` ouvre chaque fichier de `src/store/`, `src/auth/` et `src/server/` (un composant client qui en importe un fait échouer le build), sauf `src/server/actions.ts` (fichier `"use server"`, importé par les composants clients) et `src/store/schema.ts` (lu par `drizzle-kit`). Hors de Next, ce marqueur lance une erreur : les commandes `node --import tsx` qui chargent ces fichiers (tests, scripts, `mobile/scripts/e2e.mjs`) prennent `--conditions=react-server`. `tests/domain/server-only.test.ts` le vérifie.
   - `src/server/commands/` : orchestration partagée par les server actions et l'API, sans dépendance à Next (ni `cookies()`, ni `headers()`, ni `redirect()`). Chaque commande reçoit un `CommandContext` (compte, IP, langue, origine), vérifie le compte (`activeUser`), l'appartenance à la liste (`findMembership`) ou l'accès public (`canAccessPublicListWith`), limite le débit des actions sensibles (`rateLimitForIp`), et rend `{ ok, … } | { ok: false, error }`.
   - `src/server/actions.ts` : server actions, adaptateurs du site : FormData → commande → redirection et cookies.
   - `app/api/v1/` et `src/server/api/` : API JSON, adaptateurs : `withApi` → corps JSON → commande → `apiJson` / `apiError`. Une route se décrit d'abord dans le contrat `specs/004-mobile-api/contracts/openapi.yaml` ; `tests/domain/api-contract.test.ts` vérifie que chaque opération a sa route.

@@ -37,8 +37,6 @@ import { intlLocale } from "@/src/i18n/config";
 import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import { withLocale } from "@/src/i18n/locale-path";
 
-export const dynamic = "force-dynamic";
-
 const TAB_IDS = ["idees", "archives", "reservations", "partage", "reglages"] as const;
 type TabId = (typeof TAB_IDS)[number];
 

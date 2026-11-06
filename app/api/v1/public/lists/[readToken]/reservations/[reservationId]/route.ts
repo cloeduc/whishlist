@@ -4,7 +4,6 @@ import { apiError, apiNoContent, apiPreflight, withApi } from "@/src/server/api/
 import { cancelOwn } from "@/src/server/commands/public-list";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const DELETE = withApi<{ readToken: string; reservationId: string }>(async (api, { readToken, reservationId }) => {
   const { claimedIds } = guestProofs(api.req, readToken);

@@ -12,8 +12,6 @@ import { getTranslations, translateError } from "@/src/i18n/server";
 import { emailConfirmationPending } from "@/src/server/commands/context";
 import { emailVerificationRequired } from "@/src/server/mail";
 
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
   return { title: t("confirmEmail.metaTitle") };

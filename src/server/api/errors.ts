@@ -1,3 +1,4 @@
+import "server-only";
 /** HTTP status of each error code returned by the API. A missing code means 400 (validation). */
 const STATUS_BY_CODE: Record<string, number> = {
   unauthorized: 401,

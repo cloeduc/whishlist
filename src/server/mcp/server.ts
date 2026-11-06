@@ -1,3 +1,4 @@
+import "server-only";
 import { McpServer } from "@modelcontextprotocol/server";
 import * as z from "zod";
 import { priceInput } from "../../domain/price";

@@ -5,7 +5,6 @@ import { toMemberItem } from "@/src/server/api/views";
 import { deleteItem, patchItem, saveItem } from "@/src/server/commands/items";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 type Params = { listId: string; itemId: string };
 

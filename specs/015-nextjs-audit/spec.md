@@ -145,7 +145,7 @@ Une personne qui développe le site, ou un agent, est arrêtée à la constructi
 - **SC-002**: Aucun mot de passe n'apparaît dans la page, l'adresse ou l'historique après un refus.
 - **SC-003**: Une panne de la mise en page commune affiche la page d'erreur du site dans la bonne langue, en français et en anglais.
 - **SC-004**: Chacune des actions de l'US3 fait une seule demande au serveur au lieu de deux.
-- **SC-005**: Aucune page ni la mise en page commune ne garde de déclaration de rendu forcé (15 fichiers aujourd'hui) ; sur les 62 fichiers actuels, seuls restent ceux qui en ont besoin, chacun commenté, et chaque adresse reste rendue à chaque visite.
+- **SC-005**: Aucune page ne garde de déclaration de rendu forcé (14 fichiers aujourd'hui) ; sur les 62 fichiers actuels, seuls restent ceux qui en ont besoin, chacun commenté (dont la mise en page commune, qui empêche tout rendu pendant la construction de l'image), et chaque adresse reste rendue à chaque visite.
 - **SC-006**: Un import fautif de code serveur dans un composant client fait échouer la construction, vérifié par un essai.
 - **SC-007**: Les tests, le lint, les types et la construction passent ; les parcours de la base de démo (inscription, connexion, réservation, compte, liste) se déroulent comme avant.
 

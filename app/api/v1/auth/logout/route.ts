@@ -4,7 +4,6 @@ import { apiError, apiNoContent, apiPreflight, withApi } from "@/src/server/api/
 import { logout } from "@/src/server/commands/auth";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const POST = withApi(async (api) => {
   const ctx = await commandContext(api);

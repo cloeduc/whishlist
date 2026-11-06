@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/
 import { cancelOwnEmailChange, requestOwnEmailChange } from "@/src/server/commands/email";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** Address change request: a link is sent to the new one (010, US3). */
 export const POST = withApi(async (api) => {

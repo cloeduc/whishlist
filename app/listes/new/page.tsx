@@ -7,8 +7,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getLocale, getTranslations } from "@/src/i18n/server";
 import { withLocale } from "@/src/i18n/locale-path";
 
-export const dynamic = "force-dynamic";
-
 export default async function NewListPage() {
   const [user, t, locale] = await Promise.all([currentUser(), getTranslations("home"), getLocale()]);
   if (!user) redirect(withLocale(locale, "/connexion?next=/listes/new"));

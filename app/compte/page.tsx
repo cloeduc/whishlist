@@ -26,8 +26,6 @@ import { withLocale } from "@/src/i18n/locale-path";
 import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import { emailVerificationRequired } from "@/src/server/mail";
 
-export const dynamic = "force-dynamic";
-
 export default async function AccountPage({
   searchParams,
 }: {

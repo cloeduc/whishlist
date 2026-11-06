@@ -1,3 +1,4 @@
+import "server-only";
 import { cache } from "react";
 import type { Database } from "../domain/types";
 import { openStore, readTransaction, writeTransaction } from "./connection";

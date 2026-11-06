@@ -9,8 +9,6 @@ import { getTranslations } from "@/src/i18n/server";
 import { emailVerificationRequired } from "@/src/server/mail";
 import { publicPageMetadata } from "@/src/site/seo";
 
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
   return await publicPageMetadata({

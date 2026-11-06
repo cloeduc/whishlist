@@ -50,7 +50,7 @@ Dans DevTools, Réseau, avec le débit « Slow 4G », filtrer sur les requêtes 
 ## US4 : garde-fous et démarrage
 
 1. **server-only** : ajouter `import "@/src/store/db";` dans un composant client (p. ex. `components/site/label-chips.tsx`), lancer `npm run build`. La construction échoue, avec un message qui cite `server-only` et le module. Retirer l'import.
-2. **Rendu à la demande** : `npm run build` ; dans le tableau des routes, chaque page et chaque route d'API reste `ƒ` comme avant la feature (comparer à la sortie de `main`). `grep -rl force-dynamic app` ne liste que `robots.ts`, `sitemap.ts`, les routes `.well-known` et celles que le build a obligé à garder, chacune avec un commentaire.
+2. **Rendu à la demande** : `npm run build` ; dans le tableau des routes, chaque page et chaque route d'API reste `ƒ` comme avant la feature (comparer à la sortie de `main`). `grep -rl force-dynamic app` ne liste que `layout.tsx`, `robots.ts`, `sitemap.ts` et les deux routes `.well-known`, chacun avec un commentaire.
 3. **Démarrage** : `npm run build && PORT=3020 npm start`. Le site répond sur <http://localhost:3020> avec les données de `data/wishlist.db` du dépôt. Puis `docker build -t whishlist:local . && docker run --rm -p 3021:3000 -e SESSION_SECRET=x whishlist:local` : le site répond sur <http://localhost:3021> et le contrôle de santé passe (`docker ps` affiche `healthy`).
 4. **`robots.txt` et `.well-known`** : relancer le conteneur avec `-e APP_ORIGIN=https://exemple.test -e APPLE_TEAM_ID=ABCDE12345`. `/robots.txt` cite `https://exemple.test/sitemap.xml`, et `/.well-known/apple-app-site-association` contient `ABCDE12345`. Leurs déclarations, déjà commentées, restent.
 

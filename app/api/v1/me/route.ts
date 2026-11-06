@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/
 import { readMe, updateOwnDisplayName } from "@/src/server/commands/auth";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** Also answers when the password must be changed: the client learns it here. */
 export const GET = withApi(async (api) => {

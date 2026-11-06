@@ -1,3 +1,4 @@
+import "server-only";
 import { mustConfirmEmail } from "../../domain/email-confirmation";
 import { listPublicVisibleItems, mineReservationIdsFor, sortItems } from "../../domain/read";
 import { formatPrice } from "../../domain/price";

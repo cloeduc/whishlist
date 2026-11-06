@@ -1,3 +1,4 @@
+import "server-only";
 /** Canonical origin for mail / sharing links — never derived from headers if `APP_ORIGIN` is set. */
 
 export function normalizeAppOrigin(

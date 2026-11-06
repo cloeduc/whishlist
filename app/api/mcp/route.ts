@@ -8,7 +8,6 @@ import { buildMcpServer } from "@/src/server/mcp/server";
 import { clientIp } from "@/src/server/rate-limit";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /**
  * MCP server (Streamable HTTP, stateless) for an AI assistant. An API key (`Authorization: Bearer oys_…`)

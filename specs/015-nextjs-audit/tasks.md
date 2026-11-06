@@ -165,7 +165,7 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
   - retirer `useRouter` s'il ne sert plus ;
   - la clé créée s'affiche toujours une fois, et la liste des clés vient de la page rafraîchie par l'action.
 - [X] T026 [US3] Dérouler [quickstart.md](quickstart.md), section US3 : une requête par action, retour en arrière d'une catégorie en double, et l'avis `?k=revoked` qui disparaît sans second chargement.
-- [ ] T027 [US3] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: refresh the page with the action's response, in one round trip (US3)` (seulement les changements US3 de `src/server/actions.ts`), sans demander.
+- [X] T027 [US3] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: refresh the page with the action's response, in one round trip (US3)` (seulement les changements US3 de `src/server/actions.ts`), sans demander.
 
 **Checkpoint**: les US1, US2 et US3 marchent chacune seule.
 
@@ -179,35 +179,35 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
 
 ### Garde-fou server-only (point c)
 
-- [ ] T028 [US4] Installer la dépendance `npm install server-only`, qui l'ajoute aux `dependencies` de `package.json`. Puis vérifier le lockfile avec `npx npm@10 ci --dry-run`, puisque la CI est en npm 10 (mémoire « Lockfile et npm 10 »).
-- [ ] T029 [US4] Dans `package.json`, ajouter `--conditions=react-server` aux trois commandes `node --import tsx` (`test`, `demo:data`, `db:check`) : `node --conditions=react-server --import tsx …`. Relire l'en-tête de `scripts/db-sessions.ts`, `scripts/test-reset-mail.ts` et `scripts/backfill-og.ts`, et mettre leur ligne d'usage au même format si elle cite `tsx`. Ensuite, `npm test` passe (essai fait : 389 tests verts sous cette condition).
-- [ ] T030 [US4] Écrire `tests/domain/server-only.test.ts`. Il lit chaque fichier `.ts` de `src/store/`, `src/auth/` et `src/server/`, sous-dossiers compris, et vérifie que la première instruction est `import "server-only";`, ou qu'elle suit une directive en tête de fichier. Il exclut deux fichiers, avec la raison en commentaire :
+- [X] T028 [US4] Installer la dépendance `npm install server-only`, qui l'ajoute aux `dependencies` de `package.json`. Puis vérifier le lockfile avec `npx npm@10 ci --dry-run`, puisque la CI est en npm 10 (mémoire « Lockfile et npm 10 »).
+- [X] T029 [US4] Dans `package.json`, ajouter `--conditions=react-server` aux trois commandes `node --import tsx` (`test`, `demo:data`, `db:check`) : `node --conditions=react-server --import tsx …`. Relire l'en-tête de `scripts/db-sessions.ts`, `scripts/test-reset-mail.ts` et `scripts/backfill-og.ts`, et mettre leur ligne d'usage au même format si elle cite `tsx`. Ensuite, `npm test` passe (essai fait : 389 tests verts sous cette condition).
+- [X] T030 [US4] Écrire `tests/domain/server-only.test.ts`. Il lit chaque fichier `.ts` de `src/store/`, `src/auth/` et `src/server/`, sous-dossiers compris, et vérifie que la première instruction est `import "server-only";`, ou qu'elle suit une directive en tête de fichier. Il exclut deux fichiers, avec la raison en commentaire :
   - `src/server/actions.ts` : fichier `"use server"`, importé par les composants clients ;
   - `src/store/schema.ts` : chargé par `drizzle-kit generate` hors de Next et sans la condition `react-server`.
 
   Il échoue avant T031.
-- [ ] T031 [US4] Ajouter `import "server-only";` en première ligne de chaque fichier visé par T030 : `src/store/*.ts` sauf `schema.ts`, `src/auth/*.ts`, et `src/server/**/*.ts` sauf `actions.ts`.
+- [X] T031 [US4] Ajouter `import "server-only";` en première ligne de chaque fichier visé par T030 : `src/store/*.ts` sauf `schema.ts`, `src/auth/*.ts`, et `src/server/**/*.ts` sauf `actions.ts`.
   - Lancer `npm test`, `npm run typecheck`, `npm run build` et `npm run db:generate`. Ce dernier ne doit créer aucune migration ; supprimer toute migration vide qu'il aurait créée.
   - Vérifier aussi que `npm run demo:data -- tmp/demo-wishlist.json` et `npm run db:check -- tmp/demo-wishlist.db` marchent.
-- [ ] T032 [US4] Vérification SC-006 :
+- [X] T032 [US4] Vérification SC-006 :
   1. Ajouter temporairement `import "@/src/store/db";` dans `components/site/label-chips.tsx`.
   2. `npm run build` doit échouer, avec un message qui cite `server-only`. Noter ce message dans `research.md` R4.
   3. Retirer l'import.
 
 ### Déclarations force-dynamic (point e)
 
-- [ ] T033 [P] [US4] Retirer `export const dynamic = "force-dynamic";`, et son commentaire s'il en a un, de `app/layout.tsx` et des 14 pages :
+- [X] T033 [P] [US4] Retirer `export const dynamic = "force-dynamic";`, et son commentaire s'il en a un, de `app/layout.tsx` et des 14 pages :
   - `app/page.tsx`, `app/changer-mot-de-passe/page.tsx`, `app/compte/page.tsx`, `app/confirmer-email/[token]/page.tsx` ;
   - `app/connexion/page.tsx`, `app/inscription/page.tsx`, `app/inviter/[token]/page.tsx` ;
   - `app/l/[readToken]/page.tsx`, `app/l/[readToken]/reserver/page.tsx`, `app/l/[readToken]/types/page.tsx` ;
   - `app/listes/[id]/page.tsx`, `app/listes/new/page.tsx`, `app/mot-de-passe-oublie/page.tsx`, `app/reinitialiser/[token]/page.tsx`.
-- [ ] T034 [P] [US4] Retirer la même déclaration des gestionnaires de route qui lisent la requête :
+- [X] T034 [P] [US4] Retirer la même déclaration des gestionnaires de route qui lisent la requête :
   - toutes les routes `app/api/v1/**/route.ts` ;
   - `app/api/[version]/[...path]/route.ts`, `app/api/mcp/route.ts` ;
   - `app/compte/export/route.ts`, `app/u/[...path]/route.ts`.
 
   Garder `app/robots.ts`, `app/sitemap.ts`, `app/.well-known/apple-app-site-association/route.ts` et `app/.well-known/assetlinks.json/route.ts`, et vérifier que chacun a un commentaire qui dit pourquoi (en ajouter un à `app/sitemap.ts` s'il manque).
-- [ ] T035 [US4] Lancer `npm run build` et comparer son tableau des routes à `tmp/015-build-before.txt` (T001) :
+- [X] T035 [US4] Lancer `npm run build` et comparer son tableau des routes à `tmp/015-build-before.txt` (T001) :
   - chaque route doit garder son symbole ;
   - une route passée de `ƒ` à `○` reprend sa déclaration, avec un commentaire en anglais qui dit pourquoi elle est nécessaire ;
   - lister ces routes dans `research.md` R5.
@@ -216,21 +216,21 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
 
 ### Un seul démarrage (point f)
 
-- [ ] T036 [US4] Supprimer `app.js`.
+- [X] T036 [US4] Supprimer `app.js`.
   - Créer `scripts/prepare-standalone.mjs`, qui copie dans `.next/standalone/` : `public/`, `.next/static/` (vers `.next/standalone/.next/static/`), `drizzle/` et `data/seed.json` (vers `.next/standalone/data/seed.json`). Il utilise `fs.cpSync(…, { recursive: true })` et se lance avec `"postbuild": "node scripts/prepare-standalone.mjs"` dans `package.json`.
   - Créer `scripts/start.mjs`. Si `WISHLIST_DATA_PATH` manque, il lui donne `path.resolve("data/wishlist.json")` (chemin absolu, puisque `server.js` fait `process.chdir(__dirname)`), vérifie que `.next/standalone/server.js` existe (sinon, il affiche « Run npm run build first » et sort en code 1), puis l'importe.
   - Écrire `"start": "node scripts/start.mjs"`. Commentaires et messages en anglais.
-- [ ] T037 [US4] Dans `Dockerfile`, étape `runner` :
+- [X] T037 [US4] Dans `Dockerfile`, étape `runner` :
   - remplacer les copies séparées de `public`, `.next/static`, `data/seed.json` et `drizzle` par la seule copie de `/app/.next/standalone`, déjà complétée par `postbuild` ;
   - garder la copie de `scripts/db-backup.mjs`, les `ENV` (`PORT`, `HOSTNAME`, `WISHLIST_DATA_PATH=/data/wishlist.json`), l'utilisateur `nextjs`, le `HEALTHCHECK` et `CMD ["node", "server.js"]`.
 
   Ensuite, `docker build -t whishlist:local .` passe.
-- [ ] T038 [US4] Documentation :
+- [X] T038 [US4] Documentation :
   - dans `README.md`, dire que `npm start` lance le serveur `standalone` de l'image, après `npm run build`, avec la base `data/wishlist.db` du dépôt par défaut ;
   - relire `deploy/DEPLOY-RUNTIPI.md` ;
   - dans `AGENTS.md`, section **Couches**, ajouter que chaque fichier de `src/store/`, `src/auth/` et `src/server/` commence par `import "server-only";`, sauf `src/server/actions.ts` et `src/store/schema.ts`, et que les commandes `tsx` qui les chargent tournent avec `--conditions=react-server` ;
   - ajouter ce flag à la ligne « Tests » si elle cite la commande.
-- [ ] T039 [US4] Dérouler [quickstart.md](quickstart.md), section US4 :
+- [X] T039 [US4] Dérouler [quickstart.md](quickstart.md), section US4 :
   - `PORT=3020 npm start` sur la base du dépôt ;
   - conteneur sur le port 3021, `healthy` ;
   - `APP_ORIGIN` et `APPLE_TEAM_ID` reflétés par `/robots.txt` et `.well-known`.

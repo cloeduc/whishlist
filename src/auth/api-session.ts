@@ -1,3 +1,4 @@
+import "server-only";
 import { clone } from "../domain/access";
 import { hashSecretToken, newId, newSecretToken } from "../domain/tokens";
 import type { ApiSession, Database, User } from "../domain/types";

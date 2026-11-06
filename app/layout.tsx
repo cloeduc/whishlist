@@ -20,7 +20,11 @@ import { emailConfirmationPending } from "@/src/server/commands/context";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-geist" });
 
-/** Session and language are cookies: the HTML is not cached. */
+/**
+ * No page is ever rendered at build time. Session and language are cookies, and the Docker image is
+ * built with a placeholder SESSION_SECRET that the session code refuses before it reaches cookies():
+ * without this flag, the build tries to prerender pages and fails. It applies to every page below.
+ */
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata(): Promise<Metadata> {

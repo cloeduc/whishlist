@@ -1,3 +1,4 @@
+import "server-only";
 import { openStore } from "./connection";
 import { LegacyImportError } from "./legacy-json";
 

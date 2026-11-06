@@ -1,3 +1,4 @@
+import "server-only";
 import { createApiKey } from "../../auth/api-keys";
 import { revokeApiKey, type ApiKeyView } from "../../domain/api-keys";
 import { updateDocument } from "../../store/db";

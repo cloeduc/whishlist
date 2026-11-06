@@ -5,7 +5,6 @@ import { toMemberItem } from "@/src/server/api/views";
 import { saveItem } from "@/src/server/commands/items";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const POST = withApi<{ listId: string }>(async (api, { listId }) => {
   const body = await readJsonBody(api.req);

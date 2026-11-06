@@ -7,8 +7,6 @@ import { ResetPasswordForm } from "@/components/site/reset-password-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getTranslations } from "@/src/i18n/server";
 
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("auth");
   return {

@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, withApi } from "@/src/server/api/http"
 import { previewInvite } from "@/src/server/commands/sharing";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** Preview of an invitation before joining (011): title, and `listId` if the account is already a member. */
 export const GET = withApi<{ inviteToken: string }>(async (api, { inviteToken }) => {

@@ -3,7 +3,6 @@ import { apiError, apiJson, apiNoContent, apiPreflight, readJsonBody, text, with
 import { deleteOwnAccount, previewOwnDeletion } from "@/src/server/commands/account";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** What deleting the account would do, without changing anything. */
 export const GET = withApi(async (api) => {

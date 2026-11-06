@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/
 import { login } from "@/src/server/commands/auth";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const POST = withApi(async (api) => {
   const body = await readJsonBody(api.req);

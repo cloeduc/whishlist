@@ -34,8 +34,11 @@ Ouvre [http://localhost:3000](http://localhost:3000).
 
 ```bash
 npm test          # tests domaine
-npm run build     # build prod local
+npm run build     # build prod local (complète .next/standalone, comme l’image)
+npm start         # lance ce build : le même server.js que l’image Docker
 ```
+
+`npm start` lit `PORT` et `HOSTNAME` comme l’image. Sans `WISHLIST_DATA_PATH`, il utilise la base `data/wishlist.db` du dépôt.
 
 Données locales : base SQLite `data/wishlist.db` (créée au premier lancement). Un ancien `data/wishlist.json` est importé une fois au démarrage, puis n'est plus ni lu ni modifié.
 

@@ -1,3 +1,4 @@
+import "server-only";
 /**
  * State a site form gets back when its action refuses it (`useActionState`): the error code and
  * what the person typed, so the form can show it again. Never a password, never the anti-bot field.

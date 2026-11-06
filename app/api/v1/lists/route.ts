@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, optionalText, readJsonBody, text, with
 import { createList, listMine } from "@/src/server/commands/lists";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const GET = withApi(async (api) => {
   const result = await listMine(await commandContext(api));

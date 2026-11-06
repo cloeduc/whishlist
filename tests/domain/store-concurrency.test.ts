@@ -32,7 +32,7 @@ test("two processes reserve the same idea at once: only one reservation in total
     const repoRoot = path.resolve(import.meta.dirname, "..", "..");
     const outputs = await Promise.all(
       ["198.51.100", "203.0.113"].map((prefix) =>
-        run(process.execPath, ["--import", "tsx", worker, dataPath, "50", prefix], { cwd: repoRoot }),
+        run(process.execPath, ["--conditions=react-server", "--import", "tsx", worker, dataPath, "50", prefix], { cwd: repoRoot }),
       ),
     );
     const counts = outputs.map(({ stdout }) => JSON.parse(stdout) as { ok: number; errors: string[] });

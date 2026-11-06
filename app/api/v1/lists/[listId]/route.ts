@@ -5,7 +5,6 @@ import { deleteList } from "@/src/server/commands/sharing";
 import type { WishlistTheme } from "@/src/domain/types";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 type Params = { listId: string };
 
