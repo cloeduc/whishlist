@@ -51,5 +51,9 @@
     "appStore": "Télécharger dans l’App Store",
     "googlePlay": "Disponible sur Google Play",
     "trademarks": "Apple et le logo Apple sont des marques d’Apple Inc. App Store est une marque de service d’Apple Inc. Google Play et le logo Google Play sont des marques de Google LLC."
+  },
+  "passwordField": {
+    "show": "Afficher le mot de passe",
+    "hide": "Masquer le mot de passe"
   }
 }

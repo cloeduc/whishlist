@@ -12,6 +12,7 @@ import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import { Field } from "@/ui/Field";
 import { Input } from "@/ui/Input";
+import { PasswordInput } from "@/ui/PasswordInput";
 import { NetworkNote } from "@/ui/NetworkNote";
 
 /** Account creation, from `03-inscription.png` (FR-001). */
@@ -71,12 +72,11 @@ export default function Register() {
         />
       </Field>
       <Field label={t("register.password")} description={t("register.passwordHint")}>
-        <Input
+        <PasswordInput
           testID="register.password"
           accessibilityLabel={t("register.password")}
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
           autoComplete="new-password"
           textContentType="newPassword"
         />

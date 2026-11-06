@@ -6,7 +6,7 @@ import { unlockPublicListAction } from "@/src/server/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { MIN_READ_PASSWORD_LENGTH } from "@/src/domain/read-password";
 import { FormRefusal } from "@/components/site/form-refusal";
 import { unlockErrorMessage } from "@/src/site/read-unlock";
@@ -53,10 +53,9 @@ export function ReadUnlockForm({
               <FormRefusal message={shown} />
               <Field>
                 <FieldLabel htmlFor="read-password">{passwordLabel}</FieldLabel>
-                <Input
+                <PasswordInput
                   id="read-password"
                   name="password"
-                  type="password"
                   required
                   minLength={MIN_READ_PASSWORD_LENGTH}
                   autoComplete="current-password"

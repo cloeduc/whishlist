@@ -8,7 +8,7 @@ import { useOnline } from "@/network";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import { Field } from "@/ui/Field";
-import { Input } from "@/ui/Input";
+import { PasswordInput } from "@/ui/PasswordInput";
 import { NetworkNote } from "@/ui/NetworkNote";
 
 /**
@@ -49,33 +49,30 @@ export function PasswordForm({ forced = false, testID }: { forced?: boolean; tes
     <>
       {!forced ? (
         <Field label={t("changePassword.current")}>
-          <Input
+          <PasswordInput
             testID={id("current")}
             accessibilityLabel={t("changePassword.current")}
             value={current}
             onChangeText={setCurrent}
-            secureTextEntry
             autoComplete="current-password"
           />
         </Field>
       ) : null}
       <Field label={t("changePassword.next")} description={t("changePassword.nextHint")}>
-        <Input
+        <PasswordInput
           testID={id("next")}
           accessibilityLabel={t("changePassword.next")}
           value={next}
           onChangeText={setNext}
-          secureTextEntry
           autoComplete="new-password"
         />
       </Field>
       <Field label={t("changePassword.confirm")}>
-        <Input
+        <PasswordInput
           testID={id("confirm")}
           accessibilityLabel={t("changePassword.confirm")}
           value={confirm}
           onChangeText={setConfirm}
-          secureTextEntry
           autoComplete="new-password"
         />
       </Field>

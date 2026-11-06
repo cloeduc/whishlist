@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { registerAction } from "@/src/server/actions";
 import { FormRefusal } from "@/components/site/form-refusal";
@@ -41,10 +42,9 @@ export function RegisterForm({ next }: { next: string }) {
         </Field>
         <Field>
           <FieldLabel htmlFor="password">{t("register.password")}</FieldLabel>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"

@@ -12,6 +12,7 @@ import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import { Field } from "@/ui/Field";
 import { Input } from "@/ui/Input";
+import { PasswordInput } from "@/ui/PasswordInput";
 import { NetworkNote } from "@/ui/NetworkNote";
 
 /** Sign-in, from `02-connexion.png` (FR-001). */
@@ -50,12 +51,11 @@ export default function Login() {
         />
       </Field>
       <Field label={t("auth:login.password")}>
-        <Input
+        <PasswordInput
           testID="login.password"
           accessibilityLabel={t("auth:login.password")}
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
           autoComplete="current-password"
           textContentType="password"
           onSubmitEditing={() => void login.run()}

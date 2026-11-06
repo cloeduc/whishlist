@@ -17,6 +17,7 @@ import { Button } from "@/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import { Field } from "@/ui/Field";
 import { Input } from "@/ui/Input";
+import { PasswordInput } from "@/ui/PasswordInput";
 import { NetworkNote } from "@/ui/NetworkNote";
 import { Screen } from "@/ui/Screen";
 import { Text } from "@/ui/Text";
@@ -149,10 +150,9 @@ export default function FollowSharedList() {
                   {lockedTitle}
                 </Text>
               ) : null}
-              <Input
+              <PasswordInput
                 testID="follow.password"
                 accessibilityLabel={t("shared.passwordLabel")}
-                secureTextEntry
                 value={password}
                 onChangeText={setPassword}
               />

@@ -51,5 +51,9 @@
     "appStore": "Download on the App Store",
     "googlePlay": "Get it on Google Play",
     "trademarks": "Apple and the Apple logo are trademarks of Apple Inc. App Store is a service mark of Apple Inc. Google Play and the Google Play logo are trademarks of Google LLC."
+  },
+  "passwordField": {
+    "show": "Show password",
+    "hide": "Hide password"
   }
 }

@@ -12,6 +12,7 @@ import { fakeFetch, json, me } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
 
 jest.mock("expo-router", () => ({
+  useFocusEffect: jest.fn(),
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true },
   useLocalSearchParams: jest.fn(() => ({ readToken: "demo-list-lecture" })),
 }));

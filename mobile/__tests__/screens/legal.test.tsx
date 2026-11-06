@@ -12,7 +12,7 @@ import { putSnapshot } from "@/offline/snapshot";
 import { fakeFetch, json } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
 
-jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
+jest.mock("expo-router", () => ({ useFocusEffect: jest.fn(), router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
 jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
 
 const fr = (key: string) => i18n.t(`content:${key}`, { email: "contact@ohyoushouldnt.app" });

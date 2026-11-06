@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { MIN_READ_PASSWORD_LENGTH } from "@/src/domain/read-password";
 import { setReadPasswordAction } from "@/src/server/actions";
 import { FormRefusal } from "@/components/site/form-refusal";
@@ -24,10 +24,9 @@ export function ReadPasswordForm({ wishlistId, hasPassword }: { wishlistId: stri
         <FormRefusal code={state?.error} />
         <Field>
           <FieldLabel htmlFor="read-password">{t("share.readPasswordLabel")}</FieldLabel>
-          <Input
+          <PasswordInput
             id="read-password"
             name="password"
-            type="password"
             required
             minLength={MIN_READ_PASSWORD_LENGTH}
             autoComplete="new-password"

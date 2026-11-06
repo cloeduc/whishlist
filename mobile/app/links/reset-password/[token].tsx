@@ -10,7 +10,7 @@ import { useOnline } from "@/network";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import { Field } from "@/ui/Field";
-import { Input } from "@/ui/Input";
+import { PasswordInput } from "@/ui/PasswordInput";
 import { NetworkNote } from "@/ui/NetworkNote";
 
 const DEAD_LINK = new Set(["resetLinkInvalid", "resetLinkExpired"]);
@@ -60,12 +60,11 @@ export default function ResetPasswordLink() {
   return (
     <AuthLayout title={t("auth:reset.title")} description={t("auth:reset.description")} testID="reset-password.screen">
       <Field label={t("auth:reset.password")} description={t("auth:reset.passwordHint")}>
-        <Input
+        <PasswordInput
           testID="reset-password.password"
           accessibilityLabel={t("auth:reset.password")}
           value={password}
           onChangeText={setPassword}
-          secureTextEntry
           autoComplete="new-password"
         />
       </Field>
