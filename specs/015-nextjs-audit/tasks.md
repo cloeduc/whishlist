@@ -119,7 +119,7 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
   - `grep -n "?e=\|?ee=" src/server/actions.ts` ne doit plus remonter aucune des 13 actions. Il doit rester celles de `cancelEmailChangeAction`, `confirmEmailAction`, `joinInviteAction`, `subscribeAction`, `cancelMyReservationAction` et `redirectToList`.
   - `npm run lint`, `npm run typecheck` et `npm test` passent.
 - [X] T015 [US1] Dérouler [quickstart.md](quickstart.md), section US1, sur la base de démo : les 13 refus, les lignes 1, 2 et 10 sans JavaScript, l'inscription avec une adresse déjà prise (écran « e-mail envoyé ») et l'ancienne adresse `/inscription?e=fields`. Noter les écarts dans `research.md` R1.
-- [ ] T016 [US1] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: keep what was typed when a site form is refused (US1)` des fichiers de cette story (avec `specs/015-nextjs-audit/`), sans demander.
+- [X] T016 [US1] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: keep what was typed when a site form is refused (US1)` des fichiers de cette story (avec `specs/015-nextjs-audit/`), sans demander.
 
 **Checkpoint**: l'US1 est livrable seule.
 
@@ -131,15 +131,15 @@ Aucune : chaque story touche des fichiers à elle, et le module `form-state` ne 
 
 **Independent Test**: [quickstart.md](quickstart.md), section US2.
 
-- [ ] T017 [P] [US2] Ajouter la clé `error.home` dans `locales/fr/common.json` (« Revenir à l'accueil ») et dans `locales/en/common.json` (« Back to home »), à côté de `error.title`, `error.body` et `error.retry`.
-- [ ] T018 [US2] Créer `app/global-error.tsx` (`"use client"`, props `{ error: unknown; retry: () => void }`) :
+- [X] T017 [P] [US2] Ajouter la clé `error.home` dans `locales/fr/common.json` (« Revenir à l'accueil ») et dans `locales/en/common.json` (« Back to home »), à côté de `error.title`, `error.body` et `error.retry`.
+- [X] T018 [US2] Créer `app/global-error.tsx` (`"use client"`, props `{ error: unknown; retry: () => void }`) :
   - il rend ses propres `<html lang={locale}>` et `<body>`, importe `./globals.css` et reprend la police Geist et les classes de `app/layout.tsx` ;
   - la langue vient de `stripLocalePrefix(usePathname() ?? "/").locale` (`src/i18n/locale-path.ts`), français par défaut ;
   - le contenu est enveloppé dans `I18nProvider` (`src/i18n/client.tsx`) ;
   - il affiche `common:error.title`, `common:error.body`, un `Button` qui appelle `retry()` (`common:error.retry`) et un lien `LinkButton` ou `<a>` vers `withLocale(locale, "/")` (`common:error.home`) ;
   - il n'importe rien de `src/store`, `src/auth` ni `src/server` (FR-007).
-- [ ] T019 [P] [US2] Dans `app/error.tsx`, remplacer la prop `reset` par `retry` (`{ error: unknown; retry: () => void }`, `onClick={() => retry()}`), comme le recommande `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/error.md` (`retry` est stable depuis 16.3.0).
-- [ ] T020 [US2] Dérouler [quickstart.md](quickstart.md), section US2 (`throw` temporaire dans `RootLayout`, puis dans `app/compte/page.tsx`, en `/` et en `/en`). Retirer les `throw`, puis noter dans `research.md` R3 s'il y a un avertissement d'hydratation en `/en`.
+- [X] T019 [P] [US2] Dans `app/error.tsx`, remplacer la prop `reset` par `retry` (`{ error: unknown; retry: () => void }`, `onClick={() => retry()}`), comme le recommande `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/error.md` (`retry` est stable depuis 16.3.0).
+- [X] T020 [US2] Dérouler [quickstart.md](quickstart.md), section US2 (`throw` temporaire dans `RootLayout`, puis dans `app/compte/page.tsx`, en `/` et en `/en`). Retirer les `throw`, puis noter dans `research.md` R3 s'il y a un avertissement d'hydratation en `/en`.
 - [ ] T021 [US2] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: a translated site page when the whole layout fails (US2)`, sans demander.
 
 **Checkpoint**: les US1 et US2 marchent chacune seule.

@@ -41,7 +41,8 @@
   "error": {
     "title": "Something went wrong",
     "body": "Reload the page. If it keeps happening, try again in a moment.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "home": "Back to home"
   },
   "getApp": {
     "button": "The app on your phone",

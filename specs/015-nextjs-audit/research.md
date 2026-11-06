@@ -78,3 +78,10 @@ La lecture ciblée de la base (étape 2 de la 008) est écartée (Clarifications
 - **Sans JavaScript (FR-003)** : non vérifiable. Sans JavaScript, aucune page du site ne s'affiche, ni en dev ni en prod : `app/loading.tsx` enveloppe chaque page dans un `Suspense`, et le contenu arrive dans un `<div hidden>` que seul le script de React insère. C'était déjà le cas avant cette feature. Les actions restent compatibles (elles sont passées à `<form action>`), mais il faut une décision : retirer ou déplacer `app/loading.tsx`, ou abandonner FR-003.
 - **Succès inchangés (FR-004)** : vérifiés pour la connexion (vers `next`), l'inscription avec une adresse déjà prise (écran « e-mail envoyé », sans erreur), la création d'une liste et une réservation (`?ok=1`).
 
+### US2 (2026-11-06)
+
+- `global-error.tsx` ne s'affiche qu'en production (en dev, c'est l'overlay de Next). Vérifié sur un build de production, avec un `throw` temporaire dans `RootLayout` puis dans `app/compte/page.tsx`, en `/` et en `/en` : la page générale s'affiche dans la bonne langue et aux couleurs du site, avec « Réessayer » et « Revenir à l'accueil ». L'erreur d'une page seule garde `app/error.tsx` dans la mise en page du site. Aucun avertissement d'hydratation lié à la langue : `usePathname()` rend le chemin avec `/en` au rendu serveur aussi.
+- « Réessayer » (`retry()`) relance une demande au serveur dans les deux cas.
+- La console montre l'erreur React n° 441 : c'est le message masqué en production d'une erreur serveur (le `throw` de test), attendu.
+- Piège de test : en production, un `SESSION_SECRET` de moins de 32 caractères fait échouer le layout, donc toute page tombe sur la page générale.
+
