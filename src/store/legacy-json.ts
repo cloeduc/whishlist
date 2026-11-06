@@ -1,3 +1,4 @@
+import "server-only";
 import { readFileSync } from "node:fs";
 import { resolveTheme } from "../domain/theme";
 import type { Database } from "../domain/types";

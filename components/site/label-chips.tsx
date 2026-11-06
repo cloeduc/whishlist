@@ -1,16 +1,34 @@
 "use client";
 
 import { XIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useOptimistic, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { splitLabels } from "@/src/domain/split-labels";
 import { manageLabelAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 type Chip = { id: string; label: string };
+type LabelOp = Parameters<typeof manageLabelAction>[0];
+
+const PENDING_PREFIX = "pending-";
+
+/** A chip added optimistically: the server has not given it an id yet, so it cannot be renamed or deleted. */
+function isPendingChip(chip: Chip): boolean {
+  return chip.id.startsWith(PENDING_PREFIX);
+}
+
+/** What the chips look like while the server applies `op` (dropped when the transition ends). */
+function applyOp(current: Chip[], op: LabelOp): Chip[] {
+  if (op.op === "add") {
+    const added = splitLabels(op.label ?? "").map((label, index) => ({ id: `${PENDING_PREFIX}${index}`, label }));
+    return [...current, ...added];
+  }
+  if (op.op === "rename") return current.map((chip) => (chip.id === op.id ? { ...chip, label: op.label ?? chip.label } : chip));
+  return current.filter((chip) => chip.id !== op.id);
+}
 
 export function LabelChips({
   wishlistId,
@@ -28,30 +46,24 @@ export function LabelChips({
   addAria: string;
 }) {
   const { t } = useTranslation(["list", "errors", "common"]);
-  const router = useRouter();
-  const [chips, setChips] = useState(items);
-  const [sourceItems, setSourceItems] = useState(items);
-  if (items !== sourceItems) {
-    setSourceItems(items);
-    setChips(items);
-  }
+  // The action refreshes the page: `items` comes back updated, or unchanged when refused.
+  const [chips, applyOptimistic] = useOptimistic(items, applyOp);
   const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function run(op: Parameters<typeof manageLabelAction>[0], onOk?: () => void) {
+  function run(op: LabelOp, onOk?: () => void) {
     setError(null);
     startTransition(async () => {
+      applyOptimistic(op);
       const result = await manageLabelAction(op);
       if (!result.ok) {
-        setChips(items);
         setError(t(`errors:${result.error}`, { defaultValue: result.error }));
         return;
       }
       onOk?.();
-      router.refresh();
     });
   }
 
@@ -105,6 +117,7 @@ export function LabelChips({
               <button
                 type="button"
                 className="max-w-48 truncate px-0.5 text-left"
+                disabled={isPendingChip(chip)}
                 onClick={() => {
                   setEditingId(chip.id);
                   setEditValue(chip.label);
@@ -114,7 +127,8 @@ export function LabelChips({
               </button>
               <button
                 type="button"
-                className="inline-flex size-8 items-center justify-center rounded-base hover:bg-background focus-visible:ring-2 focus-visible:ring-black"
+                className="inline-flex size-8 items-center justify-center rounded-base hover:bg-background focus-visible:ring-2 focus-visible:ring-black disabled:pointer-events-none disabled:opacity-50"
+                disabled={isPendingChip(chip)}
                 aria-label={t("categories.deleteChip", { label: chip.label })}
                 onClick={() => removeChip(chip.id)}
               >
@@ -154,11 +168,7 @@ export function LabelChips({
           {t("categories.add")}
         </Button>
       </div>
-      {error ? (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : null}
+      <FormRefusal message={error} />
     </div>
   );
 }

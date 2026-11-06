@@ -3,7 +3,6 @@ import { apiError, apiNoContent, apiPreflight, withApi } from "@/src/server/api/
 import { leave } from "@/src/server/commands/sharing";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const POST = withApi<{ listId: string }>(async (api, { listId }) => {
   const result = await leave(await commandContext(api), { wishlistId: listId });

@@ -8,8 +8,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import { withLocale } from "@/src/i18n/locale-path";
 
-export const dynamic = "force-dynamic";
-
 export default async function InvitePage({
   params,
   searchParams,

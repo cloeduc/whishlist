@@ -1,3 +1,4 @@
+import "server-only";
 import { isApiKeyToken } from "../../auth/api-keys";
 import type { User } from "../../domain/types";
 import { apiKeyUser, bearerFrom } from "../api/auth";

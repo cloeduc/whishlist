@@ -28,12 +28,11 @@ RUN apt-get update \
   && mkdir -p /data \
   && chown nextjs:nodejs /data
 
-COPY --from=builder /app/public ./public
+# The standalone server, completed by `postbuild` (scripts/prepare-standalone.mjs) with public/,
+# .next/static/, drizzle/ (migrations applied when the database opens) and data/seed.json.
+# `npm start` runs the same folder.
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/data/seed.json ./data/seed.json
-# Migrations applied when the database opens; hot backup (deploy/backup-whishlist.sh).
-COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+# Hot backup (deploy/backup-whishlist.sh).
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/db-backup.mjs ./scripts/db-backup.mjs
 
 USER nextjs

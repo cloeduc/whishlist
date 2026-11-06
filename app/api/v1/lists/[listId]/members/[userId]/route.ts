@@ -3,7 +3,6 @@ import { apiError, apiNoContent, apiPreflight, withApi } from "@/src/server/api/
 import { removeMember } from "@/src/server/commands/sharing";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const DELETE = withApi<{ listId: string; userId: string }>(async (api, { listId, userId }) => {
   const result = await removeMember(await commandContext(api), { wishlistId: listId, userId });

@@ -1,3 +1,4 @@
+import "server-only";
 import { headers } from "next/headers";
 
 type Bucket = { count: number; resetAt: number };

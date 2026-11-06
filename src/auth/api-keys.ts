@@ -1,3 +1,4 @@
+import "server-only";
 import { addApiKey, findApiKeyByHash, type ApiKeyView } from "../domain/api-keys";
 import { hashSecretToken, newSecretToken } from "../domain/tokens";
 import type { ApiKey, Database, User } from "../domain/types";

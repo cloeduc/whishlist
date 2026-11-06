@@ -1,3 +1,4 @@
+import "server-only";
 import { cookies, headers } from "next/headers";
 import { cache } from "react";
 import { originFromEnv, originFromHeaders } from "./origin";

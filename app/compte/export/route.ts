@@ -6,7 +6,6 @@ import { exportOwnAccount } from "@/src/server/commands/account";
 import { isRateLimitError } from "@/src/server/rate-limit";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** Same document as `GET /api/v1/me/export`, with the site's session cookie. */
 export async function GET() {

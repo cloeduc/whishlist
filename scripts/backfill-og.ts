@@ -1,3 +1,4 @@
+// Fills in missing idea images: `WISHLIST_DATA_PATH=… node --conditions=react-server --import tsx scripts/backfill-og.ts`.
 import { fetchOgImage } from "../src/domain/og-image";
 import { closeStore, readDocument, updateDocument } from "../src/store/db";
 

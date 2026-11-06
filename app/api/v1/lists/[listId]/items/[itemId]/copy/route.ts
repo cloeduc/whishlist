@@ -4,7 +4,6 @@ import { toMemberItem } from "@/src/server/api/views";
 import { copyItem } from "@/src/server/commands/items";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** `{ targetListId, typeId, personId, id? }`: copy of the idea, without its reservation. */
 export const POST = withApi<{ listId: string; itemId: string }>(async (api, { listId, itemId }) => {

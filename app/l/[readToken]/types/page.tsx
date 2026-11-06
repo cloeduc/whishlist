@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { getTranslations } from "@/src/i18n/server";
 
-export const dynamic = "force-dynamic";
-
 export default async function TypesPage({ params }: { params: Promise<{ readToken: string }> }) {
   const { readToken } = await params;
   const [t, doc, user] = await Promise.all([getTranslations("public"), getDocument(), currentUser()]);

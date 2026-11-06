@@ -8,7 +8,6 @@ import {
 import { siteOrigin } from "@/src/site/seo";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 const MAX_BODY = 8 * 1024;
 

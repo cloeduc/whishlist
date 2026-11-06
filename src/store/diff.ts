@@ -1,3 +1,4 @@
+import "server-only";
 import type { Database } from "../domain/types";
 import { COLLECTION_NAMES, COLLECTIONS, sameRow, type CollectionName, type RowOf, type StoreDb } from "./rows";
 

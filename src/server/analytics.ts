@@ -1,3 +1,4 @@
+import "server-only";
 import { analyticsTargetAllowed } from "@/src/site/analytics-public";
 
 const WEBSITE_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

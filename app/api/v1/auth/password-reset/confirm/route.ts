@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/
 import { resetPasswordWithLink } from "@/src/server/commands/auth";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** New password from the link received by email, opened in the app (011). With `signIn`, returns a session. */
 export const POST = withApi(async (api) => {

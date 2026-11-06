@@ -1,3 +1,4 @@
+import "server-only";
 import type { ItemFields } from "../commands/items";
 import { text, type JsonBody } from "./http";
 

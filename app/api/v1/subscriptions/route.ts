@@ -4,7 +4,6 @@ import { apiError, apiJson, apiPreflight, optionalText, readJsonBody, text, with
 import { subscribeToList } from "@/src/server/commands/public-list";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 export const POST = withApi(async (api) => {
   const body = await readJsonBody(api.req);

@@ -3,7 +3,6 @@ import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/
 import { changeOwnPassword } from "@/src/server/commands/auth";
 
 export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
 
 /** Expires all of the account's sessions, then returns a new token to this client. */
 export const POST = withApi(async (api) => {

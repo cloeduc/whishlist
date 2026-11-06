@@ -16,30 +16,26 @@ import {
   leaveAction,
   regenerateInviteAction,
   removeMemberAction,
-  sendInviteAction,
   setItemArchivedFormAction,
-  setReadPasswordAction,
 } from "../../../src/server/actions";
-import { hasReadPassword, MIN_READ_PASSWORD_LENGTH } from "../../../src/domain/read-password";
+import { hasReadPassword } from "../../../src/domain/read-password";
 import { resolveTheme } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { AppearanceForm } from "@/components/site/appearance-form";
 import { ConfirmForm } from "@/components/site/confirm-form";
 import { CopyLinkField } from "@/components/site/copy-link-field";
+import { InviteEmailForm } from "@/components/site/invite-email-form";
 import { LiveGiftMark } from "@/components/site/live-gift-mark";
+import { ReadPasswordForm } from "@/components/site/read-password-form";
 import { WishlistThemeScope } from "@/components/site/wishlist-theme-scope";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { intlLocale } from "@/src/i18n/config";
 import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import { withLocale } from "@/src/i18n/locale-path";
-
-export const dynamic = "force-dynamic";
 
 const TAB_IDS = ["idees", "archives", "reservations", "partage", "reglages"] as const;
 type TabId = (typeof TAB_IDS)[number];
@@ -353,24 +349,7 @@ export default async function EditListPage({
               <CardDescription>{t("share.inviteEmailDescription")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
-              <form action={sendInviteAction}>
-                <FieldGroup>
-                  <input type="hidden" name="wishlistId" value={id} />
-                  <input type="hidden" name="onglet" value="partage" />
-                  <Field>
-                    <FieldLabel htmlFor="invite-email">{t("share.inviteEmail")}</FieldLabel>
-                    <Input
-                      id="invite-email"
-                      name="email"
-                      type="email"
-                      required
-                      autoComplete="email"
-                      placeholder="prenom@exemple.fr"
-                    />
-                  </Field>
-                  <Button type="submit">{t("share.sendInvite")}</Button>
-                </FieldGroup>
-              </form>
+              <InviteEmailForm wishlistId={id} />
               {membership.role === "owner" ? (
                 <div className="flex flex-col gap-2">
                   <ConfirmForm
@@ -399,27 +378,7 @@ export default async function EditListPage({
                 <p className="text-sm font-medium">
                   {hasReadPassword(list) ? t("share.readPasswordSet") : t("share.readPasswordUnset")}
                 </p>
-                <form action={setReadPasswordAction}>
-                  <FieldGroup>
-                    <input type="hidden" name="wishlistId" value={id} />
-                    <input type="hidden" name="onglet" value="partage" />
-                    <p className="text-sm font-medium">
-                      {hasReadPassword(list) ? t("share.readPasswordChange") : t("share.readPasswordDefine")}
-                    </p>
-                    <Field>
-                      <FieldLabel htmlFor="read-password">{t("share.readPasswordLabel")}</FieldLabel>
-                      <Input
-                        id="read-password"
-                        name="password"
-                        type="password"
-                        required
-                        minLength={MIN_READ_PASSWORD_LENGTH}
-                        autoComplete="new-password"
-                      />
-                    </Field>
-                    <Button type="submit">{t("share.readPasswordSave")}</Button>
-                  </FieldGroup>
-                </form>
+                <ReadPasswordForm wishlistId={id} hasPassword={hasReadPassword(list)} />
                 {hasReadPassword(list) ? (
                   <ConfirmForm
                     title={t("confirm.clearPasswordTitle")}

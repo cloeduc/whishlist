@@ -1,3 +1,4 @@
+import "server-only";
 import { currentUser, origin } from "../auth/current";
 import { getLocale } from "../i18n/server";
 import type { CommandContext } from "./commands/context";

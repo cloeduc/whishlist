@@ -1,3 +1,4 @@
+import "server-only";
 import type { NextRequest } from "next/server";
 import { findApiKey, isApiKeyToken } from "../../auth/api-keys";
 import { touchApiKey } from "../../domain/api-keys";

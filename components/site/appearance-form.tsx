@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { GiftMark } from "@/components/site/gift-mark";
 import { useWishlistTheme } from "@/components/site/wishlist-theme-scope";
@@ -14,6 +14,7 @@ import {
   type WishlistTheme,
 } from "@/src/domain/theme";
 import { updateWishlistSettingsAction } from "@/src/server/actions";
+import { FormRefusal } from "@/components/site/form-refusal";
 
 type Props = {
   wishlistId: string;
@@ -30,7 +31,9 @@ export function AppearanceForm({
   coverImageUrl,
   theme: initialTheme,
 }: Props) {
-  const { t } = useTranslation("list");
+  const { t } = useTranslation(["list", "errors"]);
+  // Fields are controlled: a refusal keeps the drafts (no `key` reset).
+  const [state, formAction, pending] = useActionState(updateWishlistSettingsAction, null);
   const { setTheme: setLiveTheme } = useWishlistTheme();
   const [draftTitle, setDraftTitle] = useState(title);
   const [draftSubtitle, setDraftSubtitle] = useState(subtitle ?? "");
@@ -41,7 +44,8 @@ export function AppearanceForm({
     source.title !== title ||
     source.subtitle !== subtitle ||
     source.coverImageUrl !== coverImageUrl ||
-    source.initialTheme !== initialTheme
+    // By value: the page sends a new theme object on each refresh (a refused save refreshes it too).
+    JSON.stringify(source.initialTheme) !== JSON.stringify(initialTheme)
   ) {
     setSource({ title, subtitle, coverImageUrl, initialTheme });
     setDraftTitle(title);
@@ -63,12 +67,12 @@ export function AppearanceForm({
   function resetColors() {
     setColors(DEFAULT_WISHLIST_THEME);
   }
-
   return (
-    <form action={updateWishlistSettingsAction} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="wishlistId" value={wishlistId} />
       <input type="hidden" name="onglet" value="reglages" />
       <FieldGroup>
+        <FormRefusal code={state?.error} />
         <Field>
           <FieldLabel htmlFor="list-title">{t("settings.listTitle")}</FieldLabel>
           <Input
@@ -155,7 +159,9 @@ export function AppearanceForm({
           </div>
         </Field>
       </FieldGroup>
-      <Button type="submit">{t("settings.saveAppearance")}</Button>
+      <Button type="submit" disabled={pending}>
+        {t("settings.saveAppearance")}
+      </Button>
     </form>
   );
 }

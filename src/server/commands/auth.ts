@@ -1,3 +1,4 @@
+import "server-only";
 import { issueApiSession, pruneApiSessions, revokeApiSession } from "../../auth/api-session";
 import { pendingEmailChange } from "../../domain/email-confirmation";
 import { createPasswordReset, resetPasswordWithToken } from "../../domain/password-reset";

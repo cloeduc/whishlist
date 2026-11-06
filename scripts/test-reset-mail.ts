@@ -1,3 +1,4 @@
+// Sends a test password reset email: `node --conditions=react-server --import tsx scripts/test-reset-mail.ts`.
 import { readFileSync } from "node:fs";
 import { mailConfigured, sendPasswordResetMail } from "../src/server/mail";
 

@@ -1,3 +1,4 @@
+import "server-only";
 import { canAccessPublicListWith } from "../../auth/public-list";
 import { READ_UNLOCK_TTL_SEC, signReadUnlock } from "../../auth/read-unlock";
 import { signReservationClaim } from "../../auth/reservation-claim";
