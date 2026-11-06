@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { loginAction } from "@/src/server/actions";
 import { FormRefusal } from "@/components/site/form-refusal";
 
@@ -24,7 +25,7 @@ export function LoginForm({ next, notice, footer }: { next: string; notice: Reac
         </Field>
         <Field>
           <FieldLabel htmlFor="password">{t("login.password")}</FieldLabel>
-          <Input id="password" name="password" type="password" required autoComplete="current-password" />
+          <PasswordInput id="password" name="password" required autoComplete="current-password" />
         </Field>
         <Button type="submit" disabled={pending}>
           {t("login.submit")}

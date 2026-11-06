@@ -39,16 +39,16 @@ Aucune tâche bloquante : les composants naissent dans l'US1 et s'enrichissent d
 
 ### Tests for User Story 1
 
-- [ ] T001 [P] [US1] Test de rendu serveur du `PasswordInput` du site dans `tests/domain/password-input.test.ts` (`react-dom/server`) : `type="password"`, `autocapitalize="none"`, `autocorrect="off"`, `spellcheck="false"`, `autoComplete` reçu conservé, un `type` passé par l'appelant ignoré
-- [ ] T002 [P] [US1] Tests du `PasswordInput` de l'app dans `mobile/__tests__/ui/password-input.test.tsx` : `secureTextEntry`, `autoCapitalize="none"`, `autoCorrect={false}`, `spellCheck={false}`, `testID` / `accessibilityLabel` / `autoComplete` / `textContentType` transmis au `TextInput`, même boîte que `Input` (bordure, ombre)
+- [X] T001 [P] [US1] Test de rendu serveur du `PasswordInput` du site dans `tests/domain/password-input.test.ts` (`react-dom/server`) : `type="password"`, `autocapitalize="none"`, `autocorrect="off"`, `spellcheck="false"`, `autoComplete` reçu conservé, un `type` passé par l'appelant ignoré
+- [X] T002 [P] [US1] Tests du `PasswordInput` de l'app dans `mobile/__tests__/ui/password-input.test.tsx` : `secureTextEntry`, `autoCapitalize="none"`, `autoCorrect={false}`, `spellCheck={false}`, `testID` / `accessibilityLabel` / `autoComplete` / `textContentType` transmis au `TextInput`, même boîte que `Input` (bordure, ombre)
 
 ### Implementation for User Story 1
 
-- [ ] T003 [P] [US1] Créer `components/ui/password-input.tsx` (`"use client"`) : `PasswordInput`, props d'`Input` sans `type`, rend `Input` avec `type="password"`, `autoCapitalize="none"`, `autoCorrect="off"`, `spellCheck={false}` (contract `contracts/password-input.md`)
-- [ ] T004 [US1] Remplacer les champs mot de passe du site par `PasswordInput`, `autoComplete` inchangé : `components/site/login-form.tsx`, `register-form.tsx`, `reset-password-form.tsx`, `password-form.tsx` (3 champs), `email-change-form.tsx`, `delete-account-dialog.tsx`, `read-password-form.tsx`, `read-unlock-form.tsx`
-- [ ] T005 [P] [US1] Créer `mobile/src/ui/PasswordInput.tsx` : props d'`Input` sans `secureTextEntry`, `autoCapitalize`, `autoCorrect`, `spellCheck`, qu'il fixe (`secureTextEntry`, `"none"`, `false`, `false`)
-- [ ] T006 [US1] Remplacer les 10 champs de l'app par `PasswordInput`, testID, `accessibilityLabel`, `autoComplete`, `textContentType`, `editable`, `invalid` inchangés : `mobile/app/(auth)/login.tsx`, `mobile/app/(auth)/register.tsx`, `mobile/app/links/reset-password/[token].tsx`, `mobile/src/features/account/PasswordForm.tsx` (3), `mobile/src/features/account/EmailCard.tsx`, `mobile/app/(app)/delete-account.tsx`, `mobile/app/guest/[readToken]/index.tsx`, `mobile/app/(app)/shared/follow.tsx`
-- [ ] T007 [US1] Vérifier que les tests d'écrans existants (`mobile/__tests__/screens/*.test.tsx`) passent sans changement de testID
+- [X] T003 [P] [US1] Créer `components/ui/password-input.tsx` (`"use client"`) : `PasswordInput`, props d'`Input` sans `type`, rend `Input` avec `type="password"`, `autoCapitalize="none"`, `autoCorrect="off"`, `spellCheck={false}` (contract `contracts/password-input.md`)
+- [X] T004 [US1] Remplacer les champs mot de passe du site par `PasswordInput`, `autoComplete` inchangé : `components/site/login-form.tsx`, `register-form.tsx`, `reset-password-form.tsx`, `password-form.tsx` (3 champs), `email-change-form.tsx`, `delete-account-dialog.tsx`, `read-password-form.tsx`, `read-unlock-form.tsx`
+- [X] T005 [P] [US1] Créer `mobile/src/ui/PasswordInput.tsx` : props d'`Input` sans `secureTextEntry`, `autoCapitalize`, `autoCorrect`, `spellCheck`, qu'il fixe (`secureTextEntry`, `"none"`, `false`, `false`)
+- [X] T006 [US1] Remplacer les 10 champs de l'app par `PasswordInput`, testID, `accessibilityLabel`, `autoComplete`, `textContentType`, `editable`, `invalid` inchangés : `mobile/app/(auth)/login.tsx`, `mobile/app/(auth)/register.tsx`, `mobile/app/links/reset-password/[token].tsx`, `mobile/src/features/account/PasswordForm.tsx` (3), `mobile/src/features/account/EmailCard.tsx`, `mobile/app/(app)/delete-account.tsx`, `mobile/app/guest/[readToken]/index.tsx`, `mobile/app/(app)/shared/follow.tsx`
+- [X] T007 [US1] Vérifier que les tests d'écrans existants (`mobile/__tests__/screens/*.test.tsx`) passent sans changement de testID
 - [ ] T008 [US1] Commit de la story : contrôles verts, puis `feat: password fields without auto-capitalisation or auto-correction (US1)`, sans demander
 
 **Checkpoint**: US1 livrable seule (pas encore d'œil).

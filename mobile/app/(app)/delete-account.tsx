@@ -14,7 +14,7 @@ import { BackLink } from "@/ui/BackLink";
 import { Button } from "@/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card";
 import { Field } from "@/ui/Field";
-import { Input } from "@/ui/Input";
+import { PasswordInput } from "@/ui/PasswordInput";
 import { NetworkNote } from "@/ui/NetworkNote";
 import { PageTitle } from "@/ui/PageTitle";
 import { Screen } from "@/ui/Screen";
@@ -150,12 +150,11 @@ export default function DeleteAccount() {
           <Card>
             <CardContent>
               <Field label={t("auth:account.deletePassword")} error={remove.error} errorTestID="delete-account.error">
-                <Input
+                <PasswordInput
                   testID="delete-account.password"
                   accessibilityLabel={t("auth:account.deletePassword")}
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
                   autoComplete="current-password"
                   textContentType="password"
                   invalid={Boolean(remove.error)}

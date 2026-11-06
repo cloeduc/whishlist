@@ -4,7 +4,7 @@ import { useActionState, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { changePasswordAction } from "@/src/server/actions";
 import { FormRefusal } from "@/components/site/form-refusal";
@@ -28,15 +28,14 @@ export function PasswordForm({ forced, notice }: { forced: boolean; notice: Reac
         {!forced ? (
           <Field>
             <FieldLabel htmlFor="currentPassword">{t("changePassword.current")}</FieldLabel>
-            <Input id="currentPassword" name="currentPassword" type="password" required autoComplete="current-password" />
+            <PasswordInput id="currentPassword" name="currentPassword" required autoComplete="current-password" />
           </Field>
         ) : null}
         <Field>
           <FieldLabel htmlFor="password">{t("changePassword.next")}</FieldLabel>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"
@@ -45,10 +44,9 @@ export function PasswordForm({ forced, notice }: { forced: boolean; notice: Reac
         </Field>
         <Field>
           <FieldLabel htmlFor="confirm">{t("changePassword.confirm")}</FieldLabel>
-          <Input
+          <PasswordInput
             id="confirm"
             name="confirm"
-            type="password"
             required
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"

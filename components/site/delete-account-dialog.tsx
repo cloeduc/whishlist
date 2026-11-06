@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import type { AccountDeletionPreview } from "@/src/domain/account";
 import { deleteAccountAction } from "@/src/server/actions";
 
@@ -90,7 +90,7 @@ export function DeleteAccountDialog({ preview }: { preview: AccountDeletionPrevi
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="delete-password">{t("account.deletePassword")}</FieldLabel>
-              <Input id="delete-password" name="password" type="password" required autoComplete="current-password" />
+              <PasswordInput id="delete-password" name="password" required autoComplete="current-password" />
             </Field>
             <DialogFooter>
               <DialogClose render={<Button type="button" variant="outline" />}>{t("account.deleteCancel")}</DialogClose>

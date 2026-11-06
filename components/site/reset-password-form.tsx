@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { MIN_PASSWORD_LENGTH } from "@/src/domain/passwords";
 import { resetPasswordAction } from "@/src/server/actions";
 import { FormRefusal } from "@/components/site/form-refusal";
@@ -26,10 +26,9 @@ export function ResetPasswordForm({ token }: { token: string }) {
         <FormRefusal message={error} />
         <Field>
           <FieldLabel htmlFor="password">{t("reset.password")}</FieldLabel>
-          <Input
+          <PasswordInput
             id="password"
             name="password"
-            type="password"
             required
             minLength={MIN_PASSWORD_LENGTH}
             autoComplete="new-password"

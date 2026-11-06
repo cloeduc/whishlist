@@ -10,6 +10,7 @@ import { Button } from "@/ui/Button";
 import { CollapsibleCard } from "@/ui/Card";
 import { Field } from "@/ui/Field";
 import { Input } from "@/ui/Input";
+import { PasswordInput } from "@/ui/PasswordInput";
 import { NetworkNote } from "@/ui/NetworkNote";
 import { Text } from "@/ui/Text";
 
@@ -76,13 +77,12 @@ export function EmailCard() {
         />
       </Field>
       <Field label={t("account.emailChange.currentPassword")}>
-        <Input
+        <PasswordInput
           testID="account.email-password"
           accessibilityLabel={t("account.emailChange.currentPassword")}
           value={password}
           onChangeText={setPassword}
           editable={online}
-          secureTextEntry
           autoComplete="current-password"
         />
       </Field>

@@ -22,7 +22,7 @@ import { Button } from "@/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import { Empty } from "@/ui/Empty";
 import { Field } from "@/ui/Field";
-import { Input } from "@/ui/Input";
+import { PasswordInput } from "@/ui/PasswordInput";
 import { NetworkNote } from "@/ui/NetworkNote";
 import { OfflineBanner } from "@/ui/OfflineBanner";
 import { PillTabs } from "@/ui/PillTabs";
@@ -128,12 +128,11 @@ function Unlock({ readToken, onUnlocked }: { readToken: string; onUnlocked: () =
         </CardHeader>
         <CardContent>
           <Field label={t("unlock.password")} description={t("unlock.passwordHint")}>
-            <Input
+            <PasswordInput
               testID="guest.password"
               accessibilityLabel={t("unlock.password")}
               value={password}
               onChangeText={setPassword}
-              secureTextEntry
               autoComplete="off"
             />
           </Field>
