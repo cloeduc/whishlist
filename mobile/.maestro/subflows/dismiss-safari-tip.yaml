@@ -1,0 +1,13 @@
+# Closes Safari's tip if it is showing. On a fresh Safari (erased simulator), iOS 26 shows a tip
+# (« Afficher les signets, le menu Partager et les onglets ouverts ») shortly after the first page loads.
+# While it is open, the page is out of Maestro's reach and a tap only closes the tip.
+# Its identifiers do not depend on the language. Does nothing once the tip has been seen.
+appId: com.apple.mobilesafari
+---
+- runFlow:
+    when:
+      visible:
+        id: TipView
+    commands:
+      - tapOn:
+          id: xmark.circle.fill

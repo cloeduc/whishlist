@@ -11,12 +11,28 @@ appId: app.ohyoushouldnt.mobile
           env:
             TO: ${TO}
 - openLink: ${output.confirmUrl}
-- extendedWaitUntil:
-    visible: ${output.t.auth.confirmEmail.submit}
-    timeout: 20000
-- tapOn: ${output.t.auth.confirmEmail.submit}
-- extendedWaitUntil:
-    visible: ${DONE}
-    timeout: 20000
+# Safari's first-launch tip (see dismiss-safari-tip.yaml) can open at any point after the page loads and
+# hide it. Waiting for the page: each attempt closes the tip, then waits for « Confirmer ».
+- retry:
+    maxRetries: 2
+    commands:
+      - runFlow: dismiss-safari-tip.yaml
+      - extendedWaitUntil:
+          visible: ${output.t.auth.confirmEmail.submit}
+          timeout: 20000
+# Confirming: each attempt closes the tip, taps « Confirmer » if it is still there (a confirmed address no
+# longer shows it), then waits for DONE.
+- retry:
+    maxRetries: 2
+    commands:
+      - runFlow: dismiss-safari-tip.yaml
+      - runFlow:
+          when:
+            visible: ${output.t.auth.confirmEmail.submit}
+          commands:
+            - tapOn: ${output.t.auth.confirmEmail.submit}
+      - extendedWaitUntil:
+          visible: ${DONE}
+          timeout: 20000
 - launchApp:
     stopApp: false
