@@ -1,0 +1,10 @@
+# From a list screen: back to « Mes listes », then logs out (logout.yaml).
+appId: app.ohyoushouldnt.mobile
+---
+- scrollUntilVisible:
+    element:
+      id: back-link.back
+    direction: UP
+- tapOn:
+    id: back-link.back
+- runFlow: logout.yaml

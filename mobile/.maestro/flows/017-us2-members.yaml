@@ -1,0 +1,131 @@
+# 017 US2: members of a list made by the flow (never the demo list). Account B joins through the
+# emailed invitation, leaves, joins again; owner A sees B as « Membre », removes B, then, alone,
+# cannot leave (aloneMustDelete).
+appId: app.ohyoushouldnt.mobile
+name: "017 US2 — See members, remove a member, leave a list"
+tags:
+  - 017-us2
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+
+# Account B first, to know its address; then account A creates the list and invites B.
+- runFlow: ../subflows/register.yaml
+- evalScript: ${output.emailB = output.email; output.nameB = 'E2E ' + output.unique}
+- runFlow: ../subflows/logout.yaml
+- runFlow: ../subflows/register.yaml
+- evalScript: ${output.emailA = output.email; output.listTitle = 'Membres ' + output.unique}
+- runFlow:
+    file: ../subflows/create-list.yaml
+    env:
+      TITLE: ${output.listTitle}
+- tapOn:
+    id: tab-partage
+- scrollUntilVisible:
+    element:
+      id: share.send-invite
+- tapOn:
+    id: share.invite-email
+- inputText: ${output.emailB}
+- hideKeyboard
+- tapOn:
+    id: share.send-invite
+- scrollUntilVisible:
+    element:
+      id: share.invite-sent
+    timeout: 10000
+    direction: UP
+- runFlow: ../subflows/back-and-logout.yaml
+
+# B joins, then leaves: back to « Mes listes », without the list.
+- runFlow:
+    file: ../subflows/submit-login.yaml
+    env:
+      EMAIL: ${output.emailB}
+      PASSWORD: ${MAESTRO_DEMO_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 20000
+- runFlow:
+    file: ../subflows/open-mail-link.yaml
+    env:
+      TO: ${output.emailB}
+      KIND: inviter
+- extendedWaitUntil:
+    visible:
+      id: invite.join
+    timeout: 20000
+- tapOn:
+    id: invite.join
+- extendedWaitUntil:
+    visible:
+      id: list.screen
+    timeout: 20000
+- tapOn:
+    id: tab-partage
+- scrollUntilVisible:
+    element:
+      id: share.leave
+- tapOn:
+    id: share.leave
+- tapOn:
+    id: share.leave-confirm
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 20000
+- assertNotVisible: ${output.listTitle}
+
+# B joins again with the same link, then logs out.
+- runFlow:
+    file: ../subflows/open-mail-link.yaml
+    env:
+      TO: ${output.emailB}
+      KIND: inviter
+- tapOn:
+    id: invite.join
+- extendedWaitUntil:
+    visible:
+      id: list.screen
+    timeout: 20000
+- runFlow: ../subflows/back-and-logout.yaml
+
+# A sees B as « Membre » and removes B.
+- runFlow:
+    file: ../subflows/submit-login.yaml
+    env:
+      EMAIL: ${output.emailA}
+      PASSWORD: ${MAESTRO_DEMO_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 20000
+- tapOn: ${output.listTitle}
+- tapOn:
+    id: tab-partage
+- scrollUntilVisible:
+    element:
+      id: share.leave
+- assertVisible: ${output.nameB}.*
+- tapOn:
+    id: share\.remove-.*
+- tapOn:
+    id: share.remove-confirm
+- extendedWaitUntil:
+    notVisible: ${output.nameB}.*
+    timeout: 10000
+
+# Alone, A cannot leave: the server's refusal is shown.
+- scrollUntilVisible:
+    element:
+      id: share.leave
+- tapOn:
+    id: share.leave
+- tapOn:
+    id: share.leave-confirm
+- scrollUntilVisible:
+    element:
+      id: share.members-error
+    timeout: 10000
+    direction: UP

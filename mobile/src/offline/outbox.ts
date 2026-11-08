@@ -225,6 +225,13 @@ export async function discard(seq: number): Promise<void> {
   emit();
 }
 
+/** The list was left or deleted (017): none of its changes can be sent any more. */
+export async function discardList(listId: string): Promise<void> {
+  const db = await getDb();
+  await db.run("DELETE FROM outbox WHERE listId = ?", [listId]);
+  emit();
+}
+
 /** At startup: an interrupted send (app killed) goes back to pending; resending is safe (R5). */
 export async function resetSending(): Promise<void> {
   const db = await getDb();

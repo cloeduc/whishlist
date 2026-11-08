@@ -41,8 +41,14 @@
     "share": "Share",
     "message": "{{title}} — {{url}}",
     "passwordNotice": "This list is protected by a password. Give it to your friends and family along with the link.",
-    "manageOnSite": "Manage sharing on the website",
     "pendingList": "This list hasn't been sent yet. Its link will be available once you are back online."
+  },
+  "sharing": {
+    "shareInvite": "Send invitation link",
+    "inviteMessage": "Join me to manage the list \"{{title}}\": {{url}}",
+    "pendingLost_one": "{{count}} unsent change on this list will be lost.",
+    "pendingLost_other": "{{count}} unsent changes on this list will be lost.",
+    "offline": "You are offline: invitations, members and the password can be managed once you are back online."
   },
   "incoming": {
     "title": "Add to a list",

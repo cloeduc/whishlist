@@ -1,4 +1,4 @@
-# 005 US4: QR code, public link (never the invite link), copy confirmed, share sheet opened.
+# 005 US4: QR code, public link (never the invite link in its field), copy confirmed, share sheet opened.
 # Scanning the QR code and what the share sheet receives stay manual (exclusions.md).
 appId: app.ohyoushouldnt.mobile
 name: "005 US4 — Share a list publicly"
@@ -24,7 +24,10 @@ tags:
 - assertVisible:
     id: share.read-link
     text: .*/l/demo-list-lecture.*
-- assertNotVisible: .*demo-list-invitation.*
+# The invite link has its own card (017): it is never in the public link field.
+- assertNotVisible:
+    id: share.read-link
+    text: .*demo-list-invitation.*
 
 - scrollUntilVisible:
     element:

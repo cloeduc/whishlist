@@ -41,8 +41,14 @@
     "share": "Partager",
     "message": "{{title}} — {{url}}",
     "passwordNotice": "Cette liste est protégée par un mot de passe. Communiquez-le à vos proches en plus du lien.",
-    "manageOnSite": "Gérer le partage sur le site",
     "pendingList": "Cette liste n'a pas encore été envoyée. Son lien sera disponible dès que le réseau sera revenu."
+  },
+  "sharing": {
+    "shareInvite": "Envoyer le lien d'invitation",
+    "inviteMessage": "Rejoignez-moi pour gérer la liste « {{title}} » : {{url}}",
+    "pendingLost_one": "{{count}} changement pas encore envoyé sur cette liste sera perdu.",
+    "pendingLost_other": "{{count}} changements pas encore envoyés sur cette liste seront perdus.",
+    "offline": "Vous êtes hors ligne : les invitations, les membres et le mot de passe se gèrent quand le réseau est revenu."
   },
   "incoming": {
     "title": "Ajouter à une liste",

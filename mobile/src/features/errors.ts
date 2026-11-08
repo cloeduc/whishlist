@@ -12,20 +12,22 @@ export function errorText(error: unknown): string {
 
 /**
  * Action that requires the server (sign-in, account, settings…): busy during the call,
- * and its translated error kept to show it below the form, fields kept (FR-014).
+ * and its translated error kept to show it below the form, fields kept (FR-014). `code` is the
+ * server's error code, for a screen that offers something after a given refusal.
  */
 export function useServerAction<A extends unknown[]>(action: (...args: A) => Promise<void>) {
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [failure, setFailure] = useState<{ text: string; code: string | null } | null>(null);
+  const setError = useCallback((text: string | null) => setFailure(text === null ? null : { text, code: null }), []);
   const run = useCallback(
     async (...args: A): Promise<boolean> => {
       setBusy(true);
-      setError(null);
+      setFailure(null);
       try {
         await action(...args);
         return true;
       } catch (caught) {
-        setError(errorText(caught));
+        setFailure({ text: errorText(caught), code: caught instanceof ApiError ? caught.code : null });
         return false;
       } finally {
         setBusy(false);
@@ -33,5 +35,5 @@ export function useServerAction<A extends unknown[]>(action: (...args: A) => Pro
     },
     [action],
   );
-  return { busy, error, setError, run };
+  return { busy, error: failure?.text ?? null, code: failure?.code ?? null, setError, run };
 }

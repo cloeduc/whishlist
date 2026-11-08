@@ -1,5 +1,6 @@
 import {
   discard,
+  discardList,
   enqueue,
   listChanges,
   markSending,
@@ -174,4 +175,14 @@ test("an idea never sent, then moved, then deleted: nothing is left to send", as
   await enqueue(moveItem("a"));
   await enqueue({ kind: "deleteItem", listId: "w2", targetId: "a", payload: {} });
   expect(await listChanges()).toEqual([]);
+});
+
+test("discardList removes every change of the list, and only those (017)", async () => {
+  await enqueue(createItem("a", "w"));
+  await enqueue(createItem("b", "other-list"));
+  await enqueue(updateItem("a", "Lego"));
+  await discardList("w");
+  expect((await listChanges()).map((change) => change.targetId)).toEqual(["b"]);
+  await discardList("no-change-list");
+  expect((await listChanges()).map((change) => change.targetId)).toEqual(["b"]);
 });

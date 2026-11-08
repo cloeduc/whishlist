@@ -1,0 +1,12 @@
+# Opens a web link of the site (URL) in the app, through the ohyoushouldnt:// scheme, and accepts
+# iOS's « Ouvrir » prompt when it asks to open the link in the app.
+appId: app.ohyoushouldnt.mobile
+---
+- runScript:
+    file: ../scripts/app-link.js
+    env:
+      URL: ${URL}
+- openLink: ${output.appLink}
+- tapOn:
+    text: Ouvrir|Open
+    optional: true

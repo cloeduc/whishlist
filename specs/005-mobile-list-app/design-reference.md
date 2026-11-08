@@ -85,8 +85,8 @@ Le site affiche en haut : cadeau encadré + « Oh, mais fallait pas ! » (EN : �
 | Liste – Idées | `06-liste-idees.png` | cadeau + titre, bouton « Voir la liste partagée », pastilles d'onglets, carte « Ajouter une idée cadeau », catégories en accordéon |
 | Liste – Archives | `07-liste-archives.png` | idées archivées en cartes |
 | Liste – Réservations | `08-liste-reservations.png` | réservations avec offreur et petit mot |
-| Liste – Partage | `09-liste-partage.png` | carte « Partager avec vos proches » avec champ lien + copier ; **ajout de l'app** : QR code et bouton de partage du téléphone dans cette carte, au même style |
-| Liste – Réglages | `10-liste-reglages.png` | catégories et « qui » en pastilles éditables |
+| Liste – Partage | `09-liste-partage.png` | titre et description de l'onglet, puis les cartes du site dans le même ordre (feature 017) : « Partager avec vos proches » avec champ lien + copier, « Gérer la liste à plusieurs », « Inviter par e-mail » (avec « Remplacer le lien d'invitation » pour le propriétaire), « Protéger l'accès à votre liste » (propriétaire), « Gérer les membres » ; **ajouts de l'app** : QR code et bouton de partage du téléphone dans la première carte, bouton « Envoyer le lien d'invitation » dans la deuxième, au même style |
+| Liste – Réglages | `10-liste-reglages.png` | catégories et « qui » en pastilles éditables ; carte « Supprimer la liste » du propriétaire (feature 017) |
 | Mon compte | `11-compte.png` | cartes nom affiché et mot de passe ; en bas (feature 006), carte « Vos données et informations », « Se déconnecter », puis « Supprimer mon compte » en rouge |
 | Supprimer mon compte (feature 006) | `11-compte.png` | mêmes cartes, champ mot de passe et bouton rouge pleine largeur que la carte « Supprimer mon compte » du site |
 | Page publique (ouverte par le lien partagé) | `12-liste-publique.png` | reste sur le site ; sert de référence pour le thème de liste |
@@ -113,7 +113,6 @@ Relevés en comparant l'app sur simulateur iOS (iPhone Air, compte de démo) aux
 | Liste, formulaires | Lien « Retour » à la place de l'en-tête du produit | Le site s'appuie sur le bouton retour du navigateur ; l'app en a besoin à l'écran. Même style que les liens du site |
 | Liste – Idées | Bouton « Ajouter une idée cadeau » qui ouvre le formulaire, au lieu de la carte-formulaire en tête | Sur un téléphone, le formulaire complet au-dessus des catégories repousse les idées très loin ; le formulaire ouvert est la même carte, mêmes champs et libellés |
 | Liste – Idées | Pas de poignée de glisser-déposer | Le site garde des flèches et un menu de catégorie pour les mêmes actions ; l'app n'utilise que ceux-là |
-| Liste – Partage | Seule la carte « Partager avec vos proches », avec QR code et bouton « Partager » ; lien « Gérer le partage sur le site » | Invitations, mot de passe de lecture et membres restent sur le site dans cette version (contracts/screens.md) |
-| Liste – Réglages | Seuls les blocs catégories et « qui » | Apparence et suppression de la liste restent sur le site dans cette version |
+| Liste – Réglages | Pas de carte d'apparence (thème, couverture) | L'apparence de la liste reste sur le site dans cette version ; la suppression est dans l'app depuis la feature 017 |
 | Mon compte | Pas de sous-titre ni de carte « Mes réservations » ; bouton « Se déconnecter » en bas | Les réservations faites avec le compte ne sont pas dans le périmètre de l'app ; sur le site, la déconnexion est dans la navigation du haut, que l'app n'a pas |
 | Chargement | Le cadeau se balance doucement | Indicateur propre à l'app ; immobile si le téléphone demande moins d'animations |

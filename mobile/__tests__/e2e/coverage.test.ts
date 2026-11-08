@@ -13,6 +13,7 @@ const specs = {
   "011": "specs/011-app-deep-links/spec.md",
   "012": "specs/012-list-subscriptions/spec.md",
   "016": "specs/016-password-field/spec.md",
+  "017": "specs/017-mobile-sharing/spec.md",
 };
 
 function storiesOf(feature: string, file: string): string[] {

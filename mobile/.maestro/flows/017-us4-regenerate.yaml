@@ -1,0 +1,58 @@
+# 017 US4: the owner of a list made by the flow replaces its invite link from the app;
+# the old link no longer lets another account join (invite.error).
+appId: app.ohyoushouldnt.mobile
+name: "017 US4 — Replace the invite link"
+tags:
+  - 017-us4
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runFlow: ../subflows/register.yaml
+- evalScript: ${output.listTitle = 'Lien ' + output.unique}
+- runFlow:
+    file: ../subflows/create-list.yaml
+    env:
+      TITLE: ${output.listTitle}
+- tapOn:
+    id: tab-partage
+- scrollUntilVisible:
+    element:
+      id: share.invite-link
+- copyTextFrom:
+    id: share.invite-link
+- evalScript: ${output.oldInvite = maestro.copiedText}
+
+# Replace, confirm: the field shows another link.
+- scrollUntilVisible:
+    element:
+      id: share.regenerate
+- tapOn:
+    id: share.regenerate
+- tapOn:
+    id: share.regenerate-confirm
+- scrollUntilVisible:
+    element:
+      id: share.invite-link
+    direction: UP
+- extendedWaitUntil:
+    notVisible:
+      id: share.invite-link
+      text: ${output.oldInvite}
+    timeout: 10000
+- copyTextFrom:
+    id: share.invite-link
+- assertTrue: ${maestro.copiedText != output.oldInvite}
+
+# Another account opens the old link: refused.
+- runFlow: ../subflows/back-and-logout.yaml
+- runFlow: ../subflows/register.yaml
+- runFlow:
+    file: ../subflows/open-app-link.yaml
+    env:
+      URL: ${output.oldInvite}
+- extendedWaitUntil:
+    visible:
+      id: invite.error
+    timeout: 20000
+- assertNotVisible:
+    id: invite.join

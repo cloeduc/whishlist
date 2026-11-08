@@ -4,7 +4,7 @@ import { AppState } from "react-native";
 import { api, ApiError, done, NetworkError, ok, type Schemas } from "@/api/client";
 import { currentLocale, intlLocale } from "@/i18n";
 import { viewList, viewLists, type ViewList, type ViewListSummary } from "@/offline/optimistic";
-import { createListBody, listChanges, onOutboxChange, resetSending, type Change } from "@/offline/outbox";
+import { createListBody, discardList, listChanges, onOutboxChange, resetSending, type Change } from "@/offline/outbox";
 import {
   getSnapshot,
   listKey,
@@ -92,7 +92,10 @@ export async function refreshLists(): Promise<void> {
   }
 }
 
-/** Reloads a list; a 404 removes it from the copy (data-model.md, « snapshot »). */
+/**
+ * Reloads a list. A 404 (list deleted, or the account no longer a member) removes it from the
+ * phone: its copy and its unsent changes, which the server would refuse anyway (017, research R3).
+ */
 export async function refreshList(listId: string): Promise<void> {
   // A list still waiting to be created does not exist on the server.
   if (state.changes.some((change) => change.kind === "createList" && change.targetId === listId)) return;
@@ -103,12 +106,24 @@ export async function refreshList(listId: string): Promise<void> {
     await loadList(listId);
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
+      await discardList(listId);
       await removeSnapshot(listKey(listId));
       update({ missing: { ...state.missing, [listId]: true }, list: { ...state.list, [listId]: null } });
       return;
     }
     if (!(error instanceof NetworkError || error instanceof ApiError)) throw error;
   }
+}
+
+/**
+ * The person left or deleted the list (017): its copy goes, without the « liste introuvable »
+ * message that a 404 brings, then « Mes listes » is reloaded.
+ */
+export async function forgetList(listId: string): Promise<void> {
+  await removeSnapshot(listKey(listId));
+  const { [listId]: _dropped, ...list } = state.list;
+  update({ list, missing: Object.fromEntries(Object.entries(state.missing).filter(([id]) => id !== listId)) });
+  await refreshLists();
 }
 
 /** Sends a change from the queue, route by route (contract 004 + api-v1-additions). */
@@ -269,6 +284,11 @@ export function useMemberList(listId: string): {
 /** Changes not yet accepted (offline banner, warning on sign-out). */
 export function usePendingCount(): number {
   return useStore().changes.filter((change) => change.state !== "rejected").length;
+}
+
+/** Changes of one list still on the phone, rejected ones included: lost if the list is left or deleted (017). */
+export function usePendingCountFor(listId: string): number {
+  return useStore().changes.filter((change) => change.listId === listId).length;
 }
 
 /** Date of the most recent copy shown (« dernière mise à jour à … » banner). */

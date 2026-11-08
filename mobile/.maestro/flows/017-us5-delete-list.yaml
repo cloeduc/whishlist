@@ -1,0 +1,60 @@
+# 017 US5: the owner deletes a list from the settings tab; alone in another list, leaving offers
+# the deletion instead. Both lists are made by the flow.
+appId: app.ohyoushouldnt.mobile
+name: "017 US5 — Delete a list"
+tags:
+  - 017-us5
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runFlow: ../subflows/register.yaml
+- evalScript: ${output.first = 'Supprimer ' + output.unique; output.second = 'Seule ' + output.unique}
+
+# From the settings tab.
+- runFlow:
+    file: ../subflows/create-list.yaml
+    env:
+      TITLE: ${output.first}
+- tapOn:
+    id: tab-reglages
+- scrollUntilVisible:
+    element:
+      id: settings.delete-list
+- tapOn:
+    id: settings.delete-list
+- tapOn:
+    id: settings.delete-confirm
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 20000
+- assertNotVisible: ${output.first}
+
+# Alone in the list: « Quitter » is refused and offers the deletion.
+- runFlow:
+    file: ../subflows/create-list.yaml
+    env:
+      TITLE: ${output.second}
+- tapOn:
+    id: tab-partage
+- scrollUntilVisible:
+    element:
+      id: share.leave
+- tapOn:
+    id: share.leave
+- tapOn:
+    id: share.leave-confirm
+- scrollUntilVisible:
+    element:
+      id: share.alone-delete
+    timeout: 10000
+    direction: UP
+- tapOn:
+    id: share.alone-delete
+- tapOn:
+    id: share.delete-confirm
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 20000
+- assertNotVisible: ${output.second}

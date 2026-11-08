@@ -1,0 +1,71 @@
+# 017 US1: a member (camille, not the owner) invites someone to manage the demo list from the app.
+# Invite link shown and copied, its own share sheet opened, invitation sent by email and found in MailDev.
+# Writes nothing in the demo list: the invited address is unique and never joins.
+appId: app.ohyoushouldnt.mobile
+name: "017 US1 — Invite someone to manage a list"
+tags:
+  - 017-us1
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/unique.js
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: camille@example.test
+- tapOn:
+    id: lists.card-demo-list
+- tapOn:
+    id: tab-partage
+
+# « Gérer la liste à plusieurs »: the invite link, copied.
+- scrollUntilVisible:
+    element:
+      id: share.copy-invite
+- assertVisible:
+    id: share.invite-link
+    text: .*/inviter/demo-list-invitation.*
+- tapOn:
+    id: share.copy-invite
+- scrollUntilVisible:
+    element:
+      id: share.invite-copied
+    timeout: 5000
+
+# Its own share button opens the system share sheet; we close it.
+- scrollUntilVisible:
+    element:
+      id: share.share-invite
+    direction: UP
+- tapOn:
+    id: share.share-invite
+- runFlow:
+    file: ../subflows/close-share-sheet.yaml
+- extendedWaitUntil:
+    visible:
+      id: share.share-invite
+    timeout: 10000
+
+# « Inviter par e-mail »: the email arrives in MailDev with the invite link.
+- scrollUntilVisible:
+    element:
+      id: share.send-invite
+- tapOn:
+    id: share.invite-email
+- inputText: invite-${output.unique}@example.test
+- hideKeyboard
+- tapOn:
+    id: share.send-invite
+- scrollUntilVisible:
+    element:
+      id: share.invite-sent
+    timeout: 10000
+    direction: UP
+- retry:
+    maxRetries: 3
+    commands:
+      - runScript:
+          file: ../scripts/maildev-link.js
+          env:
+            TO: invite-${output.unique}@example.test
+            KIND: inviter
+- assertTrue: ${output.link.indexOf('/inviter/demo-list-invitation') >= 0}

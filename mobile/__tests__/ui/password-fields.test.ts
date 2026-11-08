@@ -18,7 +18,7 @@ test("no field is masked outside PasswordInput", () => {
   expect(masked.map(({ file }) => file)).toEqual([]);
 });
 
-test("the 10 password fields of the spec use PasswordInput", () => {
+test("the 11 password fields (spec 016, plus the read password of 017) use PasswordInput", () => {
   const uses = sources().flatMap(({ file, source }) => [...source.matchAll(/<PasswordInput\b/g)].map(() => file));
   expect(uses.sort()).toEqual(
     [
@@ -32,6 +32,7 @@ test("the 10 password fields of the spec use PasswordInput", () => {
       "src/features/account/PasswordForm.tsx",
       "src/features/account/PasswordForm.tsx",
       "src/features/account/PasswordForm.tsx",
+      "src/features/sharing/ReadPasswordCard.tsx",
     ].sort(),
   );
 });

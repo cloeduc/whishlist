@@ -10,8 +10,7 @@ appId: app.ohyoushouldnt.mobile
           env:
             TO: ${TO}
             KIND: ${KIND}
-- runScript:
-    file: ../scripts/app-link.js
+- runFlow:
+    file: open-app-link.yaml
     env:
       URL: ${output.link}
-- openLink: ${output.appLink}

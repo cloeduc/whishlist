@@ -1,43 +1,40 @@
-import * as Clipboard from "expo-clipboard";
-import { CopyIcon } from "lucide-react-native";
-import { useState } from "react";
-import { Linking, Share, View } from "react-native";
+import { Share } from "react-native";
 import { useTranslation } from "react-i18next";
 
+import { AloneDeleteButton } from "@/features/lists/DeleteListCard";
 import { ListScreen } from "@/features/lists/ListScreen";
-import { currentLocale, withLocale } from "@/i18n";
+import { CopyLinkField } from "@/features/sharing/CopyLinkField";
+import { InviteCard } from "@/features/sharing/InviteCard";
+import { InviteEmailCard } from "@/features/sharing/InviteEmailCard";
+import { MembersCard } from "@/features/sharing/MembersCard";
+import { ReadPasswordCard } from "@/features/sharing/ReadPasswordCard";
+import { useOnline } from "@/network";
 import { tokens } from "@/theme/tokens";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import { Field } from "@/ui/Field";
-import { Input } from "@/ui/Input";
+import { PageTitle } from "@/ui/PageTitle";
 import { QrCard } from "@/ui/QrCard";
 import { Text } from "@/ui/Text";
 
-/** The list's sharing page on the site (invitations, password, members). */
-function adminShareUrl(readUrl: string, listId: string): string | null {
-  const origin = /^https?:\/\/[^/]+/.exec(readUrl)?.[0];
-  return origin ? origin + withLocale(currentLocale(), `/listes/${listId}?onglet=partage`) : null;
-}
-
 /**
- * Share tab, from the « Partager avec vos proches » card of `09-liste-partage.png`,
- * plus the QR code and the phone's share sheet (FR-020 to FR-024).
- * The shared link is always `readUrl`, never the invite link (FR-023). Works offline
- * for a list already sent: the link is in the local copy.
+ * Share tab, the site's « Partage » tab card by card (017, contracts/screens.md): public link with
+ * the QR code and the phone's share sheet (005, FR-020 to FR-024), then the invite link, the
+ * invitation by email, the read password (owner) and the members. The public link's « Partager » never sends the invite link (FR-023).
+ * Offline, the links stay readable and copyable; the actions that write are disabled.
  */
 export default function ShareTab() {
   const { t } = useTranslation(["list", "mobile"]);
-  const [copied, setCopied] = useState(false);
+  const online = useOnline();
   return (
     <ListScreen tab="partage">
       {(list) => {
         if (list.localOnly || !list.readUrl) return <Alert>{t("mobile:share.pendingList")}</Alert>;
         const readUrl = list.readUrl;
-        const admin = adminShareUrl(readUrl, list.id);
         return (
           <>
+            <PageTitle title={t("list:share.title")} description={t("list:share.description")} weight="heading" />
+            {online ? null : <Alert testID="share.offline">{t("mobile:sharing.offline")}</Alert>}
             <Card>
               <CardHeader>
                 <CardTitle>{t("list:share.readTitle")}</CardTitle>
@@ -56,27 +53,26 @@ export default function ShareTab() {
                   // The link is in the message: `url` as well would double it on iOS.
                   onPress={() => void Share.share({ title: list.title, message: t("mobile:share.message", { title: list.title, url: readUrl }) })}
                 />
-                <Field label={t("list:share.readLink")}>
-                  <View style={{ flexDirection: "row", gap: tokens.space[2], alignItems: "center" }}>
-                    <View style={{ flex: 1 }}>
-                      <Input testID="share.read-link" accessibilityLabel={t("list:share.readLink")} value={readUrl} editable={false} muted selectTextOnFocus />
-                    </View>
-                    <Button
-                      size="icon"
-                      variant="neutral"
-                      accessibilityLabel={t("list:share.copyRead")}
-                      icon={<CopyIcon size={16} color={tokens.colors.black} />}
-                      onPress={() => {
-                        void Clipboard.setStringAsync(readUrl).then(() => setCopied(true));
-                      }}
-                      testID="copy-link"
-                    />
-                  </View>
-                </Field>
-                {copied ? <Alert testID="share.copied">{t("list:share.copied")}</Alert> : null}
+                <CopyLinkField
+                  label={t("list:share.readLink")}
+                  value={readUrl}
+                  copyLabel={t("list:share.copyRead")}
+                  fieldTestID="share.read-link"
+                  copyTestID="copy-link"
+                  copiedTestID="share.copied"
+                />
               </CardContent>
             </Card>
-            {admin ? <Button title={t("mobile:share.manageOnSite")} variant="link" onPress={() => void Linking.openURL(admin)} /> : null}
+            <InviteCard title={list.title} inviteUrl={list.inviteUrl} />
+            <InviteEmailCard listId={list.id} owner={list.role === "owner"} disabled={!online} />
+            <ReadPasswordCard listId={list.id} owner={list.role === "owner"} protectedList={list.hasReadPassword} disabled={!online} />
+            <MembersCard
+              listId={list.id}
+              role={list.role}
+              members={list.members}
+              disabled={!online}
+              aloneAction={<AloneDeleteButton list={list} disabled={!online} />}
+            />
           </>
         );
       }}
