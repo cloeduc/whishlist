@@ -137,7 +137,7 @@ Variables des scripts d'exploitation (lues sur l'hôte, pas par l'app) :
 | `WHISHLIST_BACKUP_DIR` | `~/webserver/backups/whishlist` | Dossier des sauvegardes |
 | `WHISHLIST_BACKUP_KEEP` | `14` | Jours de sauvegardes gardés |
 | `WHISHLIST_BACKUP_PASSPHRASE` | — | Chiffre les sauvegardes (AES) si présente |
-| `WHISHLIST_CONTAINER` | `whishlist` | Conteneur où lancer la sauvegarde à chaud |
+| `WHISHLIST_CONTAINER` | `whishlist`, sinon la tâche du service Swarm `whishlist-<suffixe>` (Dokploy) | Conteneur où lancer la sauvegarde à chaud |
 | `WHISHLIST_ENV_FILE` | `~/webserver/data/whishlist.env` | Fichier env vérifié par `harden-data.sh` et `ops-check.sh` |
 | `WHISHLIST_NTFY_TOPIC` | — | Topic ntfy qui reçoit une alerte si la sauvegarde échoue ; sans elle, aucune notification |
 | `WHISHLIST_NTFY_URL` | `http://127.0.0.1:8166` | Serveur ntfy |
@@ -172,6 +172,15 @@ WHISHLIST_DATA_DIR=./data-prod docker compose \
   --env-file whishlist.env \
   up -d --force-recreate --pull never
 ```
+
+### Avec Dokploy
+
+La prod tourne dans [Dokploy](https://dokploy.com) (projet `whishlist`, application `whishlist-5jk4ba`). Chaque push sur `main` (merge d'une PR) déclenche par webhook GitHub un build du `Dockerfile` sur le serveur, puis remplace le conteneur.
+
+- Source : dépôt Git public, branche `main`, build `Dockerfile`, contexte `.`.
+- Variables : celles de `deploy/compose.prod.yml` sans le préfixe `WHISHLIST_` (onglet Environment). Swarm ne connaît pas `host.docker.internal` : `UMAMI_URL` vise l'adresse de l'hôte sur le réseau local.
+- Volume : montage `bind` du dossier de données de l'hôte sur `/data` ; l'image tourne en `1000:1000` (utilisateur `node`), propriétaire de ce dossier.
+- Port : publié en mode `host` (`8740` → `3000`), exposé par le tunnel Cloudflare comme ci-dessous. Le Traefik de Dokploy n'est pas utilisé.
 
 ---
 

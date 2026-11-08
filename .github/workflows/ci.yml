@@ -1,11 +1,11 @@
-# Checks for each PR and each push to main: site, mobile app, Docker image.
+# Checks for each PR and each push to main or staging: site, mobile app, Docker image.
 # `pull_request` (not `pull_request_target`): code from a fork runs without secrets, with a read-only token.
 name: CI
 
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, staging]
 
 permissions:
   contents: read
