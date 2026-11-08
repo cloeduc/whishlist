@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
+import { toMe } from "../../src/server/api/views";
 import { emailConfirmationPending } from "../../src/server/commands/context";
 import {
+  emailConfirmationEnforced,
   emailVerificationRequired,
   mailConfigured,
   mailDryRun,
@@ -40,6 +42,22 @@ test("emailConfirmationPending: an account that must change its password does th
   });
   await withEnv({ RESEND_API_KEY: undefined, MAIL_FROM: undefined, MAIL_DRY_RUN: undefined, NODE_ENV: "test" }, () => {
     assert.equal(emailConfirmationPending(sam), false);
+  });
+});
+
+test("EMAIL_VERIFICATION_OPTIONAL=1: an unconfirmed address no longer blocks, sending stays on", async () => {
+  const sam = { ...user("sam", "sam@example.test", "Sam"), emailVerifiedAt: null };
+  const resend = { RESEND_API_KEY: "re_test", MAIL_FROM: "x@example.test", MAIL_DRY_RUN: undefined, NODE_ENV: "production" };
+  await withEnv({ ...resend, EMAIL_VERIFICATION_OPTIONAL: "1" }, () => {
+    assert.equal(emailVerificationRequired(), true);
+    assert.equal(emailConfirmationEnforced(), false);
+    assert.equal(emailConfirmationPending(sam), false);
+    assert.equal(toMe(sam, null).emailVerified, true);
+  });
+  await withEnv({ ...resend, EMAIL_VERIFICATION_OPTIONAL: undefined }, () => {
+    assert.equal(emailConfirmationEnforced(), true);
+    assert.equal(emailConfirmationPending(sam), true);
+    assert.equal(toMe(sam, null).emailVerified, false);
   });
 });
 

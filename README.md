@@ -75,6 +75,7 @@ Les PNG sont écrits dans `public/guide/fr` et `public/guide/en`.
 | `INSTANCE_CONTENT_PATH` | non | JSON privé personnalisant la page projet |
 | `RESEND_API_KEY` | non | Envoi d’e-mails |
 | `MAIL_FROM` | non | Expéditeur Resend, ex. `Oh, You Shouldn't! <noreply@domaine.fr>` |
+| `EMAIL_VERIFICATION_OPTIONAL` | non | `1` = une adresse non confirmée ne bloque plus le compte (ni garde, ni bandeau, `emailVerified: true` dans l'API) ; les e-mails de confirmation partent toujours. Temporaire, pour les versions de l'app qui ne gèrent pas la confirmation |
 | `PASSWORD_RESET_SHOW_LINK` | non | `1` = affiche le lien reset dans l’UI si mail KO (dev) |
 | `MAIL_SMTP_URL` | non | `smtp://localhost:1025` = e-mails envoyés à ce serveur SMTP (MailDev, suite e2e) au lieu de Resend ; dev uniquement, ignorée en production |
 | `MAIL_DRY_RUN` | non | `1` = e-mails écrits dans `data/mail.log` au lieu de partir, validation des adresses active (dev uniquement, ignorée en production) |

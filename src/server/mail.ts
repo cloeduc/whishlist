@@ -30,6 +30,16 @@ export function emailVerificationRequired(): boolean {
   return mailConfigured() || mailDryRun();
 }
 
+/**
+ * Does an unconfirmed address block the account (write guard, banner, the API's `emailVerified`)?
+ * `EMAIL_VERIFICATION_OPTIONAL=1` lifts that block without turning sending off: the confirmation link is still sent
+ * on sign-up and an address change still waits for its confirmation. Temporary production measure, until every app
+ * version in use handles the confirmation.
+ */
+export function emailConfirmationEnforced(): boolean {
+  return emailVerificationRequired() && process.env.EMAIL_VERIFICATION_OPTIONAL !== "1";
+}
+
 /** `sent`: handed to Resend. `failed`: Resend refused it (neither the simulated sending nor the missing configuration). */
 type MailResult = { sent: boolean; failed: boolean };
 

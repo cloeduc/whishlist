@@ -2,7 +2,7 @@ import "server-only";
 import { mustConfirmEmail } from "../../domain/email-confirmation";
 import type { User } from "../../domain/types";
 import type { Locale } from "../../i18n/config";
-import { emailVerificationRequired } from "../mail";
+import { emailConfirmationEnforced } from "../mail";
 
 /**
  * What a command knows about the request, without depending on Next:
@@ -41,7 +41,7 @@ export function verifiedUser(ctx: CommandContext): { ok: true; user: User } | { 
  * site banner, link resend. An account that must change its password does that first.
  */
 export function emailConfirmationPending(user: User): boolean {
-  return !user.mustChangePassword && mustConfirmEmail(user, emailVerificationRequired());
+  return !user.mustChangePassword && mustConfirmEmail(user, emailConfirmationEnforced());
 }
 
 /**

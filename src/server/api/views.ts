@@ -7,7 +7,7 @@ import { isSubscriptionUnlocked, viewerRelation } from "../../domain/subscriptio
 import type { Database, Item, Role, Subscription, User, WishlistTheme, Wishlist } from "../../domain/types";
 import { intlLocale, type Locale } from "../../i18n/config";
 import { withLocale } from "../../i18n/locale-path";
-import { emailVerificationRequired } from "../mail";
+import { emailConfirmationEnforced } from "../mail";
 
 /** JSON shapes of the contract (`specs/004-mobile-api/contracts/openapi.yaml`). */
 
@@ -172,7 +172,7 @@ export function toMe(user: User, pendingEmail: string | null): MeView {
     email: user.email,
     displayName: user.displayName,
     mustChangePassword: user.mustChangePassword,
-    emailVerified: !mustConfirmEmail(user, emailVerificationRequired()),
+    emailVerified: !mustConfirmEmail(user, emailConfirmationEnforced()),
     pendingEmail,
   };
 }
