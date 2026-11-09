@@ -8,7 +8,7 @@ import { i18n } from "@/i18n";
 import { fakeFetch, json, me } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
 
-const params: { token: string; suite?: string } = { token: "tok" };
+const params: { token: string; next?: string } = { token: "tok" };
 jest.mock("expo-router", () => ({
   router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true },
   useLocalSearchParams: () => params,
@@ -20,7 +20,7 @@ beforeEach(async () => {
   await signOut();
   await i18n.changeLanguage("fr");
   params.token = "tok";
-  delete params.suite;
+  delete params.next;
   jest.mocked(router.replace).mockClear();
 });
 
@@ -103,13 +103,28 @@ test("server unreachable: « Réessayer » retries the confirmation", async () =
 });
 
 test("sign-up from an invitation: « Reprendre l'invitation » leads to the invitation screen", async () => {
-  params.suite = "/inviter/it";
+  params.next = "/invite/it";
+  let sent: unknown;
   fakeFetch({
-    "POST /auth/email-confirmation": () => json(200, { purpose: "verify", ownAccount: false, suite: "/inviter/it" }),
+    "POST /auth/email-confirmation": async (request) => {
+      sent = await request.json();
+      return json(200, { purpose: "verify", ownAccount: false, suite: "/invite/it" });
+    },
   });
   await render(<ConfirmEmailLink />);
   const next = await screen.findByTestId("confirm-email.next");
   expect(next).toHaveTextContent("Reprendre l’invitation");
   await fireEvent.press(next);
+  expect(router.replace).toHaveBeenCalledWith("/links/invite/it");
+  expect(sent).toMatchObject({ token: "tok", suite: "/invite/it" });
+});
+
+test("a server that still returns a former French invitation path: the invitation is resumed (018)", async () => {
+  params.next = "/invite/it";
+  fakeFetch({
+    "POST /auth/email-confirmation": () => json(200, { purpose: "verify", ownAccount: false, suite: "/inviter/it" }),
+  });
+  await render(<ConfirmEmailLink />);
+  await fireEvent.press(await screen.findByTestId("confirm-email.next"));
   expect(router.replace).toHaveBeenCalledWith("/links/invite/it");
 });

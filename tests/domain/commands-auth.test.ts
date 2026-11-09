@@ -14,7 +14,7 @@ import {
 } from "../../src/server/commands/auth";
 import { isRateLimitError } from "../../src/server/rate-limit";
 import { readDocument, updateDocument } from "../../src/store/db";
-import { apiDoc, ctx, ensurePasswordHash, PASSWORD, withStore } from "./helpers/api-fixtures";
+import { apiDoc, ctx, ensurePasswordHash, mailLog, PASSWORD, withMailDryRun, withStore } from "./helpers/api-fixtures";
 
 before(ensurePasswordHash);
 
@@ -248,4 +248,20 @@ test("20 new password attempts by link in 15 minutes from one IP: the 21st is re
       isRateLimitError,
     );
   });
+});
+
+test("account emails carry the English addresses (018): reset link, sign-in link of the « already registered » email", async () => {
+  await withMailDryRun(() =>
+    withStore(apiDoc(), async () => {
+      const reset = await requestPasswordReset(ctx(), { email: "alex@example.test" });
+      assert.match((reset.ok && reset.resetUrl) || "", /^https:\/\/ohyoushouldnt\.example\.test\/reset-password\/[\w-]+$/);
+      const english = await requestPasswordReset({ ...ctx(null, "203.0.113.7"), locale: "en" }, { email: "alex@example.test" });
+      assert.match((english.ok && english.resetUrl) || "", /^https:\/\/ohyoushouldnt\.example\.test\/en\/reset-password\/[\w-]+$/);
+
+      await register(ctx(), { email: "alex@example.test", password: "mot-de-passe-long", displayName: "Alex" });
+      const log = await mailLog();
+      assert.match(log, /https:\/\/ohyoushouldnt\.example\.test\/login\b/);
+      assert.doesNotMatch(log, /\/(reinitialiser|connexion)\b/);
+    }),
+  );
 });

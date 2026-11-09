@@ -188,7 +188,7 @@ export async function mailLog(): Promise<string> {
 
 /** Last address confirmation token written to the email log. */
 export async function lastConfirmationToken(): Promise<string> {
-  const tokens = [...(await mailLog()).matchAll(/\/confirmer-email\/([\w-]+)/g)].map((match) => match[1]!);
+  const tokens = [...(await mailLog()).matchAll(/\/confirm-email\/([\w-]+)/g)].map((match) => match[1]!);
   const token = tokens.at(-1);
   if (!token) throw new Error("aucun lien de confirmation dans mail.log");
   return token;

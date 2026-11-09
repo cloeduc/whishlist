@@ -61,7 +61,7 @@ export function ItemForm({
   people,
   item,
   price,
-  onglet = "idees",
+  tab = "ideas",
   llmEnabled = false,
 }: {
   wishlistId: string;
@@ -79,7 +79,7 @@ export function ItemForm({
     description?: string | null;
   };
   price?: string;
-  onglet?: string;
+  tab?: string;
   llmEnabled?: boolean;
 }) {
   const { t } = useTranslation(["list", "common", "errors"]);
@@ -142,7 +142,7 @@ export function ItemForm({
     <form action={formAction} className="flex flex-col gap-3">
       <FieldGroup className="gap-3">
         <input type="hidden" name="wishlistId" value={wishlistId} />
-        <input type="hidden" name="onglet" value={onglet} />
+        <input type="hidden" name="tab" value={tab} />
         {item ? <input type="hidden" name="itemId" value={item.id} /> : null}
         {error ? (
           <p className="rounded-base border-2 border-border bg-secondary-background px-3 py-2 text-sm font-medium text-destructive">

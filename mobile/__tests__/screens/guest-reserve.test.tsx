@@ -58,7 +58,7 @@ test("reservation without an account: name and message sent, claim kept, back to
   expect(router.replace).not.toHaveBeenCalled();
 });
 
-test("form opened directly (/l/<t>/reserver link): the list view replaces it", async () => {
+test("form opened directly (/l/<t>/reserve link): the list view replaces it", async () => {
   jest.mocked(router.canGoBack).mockReturnValue(false);
   fakeFetch({
     "GET /public/lists/rt": () => json(200, publicList()),

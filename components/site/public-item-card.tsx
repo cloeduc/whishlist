@@ -101,7 +101,7 @@ export function PublicItemCard({
           />
         ) : (
           <LinkButton
-            href={`/l/${readToken}/reserver?itemId=${encodeURIComponent(item.id)}`}
+            href={`/l/${readToken}/reserve?itemId=${encodeURIComponent(item.id)}`}
             size="sm"
             className="w-full sm:w-auto"
             aria-label={offerAria}

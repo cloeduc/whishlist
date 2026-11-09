@@ -12,7 +12,7 @@ tags:
 - runFlow: ../subflows/register.yaml
 - runFlow: ../subflows/logout.yaml
 
-- openLink: ohyoushouldnt://inviter/demo-list-invitation
+- openLink: ohyoushouldnt://invite/demo-list-invitation
 - extendedWaitUntil:
     visible:
       id: invite.login
@@ -38,7 +38,7 @@ tags:
     timeout: 20000
 
 # Reopening the link, already a member: the list opens right away.
-- openLink: ohyoushouldnt://inviter/demo-list-invitation
+- openLink: ohyoushouldnt://invite/demo-list-invitation
 - extendedWaitUntil:
     visible:
       id: list.add-item

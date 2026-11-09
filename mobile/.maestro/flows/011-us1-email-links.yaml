@@ -17,7 +17,7 @@ tags:
     file: ../subflows/open-mail-link.yaml
     env:
       TO: ${output.email}
-      KIND: confirmer-email
+      KIND: confirm-email
 - extendedWaitUntil:
     visible:
       id: confirm-email.status
@@ -32,7 +32,7 @@ tags:
     id: verify.banner
 
 # Login link, already logged in: their lists.
-- openLink: ohyoushouldnt://connexion
+- openLink: ohyoushouldnt://login
 - extendedWaitUntil:
     visible:
       id: lists.screen
@@ -57,7 +57,7 @@ tags:
     file: ../subflows/open-mail-link.yaml
     env:
       TO: ${output.email}
-      KIND: reinitialiser
+      KIND: reset-password
 - extendedWaitUntil:
     visible:
       id: reset-password.screen

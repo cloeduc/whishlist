@@ -51,7 +51,7 @@ tags:
     file: ../subflows/open-mail-link.yaml
     env:
       TO: ${output.emailB}
-      KIND: inviter
+      KIND: invite
 - extendedWaitUntil:
     visible:
       id: invite.join
@@ -82,7 +82,7 @@ tags:
     file: ../subflows/open-mail-link.yaml
     env:
       TO: ${output.emailB}
-      KIND: inviter
+      KIND: invite
 - tapOn:
     id: invite.join
 - extendedWaitUntil:

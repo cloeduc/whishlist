@@ -21,7 +21,7 @@ import { Select } from "@/ui/Select";
 import { Text } from "@/ui/Text";
 
 /**
- * « Réserver un cadeau » of the guest view (011, US4), like the site's `/l/{readToken}/reserver`: the chosen
+ * « Réserver un cadeau » of the guest view (011, US4), like the site's `/l/{readToken}/reserve`: the chosen
  * idea, or a category then an idea, the optional name and message. Always online: a
  * reservation is never queued (FR-010b). An idea taken in the meantime is refused by the server.
  */

@@ -9,7 +9,8 @@ import {
   requestEmailChange,
 } from "../../domain/email-confirmation";
 import type { EmailConfirmation } from "../../domain/types";
-import { internalPath, withLocale } from "../../i18n/locale-path";
+import { withLocale } from "../../i18n/locale-path";
+import { canonicalInternalPath } from "../../site/legacy-paths";
 import { readDocument, updateDocument } from "../../store/db";
 import { toMe, type MeView } from "../api/views";
 import {
@@ -22,8 +23,8 @@ import { rateLimitForIp } from "../rate-limit";
 import { activeUser, emailConfirmationPending, type CommandContext, type CommandResult } from "./context";
 
 function confirmUrl(ctx: CommandContext, token: string, suite: string | null): string {
-  const page = `${ctx.origin}${withLocale(ctx.locale, `/confirmer-email/${token}`)}`;
-  return suite ? `${page}?suite=${encodeURIComponent(suite)}` : page;
+  const page = `${ctx.origin}${withLocale(ctx.locale, `/confirm-email/${token}`)}`;
+  return suite ? `${page}?next=${encodeURIComponent(suite)}` : page;
 }
 
 /** The link is returned only in dev when the email was not sent (shown by the site), never in production. */
@@ -33,7 +34,8 @@ function revealed(url: string, sent: boolean): string | null {
 
 /**
  * Creates (or replaces) the confirmation link of the current address and sends it, outside the transaction.
- * `suite`: where to resume after the confirmation (an invitation, for example).
+ * `suite`: where to resume after the confirmation (an invitation, for example), sent as `next` in the link.
+ * The field keeps its name in the API (contract unchanged); a former French address is translated.
  */
 export async function sendVerificationLink(
   ctx: CommandContext,
@@ -44,7 +46,7 @@ export async function sendVerificationLink(
     return { doc: issued.ok ? issued.doc : doc, result: issued };
   });
   if (!created.ok) return created;
-  const url = confirmUrl(ctx, created.token, internalPath(input.suite));
+  const url = confirmUrl(ctx, created.token, canonicalInternalPath(input.suite));
   const mail = await sendEmailVerificationMail({ to: created.email, confirmUrl: url, locale: ctx.locale });
   return { ok: true, sent: mail.sent, failed: mail.failed, verificationUrl: revealed(url, mail.sent) };
 }
@@ -97,7 +99,7 @@ export async function confirmEmailWithToken(
   return {
     ok: true,
     purpose: confirmed.purpose,
-    suite: internalPath(input.suite),
+    suite: canonicalInternalPath(input.suite),
     ownAccount: ctx.user?.id === confirmed.userId,
   };
 }

@@ -43,7 +43,7 @@ export default async function HomePage({
     getLocale(),
     searchParams ?? Promise.resolve({ fe: undefined }),
   ]);
-  if (user?.mustChangePassword) redirect(withLocale(locale, "/compte"));
+  if (user?.mustChangePassword) redirect(withLocale(locale, "/account"));
   if (!user) {
     return (
       <main className="flex flex-col gap-6">
@@ -84,7 +84,7 @@ export default async function HomePage({
       <section className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-2xl font-medium tracking-tight">{t("mine.title")}</h1>
-          <LinkButton href="/listes/new" size="sm">
+          <LinkButton href="/lists/new" size="sm">
             {t("mine.newList")}
           </LinkButton>
         </div>
@@ -98,7 +98,7 @@ export default async function HomePage({
               <EmptyDescription>{t("mine.emptyBody")}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
-              <LinkButton href="/listes/new">{t("mine.newList")}</LinkButton>
+              <LinkButton href="/lists/new">{t("mine.newList")}</LinkButton>
             </EmptyContent>
           </Empty>
         ) : (
@@ -119,7 +119,7 @@ export default async function HomePage({
                   <div className="flex min-w-0 flex-col gap-1">
                     <CardTitle>
                       <Link
-                        href={withLocale(locale, `/listes/${list.id}`)}
+                        href={withLocale(locale, `/lists/${list.id}`)}
                         className="hover:underline after:absolute after:inset-0 after:rounded-base focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-solid focus-visible:after:outline-offset-2 focus-visible:after:outline-black"
                       >
                         {list.title}
@@ -135,7 +135,7 @@ export default async function HomePage({
           </div>
         )}
       </section>
-      <section id="suivies" className="scroll-mt-6 flex flex-col gap-4">
+      <section id="following" className="scroll-mt-6 flex flex-col gap-4">
         <h2 className="text-xl font-medium tracking-tight">{t("followed.title")}</h2>
         <form action={subscribeByLinkAction} className="flex flex-col gap-2 sm:flex-row sm:items-center">
           <label htmlFor="follow-link" className="sr-only">

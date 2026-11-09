@@ -14,6 +14,7 @@ const specs = {
   "012": "specs/012-list-subscriptions/spec.md",
   "016": "specs/016-password-field/spec.md",
   "017": "specs/017-mobile-sharing/spec.md",
+  "018": "specs/018-english-urls/spec.md",
 };
 
 function storiesOf(feature: string, file: string): string[] {

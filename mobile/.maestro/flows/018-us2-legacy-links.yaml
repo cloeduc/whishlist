@@ -1,0 +1,74 @@
+# 018 US2: the former French addresses (/confirmer-email, /inviter, /connexion, /l/…/reserver), still carried
+# by emails sent before the change, keep opening the same screens of the app as the English ones.
+# The links open through the ohyoushouldnt:// scheme: locally, the domain is not associated with the app.
+appId: app.ohyoushouldnt.mobile
+name: "018 US2 — Former website addresses still open the app"
+tags:
+  - 018-us2
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runScript: ../scripts/legacy-paths.generated.js
+- runFlow: ../subflows/register-unconfirmed.yaml
+- assertVisible:
+    id: verify.banner
+
+# Confirmation link received by email, opened under its former address: confirmed in the app.
+- retry:
+    maxRetries: 3
+    commands:
+      - runScript:
+          file: ../scripts/maildev-link.js
+          env:
+            TO: ${output.email}
+            KIND: confirm-email
+- runScript:
+    file: ../scripts/former-link.js
+    env:
+      URL: ${output.link}
+- openLink: ${output.appLink}
+- extendedWaitUntil:
+    visible:
+      id: confirm-email.status
+    timeout: 20000
+- tapOn:
+    id: confirm-email.next
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 10000
+- assertNotVisible:
+    id: verify.banner
+
+# Former login address, already logged in: their lists.
+- openLink: ohyoushouldnt://connexion
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 10000
+
+# Former reservation address of the demo list's public link: the reservation screen.
+- openLink: ohyoushouldnt://l/demo-list-lecture/reserver
+- extendedWaitUntil:
+    visible:
+      id: guest-reserve.screen
+    timeout: 20000
+
+# Former invite address, without a session: login comes first, then the invitation.
+- runFlow: ../subflows/launch-clean.yaml
+- openLink: ohyoushouldnt://inviter/demo-list-invitation
+- extendedWaitUntil:
+    visible:
+      id: invite.login
+    timeout: 20000
+- tapOn:
+    id: invite.login
+- runFlow:
+    file: ../subflows/submit-login.yaml
+    env:
+      EMAIL: ${output.email}
+      PASSWORD: ${MAESTRO_DEMO_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: invite.join
+    timeout: 20000

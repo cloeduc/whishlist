@@ -137,7 +137,7 @@ Variables des scripts d'exploitation (lues sur l'hôte, pas par l'app) :
 | `WHISHLIST_BACKUP_DIR` | `~/webserver/backups/whishlist` | Dossier des sauvegardes |
 | `WHISHLIST_BACKUP_KEEP` | `14` | Jours de sauvegardes gardés |
 | `WHISHLIST_BACKUP_PASSPHRASE` | — | Chiffre les sauvegardes (AES) si présente |
-| `WHISHLIST_CONTAINER` | `whishlist` | Conteneur où lancer la sauvegarde à chaud |
+| `WHISHLIST_CONTAINER` | `whishlist`, sinon la tâche du service Swarm `whishlist-<suffixe>` (Dokploy) | Conteneur où lancer la sauvegarde à chaud |
 | `WHISHLIST_ENV_FILE` | `~/webserver/data/whishlist.env` | Fichier env vérifié par `harden-data.sh` et `ops-check.sh` |
 | `WHISHLIST_NTFY_TOPIC` | — | Topic ntfy qui reçoit une alerte si la sauvegarde échoue ; sans elle, aucune notification |
 | `WHISHLIST_NTFY_URL` | `http://127.0.0.1:8166` | Serveur ntfy |
@@ -172,6 +172,15 @@ WHISHLIST_DATA_DIR=./data-prod docker compose \
   --env-file whishlist.env \
   up -d --force-recreate --pull never
 ```
+
+### Avec Dokploy
+
+La prod tourne dans [Dokploy](https://dokploy.com) (projet `whishlist`, application `whishlist-5jk4ba`). Chaque push sur `main` (merge d'une PR) déclenche par webhook GitHub un build du `Dockerfile` sur le serveur, puis remplace le conteneur.
+
+- Source : dépôt Git public, branche `main`, build `Dockerfile`, contexte `.`.
+- Variables : celles de `deploy/compose.prod.yml` sans le préfixe `WHISHLIST_` (onglet Environment). Swarm ne connaît pas `host.docker.internal` : `UMAMI_URL` vise l'adresse de l'hôte sur le réseau local.
+- Volume : montage `bind` du dossier de données de l'hôte sur `/data` ; l'image tourne en `1000:1000` (utilisateur `node`), propriétaire de ce dossier.
+- Port : publié en mode `host` (`8740` → `3000`), exposé par le tunnel Cloudflare comme ci-dessous. Le Traefik de Dokploy n'est pas utilisé.
 
 ---
 
@@ -209,7 +218,7 @@ Copie `data/instance-content.example.json` vers `data/instance-content.json`, pu
 adapte le récit FR/EN et le lien Stripe (supportUrl). Place éventuellement le portrait dans
 `public/instance/portrait.png`.
 
-Ces deux chemins sont ignorés par Git. Sans eux, la page `/projet` affiche le
+Ces deux chemins sont ignorés par Git. Sans eux, la page `/about` affiche le
 contenu générique du dépôt. `INSTANCE_CONTENT_PATH` permet de placer le JSON
 ailleurs en production.
 
@@ -278,14 +287,16 @@ EXPO_PUBLIC_API_URL=http://localhost:3010 npm --prefix mobile run ios       # ou
 
 ### Liens de l’app
 
-Les liens envoyés par e-mail ou partagés (confirmation d’adresse, réinitialisation, invitation, lien public d’une liste) gardent leur adresse sur le site. Sur un téléphone où l’app est installée (1.1.0 et plus), ils ouvrent l’app ; sinon, le site. La liste des chemins ouverts par l’app est dans `src/site/app-links.ts` (contrat : [`specs/011-app-deep-links/contracts/links.md`](specs/011-app-deep-links/contracts/links.md)).
+Les liens envoyés par e-mail ou partagés (confirmation d’adresse, réinitialisation, invitation, lien public d’une liste) gardent leur adresse sur le site. Sur un téléphone où l’app est installée (1.1.0 et plus), ils ouvrent l’app ; sinon, le site. La liste des chemins ouverts par l’app est dans `src/site/app-link-routes.json` (contrat : [`specs/011-app-deep-links/contracts/links.md`](specs/011-app-deep-links/contracts/links.md), chemins : [`specs/018-english-urls/contracts/addresses.md`](specs/018-english-urls/contracts/addresses.md)).
+
+Les adresses du site sont en anglais depuis la feature 018 (`/lists`, `/account`, `/login`, `/invite/<jeton>`…). Les anciennes adresses françaises (`/listes`, `/compte`, `/connexion`, `/inviter/<jeton>`…) redirigent en 301 vers les nouvelles, langue comprise, d’après `src/site/legacy-paths.json` ; l’app et les fichiers d’association reconnaissent les deux formes.
 
 - Le site publie `/.well-known/apple-app-site-association` et `/.well-known/assetlinks.json` quand `APPLE_TEAM_ID` et `ANDROID_CERT_SHA256` sont réglés (404 sinon) :
   - `APPLE_TEAM_ID` : l’équipe Apple ci-dessus ;
   - `ANDROID_CERT_SHA256` : Play Console → l’app → Intégrité de l’app → Signature de l’app, empreintes SHA-256 de la **clé de signature de l’app** et de la **clé d’importation**, séparées par une virgule.
 - L’app ne déclare le domaine que pour un serveur en `https` (`mobile/app.config.ts`) ; un nouveau build natif est nécessaire après un changement de la table des chemins.
 - Vérifier après un déploiement : `curl -sI https://ohyoushouldnt.app/.well-known/apple-app-site-association` (200, `application/json`, sans redirection), même chose pour `assetlinks.json` ; le CDN d’Apple (`https://app-site-association.cdn-apple.com/a/v1/ohyoushouldnt.app`) ; sur Android, `adb shell pm get-app-links app.ohyoushouldnt.mobile` doit dire `verified`.
-- En local, sans domaine associé, les mêmes chemins s’ouvrent par le schéma de l’app : `xcrun simctl openurl booted "ohyoushouldnt://reinitialiser/<jeton>"`.
+- En local, sans domaine associé, les mêmes chemins s’ouvrent par le schéma de l’app : `xcrun simctl openurl booted "ohyoushouldnt://reset-password/<jeton>"`.
 - `APP_STORE_URL` et `PLAY_STORE_URL` font apparaître, sur le site consulté depuis un téléphone, l’icône qui propose l’app.
 
 ---

@@ -116,12 +116,12 @@ test("sign-up: a confirmation link is sent, with the next path if it is internal
         email: "sam@example.test",
         password: "mot-de-passe-long",
         displayName: "Sam",
-        next: "/inviter/it",
+        next: "/invite/it",
       });
       assert.ok(created.ok && created.user);
       assert.equal(created.user.emailVerifiedAt, null);
       // In dev, the simulated email was not sent: the link is returned so it can be shown.
-      assert.match(created.verificationUrl ?? "", /^https:\/\/ohyoushouldnt\.example\.test\/confirmer-email\/[\w-]+\?suite=%2Finviter%2Fit$/);
+      assert.match(created.verificationUrl ?? "", /^https:\/\/ohyoushouldnt\.example\.test\/confirm-email\/[\w-]+\?next=%2Finvite%2Fit$/);
       const log = await mailLog();
       assert.match(log, /email-verification \(dry run\) -> sam@example\.test/);
       const doc = await readDocument();
@@ -179,8 +179,8 @@ test("confirmation in the app with the session of the link's account (011): ownA
       const created = await register(ctx(), { email: "sam@example.test", password: "mot-de-passe-long", displayName: "Sam" });
       assert.ok(created.ok && created.user);
       const token = await lastConfirmationToken();
-      const confirmed = await confirmEmailWithToken(ctx(created.user), { token, suite: "/inviter/it" });
-      assert.deepEqual(confirmed, { ok: true, purpose: "verify", suite: "/inviter/it", ownAccount: true });
+      const confirmed = await confirmEmailWithToken(ctx(created.user), { token, suite: "/invite/it" });
+      assert.deepEqual(confirmed, { ok: true, purpose: "verify", suite: "/invite/it", ownAccount: true });
     }),
   );
 });
@@ -257,7 +257,7 @@ test("address change: link to the new one, sign-in unchanged until confirmation,
       const notice = log.slice(log.lastIndexOf("email-changed"));
       assert.match(notice, /^email-changed \(dry run\) -> camille@example\.test/);
       assert.match(notice, /ca•••@example\.test/);
-      assert.doesNotMatch(notice, /camille\.b@example\.test|confirmer-email|mot-de-passe-oublie/);
+      assert.doesNotMatch(notice, /camille\.b@example\.test|confirm-email|forgot-password|confirmer-email|mot-de-passe-oublie/);
       assert.match(notice, /contact@ohyoushouldnt\.app/);
 
       assert.deepEqual(await login(ctx(), { email: "camille@example.test", password: PASSWORD }), {
@@ -376,4 +376,22 @@ test("sign-up: a Resend refusal is reported, for a new account as for an already
   } finally {
     globalThis.fetch = realFetch;
   }
+});
+
+test("a former French return path is translated in the link and after confirmation (018, FR-005)", async () => {
+  await withMailDryRun(() =>
+    withStore(apiDoc(), async () => {
+      const created = await register(ctx(), {
+        email: "sam@example.test",
+        password: "mot-de-passe-long",
+        displayName: "Sam",
+        next: "/inviter/it",
+      });
+      assert.ok(created.ok);
+      assert.match(created.verificationUrl ?? "", /\/confirm-email\/[\w-]+\?next=%2Finvite%2Fit$/);
+      const token = await lastConfirmationToken();
+      const confirmed = await confirmEmailWithToken(ctx(), { token, suite: "/en/inviter/it" });
+      assert.deepEqual(confirmed, { ok: true, purpose: "verify", suite: "/en/invite/it", ownAccount: false });
+    }),
+  );
 });

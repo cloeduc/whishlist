@@ -24,7 +24,8 @@ type Outcome =
  */
 export default function ConfirmEmailLink() {
   const { t } = useTranslation(["auth", "mobile"]);
-  const { token, suite } = useLocalSearchParams<{ token: string; suite?: string }>();
+  // `next`: where to resume (an invitation); the API field keeps its former name, `suite`.
+  const { token, next: resumePath } = useLocalSearchParams<{ token: string; next?: string }>();
   const session = useSession();
   const signedIn = session.status === "signedIn";
   const [outcome, setOutcome] = useState<Outcome>({ status: "pending" });
@@ -33,14 +34,14 @@ export default function ConfirmEmailLink() {
   const confirm = useCallback(async () => {
     setOutcome({ status: "pending" });
     try {
-      const answer = await ok(api.POST("/auth/email-confirmation", { body: { token, suite: suite || undefined } }));
+      const answer = await ok(api.POST("/auth/email-confirmation", { body: { token, suite: resumePath || undefined } }));
       setOutcome({ status: "done", ...answer });
       // The « confirmez votre adresse » banner and « Mon compte » follow the reloaded account.
       await refreshMe().catch(() => undefined);
     } catch (error) {
       setOutcome({ status: "failed", message: errorText(error), retry: error instanceof NetworkError });
     }
-  }, [token, suite]);
+  }, [token, resumePath]);
 
   useEffect(() => {
     // A single attempt on open: sending the same token a second time would be refused (already used).
@@ -89,7 +90,8 @@ function nextStep(
 ): { href: Href; label: string } | null {
   if (outcome.status === "pending" || (outcome.status === "failed" && outcome.retry)) return null;
   // Sign-up from an invitation: take it up again, as on the site page (010, US1-6).
-  const invite = outcome.status === "done" && outcome.suite?.startsWith("/inviter/") ? appPathForUrl(outcome.suite) : null;
+  const resume = outcome.status === "done" && outcome.suite ? appPathForUrl(outcome.suite) : null;
+  const invite = resume?.startsWith("/links/invite/") ? resume : null;
   if (invite) return { href: invite as Href, label: t("auth:confirmEmail.resumeInvite") };
   if (outcome.status === "done" && outcome.purpose === "change" && outcome.ownAccount && signedIn) {
     return { href: "/account", label: t("auth:account.title") };

@@ -1,22 +1,26 @@
 import { stripLocalePrefix } from "@/src/i18n/locale-path";
+import { formerPathsUnder } from "@/src/site/legacy-paths";
 
 /** The visitor's local choice. Not a cookie. */
 export const ANALYTICS_OPTOUT_KEY = "wishlist-analytics-optout";
 
 /** Paths whose address is a capability or a session. Never sent. */
-const PRIVATE_PREFIXES = [
+const CURRENT_PRIVATE_PREFIXES = [
   "/l",
-  "/listes",
-  "/connexion",
-  "/inscription",
-  "/compte",
-  "/inviter",
-  "/reinitialiser",
-  "/confirmer-email",
-  "/changer-mot-de-passe",
-  "/mot-de-passe-oublie",
+  "/lists",
+  "/login",
+  "/register",
+  "/account",
+  "/invite",
+  "/reset-password",
+  "/confirm-email",
+  "/change-password",
+  "/forgot-password",
   "/u",
-] as const;
+];
+
+/** Their former French paths (feature 018) are redirected before rendering, but stay private anyway. */
+const PRIVATE_PREFIXES = [...CURRENT_PRIVATE_PREFIXES, ...formerPathsUnder(CURRENT_PRIVATE_PREFIXES)];
 
 /** Accepts a path or an absolute URL. The query and the fragment are ignored. */
 export function analyticsTargetAllowed(value: string): boolean {

@@ -79,11 +79,11 @@ import {
 } from "./commands/public-list";
 import type { LlmImpact } from "../domain/llm-impact";
 import { isLocale, localeCookie, type Locale } from "../i18n/config";
-import { internalPath, withLocale } from "../i18n/locale-path";
+import { withLocale } from "../i18n/locale-path";
+import { canonicalInternalPath } from "../site/legacy-paths";
+import { parseListTab } from "../site/list-tabs";
 import { getLocale } from "../i18n/server";
 
-
-const ADMIN_ONGLETS = new Set(["idees", "archives", "reservations", "partage", "reglages"]);
 
 async function localeRedirect(path: string): Promise<never> {
   const locale = await getLocale();
@@ -96,19 +96,19 @@ async function redirectToList(
   error?: string,
   ok?: string,
 ): Promise<never> {
-  const raw = String(formData.get("onglet") ?? "");
-  const mapped = raw === "categories" ? "reglages" : raw;
-  const onglet = ADMIN_ONGLETS.has(mapped) ? mapped : "idees";
+  // A page opened before feature 018 still posts `onglet` with a French value.
+  const tab = parseListTab(String(formData.get("tab") ?? formData.get("onglet") ?? ""));
   const params = new URLSearchParams();
-  if (onglet !== "idees") params.set("onglet", onglet);
+  if (tab !== "ideas") params.set("tab", tab);
   if (error) params.set("e", error);
   if (ok) params.set("ok", ok);
   const query = params.toString();
-  return localeRedirect(query ? `/listes/${wishlistId}?${query}` : `/listes/${wishlistId}`);
+  return localeRedirect(query ? `/lists/${wishlistId}?${query}` : `/lists/${wishlistId}`);
 }
 
+/** Internal return path, a former French address translated (feature 018); anything else is `/`. */
 function nextPath(value: FormDataEntryValue | null): string {
-  return internalPath(value) ?? "/";
+  return canonicalInternalPath(typeof value === "string" ? value : null) ?? "/";
 }
 
 async function openSession(userId: string, sessionVersion = 0) {
@@ -141,9 +141,9 @@ export async function registerAction(prev: FormState, formData: FormData): Promi
   // Email already registered: same screen, no sign-in (an email was sent).
   if (result.user) await openSession(result.user.id, result.user.sessionVersion ?? 0);
   // Never a plain link in production (the command does not return it).
-  const link = result.verificationUrl ? `&lien=${encodeURIComponent(result.verificationUrl)}` : "";
-  const failed = result.mailFailed ? "&envoi=echec" : "";
-  return localeRedirect(`/inscription?ok=1&next=${encodeURIComponent(dest)}${link}${failed}`);
+  const link = result.verificationUrl ? `&link=${encodeURIComponent(result.verificationUrl)}` : "";
+  const failed = result.mailFailed ? "&mail=failed" : "";
+  return localeRedirect(`/register?ok=1&next=${encodeURIComponent(dest)}${link}${failed}`);
 }
 
 export async function loginAction(prev: FormState, formData: FormData): Promise<FormState> {
@@ -160,18 +160,18 @@ export async function loginAction(prev: FormState, formData: FormData): Promise<
   if (!checked.ok) return refusal(prev, "1", formData, LOGIN_KEPT_FIELDS);
   const user = checked.user;
   await openSession(user.id, user.sessionVersion ?? 0);
-  if (user.mustChangePassword) return localeRedirect("/compte");
+  if (user.mustChangePassword) return localeRedirect("/account");
   return localeRedirect(dest);
 }
 
 export async function updateDisplayNameAction(prev: FormState, formData: FormData): Promise<FormState> {
   const user = await currentUser();
-  if (!user) return localeRedirect("/connexion");
-  if (user.mustChangePassword) return localeRedirect("/compte");
+  if (!user) return localeRedirect("/login");
+  if (user.mustChangePassword) return localeRedirect("/account");
   const displayName = String(formData.get("displayName") ?? "");
   const result = await updateOwnDisplayName(await actionContext(), { displayName });
   if (!result.ok) return refusal(prev, result.error, formData, DISPLAY_NAME_KEPT_FIELDS);
-  return localeRedirect("/compte?ok=name");
+  return localeRedirect("/account?ok=name");
 }
 
 /** Account page: new API key; the token is returned once, to be copied. */
@@ -197,12 +197,12 @@ export async function createApiKeyAction(input: {
 export async function revokeApiKeyFormAction(formData: FormData) {
   await memberId();
   const result = await revokeMyApiKey(await actionContext(), { keyId: String(formData.get("keyId") ?? "") });
-  return localeRedirect(result.ok ? "/compte?k=revoked#cles" : `/compte?k=${result.error}#cles`);
+  return localeRedirect(result.ok ? "/account?k=revoked#keys" : `/account?k=${result.error}#keys`);
 }
 
 export async function changePasswordAction(prev: FormState, formData: FormData): Promise<FormState> {
   const user = await currentUser();
-  if (!user) return localeRedirect("/connexion");
+  if (!user) return localeRedirect("/login");
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
   const currentPassword = String(formData.get("currentPassword") ?? "");
@@ -225,7 +225,7 @@ export async function changePasswordAction(prev: FormState, formData: FormData):
     return refused(code);
   }
   await openSession(user.id, result.user.sessionVersion ?? 0);
-  return localeRedirect(user.mustChangePassword ? "/" : "/compte?ok=1");
+  return localeRedirect(user.mustChangePassword ? "/" : "/account?ok=1");
 }
 
 export async function deleteAccountAction(formData: FormData) {
@@ -234,16 +234,16 @@ export async function deleteAccountAction(formData: FormData) {
   try {
     result = await deleteOwnAccount(await actionContext(), { password });
   } catch (error) {
-    if (isRateLimitError(error)) return localeRedirect("/compte?d=rateLimited#supprimer");
+    if (isRateLimitError(error)) return localeRedirect("/account?d=rateLimited#delete");
     throw error;
   }
   if (!result.ok) {
-    if (result.error === "unauthorized") return localeRedirect("/connexion");
-    return localeRedirect(`/compte?d=${result.error}#supprimer`);
+    if (result.error === "unauthorized") return localeRedirect("/login");
+    return localeRedirect(`/account?d=${result.error}#delete`);
   }
   const jar = await cookies();
   jar.delete(SESSION_COOKIE);
-  return localeRedirect("/connexion?deleted=1");
+  return localeRedirect("/login?deleted=1");
 }
 
 export async function logoutAction() {
@@ -263,9 +263,9 @@ export async function requestPasswordResetAction(prev: FormState, formData: Form
   }
   // Never a plain link in production (the command does not return it).
   if (result.ok && result.resetUrl) {
-    return localeRedirect(`/mot-de-passe-oublie?ok=1&lien=${encodeURIComponent(result.resetUrl)}`);
+    return localeRedirect(`/forgot-password?ok=1&link=${encodeURIComponent(result.resetUrl)}`);
   }
-  return localeRedirect(`/mot-de-passe-oublie?ok=1${mailConfigured() ? "" : "&sansmail=1"}`);
+  return localeRedirect(`/forgot-password?ok=1${mailConfigured() ? "" : "&nomail=1"}`);
 }
 
 export async function resetPasswordAction(prev: FormState, formData: FormData): Promise<FormState> {
@@ -298,13 +298,13 @@ export async function resendEmailVerificationAction(formData: FormData) {
     throw error;
   }
   if (!result.ok) {
-    if (result.error === "unauthorized") return localeRedirect("/connexion");
-    if (result.error === "mustChangePassword") return localeRedirect("/compte");
+    if (result.error === "unauthorized") return localeRedirect("/login");
+    if (result.error === "mustChangePassword") return localeRedirect("/account");
     return localeRedirect(`${back}${join}verify=already`);
   }
   // Never a plain link in production (the command does not return it).
   if (result.verificationUrl) {
-    return localeRedirect(`${back}${join}verify=sent&lien=${encodeURIComponent(result.verificationUrl)}`);
+    return localeRedirect(`${back}${join}verify=sent&link=${encodeURIComponent(result.verificationUrl)}`);
   }
   return localeRedirect(`${back}${join}verify=${result.sent ? "sent" : "failed"}`);
 }
@@ -312,8 +312,8 @@ export async function resendEmailVerificationAction(formData: FormData) {
 /** « Adresse de connexion » card of « Mon compte » (010, US3). */
 export async function requestEmailChangeAction(prev: FormState, formData: FormData): Promise<FormState> {
   const user = await currentUser();
-  if (!user) return localeRedirect("/connexion");
-  if (user.mustChangePassword) return localeRedirect("/compte");
+  if (!user) return localeRedirect("/login");
+  if (user.mustChangePassword) return localeRedirect("/account");
   let result: Awaited<ReturnType<typeof requestOwnEmailChange>>;
   try {
     result = await requestOwnEmailChange(await actionContext(), {
@@ -325,26 +325,26 @@ export async function requestEmailChangeAction(prev: FormState, formData: FormDa
     throw error;
   }
   if (!result.ok) return refusal(prev, result.error, formData, EMAIL_CHANGE_KEPT_FIELDS);
-  if (!result.me.pendingEmail) return localeRedirect("/compte?email=changed#email");
+  if (!result.me.pendingEmail) return localeRedirect("/account?email=changed#email");
   // Never a plain link in production (the command does not return it).
-  const link = result.confirmUrl ? `&lien=${encodeURIComponent(result.confirmUrl)}` : "";
-  return localeRedirect(`/compte?email=${result.sent || result.confirmUrl ? "pending" : "failed"}${link}#email`);
+  const link = result.confirmUrl ? `&link=${encodeURIComponent(result.confirmUrl)}` : "";
+  return localeRedirect(`/account?email=${result.sent || result.confirmUrl ? "pending" : "failed"}${link}#email`);
 }
 
 export async function cancelEmailChangeAction() {
   const result = await cancelOwnEmailChange(await actionContext());
   if (!result.ok) {
-    if (result.error === "unauthorized") return localeRedirect("/connexion");
-    return localeRedirect(`/compte?ee=${encodeURIComponent(result.error)}#email`);
+    if (result.error === "unauthorized") return localeRedirect("/login");
+    return localeRedirect(`/account?ee=${encodeURIComponent(result.error)}#email`);
   }
-  return localeRedirect("/compte?email=cancelled#email");
+  return localeRedirect("/account?email=cancelled#email");
 }
 
 /** « Confirmer » button of the page of the link received by email. */
 export async function confirmEmailAction(formData: FormData) {
   const token = String(formData.get("token") ?? "");
-  const suite = nextPath(formData.get("suite"));
-  const page = `/confirmer-email/${encodeURIComponent(token)}`;
+  const suite = nextPath(formData.get("next") ?? formData.get("suite"));
+  const page = `/confirm-email/${encodeURIComponent(token)}`;
   let result: Awaited<ReturnType<typeof confirmEmailWithToken>>;
   try {
     result = await confirmEmailWithToken(await actionContext(), { token, suite });
@@ -354,29 +354,29 @@ export async function confirmEmailAction(formData: FormData) {
   }
   if (!result.ok) return localeRedirect(`${page}?e=${encodeURIComponent(result.error)}`);
   const query = new URLSearchParams({ ok: result.purpose });
-  if (result.suite && result.suite !== "/") query.set("suite", result.suite);
+  if (result.suite && result.suite !== "/") query.set("next", result.suite);
   // The confirmed account is the session's: the page can show its new address.
-  if (result.ownAccount) query.set("compte", "1");
+  if (result.ownAccount) query.set("own", "1");
   return localeRedirect(`${page}?${query.toString()}`);
 }
 
 export async function createListAction(prev: FormState, formData: FormData): Promise<FormState> {
   const user = await currentUser();
-  if (!user) return localeRedirect("/connexion");
-  if (user.mustChangePassword) return localeRedirect("/compte");
+  if (!user) return localeRedirect("/login");
+  if (user.mustChangePassword) return localeRedirect("/account");
   const result = await createList(await actionContext(), {
     title: String(formData.get("title") ?? ""),
     category: String(formData.get("category") ?? ""),
     person: String(formData.get("person") ?? ""),
   });
   if (!result.ok) return refusal(prev, result.error, formData, NEW_LIST_KEPT_FIELDS);
-  return localeRedirect(`/listes/${result.list.id}`);
+  return localeRedirect(`/lists/${result.list.id}`);
 }
 
 async function memberId(): Promise<string> {
   const user = await currentUser();
-  if (!user) return localeRedirect("/connexion");
-  if (user.mustChangePassword) return localeRedirect("/compte");
+  if (!user) return localeRedirect("/login");
+  if (user.mustChangePassword) return localeRedirect("/account");
   return user.id;
 }
 
@@ -755,17 +755,17 @@ export async function cancelMyReservationAction(formData: FormData) {
 
 export async function joinInviteAction(token: string) {
   const user = await currentUser();
-  if (!user) return localeRedirect(`/connexion?next=${encodeURIComponent(`/inviter/${token}`)}`);
-  if (user.mustChangePassword) return localeRedirect("/compte");
+  if (!user) return localeRedirect(`/login?next=${encodeURIComponent(`/invite/${token}`)}`);
+  if (user.mustChangePassword) return localeRedirect("/account");
   const result = await joinInvite(await actionContext(), { token });
-  if (!result.ok) return localeRedirect(`/inviter/${token}?e=${encodeURIComponent(result.error)}`);
-  return localeRedirect(`/listes/${result.list.id}`);
+  if (!result.ok) return localeRedirect(`/invite/${token}?e=${encodeURIComponent(result.error)}`);
+  return localeRedirect(`/lists/${result.list.id}`);
 }
 
 export async function subscribeAction(formData: FormData) {
   const readToken = String(formData.get("readToken") ?? "").trim();
   const user = await currentUser();
-  if (!user) return localeRedirect(`/connexion?next=${encodeURIComponent(`/l/${readToken}`)}`);
+  if (!user) return localeRedirect(`/login?next=${encodeURIComponent(`/l/${readToken}`)}`);
   await memberId();
   let result: Awaited<ReturnType<typeof subscribeToList>>;
   try {
@@ -798,16 +798,16 @@ export async function subscribeByLinkAction(formData: FormData) {
       isUnlocked: hasReadUnlock,
     });
   } catch (error) {
-    if (isRateLimitError(error)) return localeRedirect("/?fe=rateLimited#suivies");
+    if (isRateLimitError(error)) return localeRedirect("/?fe=rateLimited#following");
     throw error;
   }
   if (!result.ok) {
     if ("readToken" in result) {
       return localeRedirect(`/l/${result.readToken}?subscribe=1`);
     }
-    return localeRedirect(`/?fe=${encodeURIComponent(result.error)}#suivies`);
+    return localeRedirect(`/?fe=${encodeURIComponent(result.error)}#following`);
   }
-  return localeRedirect("/#suivies");
+  return localeRedirect("/#following");
 }
 
 export async function unsubscribeAction(formData: FormData) {
@@ -816,7 +816,7 @@ export async function unsubscribeAction(formData: FormData) {
   await memberId();
   await unsubscribeFromList(await actionContext(), { readToken });
   if (returnTo === "list") return localeRedirect(`/l/${readToken}`);
-  return localeRedirect("/#suivies");
+  return localeRedirect("/#following");
 }
 
 export async function setLocaleAction(locale: Locale) {

@@ -245,7 +245,7 @@ export function toMemberListView(
     theme: wishlist.theme,
     role,
     readUrl: siteUrl(origin, locale, `/l/${wishlist.readToken}`),
-    inviteUrl: siteUrl(origin, locale, `/inviter/${wishlist.inviteToken}`),
+    inviteUrl: siteUrl(origin, locale, `/invite/${wishlist.inviteToken}`),
     hasReadPassword: hasReadPassword(wishlist),
     categories: categoriesOf(doc, wishlist.id),
     people: peopleOf(doc, wishlist.id),

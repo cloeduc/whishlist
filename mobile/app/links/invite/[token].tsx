@@ -23,7 +23,7 @@ type Preview =
   | { status: "failed"; message: string; retry: boolean };
 
 /**
- * Invite link opened in the app (011, US2), like the site's `/inviter/{token}`. Without a session, the link
+ * Invite link opened in the app (011, US2), like the site's `/invite/{token}`. Without a session, the link
  * is kept during sign-in or sign-up, then the screen comes back here (R5). Signed in: the title of
  * the list and « Rejoindre »; an account that is already a member goes straight to the list.
  */

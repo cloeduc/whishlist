@@ -16,7 +16,7 @@ import { NetworkNote } from "@/ui/NetworkNote";
 const DEAD_LINK = new Set(["resetLinkInvalid", "resetLinkExpired"]);
 
 /**
- * Reset link opened in the app (011, R7): same form as `/reinitialiser/{token}`.
+ * Reset link opened in the app (011, R7): same form as `/reset-password/{token}`.
  * With nobody signed in, the server also opens a session and the app goes to the lists; signed in to
  * another account, the app's session does not change. The length rule is the server's.
  */

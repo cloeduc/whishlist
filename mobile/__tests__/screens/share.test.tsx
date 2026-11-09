@@ -440,7 +440,7 @@ test("the link « Gérer le partage sur le site » is gone: everything is in the
 // 017 US4: replacing the invite link, owner only.
 
 test("the owner replaces the invite link after confirming: the new link shows", async () => {
-  const NEW_URL = "https://ohyoushouldnt.example.test/inviter/new";
+  const NEW_URL = "https://ohyoushouldnt.example.test/invite/new";
   let replaced = false;
   await renderOwner(list);
   expect(screen.getByText(i18n.t("list:share.regenerateHint"))).toBeOnTheScreen();

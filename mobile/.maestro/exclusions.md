@@ -43,6 +43,7 @@ Les vérifications « visible sur le site » des stories restent manuelles aussi
 | 017-us1 | Message de limite d'envoi des invitations (8 par heure) | Trop long à provoquer dans la suite ; le message est couvert par le test d'écran (`__tests__/screens/share.test.tsx`) | [017 quickstart, story 1](../../specs/017-mobile-sharing/quickstart.md#story-1--inviter) |
 | 017-us2 | Actions de gestion désactivées hors ligne (cas limite « Hors ligne ») | Demande le mode avion (Android seulement) ; couvert par les tests d'écran hors ligne de `share.test.tsx` et `settings.test.tsx` | [017 quickstart, story 2](../../specs/017-mobile-sharing/quickstart.md#story-2--membres) |
 | 017-us5 | Avertissement des changements en attente avant la suppression ou la sortie | Demande des changements faits hors ligne puis le réseau pour supprimer ; couvert par `settings.test.tsx` | [017 quickstart, story 5](../../specs/017-mobile-sharing/quickstart.md#story-5--supprimer-la-liste) |
+| 018-us1 | Story entière : adresses du site en anglais et redirection des anciennes | Sort de l'app (site) ; le site n'a pas de suite e2e, le parcours se vérifie à la main | [018 quickstart, US1](../../specs/018-english-urls/quickstart.md#us1--site) |
 
 ## Partage vers l'app (PR #15, sans spec)
 

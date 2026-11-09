@@ -12,7 +12,7 @@ function form(entries: Record<string, string | Blob>): FormData {
 }
 
 test("keptValues returns exactly the listed fields", () => {
-  const data = form({ email: "ana@example.test", displayName: "Ana", next: "/listes" });
+  const data = form({ email: "ana@example.test", displayName: "Ana", next: "/lists" });
   assert.deepEqual(keptValues(data, ["email", "displayName"]), {
     email: "ana@example.test",
     displayName: "Ana",
