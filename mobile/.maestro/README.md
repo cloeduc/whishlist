@@ -15,9 +15,10 @@ npx maildev@3.0.0 --smtp 1025 --web 1080
 # 3. Serveur local sur la base de la suite (tmp/e2e/wishlist.db), qui envoie ses e-mails à MailDev
 #    (MAIL_SMTP_URL, ignorée en production). La commande e2e remplace la base à chaque exécution, en une
 #    transaction ; le serveur la relit à chaque requête, sans redémarrer. Sans GEMINI_API_KEY ni OPENAI_API_KEY.
+#    Le serveur de dev part d'un .next/ neuf (voir « Pages rechargées en boucle » plus bas).
 export DEMO_PASSWORD='demo-password-1'
 npm run demo:data -- tmp/e2e/wishlist.json
-MAIL_SMTP_URL=smtp://localhost:1025 WISHLIST_DATA_PATH=tmp/e2e/wishlist.json SESSION_SECRET=dev-secret-dev-secret-dev-secret-00 npm run dev -- --port 3010
+rm -rf .next && MAIL_SMTP_URL=smtp://localhost:1025 WISHLIST_DATA_PATH=tmp/e2e/wishlist.json SESSION_SECRET=dev-secret-dev-secret-dev-secret-00 npm run dev -- --port 3010
 
 # 4. App pointée sur ce serveur, au choix :
 #    - build Debug avec son Metro (pratique pour retoucher les écrans sans rebuild) ;
@@ -35,6 +36,8 @@ En build Debug, l'app contient le lanceur du dev client. Après l'effacement de 
 Sur iOS, `submit-register.yaml` ferme la feuille « Utiliser un mot de passe robuste ? » en appuyant sur la position de sa croix : cette feuille du système est invisible pour Maestro. Les sous-parcours refusent aussi « Enregistrer le mot de passe ? » (« Plus tard »).
 
 Sur un Safari neuf (simulateur effacé), iOS 26 ouvre au premier chargement une bulle « Afficher les signets, le menu Partager et les onglets ouverts » qui cache la page à Maestro : `subflows/dismiss-safari-tip.yaml` la ferme, et les sous-parcours qui passent par Safari (`confirm-email.yaml`, `share-from-safari.yaml`) l'appellent avant de taper dans la page.
+
+**Pages rechargées en boucle.** Le cache `.next/` de `next dev` peut se mettre à republier des compilations sans fin : le journal du serveur aligne alors des « ✓ Compiled in 0ms », et chaque page du site ouverte dans Safari se recharge plusieurs fois par seconde. Les parcours qui confirment une adresse échouent (l'appui sur « Confirmer » tombe pendant un rechargement), et Safari restaure ces onglets d'un parcours à l'autre. Remède : arrêter le serveur, supprimer `.next/`, le relancer. Cause probable : un `npm run build` lancé dans le même dossier que `next dev` (les deux écrivent dans `.next/`). Pendant la suite, ne lancez donc pas de build et ne travaillez pas dans le dossier que sert le serveur : servez la suite depuis un worktree à part si vous continuez à coder.
 
 Laissez le Mac branché et capot ouvert pendant la suite : une mise en veille coupe Maestro (« Device became unreachable »).
 

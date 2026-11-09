@@ -78,7 +78,8 @@ async function request(url, init) {
 
 function serverHint(apiUrl) {
   const port = new URL(apiUrl).port || "80";
-  return `MAIL_SMTP_URL=smtp://localhost:1025 WISHLIST_DATA_PATH=tmp/e2e/wishlist.json npm run dev -- --port ${port}`;
+  // A fresh .next/: a stale dev cache can reload the pages open in Safari endlessly (see README).
+  return `rm -rf .next && MAIL_SMTP_URL=smtp://localhost:1025 WISHLIST_DATA_PATH=tmp/e2e/wishlist.json npm run dev -- --port ${port}`;
 }
 
 const MAILDEV_HINT = "npx maildev@3.0.0 --smtp 1025 --web 1080";
