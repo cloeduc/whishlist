@@ -82,7 +82,7 @@ export async function register(
   // `mailFailed` also applies to this email: the response does not single out an existing account.
   const mail = await sendAlreadyRegisteredMail({
     to: normalizeEmail(input.email),
-    loginUrl: `${ctx.origin}${withLocale(ctx.locale, "/connexion")}`,
+    loginUrl: `${ctx.origin}${withLocale(ctx.locale, "/login")}`,
     locale: ctx.locale,
   });
   return { ok: true, user: null, verificationUrl: null, mailFailed: mail.failed };
@@ -158,7 +158,7 @@ export async function requestPasswordReset(
     return { doc: reset.doc, result: reset };
   });
   if (!created.token || !created.email) return { ok: true, resetUrl: null };
-  const resetUrl = `${ctx.origin}${withLocale(ctx.locale, `/reinitialiser/${created.token}`)}`;
+  const resetUrl = `${ctx.origin}${withLocale(ctx.locale, `/reset-password/${created.token}`)}`;
   const mail = await sendPasswordResetMail({ to: created.email, resetUrl, locale: ctx.locale });
   const reveal = !mail.sent && process.env.NODE_ENV !== "production";
   return { ok: true, resetUrl: reveal ? resetUrl : null };

@@ -15,7 +15,7 @@ export function DevLinkAlert({
   label: string;
   url: string | null | undefined;
   origin: string;
-  page: "/confirmer-email/" | "/reinitialiser/";
+  page: "/confirm-email/" | "/reset-password/";
 }) {
   if (process.env.NODE_ENV === "production" || !isSiteLink(url, origin, page)) return null;
   return (

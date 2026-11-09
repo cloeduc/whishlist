@@ -31,12 +31,18 @@ test("extractReadToken accepts a raw token, a /l/ or /en/l/ path, and a full URL
     extractReadToken("https://ohyoushouldnt.app/l/read-other-123456/reserver?itemId=i1"),
     "read-other-123456",
   );
+  assert.equal(
+    extractReadToken("https://ohyoushouldnt.app/l/read-other-123456/reserve?itemId=i1"),
+    "read-other-123456",
+  );
   assert.equal(extractReadToken("/l/read-other-123456/types"), "read-other-123456");
   assert.equal(extractReadToken("ohyoushouldnt.app/listes/read-other-123456"), null);
   assert.equal(extractReadToken(""), null);
   assert.equal(extractReadToken("   "), null);
   assert.equal(extractReadToken("court"), null);
   assert.equal(extractReadToken("https://ohyoushouldnt.app/inviter/invite-token-123"), null);
+  assert.equal(extractReadToken("https://ohyoushouldnt.app/invite/invite-token-123"), null);
+  assert.equal(extractReadToken("https://ohyoushouldnt.app/lists/12345678"), null);
   assert.equal(extractReadToken("https://ohyoushouldnt.app/listes/12345678"), null);
   assert.equal(extractReadToken("http://[invalid"), null);
 });

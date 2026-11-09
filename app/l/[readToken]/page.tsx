@@ -213,7 +213,7 @@ export default async function ReadPage({
         ))}
       </nav>
       <div className="flex flex-wrap items-center gap-2">
-        <LinkButton href={`/l/${readToken}/reserver`}>{t("reserveIdea")}</LinkButton>
+        <LinkButton href={`/l/${readToken}/reserve`}>{t("reserveIdea")}</LinkButton>
         {!isMember ? (
           activeAccount ? (
             isSubscribed ? (
@@ -242,7 +242,7 @@ export default async function ReadPage({
             )
           ) : (
             <LinkButton
-              href={`/connexion?next=${encodeURIComponent(`/l/${readToken}`)}`}
+              href={`/login?next=${encodeURIComponent(`/l/${readToken}`)}`}
               variant="neutral"
             >
               {t("subscription.follow")}

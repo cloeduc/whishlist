@@ -1,3 +1,4 @@
+import { canonicalSitePath } from "../site/legacy-paths";
 import { isLocale, type Locale } from "./config";
 
 export function stripLocalePrefix(pathname: string): { locale: Locale; path: string } {
@@ -21,7 +22,7 @@ export type LocaleDecision =
   | { type: "rewrite"; pathname: string; search: string; locale: Locale }
   | { type: "continue"; locale: Locale };
 
-/** Internal site path (`/inviter/…`), never another origin (`//hote`, `/\\hote`, `https://…`). */
+/** Internal site path (`/invite/…`), never another origin (`//host`, `/\\host`, `https://…`). */
 export function internalPath(value: unknown): string | null {
   if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
     return null;
@@ -37,35 +38,49 @@ function pathOnly(value: string | null): string | null {
 /**
  * The address decides the language. `?lang=` and `/fr` redirect to the canonical URL.
  * An internal navigation from `/en` keeps the prefix.
+ * A former French address (feature 018) redirects permanently to its English address, in the same
+ * step as the language; a form posted to it (other method than GET/HEAD) is rewritten instead, so
+ * that its body is not lost.
  */
 export function decideLocaleRoute(input: {
   pathname: string;
   search: string;
   nextUrl: string | null;
+  method?: string;
 }): LocaleDecision {
   const params = new URLSearchParams(input.search.startsWith("?") ? input.search.slice(1) : input.search);
   const lang = params.get("lang");
-  if (isLocale(lang)) {
-    params.delete("lang");
-    const bare = stripLocalePrefix(input.pathname).path;
-    const query = params.toString();
+  const hasLang = isLocale(lang);
+  if (hasLang) params.delete("lang");
+  const query = params.toString();
+  const search = hasLang ? (query ? `?${query}` : "") : input.search;
+
+  const current = stripLocalePrefix(input.pathname);
+  const frenchPrefix = input.pathname === "/fr" || input.pathname.startsWith("/fr/");
+  const canonical = canonicalSitePath(current.path, search);
+  const method = (input.method ?? "GET").toUpperCase();
+
+  if (canonical.changed && method !== "GET" && method !== "HEAD") {
     return {
-      type: "redirect",
-      status: 301,
-      pathname: withLocale(lang, bare),
-      search: query ? `?${query}` : "",
-      locale: lang,
+      type: "rewrite",
+      pathname: canonical.path,
+      search: canonical.search,
+      locale: hasLang ? lang : current.locale,
     };
   }
 
-  const current = stripLocalePrefix(input.pathname);
-  if (input.pathname === "/fr" || input.pathname === "/fr/" || input.pathname.startsWith("/fr/")) {
+  const fromNavigation = pathOnly(input.nextUrl);
+  const fromEnglishPage =
+    current.locale === "fr" && !frenchPrefix && fromNavigation !== null && stripLocalePrefix(fromNavigation).locale === "en";
+
+  if (hasLang || frenchPrefix || canonical.changed) {
+    const locale: Locale = hasLang ? lang : current.locale === "en" || fromEnglishPage ? "en" : "fr";
     return {
       type: "redirect",
       status: 301,
-      pathname: current.path,
-      search: input.search,
-      locale: "fr",
+      pathname: withLocale(locale, canonical.path),
+      search: canonical.search,
+      locale,
     };
   }
 
@@ -73,8 +88,7 @@ export function decideLocaleRoute(input: {
     return { type: "rewrite", pathname: current.path, search: input.search, locale: "en" };
   }
 
-  const fromNavigation = pathOnly(input.nextUrl);
-  if (fromNavigation && stripLocalePrefix(fromNavigation).locale === "en") {
+  if (fromEnglishPage) {
     return {
       type: "redirect",
       status: 307,

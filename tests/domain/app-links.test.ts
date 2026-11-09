@@ -16,13 +16,13 @@ const FINGERPRINT = Array.from({ length: 32 }, () => "AB").join(":");
 
 test("each link in the table opens its screen, in French as under /en", () => {
   const cases: [string, string][] = [
-    ["/confirmer-email/tok", "/links/confirm-email/tok"],
-    ["/reinitialiser/tok", "/links/reset-password/tok"],
-    ["/inviter/tok", "/links/invite/tok"],
-    ["/connexion", "/login"],
-    ["/inscription", "/register"],
+    ["/confirm-email/tok", "/links/confirm-email/tok"],
+    ["/reset-password/tok", "/links/reset-password/tok"],
+    ["/invite/tok", "/links/invite/tok"],
+    ["/login", "/login"],
+    ["/register", "/register"],
     ["/l/read", "/guest/read"],
-    ["/l/read/reserver", "/guest/read/reserve"],
+    ["/l/read/reserve", "/guest/read/reserve"],
     ["/l/read/types", "/guest/read"],
   ];
   assert.equal(cases.length >= APP_LINK_ROUTES.length, true);
@@ -32,27 +32,44 @@ test("each link in the table opens its screen, in French as under /en", () => {
   }
 });
 
+test("the former French address of each link opens the same screen (018)", () => {
+  const cases: [string, string][] = [
+    ["/confirmer-email/tok?suite=%2Finviter%2FI", "/links/confirm-email/tok?next=%2Finvite%2FI"],
+    ["/reinitialiser/tok", "/links/reset-password/tok"],
+    ["/inviter/tok", "/links/invite/tok"],
+    ["/connexion?next=%2Finviter%2FI", "/login?next=%2Finvite%2FI"],
+    ["/inscription", "/register"],
+    ["/l/read/reserver?itemId=i1", "/guest/read/reserve?itemId=i1"],
+  ];
+  for (const [site, app] of cases) {
+    assert.equal(to(`https://${HOST}${site}`), app, site);
+    assert.equal(to(`https://${HOST}/en${site}`), app, `/en${site}`);
+    assert.equal(to(`ohyoushouldnt://${site.slice(1)}`), app, `scheme ${site}`);
+    assert.equal(to(site), app, `path ${site}`);
+  }
+});
+
 test("three address forms: web, app scheme, path only", () => {
-  assert.equal(to(`https://${HOST}/reinitialiser/tok`), "/links/reset-password/tok");
-  assert.equal(to("ohyoushouldnt://reinitialiser/tok"), "/links/reset-password/tok");
-  assert.equal(to("ohyoushouldnt:///reinitialiser/tok"), "/links/reset-password/tok");
-  assert.equal(to("/reinitialiser/tok"), "/links/reset-password/tok");
-  assert.equal(to(`http://localhost:3010/reinitialiser/tok`), null);
+  assert.equal(to(`https://${HOST}/reset-password/tok`), "/links/reset-password/tok");
+  assert.equal(to("ohyoushouldnt://reset-password/tok"), "/links/reset-password/tok");
+  assert.equal(to("ohyoushouldnt:///reset-password/tok"), "/links/reset-password/tok");
+  assert.equal(to("/reset-password/tok"), "/links/reset-password/tok");
+  assert.equal(to(`http://localhost:3010/reset-password/tok`), null);
   assert.equal(
-    appPathForSiteUrl("http://localhost:3010/reinitialiser/tok", { apiHost: "localhost:3010" }),
+    appPathForSiteUrl("http://localhost:3010/reset-password/tok", { apiHost: "localhost:3010" }),
     "/links/reset-password/tok",
   );
-  assert.equal(to(`https://${HOST}/reinitialiser/tok/`), "/links/reset-password/tok");
+  assert.equal(to(`https://${HOST}/reset-password/tok/`), "/links/reset-password/tok");
 });
 
 test("query: only the expected keys pass, encoded", () => {
   assert.equal(
-    to(`https://${HOST}/confirmer-email/tok?suite=%2Finviter%2Fabc&utm=x`),
-    "/links/confirm-email/tok?suite=%2Finviter%2Fabc",
+    to(`https://${HOST}/confirm-email/tok?next=%2Finvite%2Fabc&utm=x`),
+    "/links/confirm-email/tok?next=%2Finvite%2Fabc",
   );
-  assert.equal(to(`https://${HOST}/l/read/reserver?itemId=i1&typeId=t1#x`), "/guest/read/reserve?itemId=i1&typeId=t1");
-  assert.equal(to(`https://${HOST}/connexion?next=%2Finviter%2Fabc`), "/login?next=%2Finviter%2Fabc");
-  assert.equal(to(`https://${HOST}/inviter/tok?foo=bar`), "/links/invite/tok");
+  assert.equal(to(`https://${HOST}/l/read/reserve?itemId=i1&typeId=t1#x`), "/guest/read/reserve?itemId=i1&typeId=t1");
+  assert.equal(to(`https://${HOST}/login?next=%2Finvite%2Fabc`), "/login?next=%2Finvite%2Fabc");
+  assert.equal(to(`https://${HOST}/invite/tok?foo=bar`), "/links/invite/tok");
   assert.equal(to(`https://${HOST}/l/read?typeId=`), "/guest/read");
 });
 
@@ -62,17 +79,19 @@ test("addresses the app does not handle: null", () => {
     `https://${HOST}/en`,
     `https://${HOST}/guide`,
     `https://${HOST}/compte/export`,
+    `https://${HOST}/account/export`,
     `https://${HOST}/api/v1/me`,
     // Opened in the browser on purpose from the app (« Gérer le partage sur le site »).
     `https://${HOST}/listes/abc?onglet=partage`,
-    `https://${HOST}/inviter/`,
-    `https://${HOST}/inviter//x`,
-    `https://${HOST}/inviter/a%2Fb`,
-    `https://${HOST}/inviter/%E0%A4%A`,
+    `https://${HOST}/lists/abc?tab=sharing`,
+    `https://${HOST}/invite/`,
+    `https://${HOST}/invite//x`,
+    `https://${HOST}/invite/a%2Fb`,
+    `https://${HOST}/invite/%E0%A4%A`,
     `https://${HOST}/l/read/autre`,
-    `https://evil.example/inviter/tok`,
-    `https://${HOST}.evil.example/inviter/tok`,
-    "//evil.example/inviter/tok",
+    `https://evil.example/invite/tok`,
+    `https://${HOST}.evil.example/invite/tok`,
+    "//evil.example/invite/tok",
     "javascript:alert(1)",
     "",
   ]) {
@@ -81,19 +100,32 @@ test("addresses the app does not handle: null", () => {
 });
 
 test("a token is decoded then re-encoded once", () => {
-  assert.equal(to(`https://${HOST}/inviter/a%20b`), "/links/invite/a%20b");
-  assert.equal(to(`https://${HOST}/inviter/a-b_c`), "/links/invite/a-b_c");
+  assert.equal(to(`https://${HOST}/invite/a%20b`), "/links/invite/a%20b");
+  assert.equal(to(`https://${HOST}/invite/a-b_c`), "/links/invite/a-b_c");
 });
 
 test("Apple file: the published app and each path, with and without /en", () => {
   const detail = appleAssociation("ABCDE12345").applinks.details[0]!;
   assert.deepEqual(detail.appIDs, ["ABCDE12345.app.ohyoushouldnt.mobile"]);
   const paths = detail.components.map((component) => component["/"]);
-  for (const path of ["/confirmer-email/*", "/en/confirmer-email/*", "/l/*/reserver", "/connexion"]) {
+  // New addresses and their former French forms (018), which old emails still carry.
+  for (const path of [
+    "/confirm-email/*",
+    "/en/confirm-email/*",
+    "/l/*/reserve",
+    "/login",
+    "/confirmer-email/*",
+    "/en/confirmer-email/*",
+    "/l/*/reserver",
+    "/connexion",
+    "/en/inviter/*",
+    "/reinitialiser/*",
+    "/inscription",
+  ]) {
     assert.equal(paths.includes(path), true, path);
   }
   assert.equal(new Set(paths).size, paths.length);
-  assert.equal(paths.some((path) => path.startsWith("/guide") || path.startsWith("/listes") || path === "/"), false);
+  assert.equal(paths.some((path) => path.startsWith("/guide") || path.startsWith("/listes") || path.startsWith("/lists") || path.startsWith("/compte") || path === "/"), false);
 });
 
 test("Android file: malformed fingerprints ignored, prefixes from the table", () => {
@@ -101,11 +133,11 @@ test("Android file: malformed fingerprints ignored, prefixes from the table", ()
   assert.equal(entry!.target.package_name, "app.ohyoushouldnt.mobile");
   assert.deepEqual(entry!.target.sha256_cert_fingerprints, [FINGERPRINT]);
   const prefixes = androidPathPrefixes();
-  for (const prefix of ["/confirmer-email/", "/en/confirmer-email/", "/l/", "/connexion", "/en/inscription"]) {
+  for (const prefix of ["/confirm-email/", "/en/confirm-email/", "/l/", "/login", "/en/register", "/confirmer-email/", "/en/confirmer-email/", "/connexion", "/en/inscription", "/inviter/", "/reinitialiser/"]) {
     assert.equal(prefixes.includes(prefix), true, prefix);
   }
   assert.equal(new Set(prefixes).size, prefixes.length);
-  assert.equal(prefixes.some((prefix) => prefix.includes("/listes")), false);
+  assert.equal(prefixes.some((prefix) => prefix.includes("/listes") || prefix.includes("/lists") || prefix.includes("/compte")), false);
 });
 
 function assertJsonHeaders(response: Response) {

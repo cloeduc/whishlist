@@ -7,11 +7,12 @@
 /** Identifier of the published app (iOS and Android). The development variant is not associated with the domain. */
 export const APP_BUNDLE_ID = "app.ohyoushouldnt.mobile";
 
-/** The app's own scheme: same paths as the site (`ohyoushouldnt://confirmer-email/…`). */
+/** The app's own scheme: same paths as the site (`ohyoushouldnt://confirm-email/…`). */
 export const APP_SCHEME = "ohyoushouldnt";
 
 import { internalPath, stripLocalePrefix } from "../i18n/locale-path";
 import routes from "./app-link-routes.json";
+import { canonicalSitePath, legacySitePatterns, segments } from "./legacy-paths";
 
 type Params = Record<string, string>;
 
@@ -27,7 +28,7 @@ export interface AppLinkRoute {
 /**
  * The table lives in `app-link-routes.json`: `mobile/app.config.ts` reads it too, and Expo's config
  * loader reads JSON but not a TypeScript module outside `mobile/`.
- * No `/listes/:id`: the app opens these site pages on purpose (« Gérer le partage sur le site »),
+ * No `/lists/:id`: the app opens these site pages on purpose (« Gérer le partage sur le site »),
  * and a claimed link would reopen the app instead of the browser.
  */
 export const APP_LINK_ROUTES: readonly AppLinkRoute[] = routes.map((route) => ({
@@ -42,11 +43,6 @@ function fillPattern(pattern: string, params: Params): string {
 }
 
 const EN_PREFIX = "/en";
-
-/** `/a/b` → `["a", "b"]`; an empty segment (`/a//b`) stays empty and matches no pattern. */
-function segments(path: string): string[] {
-  return path === "/" ? [] : path.split("/").slice(1);
-}
 
 function decodeSegment(raw: string): string | null {
   try {
@@ -113,13 +109,14 @@ export function appPathForSiteUrl(url: string, options: { apiHost: string; schem
   const rawPath = queryStart === -1 ? beforeHash : beforeHash.slice(0, queryStart);
   const search = queryStart === -1 ? "" : beforeHash.slice(queryStart + 1);
   if (rawPath !== "" && !internalPath(rawPath)) return null;
-  const path = stripLocalePrefix(rawPath.replace(/\/+$/, "") || "/").path;
-  const pathSegments = segments(path);
+  // A former French address (feature 018) opens the same screen as the new one.
+  const canonical = canonicalSitePath(stripLocalePrefix(rawPath.replace(/\/+$/, "") || "/").path, search ? `?${search}` : "");
+  const pathSegments = segments(canonical.path);
 
   for (const route of APP_LINK_ROUTES) {
     const params = matchRoute(route, pathSegments);
     if (!params) continue;
-    const query = parseQuery(search);
+    const query = parseQuery(canonical.search.replace(/^\?/, ""));
     const kept = route.keepQuery.flatMap((key) => {
       const value = query.get(key);
       return value ? [`${encodeURIComponent(key)}=${encodeURIComponent(value)}`] : [];
@@ -130,8 +127,17 @@ export function appPathForSiteUrl(url: string, options: { apiHost: string; schem
 }
 
 /** Path pattern for the Apple file: `:param` → `*`. */
-function applePattern(route: AppLinkRoute): string {
-  return route.sitePattern.replace(/:[A-Za-z]+/g, "*");
+function applePattern(sitePattern: string): string {
+  return sitePattern.replace(/:[A-Za-z]+/g, "*");
+}
+
+/**
+ * Site path patterns claimed by the app: those of the table and their former French forms (feature 018),
+ * which emails sent before the change still carry.
+ */
+export function claimedSitePatterns(): string[] {
+  const current = APP_LINK_ROUTES.map((route) => route.sitePattern);
+  return [...current, ...legacySitePatterns(current)];
 }
 
 function withEnglish(paths: string[]): string[] {
@@ -145,7 +151,7 @@ export function appleAssociation(teamId: string) {
       details: [
         {
           appIDs: [`${teamId}.${APP_BUNDLE_ID}`],
-          components: withEnglish(APP_LINK_ROUTES.map(applePattern)).map((path) => ({ "/": path })),
+          components: withEnglish(claimedSitePatterns().map(applePattern)).map((path) => ({ "/": path })),
         },
       ],
     },
@@ -165,7 +171,7 @@ export function androidAssociation(fingerprints: readonly string[]) {
   ];
 }
 
-/** Prefixes of the Android intent filters: the fixed part of each path, with and without `/en`. */
+/** Prefixes of the Android intent filters: the fixed part of each claimed path, with and without `/en`. */
 export function androidPathPrefixes(): string[] {
-  return withEnglish(APP_LINK_ROUTES.map((route) => route.sitePattern.split(":")[0]));
+  return withEnglish(claimedSitePatterns().map((pattern) => pattern.split(":")[0]));
 }

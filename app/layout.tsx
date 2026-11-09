@@ -56,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <RootShell locale={locale} end={<AnalyticsScript />}>
       <a
-        href="#contenu"
+        href="#content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:rounded-base focus:border-2 focus:border-border focus:bg-main focus:px-3 focus:py-2 focus:text-main-foreground focus:shadow-shadow"
       >
         {t("nav.skip")}
@@ -80,7 +80,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       {user && emailConfirmationPending(user) ? (
         <EmailVerificationBanner origin={await origin()} />
       ) : null}
-      <div id="contenu" tabIndex={-1} className="outline-none">
+      <div id="content" tabIndex={-1} className="outline-none">
         {children}
       </div>
       <SiteFooter

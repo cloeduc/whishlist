@@ -33,7 +33,7 @@ test("regenerating the invite link invalidates the old one", async () => {
     assert.equal(result.ok, true);
     if (!result.ok) return;
     assert.notEqual(result.inviteToken, "it");
-    assert.equal(result.inviteUrl, `https://ohyoushouldnt.example.test/inviter/${result.inviteToken}`);
+    assert.equal(result.inviteUrl, `https://ohyoushouldnt.example.test/invite/${result.inviteToken}`);
     assert.deepEqual(await joinInvite(ctx(doc.users[1]!), { token: "it" }), { ok: false, error: "inviteLinkBroken" });
     const joined = await joinInvite(ctx(doc.users[1]!), { token: result.inviteToken });
     assert.equal(joined.ok && joined.list.role, "member");

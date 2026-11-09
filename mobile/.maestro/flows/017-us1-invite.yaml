@@ -23,7 +23,7 @@ tags:
       id: share.copy-invite
 - assertVisible:
     id: share.invite-link
-    text: .*/inviter/demo-list-invitation.*
+    text: .*/invite/demo-list-invitation.*
 - tapOn:
     id: share.copy-invite
 - scrollUntilVisible:
@@ -67,5 +67,5 @@ tags:
           file: ../scripts/maildev-link.js
           env:
             TO: invite-${output.unique}@example.test
-            KIND: inviter
-- assertTrue: ${output.link.indexOf('/inviter/demo-list-invitation') >= 0}
+            KIND: invite
+- assertTrue: ${output.link.indexOf('/invite/demo-list-invitation') >= 0}

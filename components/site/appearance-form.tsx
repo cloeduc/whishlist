@@ -70,7 +70,7 @@ export function AppearanceForm({
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="wishlistId" value={wishlistId} />
-      <input type="hidden" name="onglet" value="reglages" />
+      <input type="hidden" name="tab" value="settings" />
       <FieldGroup>
         <FormRefusal code={state?.error} />
         <Field>

@@ -1,5 +1,7 @@
 # Contrat : liens du site ouverts par l'app
 
+> **Feature 018** : les chemins du site sont passés en anglais (`/confirm-email/…`, `/reset-password/…`, `/invite/…`, `/login`, `/register`, `/l/<jeton>/reserve`). Les chemins ci-dessous sont les anciennes formes, toujours reconnues ; la référence est [`specs/018-english-urls/contracts/addresses.md`](../../018-english-urls/contracts/addresses.md).
+
 Source unique : `APP_LINK_ROUTES` dans `src/site/app-links.ts` ([research R3](../research.md#r3-chemins-revendiqués--une-seule-table-partagée-par-le-site-et-lapp)). Chaque chemin existe aussi avec le préfixe `/en`. L'app ignore ce préfixe et affiche l'écran dans sa propre langue. La requête (`?…`) est conservée.
 
 ## Chemins revendiqués

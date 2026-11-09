@@ -16,7 +16,7 @@ export default function Privacy() {
   const capabilities = useCapabilities();
   const shows = (configured: boolean | undefined) => capabilities === null || configured !== false;
   return (
-    <LegalScreen testID="legal-privacy.screen" eyebrow={t("privacy.eyebrow")} title={t("privacy.title")} intro={t("privacy.intro")} sitePath="/donnees-personnelles">
+    <LegalScreen testID="legal-privacy.screen" eyebrow={t("privacy.eyebrow")} title={t("privacy.title")} intro={t("privacy.intro")} sitePath="/privacy">
       <ContentSection title={t("privacy.accountTitle")}>
         <ContentText>{t("privacy.accountBody")}</ContentText>
       </ContentSection>

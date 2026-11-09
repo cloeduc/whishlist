@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import checks from "./e2e/checks.cjs";
 import flowFiles from "./e2e/flows.cjs";
 import junit from "./e2e/junit.cjs";
+import legacyPaths from "./e2e/legacy-paths.cjs";
 import locale from "./e2e/locale.cjs";
 import strings from "./e2e/strings.cjs";
 
@@ -162,6 +163,10 @@ async function main() {
   }
 
   writeFileSync(path.join(suiteDir, "scripts/strings.generated.js"), strings.renderStringsScript(strings.buildStrings(lang, repoRoot)));
+  writeFileSync(
+    path.join(suiteDir, "scripts/legacy-paths.generated.js"),
+    legacyPaths.renderLegacyPathsScript(legacyPaths.readLegacyPaths(repoRoot)),
+  );
 
   const skipped = flowFiles.skippedOn(device.platform, flows);
   const toRun = flows.filter((flow) => !skipped.includes(flow));

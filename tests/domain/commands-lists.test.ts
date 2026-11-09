@@ -54,7 +54,7 @@ test("the member view shows reservations and members, without email or hash", as
     assert.equal(list.role, "owner");
     assert.equal(list.hasReadPassword, true);
     assert.equal(list.readUrl, "https://ohyoushouldnt.example.test/en/l/rt");
-    assert.equal(list.inviteUrl, "https://ohyoushouldnt.example.test/en/inviter/it");
+    assert.equal(list.inviteUrl, "https://ohyoushouldnt.example.test/en/invite/it");
     assert.deepEqual(
       list.items.map((item) => [item.id, item.archived]),
       [

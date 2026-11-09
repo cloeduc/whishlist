@@ -1,0 +1,274 @@
+import { listApiKeys } from "../../src/domain/api-keys";
+import { origin } from "../../src/auth/current";
+import { requireUser } from "../../src/auth/guard";
+import { listMyOffers } from "../../src/domain/offrir";
+import { previewAccountDeletion } from "../../src/domain/account";
+import { pendingEmailChange } from "../../src/domain/email-confirmation";
+import {
+  cancelEmailChangeAction,
+} from "../../src/server/actions";
+import { getDocument } from "../../src/store/db";
+import { ApiKeysCard } from "@/components/site/api-keys-card";
+import { DeleteAccountDialog } from "@/components/site/delete-account-dialog";
+import { DevLinkAlert } from "@/components/site/dev-link-alert";
+import { DisplayNameForm } from "@/components/site/display-name-form";
+import { EmailChangeForm } from "@/components/site/email-change-form";
+import { InsetPanel } from "@/components/site/inset-panel";
+import { LinkButton } from "@/components/site/link-button";
+import { PasswordForm } from "@/components/site/password-form";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
+import { intlLocale } from "@/src/i18n/config";
+import { withLocale } from "@/src/i18n/locale-path";
+import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
+import { emailVerificationRequired } from "@/src/server/mail";
+
+export default async function AccountPage({
+  searchParams,
+}: {
+  /**
+   * `e` / `ok`: profile and password; `email` / `ee` / `link`: address change; `x`: export;
+   * `d`: account deletion; `k`: API keys.
+   */
+  searchParams: Promise<{ ok?: string; x?: string; d?: string; email?: string; ee?: string; link?: string; k?: string }>;
+}) {
+  const user = await requireUser({ allowMustChangePassword: true });
+  const query = await searchParams;
+  const [t, doc, locale, siteOrigin] = await Promise.all([
+    getTranslations("auth"),
+    getDocument(),
+    getLocale(),
+    origin(),
+  ]);
+  const forced = user.mustChangePassword;
+  const offers = forced ? [] : listMyOffers(doc, user.id, intlLocale(locale));
+  const profileOk = query.ok === "name";
+  const exportError = query.x ? await translateError(query.x) : null;
+  const deleteError = query.d ? await translateError(query.d) : null;
+  const deletion = forced ? null : previewAccountDeletion(doc, user.id);
+  const passwordOk = query.ok === "1";
+  const pendingEmail = forced ? null : pendingEmailChange(doc, user.id);
+  const emailError = query.ee ? await translateError(query.ee) : null;
+  const emailFeedback =
+    query.email === "pending"
+      ? t("account.emailChange.sent")
+      : query.email === "failed"
+        ? t("verifyBanner.failed")
+        : query.email === "changed"
+          ? t("account.emailChange.changed", { email: user.email })
+          : query.email === "cancelled"
+            ? t("account.emailChange.cancelled")
+            : null;
+  const dateFormat = new Intl.DateTimeFormat(intlLocale(locale), { dateStyle: "medium" });
+  const apiKeys = forced
+    ? []
+    : listApiKeys(doc, user.id).map((key) => ({
+        id: key.id,
+        name: key.name,
+        hint: key.hint,
+        created: dateFormat.format(new Date(key.createdAt)),
+        lastUsed: key.lastUsedAt ? dateFormat.format(new Date(key.lastUsedAt)) : null,
+      }));
+  const apiKeyNotice = !query.k ? null : query.k === "revoked" ? t("apiKeys.revoked") : await translateError(query.k);
+  const mcpUrl = `${siteOrigin}/api/mcp`;
+
+  return (
+    <main className="mx-auto flex w-full max-w-lg flex-col gap-6">
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-bold tracking-tight">{t("account.title")}</h1>
+        {!forced ? <p className="text-muted-foreground">{t("account.subtitle")}</p> : null}
+      </div>
+
+      {forced ? (
+        <Alert variant="destructive">
+          <AlertDescription>{t("changePassword.descriptionForced", { email: user.email })}</AlertDescription>
+        </Alert>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("account.profile")}</CardTitle>
+            <CardDescription>{t("account.profileHint")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <DisplayNameForm
+              displayName={user.displayName}
+              email={user.email}
+              notice={
+                profileOk ? (
+                  <Alert>
+                    <AlertDescription>{t("account.nameSaved")}</AlertDescription>
+                  </Alert>
+                ) : null
+              }
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {!forced ? (
+        <Card id="email">
+          <CardHeader>
+            <CardTitle>{t("account.emailChange.title")}</CardTitle>
+            <CardDescription>
+              {emailVerificationRequired() ? t("account.emailChange.description") : t("account.emailChange.descriptionNoMail")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <p className="flex flex-wrap items-center gap-2 text-sm">
+              {t("account.emailChange.current", { email: user.email })}
+              {emailVerificationRequired() ? (
+                <Badge variant={user.emailVerifiedAt ? "secondary" : "default"}>
+                  {user.emailVerifiedAt ? t("account.emailChange.verified") : t("account.emailChange.unverified")}
+                </Badge>
+              ) : null}
+            </p>
+            {emailFeedback ? (
+              <Alert>
+                <AlertDescription>{emailFeedback}</AlertDescription>
+              </Alert>
+            ) : null}
+            <DevLinkAlert
+              label={t("account.emailChange.devLink")}
+              url={query.link}
+              origin={siteOrigin}
+              page="/confirm-email/"
+            />
+            {emailError ? (
+              <Alert variant="destructive">
+                <AlertDescription>{emailError}</AlertDescription>
+              </Alert>
+            ) : null}
+            {pendingEmail ? (
+              <form action={cancelEmailChangeAction} className="flex flex-col gap-2">
+                <p className="text-sm text-muted-foreground">{t("account.emailChange.pending", { email: pendingEmail })}</p>
+                <Button type="submit" variant="neutral">
+                  {t("account.emailChange.cancel")}
+                </Button>
+              </form>
+            ) : null}
+            <EmailChangeForm />
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {!forced ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>{t("account.offers")}</CardTitle>
+            <CardDescription>{t("account.offersHint")}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-3">
+            {offers.length === 0 ? (
+              <Empty className="shadow-none">
+                <EmptyHeader>
+                  <EmptyTitle>{t("account.offersEmpty")}</EmptyTitle>
+                  <EmptyDescription>{t("account.offersEmptyHint")}</EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            ) : (
+              offers.map((offer) => (
+                <InsetPanel key={offer.reservationId} className="flex flex-col gap-2">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-col gap-1">
+                      <p className="font-bold text-balance">{offer.itemName}</p>
+                      <p className="text-sm text-muted-foreground">{offer.listTitle}</p>
+                    </div>
+                    {offer.priceLabel ? (
+                      <p className="shrink-0 text-lg font-bold tabular-nums">{offer.priceLabel}</p>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {offer.typeLabel ? <Badge variant="outline">{offer.typeLabel}</Badge> : null}
+                    {offer.fromName ? (
+                      <Badge variant="secondary">{t("account.offeredAs", { name: offer.fromName })}</Badge>
+                    ) : null}
+                  </div>
+                  {offer.note ? <p className="text-sm text-pretty">{offer.note}</p> : null}
+                  {offer.listReadToken ? (
+                    <LinkButton
+                      href={`/l/${offer.listReadToken}`}
+                      variant="link"
+                      size="sm"
+                      className="h-auto w-fit px-0"
+                    >
+                      {t("account.openList")}
+                    </LinkButton>
+                  ) : null}
+                </InsetPanel>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {!forced ? (
+        <Card id="keys">
+          <CardHeader>
+            <CardTitle>{t("apiKeys.title")}</CardTitle>
+            <CardDescription>{t("apiKeys.hint")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ApiKeysCard keys={apiKeys} mcpUrl={mcpUrl} notice={apiKeyNotice} />
+          </CardContent>
+        </Card>
+      ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{forced ? t("changePassword.titleForced") : t("changePassword.title")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PasswordForm
+            forced={forced}
+            notice={
+              passwordOk ? (
+                <Alert>
+                  <AlertDescription>{t("changePassword.success")}</AlertDescription>
+                </Alert>
+              ) : null
+            }
+          />
+        </CardContent>
+      </Card>
+
+      {deletion ? (
+        <>
+          <Card id="data">
+            <CardHeader>
+              <CardTitle>{t("account.dataTitle")}</CardTitle>
+              <CardDescription>{t("account.exportHint")}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3">
+              {exportError ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{exportError}</AlertDescription>
+                </Alert>
+              ) : null}
+              <a href={withLocale(locale, "/account/export")} download className={buttonVariants({ variant: "outline" })}>
+                {t("account.exportAction")}
+              </a>
+            </CardContent>
+          </Card>
+
+          <Card id="delete">
+            <CardHeader>
+              <CardTitle>{t("account.deleteTitle")}</CardTitle>
+              <CardDescription>{t("account.deleteHint")}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-3">
+              {deleteError ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{deleteError}</AlertDescription>
+                </Alert>
+              ) : null}
+              <DeleteAccountDialog preview={deletion} />
+            </CardContent>
+          </Card>
+        </>
+      ) : null}
+    </main>
+  );
+}

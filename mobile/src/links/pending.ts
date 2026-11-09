@@ -24,14 +24,15 @@ export function clearPendingLink(): void {
 }
 
 /**
- * Sign-in or sign-up opened by `/connexion?next=/inviter/…` (site link): the invitation is kept,
- * as if its link had been opened. Other `next` values are ignored.
+ * Sign-in or sign-up opened by `/login?next=/invite/…` (site link, or its former French form
+ * `/connexion?next=/inviter/…`): the invitation is kept, as if its link had been opened.
+ * Other `next` values are ignored.
  */
 export function useNextLink(): void {
   const { next } = useLocalSearchParams<{ next?: string }>();
   useEffect(() => {
-    if (typeof next !== "string" || !next.startsWith("/inviter/")) return;
+    if (typeof next !== "string") return;
     const path = appPathForUrl(next);
-    if (path) setPendingLink(path);
+    if (path?.startsWith("/links/invite/")) setPendingLink(path);
   }, [next]);
 }

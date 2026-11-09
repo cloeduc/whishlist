@@ -76,13 +76,17 @@ test.each([
   expect(jest.mocked(router.push).mock.calls.slice(-2)).toEqual([["/legal/mentions"], ["/legal/privacy"]]);
 });
 
-test("sign-in opened from /connexion?next=/inviter/… (011): the invitation is kept for later", async () => {
-  params.next = "/inviter/tok";
+test("sign-in opened from /login?next=/invite/… (011, 018): the invitation is kept for later", async () => {
+  params.next = "/invite/tok";
   try {
     await render(<Login />);
     expect(afterSignIn()).toBe("/links/invite/tok");
     clearPendingLink();
-    params.next = "/compte";
+    params.next = "/inviter/tok";
+    await render(<Login />);
+    expect(afterSignIn()).toBe("/links/invite/tok");
+    clearPendingLink();
+    params.next = "/account";
     await render(<Register />);
     expect(afterSignIn()).toBe("/");
   } finally {

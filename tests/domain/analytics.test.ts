@@ -35,6 +35,12 @@ test("list, account and invite addresses are not sent", () => {
   assert.equal(analyticsCollectAllowed("/en/confirmer-email/secret"), false);
   assert.equal(analyticsCollectAllowed("/listes/abc"), false);
   assert.equal(analyticsCollectAllowed("/connexion"), false);
+  // English addresses (018), and their former French forms above.
+  for (const path of ["/invite/secret", "/en/reset-password/secret", "/confirm-email/secret?next=%2Finvite%2Fx", "/lists/abc", "/login", "/account", "/register", "/forgot-password", "/change-password"]) {
+    assert.equal(analyticsCollectAllowed(path), false, path);
+  }
+  assert.equal(analyticsCollectAllowed("/about"), true);
+  assert.equal(analyticsCollectAllowed("/legal-notice"), true);
   assert.equal(analyticsCollectAllowed("/u/script.js"), false);
 });
 
@@ -43,6 +49,8 @@ test("the filter script contains no instance identifier", () => {
   assert.match(source, /wishlist-analytics-optout/);
   assert.match(source, /\/reinitialiser/);
   assert.match(source, /\/confirmer-email/);
+  assert.match(source, /\/reset-password/);
+  assert.match(source, /\/confirm-email/);
   assert.doesNotMatch(source, /UMAMI_URL|website-id|analytics\.example/);
 });
 

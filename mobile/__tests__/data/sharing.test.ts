@@ -25,7 +25,7 @@ const list: Schemas["MemberList"] = {
   theme: {},
   role: "owner",
   readUrl: "https://ohyoushouldnt.example.test/l/rt",
-  inviteUrl: "https://ohyoushouldnt.example.test/inviter/it",
+  inviteUrl: "https://ohyoushouldnt.example.test/invite/it",
   hasReadPassword: false,
   categories: [],
   people: [],

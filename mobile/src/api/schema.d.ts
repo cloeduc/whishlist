@@ -474,7 +474,7 @@ export interface paths {
         put?: never;
         /**
          * Choisir le nouveau mot de passe depuis le lien reçu
-         * @description Comme la page `/reinitialiser/{token}` du site : le mot de passe change, l'adresse est marquée
+         * @description Comme la page `/reset-password/{token}` du site : le mot de passe change, l'adresse est marquée
          *     vérifiée et les autres connexions du compte tombent. Avec `signIn`, la réponse ouvre une session
          *     pour ce compte ; l'app l'envoie seulement si personne n'y est connecté. 20 essais par IP en 15 min.
          *     Depuis 1.4.0.
@@ -539,7 +539,7 @@ export interface paths {
         put?: never;
         /**
          * Confirmer une adresse depuis le lien reçu
-         * @description Comme le bouton de la page `/confirmer-email/{token}` du site : validation de l'adresse ou
+         * @description Comme le bouton de la page `/confirm-email/{token}` du site : validation de l'adresse ou
          *     changement d'adresse, selon le lien. Le jeton porte toute l'autorisation ; un bearer, facultatif,
          *     sert seulement à `ownAccount`. Après un changement, l'ancienne adresse est prévenue.
          *     20 essais par IP en 15 min. Depuis 1.4.0.
@@ -556,7 +556,7 @@ export interface paths {
                     "application/json": {
                         /** @description Dernier segment du lien reçu. */
                         token: string;
-                        /** @description Paramètre `suite` du lien */
+                        /** @description Paramètre `next` du lien (`suite` avant la feature 018), s'il y en a un. */
                         suite?: string;
                     };
                 };
@@ -573,7 +573,7 @@ export interface paths {
                             purpose: "verify" | "change";
                             /** @description Le lien est celui du compte du bearer. */
                             ownAccount: boolean;
-                            /** @description Chemin interne du site où reprendre (`/inviter/…`), sinon null. */
+                            /** @description Chemin interne du site où reprendre (`/invite/…`), sinon null. Une ancienne adresse française reçue est traduite (feature 018). */
                             suite: string | null;
                         };
                     };
