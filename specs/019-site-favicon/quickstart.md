@@ -37,3 +37,10 @@ Avec le site sur une adresse joignable depuis le téléphone (staging après dé
 ## Après la mise en production (SC-004)
 
 Ouvrir le site de prod dans un navigateur qui l'avait déjà visité. Attendu : la nouvelle icône au plus tard au deuxième chargement.
+
+## Bilan de vérification (2026-11-12)
+
+- Fait : `node mobile/scripts/make-icons.mjs` ne change rien à `mobile/assets/images` ; lint, types et tests verts (437 tests) ; `npm run build` embarque `favicon.ico`, `icon1.svg` et `icon2.png` dans `.next/standalone`.
+- Fait (serveur de dev, base de démo) : sur `/fr`, `/en`, `/fr/lists` et une adresse inconnue, une seule série de balises (`favicon.ico`, `icon1.svg`, `icon2.png`, `apple-icon.png`, chacune avec un paramètre de version) ; l'ancienne adresse `/fr/listes` redirige vers une page qui porte les mêmes ; `/favicon.ico` répond `image/x-icon`, `/favicon.png` répond 404.
+- Fait : rendu agrandi de 16 px sur fond sombre et 32 px sur fond clair, cadeau reconnaissable.
+- Reste à faire à la main : regarder les onglets dans Chrome, Safari et Firefox en thème clair et sombre (parcours 1, étapes 2-3) ; écran d'accueil iPhone et Android (parcours 2) ; après déploiement, SC-004 sur un navigateur qui connaissait l'ancienne icône.

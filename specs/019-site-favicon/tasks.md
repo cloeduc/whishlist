@@ -100,10 +100,10 @@ Rien à installer : `sharp` est déjà une dépendance du site, et le dossier `s
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T015 [P] Ajouter à la section « Commandes » de `AGENTS.md` : « Icônes : `node scripts/make-icons.mjs` (site, écrit `app/favicon.ico`, `app/icon1.svg`, `app/icon2.png`, `app/apple-icon.png`) et `node mobile/scripts/make-icons.mjs` (app), après un changement de `scripts/gift-icon.mjs` ».
-- [ ] T016 [P] Mettre à jour les commentaires « gift favicon » de `src/domain/theme.ts` et `src/domain/types.ts` s'ils ne décrivent plus le dessin (ils parlent toujours du cadeau : ne changer que si c'est faux).
-- [ ] T017 Relire le quickstart en entier et cocher ce qui a été vérifié ; noter dans `quickstart.md` ce qui reste à faire après déploiement (SC-004, téléphone si non fait).
-- [ ] T018 Commit Polish : lint, types et tests verts, puis `chore: document the icon scripts (019)`, sans demander
+- [X] T015 [P] Ajouter à la section « Commandes » de `AGENTS.md` : « Icônes : `node scripts/make-icons.mjs` (site, écrit `app/favicon.ico`, `app/icon1.svg`, `app/icon2.png`, `app/apple-icon.png`) et `node mobile/scripts/make-icons.mjs` (app), après un changement de `scripts/gift-icon.mjs` ».
+- [X] T016 [P] Mettre à jour les commentaires « gift favicon » de `src/domain/theme.ts` et `src/domain/types.ts` s'ils ne décrivent plus le dessin (ils parlent toujours du cadeau : ne changer que si c'est faux).
+- [X] T017 Relire le quickstart en entier et cocher ce qui a été vérifié ; noter dans `quickstart.md` ce qui reste à faire après déploiement (SC-004, téléphone si non fait).
+- [X] T018 Commit Polish : lint, types et tests verts, puis `chore: document the icon scripts (019)`, sans demander
 
 ---
 
