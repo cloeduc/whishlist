@@ -86,13 +86,13 @@ Rien à installer : `sharp` est déjà une dépendance du site, et le dossier `s
 
 ### Tests for User Story 2
 
-- [ ] T011 [US2] Dans `tests/domain/site-icons.test.ts`, ajouter : `app/apple-icon.png` a la signature PNG, 180 × 180 dans IHDR, un type de couleur sans alpha (2) : opaque, donc rien de noir sur iOS (FR-004). Le lancer : il échoue.
+- [X] T011 [US2] Dans `tests/domain/site-icons.test.ts`, ajouter : `app/apple-icon.png` a la signature PNG, 180 × 180 dans IHDR, un type de couleur sans alpha (2) : opaque, donc rien de noir sur iOS (FR-004). Le lancer : il échoue.
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Dans `scripts/make-icons.mjs`, ajouter `app/apple-icon.png` : `svg(180, { background: theme.background, scale: 0.78 })` (mêmes réglages que `icon.png` de l'app), rendu par `sharp` avec `.flatten({ background: theme.background }).png()` pour un PNG sans canal alpha. Relancer le script : seuls `app/apple-icon.png` apparaît, les fichiers de US1 restent identiques.
-- [ ] T013 [US2] `npm test` vert ; vérifier dans le code source de la page la balise `apple-touch-icon` vers `/apple-icon.png?…` ; faire le parcours 2 du quickstart sur l'adresse IP locale du Mac (ou noter qu'il se fera sur staging après déploiement).
-- [ ] T014 [US2] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: give the website a home screen icon matching the app (US2)` de `scripts/make-icons.mjs`, `app/apple-icon.png` et `tests/domain/site-icons.test.ts` (changements de US2 seulement), sans demander
+- [X] T012 [US2] Dans `scripts/make-icons.mjs`, ajouter `app/apple-icon.png` : `svg(180, { background: theme.background, scale: 0.78 })` (mêmes réglages que `icon.png` de l'app), rendu par `sharp` avec `.flatten({ background: theme.background }).png()` pour un PNG sans canal alpha. Relancer le script : seuls `app/apple-icon.png` apparaît, les fichiers de US1 restent identiques.
+- [X] T013 [US2] `npm test` vert ; vérifier dans le code source de la page la balise `apple-touch-icon` vers `/apple-icon.png?…` ; faire le parcours 2 du quickstart sur l'adresse IP locale du Mac (ou noter qu'il se fera sur staging après déploiement).
+- [X] T014 [US2] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit `feat: give the website a home screen icon matching the app (US2)` de `scripts/make-icons.mjs`, `app/apple-icon.png` et `tests/domain/site-icons.test.ts` (changements de US2 seulement), sans demander
 
 **Checkpoint**: onglets et écran d'accueil portent l'icône de l'app.
 

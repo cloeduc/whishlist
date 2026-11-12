@@ -5,7 +5,7 @@ import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
-import { svg } from "./gift-icon.mjs";
+import { svg, theme } from "./gift-icon.mjs";
 
 const out = path.join(path.dirname(fileURLToPath(import.meta.url)), "../app");
 
@@ -39,6 +39,12 @@ const files = {
   "favicon.ico": () => ico([16, 32, 48]),
   "icon1.svg": async () => tabIcon(136),
   "icon2.png": () => tabPng(192),
+  // Home screen (iOS fills the square, transparency turns black): the app's iOS icon, opaque.
+  "apple-icon.png": () =>
+    sharp(svg(180, { background: theme.background, scale: 0.78 }))
+      .flatten({ background: theme.background })
+      .png()
+      .toBuffer(),
 };
 for (const [name, make] of Object.entries(files)) {
   await writeFile(path.join(out, name), await make());

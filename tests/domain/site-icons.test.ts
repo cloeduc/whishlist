@@ -17,6 +17,12 @@ function pngHeader(png: Buffer) {
   return { width: png.readUInt32BE(16), height: png.readUInt32BE(20), colorType: png.readUInt8(25) };
 }
 
+describe("website home screen icon", () => {
+  it("serves an opaque 180 px apple-icon, so iOS shows no black corners", () => {
+    assert.deepEqual(pngHeader(read("app/apple-icon.png")), { width: 180, height: 180, colorType: 2 });
+  });
+});
+
 describe("website tab icons", () => {
   it("serves a vector icon without an opaque background", () => {
     const svg = read("app/icon1.svg").toString("utf8");
