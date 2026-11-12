@@ -37,11 +37,6 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       locale: locale === "en" ? "en_US" : "fr_FR",
     },
-    icons: {
-      icon: [{ url: "/favicon.png", type: "image/png" }],
-      apple: [{ url: "/favicon.png" }],
-      shortcut: ["/favicon.png"],
-    },
   };
 }
 
