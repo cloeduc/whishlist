@@ -9,7 +9,16 @@ set -euo pipefail
 DATA_DIR="${WHISHLIST_DATA_DIR:-$HOME/webserver/data/whishlist}"
 BACKUP_ROOT="${WHISHLIST_BACKUP_DIR:-$HOME/webserver/backups/whishlist}"
 KEEP="${WHISHLIST_BACKUP_KEEP:-14}"
-CONTAINER="${WHISHLIST_CONTAINER:-whishlist}"
+# The running container named whishlist (compose), otherwise the running task of the whishlist Swarm service: Dokploy names
+# the service whishlist-<suffix> and its task whishlist-<suffix>.1.<id>.
+CONTAINER="${WHISHLIST_CONTAINER:-}"
+if [[ -z "$CONTAINER" ]]; then
+  if [[ -n "$(docker ps -q --filter 'name=^whishlist$')" ]]; then
+    CONTAINER=whishlist
+  else
+    CONTAINER="$(docker ps --format '{{.Names}}' | grep -E '^whishlist(-[a-z0-9]+)?\.[0-9]+\.' | head -n 1 || true)"
+  fi
+fi
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 TMP_NAME=".backup-$STAMP.db"
 SRC="$DATA_DIR/$TMP_NAME"
@@ -33,7 +42,8 @@ if [[ ! -f "$DATA_DIR/wishlist.db" ]]; then
   exit 1
 fi
 
-step="hot copy in container $CONTAINER"
+step="hot copy in container ${CONTAINER:-whishlist (none running)}"
+[[ -n "$CONTAINER" ]]
 docker exec "$CONTAINER" node scripts/db-backup.mjs "/data/$TMP_NAME"
 
 step="encryption and copy to $BACKUP_ROOT"
