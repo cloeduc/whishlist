@@ -22,7 +22,7 @@ test("last check and « Plus tard » are kept and replaced", async () => {
 
 test("an unreadable value counts as none", async () => {
   const db = await getDb();
-  await db.run("INSERT INTO meta (key, value) VALUES ('update.snooze', 'pas du json'), ('update.lastCheckAt', 'hier')");
+  await db.run("INSERT INTO meta (key, value) VALUES ('device.update.snooze', 'pas du json'), ('device.update.lastCheckAt', 'hier')");
   expect(await getSnooze()).toBeNull();
   expect(await getLastCheckAt()).toBeNull();
 });

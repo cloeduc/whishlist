@@ -40,6 +40,7 @@ export default function Privacy() {
         {shows(capabilities?.mail) ? <ContentText>{t("privacy.mailBody")}</ContentText> : null}
         {shows(capabilities?.enrich) ? <ContentText>{t("privacy.aiBody")}</ContentText> : null}
         {shows(capabilities?.analytics) ? <ContentText>{t("privacy.audienceBody")}</ContentText> : null}
+        <ContentText>{t("privacy.storesBody")}</ContentText>
       </ContentSection>
       <ContentSection title={t("privacy.rightsTitle")}>
         <ContentText>{t("privacy.rightsBody", { email: CONTACT_EMAIL })}</ContentText>

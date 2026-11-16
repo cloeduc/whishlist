@@ -34,6 +34,12 @@ export function UpdatePrompt({ enabled = !__DEV__ && Platform.OS !== "web" }: { 
         await setLastCheckAt(now);
         const info = await InAppUpdates.checkForUpdate();
         if (!info.updateAvailable) return;
+        // Android: an update already accepted (still downloading, or downloaded while the app was closed)
+        // is resumed or installed now, whatever « Plus tard » said about later versions (FR-004).
+        if (Platform.OS === "android" && info.updateInProgress) {
+          await InAppUpdates.startUpdate();
+          return;
+        }
         const storeVersion = info.storeVersion ?? null;
         if (!shouldPrompt({ storeVersion, snooze: await getSnooze(), now })) return;
         if (Platform.OS === "ios") setOffer({ storeVersion });

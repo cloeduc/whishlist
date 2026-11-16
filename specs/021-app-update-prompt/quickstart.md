@@ -25,6 +25,8 @@ Les tests jest couvrent les règles (24 h, 7 jours, nouvelle version), la fenêt
 5. Mode avion, ouvrir l'app : aucune fenêtre, l'app s'ouvre normalement.
 6. Ouvrir l'app par un lien de liste : la fenêtre s'affiche par-dessus la liste ; « Plus tard » laisse sur la liste.
 7. Avec la version la plus récente installée : aucune fenêtre.
+8. Déconnecté, sur l'écran de connexion (après avoir revu la fenêtre comme à l'étape 4) : la fenêtre s'affiche aussi.
+9. Téléphone en anglais (ou langue de l'app en anglais) : titre, texte et boutons en anglais.
 
 ## US2 : Android
 
@@ -34,3 +36,4 @@ Les tests jest couvrent les règles (24 h, 7 jours, nouvelle version), la fenêt
 4. Pour revoir la proposition : effacer les données de l'app ; accepter : continuer à naviguer pendant le téléchargement ; à la fin, l'écran d'installation de Google s'affiche, l'app redémarre en version N+1, toujours connectée.
 5. Avec un changement en attente (mode avion, ajouter une idée, revenir en ligne juste avant la fin du téléchargement) : après le redémarrage, l'idée est envoyée.
 6. Mode avion, ouvrir l'app : aucune proposition.
+7. Téléchargement fini app fermée : accepter la proposition, fermer l'app (la retirer des apps récentes) pendant le téléchargement, attendre une minute, rouvrir : l'écran d'installation de Google s'affiche et l'app redémarre en version N+1.

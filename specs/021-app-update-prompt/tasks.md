@@ -39,14 +39,14 @@ Chaque phase de story se termine par « Commit de la story » : `npm run lint`, 
 ### Tests (écrits d'abord, rouges)
 
 - [X] T004 [P] Écrire `mobile/__tests__/update/policy.test.ts` pour chaque ligne du tableau « Règles » de `data-model.md` : `shouldCheck` (démarrage → oui ; premier plan à moins de 24 h → non ; 24 h ou plus, ou jamais → oui) ; `shouldPrompt` (pas de report → oui ; même `storeVersion` à moins de 7 jours → non ; même version à 7 jours ou plus → oui ; autre `storeVersion` → oui ; `storeVersion` absente : report de 7 jours quelle que soit la version)
-- [X] T005 [P] Écrire `mobile/__tests__/update/state.test.ts` (base en mémoire, `__tests__/helpers/memory-db.ts`) : lire et écrire `update.lastCheckAt` et `update.snooze` (JSON `{ storeVersion, at }`) ; valeur absente ou JSON illisible → `null`
-- [X] T006 [P] Compléter `mobile/__tests__/offline/snapshot.test.ts` : `clearAll()` efface `userId` mais garde les clés `update.*`
+- [X] T005 [P] Écrire `mobile/__tests__/update/state.test.ts` (base en mémoire, `__tests__/helpers/memory-db.ts`) : lire et écrire `device.update.lastCheckAt` et `device.update.snooze` (JSON `{ storeVersion, at }`) ; valeur absente ou JSON illisible → `null`
+- [X] T006 [P] Compléter `mobile/__tests__/offline/snapshot.test.ts` : `clearAll()` efface `userId` mais garde les clés `device.*`
 
 ### Implementation
 
 - [X] T007 [P] Créer `mobile/src/update/policy.ts` (fonctions pures, `CHECK_INTERVAL_MS = 24 h`, `SNOOZE_MS = 7 jours`) : `shouldCheck({ now, lastCheckAt, coldStart })` et `shouldPrompt({ storeVersion, snooze, now })` ; T004 au vert
 - [X] T008 [P] Créer `mobile/src/update/state.ts` : `getLastCheckAt()`, `setLastCheckAt(date)`, `getSnooze()`, `setSnooze({ storeVersion, at })` sur la table `meta` (`INSERT … ON CONFLICT(key) DO UPDATE`, comme `ensureUser` dans `mobile/src/offline/snapshot.ts`) ; T005 au vert
-- [X] T009 `mobile/src/offline/snapshot.ts` : dans `clearAll()`, `DELETE FROM meta WHERE key NOT LIKE 'update.%'` (les clés concernent le téléphone, pas le compte, research R6) ; T006 au vert
+- [X] T009 `mobile/src/offline/snapshot.ts` : dans `clearAll()`, `DELETE FROM meta WHERE key NOT LIKE 'device.%'` (les clés concernent le téléphone, pas le compte, research R6) ; T006 au vert
 
 **Checkpoint**: règles et stockage prêts, testés.
 

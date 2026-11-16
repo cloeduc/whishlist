@@ -90,6 +90,17 @@ describe("iOS", () => {
     expect(check).not.toHaveBeenCalled();
   });
 
+  test("one check at a time: back in the foreground during the start-up check asks nothing more", async () => {
+    let answer: (info: { updateAvailable: boolean }) => void = () => undefined;
+    check.mockImplementation(() => new Promise((resolve) => (answer = resolve)));
+    await render(<UpdatePrompt enabled />);
+    await waitFor(() => expect(check).toHaveBeenCalledTimes(1));
+    await setLastCheckAt(new Date(Date.now() - CHECK_INTERVAL_MS));
+    await act(async () => appStateListener()("active"));
+    expect(check).toHaveBeenCalledTimes(1);
+    await act(async () => answer({ updateAvailable: false }));
+  });
+
   test("back in the foreground: asked again after 24 h only", async () => {
     await renderPrompt();
     expect(check).toHaveBeenCalledTimes(1);
@@ -113,6 +124,13 @@ describe("Android", () => {
     await renderPrompt();
     await waitFor(() => expect(start).toHaveBeenCalledWith(false));
     expect(screen.queryByText(i18n.t("mobile:update.title"))).toBeNull();
+  });
+
+  test("an update already in progress (or downloaded while the app was closed) is resumed, even after « Plus tard »", async () => {
+    await setSnooze({ storeVersion: "12", at: new Date() });
+    check.mockResolvedValue({ updateAvailable: true, updateInProgress: true });
+    await renderPrompt();
+    await waitFor(() => expect(start).toHaveBeenCalledWith());
   });
 
   test("flexible update not allowed by Google Play: nothing", async () => {

@@ -45,6 +45,7 @@ export default async function PrivacyPage() {
           {mailConfigured() ? <p>{t("privacy.mailBody")}</p> : null}
           {llmConfigured() ? <p>{t("privacy.aiBody")}</p> : null}
           {analyticsConfigured() ? <p>{t("privacy.audienceBody")}</p> : null}
+          <p>{t("privacy.storesBody")}</p>
         </div>
       </ContentSection>
       <ContentSection title={t("privacy.rightsTitle")}>

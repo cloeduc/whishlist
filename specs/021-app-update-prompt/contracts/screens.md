@@ -7,7 +7,7 @@ Pas de changement du contrat d'API. Textes dans `locales/{fr,en}/mobile.json` (n
 | Clé | FR | EN |
 |-----|----|----|
 | `mobile:update.title` | Nouvelle version disponible | New version available |
-| `mobile:update.body` | Une nouvelle version de l'app est disponible. Mettez-la à jour pour profiter des dernières nouveautés. | A new version of the app is available. Update it to get the latest features. |
+| `mobile:update.body` | Une nouvelle version de l'application est disponible. Mettez-la à jour pour profiter des dernières nouveautés. | A new version of the app is available. Update it to get the latest features. |
 | `mobile:update.now` | Mettre à jour | Update |
 | `mobile:update.later` | Plus tard | Later |
 

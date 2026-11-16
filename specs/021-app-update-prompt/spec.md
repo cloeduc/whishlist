@@ -41,7 +41,7 @@ Une personne ouvre l'app sur son iPhone alors qu'une version plus récente est p
 
 **Acceptance Scenarios**:
 
-1. **Given** une version plus récente publiée sur l'App Store, **When** la personne ouvre l'app, **Then** l'app affiche une fenêtre « Une nouvelle version de l'app est disponible. » avec « Mettre à jour » et « Plus tard », par-dessus l'écran ouvert (y compris une liste ouverte par un lien).
+1. **Given** une version plus récente publiée sur l'App Store, **When** la personne ouvre l'app, **Then** l'app affiche une fenêtre « Une nouvelle version de l'application est disponible. » avec « Mettre à jour » et « Plus tard », par-dessus l'écran ouvert (y compris une liste ouverte par un lien).
 2. **Given** ce message, **When** la personne appuie sur « Mettre à jour », **Then** la fiche de l'app s'ouvre dans l'App Store.
 3. **Given** ce message, **When** la personne appuie sur « Plus tard », **Then** la fenêtre se ferme et ne revient pas avant 7 jours, sauf si une version encore plus récente est publiée entre-temps.
 4. **Given** la version installée est la plus récente (ou plus récente que celle de l'App Store, par exemple une version de test), **When** la personne ouvre l'app, **Then** aucun message n'apparaît.
@@ -83,7 +83,7 @@ Une personne ouvre l'app sur Android alors qu'une version plus récente est disp
 ### Functional Requirements
 
 - **FR-001**: L'app MUST vérifier, au démarrage et au plus une fois par jour quand elle revient au premier plan, si une version plus récente que la sienne est disponible sur le store de l'appareil.
-- **FR-002**: Sur iOS, quand une version plus récente existe, l'app MUST afficher une fenêtre « Une nouvelle version de l'app est disponible. » avec « Mettre à jour », qui ouvre la fiche de l'app dans l'App Store, et « Plus tard », qui la ferme.
+- **FR-002**: Sur iOS, quand une version plus récente existe, l'app MUST afficher une fenêtre « Une nouvelle version de l'application est disponible. » avec « Mettre à jour », qui ouvre la fiche de l'app dans l'App Store, et « Plus tard », qui la ferme.
 - **FR-003**: Sur Android, quand une version plus récente existe, l'app MUST proposer la mise à jour de Google Play en mode « en arrière-plan » : la personne peut refuser ; si elle accepte, elle continue d'utiliser l'app pendant le téléchargement.
 - **FR-004**: Sur Android, quand le téléchargement est fini, la nouvelle version MUST s'installer sans autre action (écran d'installation de Google, puis redémarrage de l'app) ; si le téléchargement a fini app fermée, l'installation se fait à la prochaine ouverture. Si l'installation échoue, Google Play s'ouvre sur la fiche de l'app.
 - **FR-005**: Après « Plus tard » (iOS) ou un refus de la proposition (Android), l'app MUST ne plus rien proposer pendant 7 jours, sauf si une version plus récente que celle refusée est publiée entre-temps.

@@ -16,7 +16,7 @@ Approche : la lib `expo-in-app-updates` 0.13 (research R1, R2), une règle pure 
 
 **Primary Dependencies**: `expo-in-app-updates` 0.13.x (nouvelle, native : Play Core app-update 2.1.0 sur Android, StoreKit et recherche iTunes sur iOS) ; `react-native` `AppState` ; composants `mobile/src/ui/` (`ConfirmDialog`).
 
-**Storage**: table `meta` de la base SQLite locale (`update.lastCheckAt`, `update.snooze`), gardée à la déconnexion. Rien côté serveur.
+**Storage**: table `meta` de la base SQLite locale (`device.update.lastCheckAt`, `device.update.snooze`), gardée à la déconnexion. Rien côté serveur.
 
 **Testing**: jest-expo + Testing Library (`mobile/__tests__/`), la lib simulée par `jest.mock` ; pas de parcours Maestro (exclusions) ; vérification manuelle sur les stores (quickstart.md).
 
@@ -68,9 +68,9 @@ mobile/
 ├── app.config.ts                    # ios.infoPlist : AppStoreID, AppStoreCountry ; version 1.2.0
 ├── app/_layout.tsx                  # monte <UpdatePrompt />
 ├── src/update/policy.ts             # shouldCheck, shouldPrompt (pures)
-├── src/update/state.ts              # lecture / écriture de update.* dans meta
+├── src/update/state.ts              # lecture / écriture de device.update.* dans meta
 ├── src/features/update/UpdatePrompt.tsx
-├── src/offline/snapshot.ts          # clearAll garde update.*
+├── src/offline/snapshot.ts          # clearAll garde device.*
 ├── __tests__/update/policy.test.ts
 ├── __tests__/features/update-prompt.test.tsx
 ├── __tests__/offline/…              # clearAll

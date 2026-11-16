@@ -35,7 +35,7 @@ Le report s'enregistre après « Plus tard » (iOS) ou `updateCancelled` (Androi
 
 ## R6. Où garder l'état
 
-**Decision** : la table `meta` de la base locale (`mobile/src/offline/db.ts`), clés `update.lastCheckAt` et `update.snooze` (JSON `{ storeVersion, at }`). `clearAll()` (déconnexion, changement de compte) ne doit pas les effacer : elles concernent le téléphone, pas le compte. `clearAll` passe de `DELETE FROM meta` à `DELETE FROM meta WHERE key NOT LIKE 'update.%'`.
+**Decision** : la table `meta` de la base locale (`mobile/src/offline/db.ts`), clés `device.update.lastCheckAt` et `device.update.snooze` (JSON `{ storeVersion, at }`). `clearAll()` (déconnexion, changement de compte) ne doit pas les effacer : elles concernent le téléphone, pas le compte. `clearAll` passe de `DELETE FROM meta` à `DELETE FROM meta WHERE key NOT LIKE 'device.%'`.
 
 ## R7. Configuration iOS
 
@@ -49,10 +49,10 @@ L'écran existant `UpgradeRequired` (API trop ancienne, 410) reste tel quel ; lu
 
 ## R9. Constitution
 
-Services externes optionnels : sans réseau, ou si le store ne répond pas, l'app marche comme avant (FR-007). Aucune donnée personnelle n'est envoyée : la recherche iOS ne transmet que l'identifiant de l'app ; sur Android, la vérification passe par Google Play sur le téléphone. Rien à ajouter aux mentions de confidentialité.
+Services externes optionnels : sans réseau, ou si le store ne répond pas, l'app marche comme avant (FR-007). Aucune donnée personnelle n'est envoyée : la recherche iOS ne transmet que l'identifiant de l'app ; sur Android, la vérification passe par Google Play sur le téléphone. **Révisé à la revue** : la page « Données personnelles » (site et app) nomme maintenant l'App Store et Google Play parmi les prestataires (`privacy.storesBody`), et dit que deux réglages du téléphone survivent à la déconnexion (`privacy.appBody`).
 
 ## R10. Vérification
 
-- Tests jest (`mobile/__tests__/`) : `policy.ts` (24 h, 7 jours, nouvelle version), le composant de mise à jour avec la lib simulée (iOS : fenêtre, « Mettre à jour », « Plus tard » ; Android : appel de `startUpdate(false)`, report après `updateCancelled` ; rien hors ligne ou en cas d'erreur), `clearAll` qui garde les clés `update.*`.
+- Tests jest (`mobile/__tests__/`) : `policy.ts` (24 h, 7 jours, nouvelle version), le composant de mise à jour avec la lib simulée (iOS : fenêtre, « Mettre à jour », « Plus tard » ; Android : appel de `startUpdate(false)`, report après `updateCancelled` ; rien hors ligne ou en cas d'erreur), `clearAll` qui garde les clés `device.*`.
 - Maestro ne peut pas jouer ces parcours (il faut une vraie version publiée) : `021-us1` et `021-us2` vont dans `mobile/.maestro/exclusions.md` comme « story entière » ; feature `021` ajoutée à `mobile/__tests__/e2e/coverage.test.ts`.
 - À la main : Android par le partage interne d'app de la Play Console (deux versions), iOS avec une version plus ancienne que celle de l'App Store (quickstart.md).

@@ -32,7 +32,7 @@ test("ensureUser with the same account keeps everything", async () => {
   expect(await getSnapshot("lists")).not.toBeNull();
 });
 
-test("clearAll forgets the account but keeps the phone's update state (021)", async () => {
+test("clearAll forgets the account but keeps the phone's keys, such as the update state (021)", async () => {
   const db = await freshDb();
   await ensureUser("alex");
   await setSnooze({ storeVersion: "1.3.0", at: new Date("2026-11-16T11:30:00.000Z") });

@@ -4,8 +4,8 @@ Rien côté serveur. Sur le téléphone, deux clés dans la table `meta` de la b
 
 | Clé | Valeur | Écrite quand | Lue pour |
 |-----|--------|--------------|----------|
-| `update.lastCheckAt` | date ISO | après chaque vérification réussie ou non | `shouldCheck` : au plus une vérification par 24 h au retour au premier plan |
-| `update.snooze` | JSON `{ "storeVersion": string, "at": date ISO }` | « Plus tard » (iOS), refus de la proposition Google (Android) | `shouldPrompt` : rien pendant 7 jours pour la même `storeVersion` |
+| `device.update.lastCheckAt` | date ISO | après chaque vérification réussie ou non | `shouldCheck` : au plus une vérification par 24 h au retour au premier plan |
+| `device.update.snooze` | JSON `{ "storeVersion": string, "at": date ISO }` | « Plus tard » (iOS), refus de la proposition Google (Android) | `shouldPrompt` : rien pendant 7 jours pour la même `storeVersion` |
 
 ## Règles (`mobile/src/update/policy.ts`, fonctions pures)
 
