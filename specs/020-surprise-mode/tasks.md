@@ -158,10 +158,10 @@ Avant d'écrire du code Next.js : lire le guide utile dans `node_modules/next/di
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T054 [P] Mettre à jour le guide du site si une page décrit l'onglet Réservations ou les Archives (`app/guide/`, `locales/*/guide*.json`), et la FAQ si elle parle de « voir les réservations »
-- [ ] T055 [P] Relancer `npm run db:check -- <copie de la base de prod> --counts` après migration, et noter dans `quickstart.md` le résultat (nombre d'idées réservées désarchivées)
-- [ ] T056 Relire `tests/domain/code-language.test.ts` vert (commentaires et descriptions de tests en anglais)
-- [ ] T057 Commit Polish : contrôles verts, puis `chore: polish the surprise mode docs (020)`, sans demander (sauter si rien n'a changé)
+- [X] T054 [P] Mettre à jour le guide du site si une page décrit l'onglet Réservations ou les Archives (`app/guide/`, `locales/*/guide*.json`), et la FAQ si elle parle de « voir les réservations »
+- [ ] T055 [P] Relancer `npm run db:check -- <copie de la base de prod> --counts` après migration, et noter dans `quickstart.md` le résultat (nombre d'idées réservées désarchivées) — **à faire au déploiement** : pas de copie de la base de prod sur la machine de développement
+- [X] T056 Relire `tests/domain/code-language.test.ts` vert (commentaires et descriptions de tests en anglais)
+- [X] T057 Commit Polish : contrôles verts, puis `chore: polish the surprise mode docs (020)`, sans demander (sauter si rien n'a changé)
 
 ---
 

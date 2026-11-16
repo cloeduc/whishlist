@@ -53,7 +53,7 @@
       },
       {
         "q": "Who can see reservations?",
-        "a": "People managing the list can view its reservations. If the list is for you, it’s best to avoid that screen — unless you’re also the sort of person who turns the house upside down looking for hidden Christmas presents. On the shared list, gift givers can also recognize their own reservations in the same browser or through their account."
+        "a": "People managing the list can view its reservations. If the list is for you, tick “Don’t show me reserved gifts” in the Sharing tab: reserved ideas stay in your list without you knowing which ones, and you only see the reservations if you ask — unless you’re the sort of person who turns the house upside down looking for hidden Christmas presents. On the shared list, gift givers can also recognize their own reservations in the same browser or through their account."
       },
       {
         "q": "Can I cancel a reservation?",
@@ -98,7 +98,7 @@
       },
       {
         "title": "6. Keep track of reservations",
-        "body": "The Reservations tab shows reserved gifts. Reserving does not place an order; the purchase happens separately."
+        "body": "The Reservations tab shows reserved gifts. Reserving does not place an order; the purchase happens separately. If the list is for you, keep the surprise: in the Sharing tab, tick “Don’t show me reserved gifts”."
       }
     ],
     "guestTitle": "Received a wish list?",
