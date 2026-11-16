@@ -94,6 +94,18 @@ describe("iOS", () => {
     expect(await screen.findByText(i18n.t("mobile:update.title"))).toBeOnTheScreen();
   });
 
+  test("back in the foreground while paused: still nothing, then a single dialog once unpaused (022)", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "1.3.0" });
+    const rendered = await render(<UpdatePrompt enabled paused />);
+    await waitFor(() => expect(check).toHaveBeenCalledTimes(1));
+    await setLastCheckAt(new Date(Date.now() - CHECK_INTERVAL_MS));
+    await act(async () => appStateListener()("active"));
+    await waitFor(() => expect(check).toHaveBeenCalledTimes(2));
+    expect(screen.queryByText(i18n.t("mobile:update.title"))).toBeNull();
+    await rendered.rerender(<UpdatePrompt enabled paused={false} />);
+    expect(await screen.findAllByText(i18n.t("mobile:update.title"))).toHaveLength(1);
+  });
+
   test("development build: the store is never asked", async () => {
     await render(<UpdatePrompt enabled={false} />);
     await act(async () => undefined);
@@ -153,6 +165,30 @@ describe("Android", () => {
     await waitFor(() => expect(start).toHaveBeenCalledWith(false));
     await rendered.rerender(<UpdatePrompt enabled paused />);
     await rendered.rerender(<UpdatePrompt enabled paused={false} />);
+    expect(start).toHaveBeenCalledTimes(1);
+  });
+
+  test("an update in progress waits for « Quoi de neuf » too, then is resumed once (022)", async () => {
+    check.mockResolvedValue({ updateAvailable: true, updateInProgress: true });
+    const rendered = await render(<UpdatePrompt enabled paused />);
+    await waitFor(() => expect(check).toHaveBeenCalled());
+    await act(async () => undefined);
+    expect(start).not.toHaveBeenCalled();
+    await rendered.rerender(<UpdatePrompt enabled paused={false} />);
+    await waitFor(() => expect(start).toHaveBeenCalledWith());
+    expect(start).toHaveBeenCalledTimes(1);
+  });
+
+  test("back in the foreground while paused: Google's offer is not started, then starts once (022)", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "12", flexibleAllowed: true });
+    const rendered = await render(<UpdatePrompt enabled paused />);
+    await waitFor(() => expect(check).toHaveBeenCalledTimes(1));
+    await setLastCheckAt(new Date(Date.now() - CHECK_INTERVAL_MS));
+    await act(async () => appStateListener()("active"));
+    await waitFor(() => expect(check).toHaveBeenCalledTimes(2));
+    expect(start).not.toHaveBeenCalled();
+    await rendered.rerender(<UpdatePrompt enabled paused={false} />);
+    await waitFor(() => expect(start).toHaveBeenCalledWith(false));
     expect(start).toHaveBeenCalledTimes(1);
   });
 

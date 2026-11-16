@@ -20,6 +20,7 @@
     "version": "Version {{version}}",
     "done": "Got it",
     "account": "What's new",
+    "screenTitle": "What's new",
     "screenEyebrow": "The app",
     "screenIntro": "What each version brought, newest first.",
     "releases": {

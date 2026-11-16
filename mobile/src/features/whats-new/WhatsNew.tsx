@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { tokens } from "@/theme/tokens";
 import { Button } from "@/ui/Button";
 import { ModalCard } from "@/ui/ConfirmDialog";
+import { ContentText } from "@/ui/ContentSection";
 import { Text } from "@/ui/Text";
 import { whatsNewFor } from "@/whats-new/policy";
 import { RELEASES, releaseKey } from "@/whats-new/releases";
@@ -25,9 +26,7 @@ export function ReleaseNotes({ sentences }: { sentences: string[] }) {
   return (
     <View style={{ gap: tokens.space[1] }}>
       {sentences.map((sentence) => (
-        <Text key={sentence} color={tokens.colors.mutedForeground} style={{ lineHeight: tokens.lineHeight.relaxed }}>
-          {`• ${sentence}`}
-        </Text>
+        <ContentText key={sentence}>{`• ${sentence}`}</ContentText>
       ))}
     </View>
   );

@@ -20,6 +20,7 @@
     "version": "Version {{version}}",
     "done": "C'est noté",
     "account": "Nouveautés",
+    "screenTitle": "Nouveautés",
     "screenEyebrow": "L'application",
     "screenIntro": "Ce que chaque version a apporté, la plus récente en premier.",
     "releases": {

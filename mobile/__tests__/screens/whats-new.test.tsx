@@ -1,20 +1,18 @@
 import { render, screen } from "@testing-library/react-native";
-import Constants from "expo-constants";
 
 import WhatsNewScreen from "../../app/(app)/whats-new";
 import { i18n } from "@/i18n";
 import { RELEASES } from "@/whats-new/releases";
 
+import { installVersion } from "../helpers/app-version";
+
 jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(), back: jest.fn(), canGoBack: () => true } }));
 jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
 jest.mock("@/whats-new/releases", () => ({
+  ...jest.requireActual<typeof import("@/whats-new/releases")>("@/whats-new/releases"),
   RELEASES: ["1.1.1", "1.1.2"],
-  releaseKey: (version: string) => version.replaceAll(".", "_"),
 }));
 
-function installVersion(version: string) {
-  jest.replaceProperty(Constants, "expoConfig", { name: "app", slug: "app", version, extra: { apiUrl: "https://api.example.test" } });
-}
 
 beforeEach(async () => {
   await i18n.changeLanguage("fr");

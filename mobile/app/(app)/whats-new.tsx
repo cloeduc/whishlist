@@ -22,7 +22,7 @@ export default function WhatsNewScreen() {
       header={
         <>
           <BackLink />
-          <ContentPage eyebrow={t("whatsNew.screenEyebrow")} title={t("whatsNew.title")} intro={t("whatsNew.screenIntro")}>
+          <ContentPage eyebrow={t("whatsNew.screenEyebrow")} title={t("whatsNew.screenTitle")} intro={t("whatsNew.screenIntro")}>
             {null}
           </ContentPage>
         </>

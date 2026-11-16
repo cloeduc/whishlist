@@ -10,6 +10,7 @@ Textes dans `locales/{fr,en}/mobile.json`, bloc `whatsNew`. Libellés FR indicat
 | `mobile:whatsNew.version` | Version {{version}} | Version {{version}} |
 | `mobile:whatsNew.done` | C'est noté | Got it |
 | `mobile:whatsNew.account` | Nouveautés | What's new |
+| `mobile:whatsNew.screenTitle` | Nouveautés | What's new |
 | `mobile:whatsNew.screenEyebrow` | L'application | The app |
 | `mobile:whatsNew.screenIntro` | Ce que chaque version a apporté, la plus récente en premier. | What each version brought, newest first. |
 | `mobile:whatsNew.releases.1_1_1` | 1 à 5 phrases (research R9) | idem |
@@ -22,7 +23,7 @@ Textes dans `locales/{fr,en}/mobile.json`, bloc `whatsNew`. Libellés FR indicat
 
 ## Écran « Nouveautés » (US2)
 
-- `mobile/app/(app)/whats-new.tsx`, sur le modèle de `mobile/app/legal/licenses.tsx` : `BackLink`, `ContentPage` (`screenEyebrow`, `title`, `screenIntro`), une section par version de `RELEASES` jusqu'à la version installée, la plus récente en premier.
+- `mobile/app/(app)/whats-new.tsx`, sur le modèle de `mobile/app/legal/licenses.tsx` : `BackLink`, `ContentPage` (`screenEyebrow`, `screenTitle`, `screenIntro`), une section par version de `RELEASES` jusqu'à la version installée, la plus récente en premier.
 - `testID` : `whats-new.screen`, `whats-new.section-<x_y_z>`.
 - Entrée : bouton lien `account.whats-new` (`whatsNew.account`) dans `mobile/app/(app)/account.tsx`, juste avant « Licences ».
 

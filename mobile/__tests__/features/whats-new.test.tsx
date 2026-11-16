@@ -1,16 +1,13 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
-import Constants from "expo-constants";
 
 import { WhatsNew } from "@/features/whats-new/WhatsNew";
 import { i18n } from "@/i18n";
+import * as state from "@/whats-new/state";
 import { getLastSeenVersion, setLastSeenVersion } from "@/whats-new/state";
 
+import { installVersion } from "../helpers/app-version";
 import { freshDb } from "../helpers/memory-db";
 
-/** The installed version, as the build gives it. */
-function installVersion(version: string) {
-  jest.replaceProperty(Constants, "expoConfig", { name: "app", slug: "app", version, extra: { apiUrl: "https://api.example.test" } });
-}
 
 async function renderWhatsNew(onShownChange = jest.fn()) {
   const rendered = await render(<WhatsNew enabled onShownChange={onShownChange} />);
@@ -87,4 +84,29 @@ test("development build: no dialog, and the update prompt is not held", async ()
   await act(async () => undefined);
   expect(onShownChange).toHaveBeenCalledWith(false);
   expect(await getLastSeenVersion()).toBeNull();
+});
+
+test("closing by the system gesture (tap on the backdrop) also closes it for good (FR-003)", async () => {
+  await setLastSeenVersion("1.1.0");
+  const { onShownChange } = await renderWhatsNew();
+  await fireEvent.press(screen.getByLabelText(i18n.t("common:actions.close"), { includeHiddenElements: true }));
+  expect(screen.queryByText(i18n.t("mobile:whatsNew.title"))).toBeNull();
+  expect(onShownChange).toHaveBeenLastCalledWith(false);
+  await waitFor(async () => expect(await getLastSeenVersion()).toBe("1.1.1"));
+});
+
+test("a version without news after the one seen: no dialog, and it is recorded as seen (FR-007)", async () => {
+  installVersion("1.1.2");
+  await setLastSeenVersion("1.1.1");
+  const { onShownChange } = await renderWhatsNew();
+  expect(onShownChange).toHaveBeenLastCalledWith(false);
+  expect(screen.queryByText(i18n.t("mobile:whatsNew.title"))).toBeNull();
+  await waitFor(async () => expect(await getLastSeenVersion()).toBe("1.1.2"));
+});
+
+test("the local storage fails: no dialog, and the update prompt is not held (FR-008)", async () => {
+  jest.spyOn(state, "getLastSeenVersion").mockRejectedValue(new Error("disk"));
+  const { onShownChange } = await renderWhatsNew();
+  expect(onShownChange).toHaveBeenLastCalledWith(false);
+  expect(screen.queryByText(i18n.t("mobile:whatsNew.title"))).toBeNull();
 });

@@ -29,8 +29,12 @@ export function UpdatePrompt({
   const checking = useRef(false);
   /** Store version offered on Android, kept for a refusal reported later by `updateCancelled`. */
   const offered = useRef<string | null>(null);
-  /** Android offer found while paused: started once the other dialog is closed. */
-  const [androidOffer, setAndroidOffer] = useState<{ storeVersion: string | null } | null>(null);
+  /**
+   * Android: Google Play's flow to start, held while paused. `resume`: an update already accepted,
+   * resumed or installed; otherwise a new flexible offer.
+   */
+  type AndroidOffer = { storeVersion: string | null; resume: boolean };
+  const [androidOffer, setAndroidOffer] = useState<AndroidOffer | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
@@ -46,13 +50,13 @@ export function UpdatePrompt({
         // Android: an update already accepted (still downloading, or downloaded while the app was closed)
         // is resumed or installed now, whatever « Plus tard » said about later versions (FR-004).
         if (Platform.OS === "android" && info.updateInProgress) {
-          await InAppUpdates.startUpdate();
+          setAndroidOffer({ storeVersion: null, resume: true });
           return;
         }
         const storeVersion = info.storeVersion ?? null;
         if (!shouldPrompt({ storeVersion, snooze: await getSnooze(), now })) return;
         if (Platform.OS === "ios") setOffer({ storeVersion });
-        if (Platform.OS === "android" && info.flexibleAllowed) setAndroidOffer({ storeVersion });
+        if (Platform.OS === "android" && info.flexibleAllowed) setAndroidOffer({ storeVersion, resume: false });
       } catch {
         // Advised only: no store, no network, no message.
       } finally {
@@ -75,10 +79,14 @@ export function UpdatePrompt({
   }, [enabled]);
 
   /** The Android offer already handed to Google Play (each offer is started once). */
-  const started = useRef<{ storeVersion: string | null } | null>(null);
+  const started = useRef<AndroidOffer | null>(null);
   useEffect(() => {
     if (paused || !androidOffer || started.current === androidOffer) return;
     started.current = androidOffer;
+    if (androidOffer.resume) {
+      InAppUpdates.startUpdate().catch(() => undefined);
+      return;
+    }
     offered.current = androidOffer.storeVersion;
     // Flexible only: the update stays « conseillée », never the full-screen immediate flow.
     InAppUpdates.startUpdate(false).catch(() => undefined);

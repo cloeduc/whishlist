@@ -172,7 +172,7 @@
     "cookiesTitle": "Cookies",
     "cookiesBody": "The site sets cookies: wishlist_session (login, 30 days, httpOnly), NEXT_LOCALE (chosen language, 1 year), a wl_ru_… cookie that remembers a list password for 14 days, and a wl_rc_… cookie that finds reservations made without an account for 90 days. These cookies are not used for advertising.",
     "appTitle": "In the mobile app",
-    "appBody": "The app keeps your sign-in in the phone’s secure storage, and a copy of your lists and of changes not yet sent in its local database. Everything is erased when you sign out or delete your account, except two settings of the phone, unrelated to your account: when the app last looked for an update, and your “Later”, if any. The app does not measure audience and asks for no permission.",
+    "appBody": "The app keeps your sign-in in the phone’s secure storage, and a copy of your lists and of changes not yet sent in its local database. Everything is erased when you sign out or delete your account, except three settings of the phone, unrelated to your account: when the app last looked for an update, your “Later”, if any, and the last version whose news you saw. The app does not measure audience and asks for no permission.",
     "providersTitle": "Providers",
     "cloudflareBody": "The site and the app go through Cloudflare, Inc. (United States), which protects and serves the site: IP addresses, requested pages and exchanges pass through its servers, including outside the European Union.",
     "mailBody": "When email sending is configured, messages (address confirmation, address change, invites, password resets, an address that already has an account) go through Resend. The recipient address and the message content are then sent to that provider.",
