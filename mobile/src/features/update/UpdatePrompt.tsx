@@ -15,13 +15,22 @@ import { getLastCheckAt, getSnooze, setLastCheckAt, setSnooze } from "@/update/s
  * and restarts the app); refusing Google's offer waits 7 days. No dialog of the app.
  * The update is only advised: any failure (offline, store unreachable) stays silent.
  * `enabled`: off in development builds, where no store version exists.
+ * `paused`: another dialog goes first (« Quoi de neuf », 022); the offer waits until it is closed.
  */
-export function UpdatePrompt({ enabled = !__DEV__ && Platform.OS !== "web" }: { enabled?: boolean }) {
+export function UpdatePrompt({
+  enabled = !__DEV__ && Platform.OS !== "web",
+  paused = false,
+}: {
+  enabled?: boolean;
+  paused?: boolean;
+}) {
   const { t } = useTranslation("mobile");
   const [offer, setOffer] = useState<{ storeVersion: string | null } | null>(null);
   const checking = useRef(false);
   /** Store version offered on Android, kept for a refusal reported later by `updateCancelled`. */
   const offered = useRef<string | null>(null);
+  /** Android offer found while paused: started once the other dialog is closed. */
+  const [androidOffer, setAndroidOffer] = useState<{ storeVersion: string | null } | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
@@ -43,11 +52,7 @@ export function UpdatePrompt({ enabled = !__DEV__ && Platform.OS !== "web" }: { 
         const storeVersion = info.storeVersion ?? null;
         if (!shouldPrompt({ storeVersion, snooze: await getSnooze(), now })) return;
         if (Platform.OS === "ios") setOffer({ storeVersion });
-        if (Platform.OS === "android" && info.flexibleAllowed) {
-          offered.current = storeVersion;
-          // Flexible only: the update stays « conseillée », never the full-screen immediate flow.
-          await InAppUpdates.startUpdate(false);
-        }
+        if (Platform.OS === "android" && info.flexibleAllowed) setAndroidOffer({ storeVersion });
       } catch {
         // Advised only: no store, no network, no message.
       } finally {
@@ -69,9 +74,19 @@ export function UpdatePrompt({ enabled = !__DEV__ && Platform.OS !== "web" }: { 
     };
   }, [enabled]);
 
+  /** The Android offer already handed to Google Play (each offer is started once). */
+  const started = useRef<{ storeVersion: string | null } | null>(null);
+  useEffect(() => {
+    if (paused || !androidOffer || started.current === androidOffer) return;
+    started.current = androidOffer;
+    offered.current = androidOffer.storeVersion;
+    // Flexible only: the update stays « conseillée », never the full-screen immediate flow.
+    InAppUpdates.startUpdate(false).catch(() => undefined);
+  }, [paused, androidOffer]);
+
   return (
     <ConfirmDialog
-      visible={offer !== null}
+      visible={offer !== null && !paused}
       title={t("update.title")}
       body={t("update.body")}
       confirmLabel={t("update.now")}

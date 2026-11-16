@@ -84,6 +84,16 @@ describe("iOS", () => {
     expect(screen.queryByText(i18n.t("mobile:update.title"))).toBeNull();
   });
 
+  test("paused by « Quoi de neuf »: the dialog waits, then shows once the other one is closed (022)", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "1.3.0" });
+    const rendered = await render(<UpdatePrompt enabled paused />);
+    await waitFor(() => expect(check).toHaveBeenCalled());
+    await act(async () => undefined);
+    expect(screen.queryByText(i18n.t("mobile:update.title"))).toBeNull();
+    await rendered.rerender(<UpdatePrompt enabled paused={false} />);
+    expect(await screen.findByText(i18n.t("mobile:update.title"))).toBeOnTheScreen();
+  });
+
   test("development build: the store is never asked", async () => {
     await render(<UpdatePrompt enabled={false} />);
     await act(async () => undefined);
@@ -131,6 +141,19 @@ describe("Android", () => {
     check.mockResolvedValue({ updateAvailable: true, updateInProgress: true });
     await renderPrompt();
     await waitFor(() => expect(start).toHaveBeenCalledWith());
+  });
+
+  test("paused by « Quoi de neuf »: Google's offer starts only once the other dialog is closed (022)", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "12", flexibleAllowed: true });
+    const rendered = await render(<UpdatePrompt enabled paused />);
+    await waitFor(() => expect(check).toHaveBeenCalled());
+    await act(async () => undefined);
+    expect(start).not.toHaveBeenCalled();
+    await rendered.rerender(<UpdatePrompt enabled paused={false} />);
+    await waitFor(() => expect(start).toHaveBeenCalledWith(false));
+    await rendered.rerender(<UpdatePrompt enabled paused />);
+    await rendered.rerender(<UpdatePrompt enabled paused={false} />);
+    expect(start).toHaveBeenCalledTimes(1);
   });
 
   test("flexible update not allowed by Google Play: nothing", async () => {

@@ -15,6 +15,20 @@
     "now": "Mettre à jour",
     "later": "Plus tard"
   },
+  "whatsNew": {
+    "title": "Quoi de neuf",
+    "version": "Version {{version}}",
+    "done": "C'est noté",
+    "account": "Nouveautés",
+    "screenEyebrow": "L'application",
+    "screenIntro": "Ce que chaque version a apporté, la plus récente en premier.",
+    "releases": {
+      "1_1_1": [
+        "Gardez la surprise : dans l'onglet Partage d'une liste, cochez « Ne pas voir les cadeaux réservés ».",
+        "L'application vous prévient quand une nouvelle version est disponible."
+      ]
+    }
+  },
   "lists": {
     "itemCount_one": "{{count}} idée",
     "itemCount_other": "{{count}} idées",

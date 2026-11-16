@@ -15,6 +15,20 @@
     "now": "Update",
     "later": "Later"
   },
+  "whatsNew": {
+    "title": "What's new",
+    "version": "Version {{version}}",
+    "done": "Got it",
+    "account": "What's new",
+    "screenEyebrow": "The app",
+    "screenIntro": "What each version brought, newest first.",
+    "releases": {
+      "1_1_1": [
+        "Keep the surprise: in a list's Sharing tab, tick “Don’t show me reserved gifts”.",
+        "The app tells you when a new version is available."
+      ]
+    }
+  },
   "lists": {
     "itemCount_one": "{{count}} idea",
     "itemCount_other": "{{count}} ideas",
