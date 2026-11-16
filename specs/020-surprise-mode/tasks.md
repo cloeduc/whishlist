@@ -109,17 +109,17 @@ Avant d'écrire du code Next.js : lire le guide utile dans `node_modules/next/di
 
 ### Tests
 
-- [ ] T031 [P] [US2] Compléter `tests/domain/commands-lists.test.ts` : commande `revealReservations` (compte requis, membre requis, rend les lignes de `listOffrir` quel que soit le mode surprise, liste vide → `[]`)
+- [X] T031 [P] [US2] Compléter `tests/domain/commands-lists.test.ts` : commande `revealReservations` (compte requis, membre requis, rend les lignes de `listOffrir` quel que soit le mode surprise, liste vide → `[]`)
 
 ### Implementation
 
-- [ ] T032 [US2] `src/server/commands/lists.ts` : `revealReservations(ctx, { wishlistId })` → `{ ok: true, reservations }` (mêmes champs que `MemberReservation`)
-- [ ] T033 [US2] `src/server/actions.ts` : `revealReservationsAction(wishlistId)` qui rend les lignes (pas de redirection), pour un composant client
-- [ ] T034 [P] [US2] Ajouter les clés `list:surprise.reveal`, `revealTitle`, `revealBody`, `revealConfirm`, `revealKeep` à `locales/fr/list.json` et `locales/en/list.json`
-- [ ] T035 [US2] Créer `components/site/reservations-reveal.tsx` : `hiddenHint`, bouton « Voir les réservations », `components/ui/dialog.tsx` de confirmation, puis appel de `revealReservationsAction` et affichage des cartes habituelles (idée, catégorie, « De la part de … », mot, `ConfirmForm` « Annuler la réservation » avec `cancelReservationAction`) ; état local seulement (rien dans l'adresse ni le stockage du navigateur) ; liste vide → `list:reservations.empty`. Extraire la carte d'une réservation de `app/lists/[id]/page.tsx` en un composant partagé plutôt que la dupliquer
-- [ ] T036 [US2] `app/lists/[id]/page.tsx` : en mode surprise, l'onglet « Réservations » rend `ReservationsReveal` (toujours sans données de réservation dans le HTML)
-- [ ] T037 [US2] Vérifier à la main quickstart.md, section US2
-- [ ] T038 [US2] Commit de la story : contrôles verts, puis `feat: reveal reservations on demand in surprise mode (US2)`, sans demander
+- [X] T032 [US2] `src/server/commands/lists.ts` : `revealReservations(ctx, { wishlistId })` → `{ ok: true, reservations }` (mêmes champs que `MemberReservation`)
+- [X] T033 [US2] `src/server/actions.ts` : `revealReservationsAction(wishlistId)` qui rend les lignes (pas de redirection), pour un composant client
+- [X] T034 [P] [US2] Ajouter les clés `list:surprise.reveal`, `revealTitle`, `revealBody`, `revealConfirm`, `revealKeep` à `locales/fr/list.json` et `locales/en/list.json` (clés ajoutées avec celles de US1, dans le même bloc `surprise`)
+- [X] T035 [US2] Créer `components/site/reservations-reveal.tsx` : `hiddenHint`, bouton « Voir les réservations », `components/ui/dialog.tsx` de confirmation, puis appel de `revealReservationsAction` et affichage des cartes habituelles (idée, catégorie, « De la part de … », mot, `ConfirmForm` « Annuler la réservation » avec `cancelReservationAction`) ; état local seulement (rien dans l'adresse ni le stockage du navigateur) ; liste vide → `list:reservations.empty`. Extraire la carte d'une réservation de `app/lists/[id]/page.tsx` en un composant partagé plutôt que la dupliquer
+- [X] T036 [US2] `app/lists/[id]/page.tsx` : en mode surprise, l'onglet « Réservations » rend `ReservationsReveal` (toujours sans données de réservation dans le HTML)
+- [X] T037 [US2] Vérifier à la main quickstart.md, section US2
+- [X] T038 [US2] Commit de la story : contrôles verts, puis `feat: reveal reservations on demand in surprise mode (US2)`, sans demander
 
 **Checkpoint**: US1 et US2 complètes sur le site.
 

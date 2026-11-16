@@ -9,7 +9,6 @@ import { llmConfigured } from "@/src/domain/product-llm";
 import { ItemForm } from "@/components/site/item-form";
 import { LabelChips } from "@/components/site/label-chips";
 import {
-  cancelReservationAction,
   clearReadPasswordAction,
   deleteItemAction,
   deleteListAction,
@@ -29,6 +28,8 @@ import { InviteEmailForm } from "@/components/site/invite-email-form";
 import { LiveGiftMark } from "@/components/site/live-gift-mark";
 import { GuestViewLink } from "@/components/site/guest-view-link";
 import { ReadPasswordForm } from "@/components/site/read-password-form";
+import { ReservationCard } from "@/components/site/reservation-card";
+import { ReservationsReveal } from "@/components/site/reservations-reveal";
 import { SurpriseModeForm } from "@/components/site/surprise-mode-form";
 import { WishlistThemeScope } from "@/components/site/wishlist-theme-scope";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -282,7 +283,7 @@ export default async function EditListPage({
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-medium">{t("reservations.title")}</h2>
           {surpriseMode ? (
-            <p className="text-muted-foreground">{t("surprise.hiddenHint")}</p>
+            <ReservationsReveal wishlistId={id} />
           ) : reservations.length === 0 ? (
             <Empty>
               <EmptyHeader>
@@ -290,37 +291,7 @@ export default async function EditListPage({
               </EmptyHeader>
             </Empty>
           ) : (
-            reservations.map((row) => (
-              <Card key={row.reservationId} size="sm">
-                <CardHeader>
-                  <CardTitle className="text-balance">{row.itemName}</CardTitle>
-                  {row.typeLabel ? (
-                    <CardDescription>
-                      <Badge variant="secondary">{row.typeLabel}</Badge>
-                    </CardDescription>
-                  ) : null}
-                </CardHeader>
-                <CardContent className="flex flex-col items-start gap-3">
-                  {row.fromName ? <p>{t("reservations.from", { name: row.fromName })}</p> : null}
-                  {row.note ? <p className="text-muted-foreground">{row.note}</p> : null}
-                  <ConfirmForm
-                    title={t("reservations.cancelTitle")}
-                    description={t("reservations.cancelBody")}
-                    confirmLabel={t("reservations.cancelConfirm")}
-                    cancelLabel={t("reservations.cancelKeep")}
-                    action={cancelReservationAction}
-                    fields={{
-                      wishlistId: id,
-                      reservationId: row.reservationId,
-                      tab: "reservations",
-                    }}
-                    triggerLabel={t("reservations.cancel")}
-                    triggerVariant="outline"
-                    triggerSize="sm"
-                  />
-                </CardContent>
-              </Card>
-            ))
+            reservations.map((row) => <ReservationCard key={row.reservationId} wishlistId={id} row={row} />)
           )}
         </section>
       ) : null}

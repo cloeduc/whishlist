@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { before, test } from "node:test";
 import { formatPrice } from "../../src/domain/price";
-import { listMine, readMemberList, setSurpriseMode } from "../../src/server/commands/lists";
+import { listMine, readMemberList, revealReservations, setSurpriseMode } from "../../src/server/commands/lists";
 import { apiDoc, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtures";
 
 before(ensurePasswordHash);
@@ -130,5 +130,24 @@ test("surprise mode: only for the member who chose it, reservations left out and
     assert.ok(off.ok);
     assert.equal(off.list.surpriseMode, false);
     assert.deepEqual(off.list.reservations.map((reservation) => reservation.id), ["r-taken"]);
+  });
+});
+
+test("reservations on demand: for a member, whatever their surprise mode (020)", async () => {
+  const doc = docWithCamilleList();
+  doc.memberships.find((m) => m.wishlistId === "w" && m.userId === "alex")!.surpriseMode = true;
+  await withStore(doc, async () => {
+    assert.deepEqual(await revealReservations(ctx(), { wishlistId: "w" }), { ok: false, error: "unauthorized" });
+    const shown = await revealReservations(ctx(doc.users[0]!), { wishlistId: "w" });
+    assert.ok(shown.ok);
+    assert.deepEqual(
+      shown.reservations.map((reservation) => [reservation.itemId, reservation.itemName, reservation.fromName]),
+      [["taken", "Idée taken", "Sam"]],
+    );
+    const empty = await revealReservations(ctx(doc.users[1]!), { wishlistId: "w2" });
+    assert.deepEqual(empty, { ok: true, reservations: [], offers: [] });
+    assert.deepEqual(shown.offers.map((offer) => [offer.reservationId, offer.typeLabel, offer.note]), [["r-taken", "Jeux", "Pour ton anniversaire"]]);
+    const stranger = { ...doc.users[1]!, id: "sam", email: "sam@example.test" };
+    assert.deepEqual(await revealReservations(ctx(stranger), { wishlistId: "w" }), { ok: false, error: "notMember" });
   });
 });

@@ -48,7 +48,7 @@ import {
   resendEmailVerification,
 } from "./commands/email";
 import { manageLabel, reorderTypes, type LabelInput } from "./commands/labels";
-import { createList, setSurpriseMode, updateSettings } from "./commands/lists";
+import { createList, revealReservations, setSurpriseMode, updateSettings } from "./commands/lists";
 import {
   clearReadPassword,
   deleteList,
@@ -78,6 +78,7 @@ import {
   unsubscribeFromList,
 } from "./commands/public-list";
 import type { LlmImpact } from "../domain/llm-impact";
+import type { OffrirRow } from "../domain/offrir";
 import { isLocale, localeCookie, type Locale } from "../i18n/config";
 import { withLocale } from "../i18n/locale-path";
 import { canonicalInternalPath } from "../site/legacy-paths";
@@ -616,6 +617,15 @@ export async function setSurpriseModeAction(formData: FormData) {
   const enabled = String(formData.get("enabled") ?? "") === "1";
   const result = await setSurpriseMode(await actionContext(), { wishlistId, enabled });
   return sharingResult(wishlistId, formData, result, enabled ? "surprise" : "surpriseCleared");
+}
+
+/** « Voir les réservations » in surprise mode (020): rows for the client card, never written in the page. */
+export async function revealReservationsAction(
+  wishlistId: string,
+): Promise<{ ok: true; offers: OffrirRow[] } | { ok: false; error: string }> {
+  await memberId();
+  const result = await revealReservations(await actionContext(), { wishlistId });
+  return result.ok ? { ok: true, offers: result.offers } : result;
 }
 
 export async function unlockPublicListAction(prev: FormState, formData: FormData): Promise<FormState> {

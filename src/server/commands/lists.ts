@@ -5,16 +5,19 @@ import { createWishlist } from "../../domain/import";
 import { listDefaults, memberListTitles, numberedTitle } from "../../domain/list-defaults";
 import { addPerson, addType, splitLabels } from "../../domain/items";
 import { updateWishlistSettings } from "../../domain/membership";
+import { listOffrir, type OffrirRow } from "../../domain/offrir";
 import { followedListsOf } from "../../domain/subscription";
 import { setSurpriseMode as setSurpriseModeRule } from "../../domain/surprise";
 import type { WishlistTheme } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import { getTranslationsFor } from "../../i18n/server";
 import {
+  memberReservations,
   toListSummary,
   toMemberListView,
   toSubscribedListSummary,
   type ListSummaryView,
+  type MemberReservationView,
   type MemberListView,
   type SubscribedListSummaryView,
 } from "../api/views";
@@ -149,4 +152,17 @@ export async function setSurpriseMode(
   });
   if (!saved.ok) return saved;
   return memberListView(ctx, input.wishlistId, active.user.id);
+}
+
+/** Reservations of a list, shown on demand: what a member in surprise mode asks to see (020). */
+export async function revealReservations(
+  ctx: CommandContext,
+  input: { wishlistId: string },
+): Promise<CommandResult<{ reservations: MemberReservationView[]; offers: OffrirRow[] }>> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  const doc = await readDocument();
+  if (!findMembership(doc, input.wishlistId, active.user.id)) return { ok: false, error: "notMember" };
+  // `reservations` for the API, `offers` (with the category) for the site's cards.
+  return { ok: true, reservations: memberReservations(doc, input.wishlistId), offers: listOffrir(doc, input.wishlistId) };
 }
