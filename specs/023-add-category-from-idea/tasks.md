@@ -82,9 +82,9 @@ Branche : `023-add-category-from-idea`, créée depuis `staging` avant le premie
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T016 [P] Ajouter `"023": "specs/023-add-category-from-idea/spec.md"` à `mobile/__tests__/e2e/coverage.test.ts` ; ligne « Story entière » `023-us2` dans `mobile/.maestro/exclusions.md` (site, sans suite e2e ; lien quickstart US2)
-- [ ] T017 [P] `.specify/bugs/idea-category-locked/assessment.md` : noter en tête que la remédiation passe par la feature 023 (lien vers `specs/023-add-category-from-idea/spec.md`)
-- [ ] T018 Commit Polish : contrôles verts, puis `chore: record the 023 e2e coverage and link the bug assessment`, sans demander
+- [X] T016 [P] Ajouter `"023": "specs/023-add-category-from-idea/spec.md"` à `mobile/__tests__/e2e/coverage.test.ts` ; ligne « Story entière » `023-us2` dans `mobile/.maestro/exclusions.md` (site, sans suite e2e ; lien quickstart US2)
+- [X] T017 [P] `.specify/bugs/idea-category-locked/assessment.md` : noter en tête que la remédiation passe par la feature 023 (lien vers `specs/023-add-category-from-idea/spec.md`)
+- [X] T018 Commit Polish : contrôles verts, puis `chore: record the 023 e2e coverage and link the bug assessment`, sans demander
 
 ---
 

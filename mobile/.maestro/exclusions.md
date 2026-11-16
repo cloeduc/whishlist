@@ -50,6 +50,7 @@ Les vérifications « visible sur le site » des stories restent manuelles aussi
 | 021-us1 | Story entière : fenêtre « Nouvelle version disponible » sur iPhone | Demande une version plus récente publiée sur l'App Store ; règles et fenêtre couvertes par `update-prompt.test.tsx` | [021 quickstart, US1](../../specs/021-app-update-prompt/quickstart.md#us1--iphone) |
 | 021-us2 | Story entière : mise à jour flexible de Google Play sur Android | Demande deux versions dans la Play Console (partage interne d'app) ; branche Android couverte par `update-prompt.test.tsx` | [021 quickstart, US2](../../specs/021-app-update-prompt/quickstart.md#us2--android) |
 | 022-us1 | Fenêtre « Quoi de neuf » après une vraie mise à jour (version vue plus ancienne) | La suite efface l'app avant chaque parcours, et la fenêtre est coupée en build Debug ; règle et fenêtre couvertes par `whats-new.test.tsx` | [022 quickstart, US1](../../specs/022-whats-new/quickstart.md#us1--la-fenêtre-après-une-mise-à-jour) |
+| 023-us2 | Story entière : nouvelle catégorie depuis le formulaire d'idée du site | Sur le site, qui n'a pas de suite e2e ; dans l'app, la même entrée est vérifiée par `023-us1` | [023 quickstart, US2](../../specs/023-add-category-from-idea/quickstart.md#us2--site) |
 
 ## Partage vers l'app (PR #15, sans spec)
 
