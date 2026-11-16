@@ -9,6 +9,12 @@
     "title": "Update the app",
     "body": "The server no longer supports this version of the app. Install the latest version to continue."
   },
+  "update": {
+    "title": "New version available",
+    "body": "A new version of the app is available. Update it to get the latest features.",
+    "now": "Update",
+    "later": "Later"
+  },
   "lists": {
     "itemCount_one": "{{count}} idea",
     "itemCount_other": "{{count}} ideas",

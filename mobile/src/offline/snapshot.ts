@@ -36,7 +36,8 @@ export async function clearAll(): Promise<void> {
   await db.transaction(async () => {
     await db.run("DELETE FROM snapshot");
     await db.run("DELETE FROM outbox");
-    await db.run("DELETE FROM meta");
+    // The update state (021) belongs to the phone, not to the account.
+    await db.run("DELETE FROM meta WHERE key NOT LIKE 'update.%'");
   });
 }
 

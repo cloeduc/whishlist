@@ -9,6 +9,12 @@
     "title": "Mettez l'application à jour",
     "body": "Cette version de l'application n'est plus prise en charge par le serveur. Installez la dernière version pour continuer."
   },
+  "update": {
+    "title": "Nouvelle version disponible",
+    "body": "Une nouvelle version de l'application est disponible. Mettez-la à jour pour profiter des dernières nouveautés.",
+    "now": "Mettre à jour",
+    "later": "Plus tard"
+  },
   "lists": {
     "itemCount_one": "{{count}} idée",
     "itemCount_other": "{{count}} idées",

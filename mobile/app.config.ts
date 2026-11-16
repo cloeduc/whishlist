@@ -77,7 +77,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: PACKAGE,
     supportsTablet: false,
     // Encryption: HTTPS only (exempt), so that TestFlight asks nothing on each build.
-    infoPlist: { CFBundleAllowMixedLocalizations: true, ITSAppUsesNonExemptEncryption: false },
+    infoPlist: {
+      CFBundleAllowMixedLocalizations: true,
+      ITSAppUsesNonExemptEncryption: false,
+      // expo-in-app-updates (021): the app is published in France, look it up on the French App Store.
+      // AppStoreID (numeric App Store id) can be added here to skip the lookup by bundle id.
+      AppStoreCountry: "fr",
+    },
     ...(APP_LINK_DOMAIN ? { associatedDomains: [`applinks:${APP_LINK_DOMAIN}`] } : {}),
   },
   android: {

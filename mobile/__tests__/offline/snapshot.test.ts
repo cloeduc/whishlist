@@ -1,4 +1,5 @@
-import { ensureUser, getSnapshot, listKey, putSnapshot } from "@/offline/snapshot";
+import { clearAll, ensureUser, getSnapshot, listKey, putSnapshot } from "@/offline/snapshot";
+import { getSnooze, setSnooze } from "@/update/state";
 
 import { freshDb } from "../helpers/memory-db";
 
@@ -29,4 +30,13 @@ test("ensureUser with the same account keeps everything", async () => {
   await putSnapshot("lists", { lists: [] });
   await ensureUser("alex");
   expect(await getSnapshot("lists")).not.toBeNull();
+});
+
+test("clearAll forgets the account but keeps the phone's update state (021)", async () => {
+  const db = await freshDb();
+  await ensureUser("alex");
+  await setSnooze({ storeVersion: "1.3.0", at: new Date("2026-11-16T11:30:00.000Z") });
+  await clearAll();
+  expect(await db.first("SELECT value FROM meta WHERE key = 'userId'")).toBeNull();
+  expect(await getSnooze()).toEqual({ storeVersion: "1.3.0", at: new Date("2026-11-16T11:30:00.000Z") });
 });
