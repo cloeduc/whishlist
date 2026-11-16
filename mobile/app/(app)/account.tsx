@@ -115,6 +115,7 @@ export default function Account() {
           {download.error ? <Alert variant="destructive" testID="account.export-error">{download.error}</Alert> : null}
           <NetworkNote />
         </View>
+        <Button testID="account.whats-new" title={t("mobile:whatsNew.account")} variant="link" onPress={() => router.push("/whats-new")} />
         <Button testID="account.licenses" title={t("mobile:account.licenses")} variant="link" onPress={() => router.push("/legal/licenses")} />
         <Button
           testID="account.contact"

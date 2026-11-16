@@ -80,16 +80,16 @@ Chaque phase de story se termine par « Commit de la story » : `npm run lint`, 
 
 ### Tests
 
-- [ ] T016 [P] [US2] Écrire `mobile/__tests__/screens/whats-new.test.tsx` : une section par version de `RELEASES` jusqu'à la version installée (`whats-new.section-<x_y_z>`), la plus récente en premier, avec ses phrases ; une version plus récente que l'installée n'est pas listée
-- [ ] T017 [P] [US2] Compléter `mobile/__tests__/screens/account.test.tsx` : le lien `account.whats-new` est dans la carte des données, avant « Licences », et ouvre `/whats-new`
+- [X] T016 [P] [US2] Écrire `mobile/__tests__/screens/whats-new.test.tsx` : une section par version de `RELEASES` jusqu'à la version installée (`whats-new.section-<x_y_z>`), la plus récente en premier, avec ses phrases ; une version plus récente que l'installée n'est pas listée
+- [X] T017 [P] [US2] Compléter `mobile/__tests__/screens/account.test.tsx` : le lien `account.whats-new` est dans la carte des données, avant « Licences », et ouvre `/whats-new`
 
 ### Implementation
 
-- [ ] T018 [US2] Créer `mobile/app/(app)/whats-new.tsx` sur le modèle de `mobile/app/legal/licenses.tsx` (`ScreenList`, `BackLink`, `ContentPage` avec `whatsNew.screenEyebrow`, `whatsNew.title`, `whatsNew.screenIntro` ; une `ContentSection` par version, titre `whatsNew.version`) ; `testID="whats-new.screen"`
-- [ ] T019 [US2] `mobile/app/(app)/account.tsx` : bouton lien `account.whats-new` (`whatsNew.account`) avant « Licences », `router.push("/whats-new")`
-- [ ] T020 [US2] Écrire `mobile/.maestro/flows/022-us2-whats-new-screen.yaml` (tag `022-us2`) : se connecter (démo), « Mon compte », déplier la carte des données, « Nouveautés » : `whats-new.screen` et `whats-new.section-1_1_1` visibles ; retour : « Mon compte »
-- [ ] T021 [US2] Lancer `DEMO_PASSWORD=… npm --prefix mobile run e2e -- --platform ios .maestro/flows/022-us1-fresh-install.yaml .maestro/flows/022-us2-whats-new-screen.yaml` (prérequis : `mobile/.maestro/README.md`) ; vérifier à la main quickstart.md, section US2
-- [ ] T022 [US2] Commit de la story : contrôles verts, puis `feat: list what's new from the account screen (US2)`, sans demander
+- [X] T018 [US2] Créer `mobile/app/(app)/whats-new.tsx` sur le modèle de `mobile/app/legal/licenses.tsx` (`ScreenList`, `BackLink`, `ContentPage` avec `whatsNew.screenEyebrow`, `whatsNew.title`, `whatsNew.screenIntro` ; une `ContentSection` par version, titre `whatsNew.version`) ; `testID="whats-new.screen"`
+- [X] T019 [US2] `mobile/app/(app)/account.tsx` : bouton lien `account.whats-new` (`whatsNew.account`) avant « Licences », `router.push("/whats-new")`
+- [X] T020 [US2] Écrire `mobile/.maestro/flows/022-us2-whats-new-screen.yaml` (tag `022-us2`) : se connecter (démo), « Mon compte », déplier la carte des données, « Nouveautés » : `whats-new.screen` et `whats-new.section-1_1_1` visibles ; retour : « Mon compte »
+- [X] T021 [US2] Lancer `DEMO_PASSWORD=… npm --prefix mobile run e2e -- --platform ios .maestro/flows/022-us1-fresh-install.yaml .maestro/flows/022-us2-whats-new-screen.yaml` (prérequis : `mobile/.maestro/README.md`) ; vérifier à la main quickstart.md, section US2 — 022-us1, 022-us2 (et 020-us3) verts sur iPhone 17 Pro, build Debug ; dans ce build la fenêtre « Quoi de neuf » est coupée (`__DEV__`), 022-us1 ne prouve que l’absence de fenêtre
+- [X] T022 [US2] Commit de la story : contrôles verts, puis `feat: list what's new from the account screen (US2)`, sans demander
 
 ---
 

@@ -1,0 +1,36 @@
+# 022 US2: « Mon compte » → « Nouveautés » lists the news of the installed version; back to « Mon compte ».
+appId: app.ohyoushouldnt.mobile
+name: "022 US2 — See what's new from the account screen"
+tags:
+  - 022-us2
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: alex@example.test
+- tapOn:
+    id: open-account
+- extendedWaitUntil:
+    visible:
+      id: account.data-toggle
+    timeout: 10000
+- tapOn:
+    id: account.data-toggle
+- scrollUntilVisible:
+    element:
+      id: account.whats-new
+- tapOn:
+    id: account.whats-new
+- extendedWaitUntil:
+    visible:
+      id: whats-new.screen
+    timeout: 10000
+- assertVisible:
+    id: whats-new.section-1_1_1
+- tapOn:
+    id: back-link.back
+- extendedWaitUntil:
+    visible:
+      id: account.whats-new
+    timeout: 10000
