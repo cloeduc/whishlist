@@ -40,6 +40,7 @@ const list: Schemas["MemberList"] = {
   readUrl: READ_URL,
   inviteUrl: INVITE_URL,
   hasReadPassword: false,
+  surpriseMode: false,
   categories: [{ id: "t", label: "Jeux", sortOrder: 0 }],
   people: [{ id: "p", label: "Alex" }],
   items: [],
@@ -524,4 +525,32 @@ test("alone, after the refusal, « Supprimer la liste » is disabled once offlin
   expect(await screen.findByTestId("share.alone-delete")).toBeEnabled();
   await setOnline(false);
   expect(screen.getByTestId("share.alone-delete")).toBeDisabled();
+});
+
+// 020 US3: « Garder la surprise », any member.
+
+test("surprise mode: ticking the box sends it, reloads the list and confirms (020)", async () => {
+  let sent: unknown = null;
+  await renderShare({ ...list, role: "member" });
+  const box = await screen.findByTestId("share.surprise-toggle");
+  expect(box.props.accessibilityState).toMatchObject({ checked: false });
+  fakeFetch({
+    "PUT /lists/w/surprise-mode": async (request) => {
+      sent = await request.json();
+      return json(200, { ...list, surpriseMode: true });
+    },
+    "GET /lists/w": () => json(200, { ...list, surpriseMode: true }),
+    "GET /lists": () => json(200, { lists: [], subscriptions: [] }),
+  });
+  await fireEvent.press(box);
+  expect(await screen.findByTestId("share.surprise-saved")).toHaveTextContent(i18n.t("list:surprise.saved"));
+  expect(sent).toEqual({ enabled: true });
+  expect(screen.getByTestId("share.surprise-toggle").props.accessibilityState).toMatchObject({ checked: true });
+});
+
+test("surprise mode: offline, the box is disabled (020)", async () => {
+  await renderShare();
+  await screen.findByTestId("share.surprise-toggle");
+  await setOnline(false);
+  await waitFor(() => expect(screen.getByTestId("share.surprise-toggle").props.accessibilityState).toMatchObject({ disabled: true }));
 });

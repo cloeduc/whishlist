@@ -26,6 +26,7 @@ const list: Schemas["MemberList"] = {
   readUrl: "https://ohyoushouldnt.example.test/l/rt",
   inviteUrl: "https://ohyoushouldnt.example.test/invite/it",
   hasReadPassword: false,
+  surpriseMode: false,
   categories: [{ id: "t", label: "Jeux", sortOrder: 0 }],
   people: [{ id: "p", label: "Alex" }],
   items: [],

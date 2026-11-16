@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Oh, You Shouldn't! API
-  version: "1.8.0"
+  version: "1.9.0"
   description: |
     Accès aux listes pour un client autre que le site (app mobile, script).
 
@@ -35,6 +35,11 @@ info:
       `followedLists` dans `AccountDeletionPreview`).
     - 1.8.0 : une clé d'API (`oys_…`) reçoit `403 apiKeyNotAllowed` sur toutes les routes ; elle
       n'ouvre que le serveur MCP (`/api/mcp`).
+    - 1.9.0 : mode surprise (feature 020). `MemberList.surpriseMode` ; `PUT /lists/{listId}/surprise-mode`
+      pour l'activer ou non ; `GET /lists/{listId}/reservations` pour voir les réservations sur demande.
+      Une réservation n'archive plus l'idée : `MemberItem.archived` reste vrai pour une idée réservée hors
+      mode surprise (comme avant), mais plus en mode surprise. Supprimer ou déplacer une idée réservée en
+      mode surprise rend `itemLockedSurprise` (400).
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -79,7 +84,7 @@ paths:
                 type: object
                 required: [apiVersion, enrich, mail, analytics]
                 properties:
-                  apiVersion: { type: string, example: "1.8.0" }
+                  apiVersion: { type: string, example: "1.9.0" }
                   enrich:
                     type: boolean
                     description: Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page).
@@ -772,8 +777,12 @@ paths:
     delete:
       tags: [items]
       summary: Supprimer une idée
+      description: |
+        Une idée réservée n'est pas supprimée : `itemHasReservation`, ou `itemLockedSurprise` quand le
+        compte est en mode surprise (le message ne dit pas que l'idée est réservée).
       responses:
         "204": { description: Supprimée }
+        "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
 
   /lists/{listId}/items/{itemId}/move:
@@ -786,8 +795,8 @@ paths:
       description: |
         Il faut être membre des deux listes. L'idée garde son identifiant ; `typeId` et `personId`
         sont ceux de la liste d'arrivée. Une idée réservée ne change pas de liste
-        (`itemReservedCannotMove`) : la personne qui a réservé ne peut annuler que depuis le lien de
-        la liste d'origine. Un renvoi après réussite (même liste d'arrivée, même catégorie, même
+        (`itemReservedCannotMove`, ou `itemLockedSurprise` en mode surprise, sans dire pourquoi) : la
+        personne qui a réservé ne peut annuler que depuis le lien de la liste d'origine. Un renvoi après réussite (même liste d'arrivée, même catégorie, même
         « qui ») rend l'idée déjà déplacée.
       requestBody:
         required: true
@@ -966,6 +975,54 @@ paths:
         "404": { $ref: "#/components/responses/Error" }
 
   # ---------- Partage ----------
+
+  /lists/{listId}/surprise-mode:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    put:
+      tags: [lists]
+      summary: Activer ou désactiver le mode surprise du compte connecté (depuis 1.9.0)
+      description: |
+        « Ne pas voir les cadeaux réservés » : le réglage ne vaut que pour ce membre et cette liste.
+        Rend la liste telle que le membre la voit désormais.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled: { type: boolean }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberList" }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/reservations:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    get:
+      tags: [lists]
+      summary: Voir les réservations de la liste, sur demande (depuis 1.9.0)
+      description: |
+        Les réservations de la liste, quel que soit le mode surprise : c'est l'action volontaire
+        « Voir les réservations ». Le client ne les garde pas sur l'appareil.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reservations]
+                properties:
+                  reservations: { type: array, items: { $ref: "#/components/schemas/MemberReservation" } }
+        "404": { $ref: "#/components/responses/Error" }
 
   /lists/{listId}/reservations/{reservationId}:
     parameters:
@@ -1447,7 +1504,7 @@ components:
 
     MemberList:
       type: object
-      required: [id, title, subtitle, coverImageUrl, theme, role, readUrl, inviteUrl, hasReadPassword, categories, people, items, reservations, members]
+      required: [id, title, subtitle, coverImageUrl, theme, role, readUrl, inviteUrl, hasReadPassword, surpriseMode, categories, people, items, reservations, members]
       properties:
         id: { type: string }
         title: { type: string }
@@ -1458,10 +1515,22 @@ components:
         readUrl: { type: string }
         inviteUrl: { type: string }
         hasReadPassword: { type: boolean }
+        surpriseMode:
+          type: boolean
+          description: |
+            Mode surprise du compte connecté pour cette liste (depuis 1.9.0). Vrai : `reservations` est
+            vide et `items[].archived` ne dit que si un membre a archivé l'idée ; une idée réservée y
+            figure comme une idée libre. Faux : `items[].archived` est vrai aussi pour une idée réservée.
         categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
         people: { type: array, items: { $ref: "#/components/schemas/Label" } }
-        items: { type: array, items: { $ref: "#/components/schemas/MemberItem" }, description: Archivées comprises. }
-        reservations: { type: array, items: { $ref: "#/components/schemas/MemberReservation" } }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/MemberItem" }
+          description: Archivées comprises. Voir `surpriseMode` pour le sens de `archived`.
+        reservations:
+          type: array
+          items: { $ref: "#/components/schemas/MemberReservation" }
+          description: Vide quand `surpriseMode` est vrai ; `GET /lists/{listId}/reservations` les donne sur demande.
         members: { type: array, items: { $ref: "#/components/schemas/Member" } }
 
     AccountDeletionPreview:

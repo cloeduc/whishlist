@@ -10,7 +10,7 @@ import {
   redactedApiPath,
 } from "../../src/server/api/http";
 import { resetPasswordWithLink } from "../../src/server/commands/auth";
-import { createList } from "../../src/server/commands/lists";
+import { createList, revealReservations, setSurpriseMode } from "../../src/server/commands/lists";
 import { previewInvite } from "../../src/server/commands/sharing";
 import { readDocument } from "../../src/store/db";
 import { apiDoc, ctx, ensurePasswordHash, withMailDryRun, withStore } from "./helpers/api-fixtures";
@@ -106,6 +106,26 @@ test("POST /lists from an unconfirmed account: 403 emailNotVerified, with its me
       assert.ok(body.error.message.length > 0);
     }),
   );
+});
+
+test("surprise mode routes (020): 404 for a non-member, 401 without an account; neutral refusal is a 400", async () => {
+  await withStore(apiDoc(), async () => {
+    // Same chain as the routes: command then `apiError` (Camille is not a member of `w`).
+    const camille = (await readDocument()).users[1]!;
+    for (const [result, status] of [
+      [await setSurpriseMode(ctx(camille), { wishlistId: "w", enabled: true }), 404],
+      [await revealReservations(ctx(camille), { wishlistId: "w" }), 404],
+      [await setSurpriseMode(ctx(), { wishlistId: "w", enabled: true }), 401],
+      [await revealReservations(ctx(), { wishlistId: "w" }), 401],
+    ] as const) {
+      assert.ok(!result.ok);
+      assert.equal((await apiError(result.error, "fr")).status, status);
+    }
+    const response = await apiError("itemLockedSurprise", "fr");
+    assert.equal(response.status, 400);
+    const body = (await response.json()) as { error: { code: string; message: string } };
+    assert.doesNotMatch(body.error.message, /réservée/);
+  });
 });
 
 test("a non-member cannot tell whether a list exists", () => {

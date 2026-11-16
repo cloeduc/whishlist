@@ -1,0 +1,135 @@
+# 020 US3: on the demo list (its idea « Jeu de société coopératif » is reserved by Morgan), the owner ticks
+# « Ne pas voir les cadeaux réservés »: the reserved idea stays among the ideas, leaves the archives, the
+# Reservations tab has no count and shows the reservations only after a confirmation; leaving the screen
+# hides them again. The box is unticked at the end: the other flows find the demo list as it was.
+appId: app.ohyoushouldnt.mobile
+name: "020 US3 — Keep the surprise: hide reservations on one's own list"
+tags:
+  - 020-us3
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: alex@example.test
+- tapOn:
+    id: lists.card-demo-list
+
+# Before: the reservation is counted and the idea sits in the archives.
+- assertVisible:
+    id: tab-reservations
+    text: .*\(1\).*
+
+# Tick the box in the Sharing tab.
+- scrollUntilVisible:
+    element:
+      id: tab-partage
+    direction: UP
+- tapOn:
+    id: tab-partage
+- scrollUntilVisible:
+    element:
+      id: share.surprise-toggle
+- tapOn:
+    id: share.surprise-toggle
+- scrollUntilVisible:
+    element:
+      id: share.surprise-saved
+    timeout: 10000
+
+# Ideas: the reserved idea is there, like any other.
+- scrollUntilVisible:
+    element:
+      id: tab-idees
+    direction: UP
+- tapOn:
+    id: tab-idees
+- runFlow:
+    file: ../subflows/open-category.yaml
+    env:
+      CATEGORY: Loisirs
+      ITEM: Jeu de société coopératif
+- assertVisible:
+    id: list.item-demo-list:jeu
+
+# Archives: not there.
+- scrollUntilVisible:
+    element:
+      id: tab-archives
+    direction: UP
+- tapOn:
+    id: tab-archives
+- assertNotVisible:
+    id: archives.item-demo-list:jeu
+
+# Reservations: no count, hidden until the confirmation.
+- assertNotVisible:
+    id: tab-reservations
+    text: .*\(1\).*
+- scrollUntilVisible:
+    element:
+      id: tab-reservations
+    direction: UP
+- tapOn:
+    id: tab-reservations
+- extendedWaitUntil:
+    visible:
+      id: reservations.hidden
+    timeout: 10000
+- assertNotVisible: .*Morgan.*
+- tapOn:
+    id: reservations.reveal
+- tapOn:
+    id: reservations.reveal-confirm-keep
+- assertNotVisible: .*Morgan.*
+- tapOn:
+    id: reservations.reveal
+- tapOn:
+    id: reservations.reveal-confirm
+- extendedWaitUntil:
+    visible:
+      id: reservations.item-demo-reservation
+    timeout: 10000
+- assertVisible: .*Morgan.*
+
+# Leaving the tab forgets them.
+- scrollUntilVisible:
+    element:
+      id: tab-idees
+    direction: UP
+- tapOn:
+    id: tab-idees
+- scrollUntilVisible:
+    element:
+      id: tab-reservations
+    direction: UP
+- tapOn:
+    id: tab-reservations
+- extendedWaitUntil:
+    visible:
+      id: reservations.hidden
+    timeout: 10000
+- assertNotVisible: .*Morgan.*
+
+# Untick: the reservation is counted again.
+- scrollUntilVisible:
+    element:
+      id: tab-partage
+    direction: UP
+- tapOn:
+    id: tab-partage
+- scrollUntilVisible:
+    element:
+      id: share.surprise-toggle
+- tapOn:
+    id: share.surprise-toggle
+- scrollUntilVisible:
+    element:
+      id: share.surprise-saved
+    timeout: 10000
+- scrollUntilVisible:
+    element:
+      id: tab-reservations
+      text: .*\(1\).*
+    direction: UP

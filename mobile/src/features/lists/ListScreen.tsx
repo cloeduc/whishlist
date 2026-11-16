@@ -36,7 +36,8 @@ function tabLabels(list: ViewList, t: (key: string) => string) {
   return [
     { key: "idees", label: `${t("tabs.idees")} (${active})` },
     { key: "archives", label: `${t("tabs.archives")} (${archived})` },
-    { key: "reservations", label: `${t("tabs.reservations")} (${list.reservations.length})` },
+    // In surprise mode (020) not even the number of reservations is shown.
+    { key: "reservations", label: list.surpriseMode ? t("tabs.reservations") : `${t("tabs.reservations")} (${list.reservations.length})` },
     { key: "partage", label: t("tabs.partage") },
     { key: "reglages", label: t("tabs.reglages") },
   ];

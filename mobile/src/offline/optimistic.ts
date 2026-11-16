@@ -92,6 +92,7 @@ function localList(change: Extract<Change, { kind: "createList" }>): ViewList {
     readUrl: "",
     inviteUrl: "",
     hasReadPassword: false,
+    surpriseMode: false,
     categories: [{ id: payload.categoryId, label: shown(payload.category, payload.preview?.category), sortOrder: 0 }],
     people: [{ id: payload.personId, label: shown(payload.person, payload.preview?.person) }],
     items: [],

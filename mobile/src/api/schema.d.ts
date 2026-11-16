@@ -28,7 +28,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @example 1.8.0 */
+                            /** @example 1.9.0 */
                             apiVersion: string;
                             /** @description Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page). */
                             enrich: boolean;
@@ -1280,7 +1280,11 @@ export interface paths {
             };
         };
         post?: never;
-        /** Supprimer une idée */
+        /**
+         * Supprimer une idée
+         * @description Une idée réservée n'est pas supprimée : `itemHasReservation`, ou `itemLockedSurprise` quand le
+         *     compte est en mode surprise (le message ne dit pas que l'idée est réservée).
+         */
         delete: {
             parameters: {
                 query?: never;
@@ -1300,6 +1304,7 @@ export interface paths {
                     };
                     content?: never;
                 };
+                400: components["responses"]["Error"];
                 404: components["responses"]["Error"];
             };
         };
@@ -1356,8 +1361,8 @@ export interface paths {
          * Déplacer une idée vers une autre liste (depuis 1.5.0)
          * @description Il faut être membre des deux listes. L'idée garde son identifiant ; `typeId` et `personId`
          *     sont ceux de la liste d'arrivée. Une idée réservée ne change pas de liste
-         *     (`itemReservedCannotMove`) : la personne qui a réservé ne peut annuler que depuis le lien de
-         *     la liste d'origine. Un renvoi après réussite (même liste d'arrivée, même catégorie, même
+         *     (`itemReservedCannotMove`, ou `itemLockedSurprise` en mode surprise, sans dire pourquoi) : la
+         *     personne qui a réservé ne peut annuler que depuis le lien de la liste d'origine. Un renvoi après réussite (même liste d'arrivée, même catégorie, même
          *     « qui ») rend l'idée déjà déplacée.
          */
         post: {
@@ -1758,6 +1763,105 @@ export interface paths {
                 404: components["responses"]["Error"];
             };
         };
+        trace?: never;
+    };
+    "/lists/{listId}/surprise-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                listId: components["parameters"]["listId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Activer ou désactiver le mode surprise du compte connecté (depuis 1.9.0)
+         * @description « Ne pas voir les cadeaux réservés » : le réglage ne vaut que pour ce membre et cette liste.
+         *     Rend la liste telle que le membre la voit désormais.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    listId: components["parameters"]["listId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        enabled: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["MemberList"];
+                    };
+                };
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lists/{listId}/reservations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                listId: components["parameters"]["listId"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Voir les réservations de la liste, sur demande (depuis 1.9.0)
+         * @description Les réservations de la liste, quel que soit le mode surprise : c'est l'action volontaire
+         *     « Voir les réservations ». Le client ne les garde pas sur l'appareil.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    listId: components["parameters"]["listId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            reservations: components["schemas"]["MemberReservation"][];
+                        };
+                    };
+                };
+                404: components["responses"]["Error"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/lists/{listId}/reservations/{reservationId}": {
@@ -2469,10 +2573,17 @@ export interface components {
             readUrl: string;
             inviteUrl: string;
             hasReadPassword: boolean;
+            /**
+             * @description Mode surprise du compte connecté pour cette liste (depuis 1.9.0). Vrai : `reservations` est
+             *     vide et `items[].archived` ne dit que si un membre a archivé l'idée ; une idée réservée y
+             *     figure comme une idée libre. Faux : `items[].archived` est vrai aussi pour une idée réservée.
+             */
+            surpriseMode: boolean;
             categories: components["schemas"]["Category"][];
             people: components["schemas"]["Label"][];
-            /** @description Archivées comprises. */
+            /** @description Archivées comprises. Voir `surpriseMode` pour le sens de `archived`. */
             items: components["schemas"]["MemberItem"][];
+            /** @description Vide quand `surpriseMode` est vrai ; `GET /lists/{listId}/reservations` les donne sur demande. */
             reservations: components["schemas"]["MemberReservation"][];
             members: components["schemas"]["Member"][];
         };
