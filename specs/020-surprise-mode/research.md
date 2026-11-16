@@ -41,7 +41,7 @@ La page de liste du site, `toMemberListView` / `toListSummary` (API, app, assist
 
 ## R6. « Voir comme invité » en mode surprise
 
-**Decision** : un petit composant client `GuestViewLink` : hors mode surprise, le lien actuel ; en mode surprise, un dialogue (« La vue invité ne montre pas les cadeaux déjà réservés. ») avec « Ouvrir la vue invité » et « Rester ici ». `ConfirmForm` ne convient pas : il poste un formulaire, ici on navigue.
+**Decision** : un petit composant client `GuestViewLink` : hors mode surprise, le lien actuel ; en mode surprise, un dialogue (« La vue invité ne montre pas les cadeaux déjà réservés. ») avec « Ouvrir la vue invité » et « Rester ici ». `ConfirmForm` ne convient pas : il poste un formulaire, ici on navigue. **Révisé par la revue** : `ConfirmForm` accepte désormais un lien (`href`) ou un rappel (`onConfirm`), et sert ici comme pour « Voir les réservations » ; pas de composant à part.
 
 ## R7. API et anciennes versions de l'app
 

@@ -67,6 +67,23 @@ test("each list the account is a member of, with its role and its contents by la
   assert.equal(data.lists[2]!.reservations[0]!.byMe, true);
 });
 
+test("surprise mode: the export keeps only the account's own reservations on that list, and says so (020)", () => {
+  const doc = accountDoc();
+  for (const membership of doc.memberships.filter((m) => m.userId === "lou" && ["shared", "alexs"].includes(m.wishlistId))) {
+    membership.surpriseMode = true;
+  }
+  const data = exportAccount(doc, "lou", SITE, NOW);
+  assert.ok(data);
+  const shared = data.lists.find((list) => list.title === "Noël en famille")!;
+  assert.equal(shared.surpriseMode, true);
+  assert.deepEqual(shared.reservations, [], "Camille's reservation, giver and note stay hidden");
+  assert.ok(!JSON.stringify(shared).includes("Pour Noël"));
+  // Lou's own reservation on a list where Lou is in surprise mode stays in the file.
+  const alexs = data.lists.find((list) => list.title === "Envies d'Alex")!;
+  assert.deepEqual(alexs.reservations.map((r) => r.byMe), [true]);
+  assert.equal(exported().lists.find((list) => list.title === "Noël en famille")!.surpriseMode, false);
+});
+
 test("the public address follows the requested language", () => {
   const data = exported({ ...SITE, locale: "en" });
   assert.equal(data.lists[0]!.publicUrl, "https://ohyoushouldnt.example.test/en/l/read-solo");

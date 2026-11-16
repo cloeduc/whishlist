@@ -8,9 +8,7 @@ export const runtime = "nodejs";
 export const PUT = withApi<{ listId: string }>(async (api, { listId }) => {
   const body = await readJsonBody(api.req);
   if (!body.ok) return apiError(body.error, api.locale, api.cors);
-  const { enabled } = body.body;
-  if (typeof enabled !== "boolean") return apiError("invalidJson", api.locale, api.cors);
-  const result = await setSurpriseMode(await commandContext(api), { wishlistId: listId, enabled });
+  const result = await setSurpriseMode(await commandContext(api), { wishlistId: listId, enabled: body.body.enabled });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);
   return apiJson(result.list, 200, api.cors);
 });

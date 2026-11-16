@@ -1807,6 +1807,7 @@ export interface paths {
                     };
                 };
                 400: components["responses"]["Error"];
+                401: components["responses"]["Error"];
                 404: components["responses"]["Error"];
             };
         };
@@ -1853,6 +1854,7 @@ export interface paths {
                         };
                     };
                 };
+                401: components["responses"]["Error"];
                 404: components["responses"]["Error"];
             };
         };

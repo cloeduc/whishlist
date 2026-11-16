@@ -1,4 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { router } from "expo-router";
+import { Linking } from "react-native";
 
 import Reservations from "../../app/(app)/lists/[listId]/reservations";
 import type { Schemas } from "@/api/client";
@@ -64,6 +66,10 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await setOnline(true);
+  jest.restoreAllMocks();
+  // React Native's own mock of `Linking.openURL` keeps its calls across tests: cleared by hand.
+  jest.mocked(router.push).mockClear();
+  jest.mocked(Linking.openURL).mockClear();
 });
 
 test("surprise mode: nothing before the confirmation, the rows after it, nothing written on the phone (020)", async () => {
@@ -101,4 +107,30 @@ test("outside surprise mode: the reservations of the list, as before", async () 
   expect(await screen.findByTestId("reservations.item-r")).toHaveTextContent(/Morgan/);
   expect(screen.queryByTestId("reservations.hidden")).toBeNull();
   expect(screen.getByTestId("tab-reservations")).toHaveTextContent(`${i18n.t("list:tabs.reservations")} (1)`);
+});
+
+/** Times the guest view was opened: in the app (`router.push`) or through the link. */
+function guestViewOpenings(): number {
+  return jest.mocked(router.push).mock.calls.length + jest.mocked(Linking.openURL).mock.calls.length;
+}
+
+test("surprise mode: « Voir la liste partagée » warns before opening the guest view (020)", async () => {
+  jest.spyOn(Linking, "openURL").mockResolvedValue(undefined);
+  await renderTab(surpriseList);
+  await screen.findByTestId("reservations.hidden");
+  await fireEvent.press(screen.getByTestId("list.view-as-guest"));
+  await fireEvent.press(screen.getByTestId("list.guest-view-confirm-keep"));
+  expect(guestViewOpenings()).toBe(0);
+  await fireEvent.press(screen.getByTestId("list.view-as-guest"));
+  await fireEvent.press(screen.getByTestId("list.guest-view-confirm"));
+  expect(guestViewOpenings()).toBe(1);
+});
+
+test("outside surprise mode: « Voir la liste partagée » opens the guest view at once", async () => {
+  jest.spyOn(Linking, "openURL").mockResolvedValue(undefined);
+  await renderTab({ ...surpriseList, surpriseMode: false });
+  await screen.findByTestId("list.view-as-guest");
+  await fireEvent.press(screen.getByTestId("list.view-as-guest"));
+  expect(guestViewOpenings()).toBe(1);
+  expect(screen.queryByTestId("list.guest-view-confirm")).toBeNull();
 });

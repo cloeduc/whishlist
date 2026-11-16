@@ -1001,6 +1001,7 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/MemberList" }
         "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
 
   /lists/{listId}/reservations:
@@ -1022,6 +1023,7 @@ paths:
                 required: [reservations]
                 properties:
                   reservations: { type: array, items: { $ref: "#/components/schemas/MemberReservation" } }
+        "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
 
   /lists/{listId}/reservations/{reservationId}:

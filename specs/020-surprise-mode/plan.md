@@ -18,7 +18,7 @@ Approche : le drapeau `archived` d'une idée ne veut plus dire que « archivée 
 
 **Storage**: SQLite `data/wishlist.db` : colonne `memberships.surprise_mode`, et `UPDATE` des idées réservées (`drizzle/0006_*.sql`, data-model.md). Dans l'app : aucune migration locale ; les réservations révélées ne sont jamais écrites dans la base du téléphone.
 
-**Testing**: `node:test` + `tsx` (`tests/domain/surprise.test.ts` nouveau ; `reserve`, `items`, `read`, `api-views`, `mcp`, `legacy-json`, `api-contract` complétés) ; jest-expo dans `mobile/__tests__/` ; Maestro `mobile/.maestro/flows/020-us3.yaml` ; parcours du site à la main (quickstart.md).
+**Testing**: `node:test` + `tsx` (`tests/domain/surprise.test.ts` nouveau ; `reserve`, `items`, `read`, `api-views`, `mcp`, `legacy-json`, `api-contract` complétés) ; jest-expo dans `mobile/__tests__/` ; Maestro `mobile/.maestro/flows/020-us3-surprise-mode.yaml` ; parcours du site à la main (quickstart.md).
 
 **Target Platform**: serveur Docker existant ; iOS (iPhone 17 Pro Max, iOS 26.5) et Android.
 
@@ -90,7 +90,7 @@ app/
 components/site/
 ├── surprise-mode-form.tsx
 ├── reservations-reveal.tsx
-└── guest-view-link.tsx
+└── reservation-card.tsx    # « Voir comme invité » : `confirm-form.tsx` avec `href` (revue)
 locales/{fr,en}/list.json, errors.json
 specs/004-mobile-api/contracts/openapi.yaml
 mobile/
@@ -100,7 +100,7 @@ mobile/
 ├── src/features/sharing/SurpriseCard.tsx
 ├── app/(app)/lists/[listId]/{share,reservations,archives}.tsx
 ├── __tests__/…
-└── .maestro/flows/020-us3.yaml
+└── .maestro/flows/020-us3-surprise-mode.yaml
 tests/domain/surprise.test.ts (+ tests existants complétés)
 ```
 

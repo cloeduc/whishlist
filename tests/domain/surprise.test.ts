@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { memberShelf, reservedItemIds, setSurpriseMode, surpriseModeOf } from "../../src/domain/surprise";
+import { reservedItemIds } from "../../src/domain/reserve";
+import { memberShelf, setSurpriseMode, surpriseModeOf, visibleReservations } from "../../src/domain/surprise";
 import { emptyDatabase, type Database, type Item } from "../../src/domain/types";
 
 function item(id: string, archived = false): Item {
@@ -59,6 +60,15 @@ test("only a member of the list sets surprise mode", () => {
     error: "notMember",
   });
   assert.equal(surpriseModeOf(doc(), "w", "sam"), false);
+});
+
+test("reservations shown with the list: none for a member in surprise mode, all for the others", () => {
+  const on = setSurpriseMode(doc(), { wishlistId: "w", actorId: "alex", enabled: true });
+  assert.ok(on.ok);
+  assert.deepEqual(visibleReservations(on.doc, "w", "alex"), []);
+  assert.deepEqual(visibleReservations(on.doc, "w", "camille").map((r) => r.id), ["r"]);
+  assert.deepEqual(visibleReservations(doc(), "w", "alex").map((r) => r.id), ["r"]);
+  assert.deepEqual(visibleReservations(doc(), "other", "alex"), []);
 });
 
 test("reserved ideas of a list", () => {

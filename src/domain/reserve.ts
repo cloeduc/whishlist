@@ -11,8 +11,13 @@ function blank(value: string | null | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
+/** Ideas of a list that someone has reserved. */
+export function reservedItemIds(doc: Database, wishlistId: string): Set<string> {
+  return new Set(doc.reservations.filter((r) => r.wishlistId === wishlistId).map((r) => r.itemId));
+}
+
 export function availableItems(doc: Database, wishlistId: string, typeId: string) {
-  const reserved = new Set(doc.reservations.filter((r) => r.wishlistId === wishlistId).map((r) => r.itemId));
+  const reserved = reservedItemIds(doc, wishlistId);
   return doc.items
     .filter((item) => item.wishlistId === wishlistId && !item.archived && !reserved.has(item.id))
     .filter((item) => (typeId ? item.typeId === typeId : true))

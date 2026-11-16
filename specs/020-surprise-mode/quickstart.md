@@ -42,7 +42,7 @@ EXPO_PUBLIC_API_URL=http://localhost:3010 npm --prefix mobile run ios
 2. Réservations → « Voir les réservations » → confirmer : X et G. Quitter l'écran et revenir : caché.
 3. Passer en mode avion, rouvrir la liste : aucune réservation affichée ; le bouton est désactivé.
 4. Partage → décocher : le site (A) montre de nouveau les réservations.
-5. Parcours Maestro : `DEMO_PASSWORD=… npm --prefix mobile run e2e -- .maestro/flows/020-us3.yaml`.
+5. Parcours Maestro : `DEMO_PASSWORD=… npm --prefix mobile run e2e -- .maestro/flows/020-us3-surprise-mode.yaml`.
 
 ## Assistant (013)
 

@@ -139,15 +139,20 @@ export async function updateSettings(
   return memberListView(ctx, input.wishlistId, active.user.id);
 }
 
-/** « Ne pas voir les cadeaux réservés » for the signed-in member only (020); returns the list as they now see it. */
+/**
+ * « Ne pas voir les cadeaux réservés » for the signed-in member only (020); returns the list as they now see it.
+ * `enabled` comes as is from a JSON body: anything but a boolean is refused (`invalidJson`).
+ */
 export async function setSurpriseMode(
   ctx: CommandContext,
-  input: { wishlistId: string; enabled: boolean },
+  input: { wishlistId: string; enabled: unknown },
 ): Promise<CommandResult<{ list: MemberListView }>> {
   const active = activeUser(ctx);
   if (!active.ok) return active;
+  const { enabled } = input;
+  if (typeof enabled !== "boolean") return { ok: false, error: "invalidJson" };
   const saved = await updateDocument<CommandResult>((doc) => {
-    const result = setSurpriseModeRule(doc, { ...input, actorId: active.user.id });
+    const result = setSurpriseModeRule(doc, { wishlistId: input.wishlistId, enabled, actorId: active.user.id });
     return result.ok ? { doc: result.doc, result: { ok: true } } : { doc, result };
   });
   if (!saved.ok) return saved;
@@ -164,5 +169,9 @@ export async function revealReservations(
   const doc = await readDocument();
   if (!findMembership(doc, input.wishlistId, active.user.id)) return { ok: false, error: "notMember" };
   // `reservations` for the API, `offers` (with the category) for the site's cards.
-  return { ok: true, reservations: memberReservations(doc, input.wishlistId), offers: listOffrir(doc, input.wishlistId) };
+  return {
+    ok: true,
+    reservations: memberReservations(doc, doc.reservations.filter((r) => r.wishlistId === input.wishlistId)),
+    offers: listOffrir(doc, input.wishlistId),
+  };
 }

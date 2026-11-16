@@ -106,6 +106,8 @@ export type ExportedList = {
     description: string | null;
     archived: boolean;
   }[];
+  /** « Ne pas voir les cadeaux réservés » (020): `reservations` then only holds the account's own. */
+  surpriseMode: boolean;
   reservations: { item: string | null; fromName: string | null; note: string | null; createdAt: string; byMe: boolean }[];
 };
 
@@ -202,8 +204,10 @@ export function exportAccount(
           description: item.description,
           archived: item.archived,
         })),
+      surpriseMode: membership.surpriseMode,
+      // In surprise mode, the export does not reveal what others reserved on this list (020).
       reservations: doc.reservations
-        .filter((r) => r.wishlistId === wishlist.id)
+        .filter((r) => r.wishlistId === wishlist.id && (!membership.surpriseMode || r.userId === userId))
         .map((r) => ({
           item: itemName.get(r.itemId) ?? null,
           fromName: r.fromName,

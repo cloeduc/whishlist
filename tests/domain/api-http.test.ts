@@ -121,6 +121,21 @@ test("surprise mode routes (020): 404 for a non-member, 401 without an account; 
       assert.ok(!result.ok);
       assert.equal((await apiError(result.error, "fr")).status, status);
     }
+    // Same chain as the routes for a member: invalid body, then success with the route's response shape.
+    const alex = (await readDocument()).users[0]!;
+    const invalid = await setSurpriseMode(ctx(alex), { wishlistId: "w", enabled: "1" });
+    assert.ok(!invalid.ok);
+    assert.equal((await apiError(invalid.error, "fr")).status, 400);
+    const saved = await setSurpriseMode(ctx(alex), { wishlistId: "w", enabled: true });
+    assert.ok(saved.ok);
+    assert.equal(saved.list.surpriseMode, true);
+    assert.deepEqual(saved.list.reservations, []);
+    const shown = await revealReservations(ctx(alex), { wishlistId: "w" });
+    assert.ok(shown.ok);
+    assert.deepEqual(
+      shown.reservations.map((reservation) => [reservation.id, reservation.itemId, reservation.fromName]),
+      [["r-taken", "taken", "Sam"]],
+    );
     const response = await apiError("itemLockedSurprise", "fr");
     assert.equal(response.status, 400);
     const body = (await response.json()) as { error: { code: string; message: string } };

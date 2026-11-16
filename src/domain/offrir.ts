@@ -1,5 +1,5 @@
 import { formatPrice } from "./price";
-import type { Database } from "./types";
+import type { Database, Reservation } from "./types";
 
 export interface OffrirRow {
   reservationId: string;
@@ -22,8 +22,15 @@ export interface MyOfferRow {
 }
 
 export function listOffrir(doc: Database, wishlistId: string): OffrirRow[] {
-  return doc.reservations
-    .filter((r) => r.wishlistId === wishlistId)
+  return toOffrirRows(
+    doc,
+    doc.reservations.filter((r) => r.wishlistId === wishlistId),
+  );
+}
+
+/** Rows of the Reservations tab for the given reservations (idea, category, giver, note). */
+export function toOffrirRows(doc: Database, reservations: readonly Reservation[]): OffrirRow[] {
+  return reservations
     .map((reservation) => {
       const item = doc.items.find((i) => i.id === reservation.itemId);
       const type = item ? doc.types.find((t) => t.id === item.typeId) : undefined;

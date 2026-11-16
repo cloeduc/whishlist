@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { currentUser, origin } from "../../../src/auth/current";
 import { findMembership } from "../../../src/domain/access";
-import { listOffrir } from "../../../src/domain/offrir";
+import { toOffrirRows } from "../../../src/domain/offrir";
 import { formatPrice, priceInput } from "../../../src/domain/price";
 import { IdeasAccordion } from "@/components/site/ideas-accordion";
 import { LinkButton } from "@/components/site/link-button";
@@ -18,7 +18,8 @@ import {
   setItemArchivedFormAction,
 } from "../../../src/server/actions";
 import { hasReadPassword } from "../../../src/domain/read-password";
-import { memberShelf, reservedItemIds, surpriseModeOf } from "../../../src/domain/surprise";
+import { reservedItemIds } from "../../../src/domain/reserve";
+import { memberShelf, surpriseModeOf, visibleReservations } from "../../../src/domain/surprise";
 import { resolveTheme } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { AppearanceForm } from "@/components/site/appearance-form";
@@ -26,7 +27,6 @@ import { ConfirmForm } from "@/components/site/confirm-form";
 import { CopyLinkField } from "@/components/site/copy-link-field";
 import { InviteEmailForm } from "@/components/site/invite-email-form";
 import { LiveGiftMark } from "@/components/site/live-gift-mark";
-import { GuestViewLink } from "@/components/site/guest-view-link";
 import { ReadPasswordForm } from "@/components/site/read-password-form";
 import { ReservationCard } from "@/components/site/reservation-card";
 import { ReservationsReveal } from "@/components/site/reservations-reveal";
@@ -94,7 +94,7 @@ export default async function EditListPage({
     .filter((entry) => entry.wishlistId === id)
     .map((entry) => ({ ...entry, user: doc.users.find((account) => account.id === entry.userId) }));
   // In surprise mode nothing about reservations reaches the page, not even their number (020).
-  const reservations = surpriseMode ? [] : listOffrir(doc, id);
+  const reservations = toOffrirRows(doc, visibleReservations(doc, id, user.id));
   const personLabel = new Map(people.map((person) => [person.id, person.label]));
   const typeLabel = new Map(types.map((type) => [type.id, type.label]));
   const ideaItems = activeItems.map((item) => ({
@@ -140,7 +140,17 @@ export default async function EditListPage({
           <h1 className="text-2xl font-medium tracking-tight">{list.title}</h1>
         </div>
         {surpriseMode ? (
-          <GuestViewLink href={readUrl} label={t("viewAsGuest")} />
+          // The guest view leaves reserved ideas out: compared with « Idées », it would tell them apart (020).
+          <ConfirmForm
+            title={t("surprise.guestViewTitle")}
+            description={t("surprise.guestViewBody")}
+            confirmLabel={t("surprise.guestViewConfirm")}
+            cancelLabel={t("surprise.guestViewKeep")}
+            triggerLabel={t("viewAsGuest")}
+            triggerSize="sm"
+            confirmVariant="default"
+            href={readUrl}
+          />
         ) : (
           <LinkButton href={readUrl} variant="outline" size="sm">
             {t("viewAsGuest")}

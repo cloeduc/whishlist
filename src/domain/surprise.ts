@@ -1,5 +1,5 @@
 import { clone, findMembership } from "./access";
-import type { Database, Item } from "./types";
+import type { Database, Item, Reservation } from "./types";
 
 /**
  * « Garder la surprise » (feature 020): a member may choose not to see what was reserved on a list.
@@ -12,8 +12,10 @@ export function surpriseModeOf(doc: Database, wishlistId: string, userId: string
   return findMembership(doc, wishlistId, userId)?.surpriseMode ?? false;
 }
 
-export function reservedItemIds(doc: Database, wishlistId: string): Set<string> {
-  return new Set(doc.reservations.filter((r) => r.wishlistId === wishlistId).map((r) => r.itemId));
+/** Reservations a member is shown with the list: none in surprise mode, until they ask (« Voir les réservations »). */
+export function visibleReservations(doc: Database, wishlistId: string, userId: string): Reservation[] {
+  if (surpriseModeOf(doc, wishlistId, userId)) return [];
+  return doc.reservations.filter((r) => r.wishlistId === wishlistId);
 }
 
 /**

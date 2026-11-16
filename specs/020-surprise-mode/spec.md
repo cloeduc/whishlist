@@ -97,6 +97,7 @@ Dans l'app, l'onglet Partage d'une liste a la même carte « Garder la surprise 
 - **Réservation faite pendant que la personne regarde sa liste** : rien ne change à l'écran ; au prochain affichage, l'idée reste dans « Idées », sans marque.
 - **Réservation annulée par un invité** : rien ne change pour la personne en mode surprise ; l'idée était déjà dans « Idées ».
 - **Liste sans aucune réservation** : en mode surprise, l'onglet « Réservations » montre quand même le bouton « Voir les réservations », pour ne pas révéler qu'il n'y en a aucune. Après confirmation, il affiche « Aucun cadeau réservé pour le moment. ».
+- **Export « Télécharger mes données »** : pour une liste où la personne est en mode surprise, le fichier ne contient que ses propres réservations (pas celles des autres, ni leur nom ni leur mot) et indique le réglage `surpriseMode` (ajouté à la revue).
 - **Mot de passe de lecture, listes suivies** : le mode surprise ne change rien à l'accès des invités ni aux listes suivies (feature 012).
 
 ## Requirements *(mandatory)*

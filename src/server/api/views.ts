@@ -4,8 +4,9 @@ import { listPublicVisibleItems, mineReservationIdsFor, sortItems } from "../../
 import { formatPrice } from "../../domain/price";
 import { hasReadPassword } from "../../domain/read-password";
 import { isSubscriptionUnlocked, viewerRelation } from "../../domain/subscription";
-import { memberShelf, reservedItemIds, surpriseModeOf } from "../../domain/surprise";
-import type { Database, Item, Role, Subscription, User, WishlistTheme, Wishlist } from "../../domain/types";
+import { reservedItemIds } from "../../domain/reserve";
+import { memberShelf, surpriseModeOf, visibleReservations } from "../../domain/surprise";
+import type { Database, Item, Reservation, Role, Subscription, User, WishlistTheme, Wishlist } from "../../domain/types";
 import { intlLocale, type Locale } from "../../i18n/config";
 import { withLocale } from "../../i18n/locale-path";
 import { emailConfirmationEnforced } from "../mail";
@@ -151,15 +152,10 @@ export type MemberReservationView = {
   createdAt: string;
 };
 
-/** Reservations of a list, for its members (shown on demand in surprise mode). */
-export function memberReservations(
-  doc: Database,
-  wishlistId: string,
-  itemName = new Map(doc.items.filter((item) => item.wishlistId === wishlistId).map((item) => [item.id, item.name])),
-): MemberReservationView[] {
-  return doc.reservations
-    .filter((reservation) => reservation.wishlistId === wishlistId)
-    .map((reservation) => ({
+/** Given reservations of a list, as its members see them. */
+export function memberReservations(doc: Database, reservations: readonly Reservation[]): MemberReservationView[] {
+  const itemName = new Map(doc.items.map((item) => [item.id, item.name]));
+  return reservations.map((reservation) => ({
       id: reservation.id,
       itemId: reservation.itemId,
       itemName: itemName.get(reservation.itemId) ?? "",
@@ -271,7 +267,6 @@ export function toMemberListView(
   const surpriseMode = surpriseModeOf(doc, wishlist.id, viewer.userId);
   const reserved = reservedItemIds(doc, wishlist.id);
   const items = sortItems(doc.items.filter((item) => item.wishlistId === wishlist.id));
-  const itemName = new Map(items.map((item) => [item.id, item.name]));
   return {
     id: wishlist.id,
     title: wishlist.title,
@@ -289,7 +284,7 @@ export function toMemberListView(
       ...toMemberItem(item, locale),
       archived: memberShelf(item, reserved.has(item.id), surpriseMode) === "archives",
     })),
-    reservations: surpriseMode ? [] : memberReservations(doc, wishlist.id, itemName),
+    reservations: memberReservations(doc, visibleReservations(doc, wishlist.id, viewer.userId)),
     members: doc.memberships
       .filter((membership) => membership.wishlistId === wishlist.id)
       .map((membership) => ({

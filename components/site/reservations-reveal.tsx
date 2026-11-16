@@ -2,19 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
+import { ConfirmForm } from "@/components/site/confirm-form";
 import { FormRefusal } from "@/components/site/form-refusal";
 import { ReservationCard } from "@/components/site/reservation-card";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import type { OffrirRow } from "@/src/domain/offrir";
 import { cancelReservationAction, revealReservationsAction } from "@/src/server/actions";
@@ -25,7 +15,6 @@ import { cancelReservationAction, revealReservationsAction } from "@/src/server/
  */
 export function ReservationsReveal({ wishlistId }: { wishlistId: string }) {
   const { t } = useTranslation("list");
-  const [open, setOpen] = useState(false);
   const [offers, setOffers] = useState<OffrirRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -54,33 +43,22 @@ export function ReservationsReveal({ wishlistId }: { wishlistId: string }) {
     <div className="flex flex-col items-start gap-3">
       <p className="text-muted-foreground">{t("surprise.hiddenHint")}</p>
       <FormRefusal code={error ?? undefined} />
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger render={<Button type="button" variant="outline" disabled={pending} />}>
-          {t("surprise.reveal")}
-        </DialogTrigger>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>{t("surprise.revealTitle")}</DialogTitle>
-            <DialogDescription>{t("surprise.revealBody")}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose render={<Button type="button" variant="outline" />}>{t("surprise.revealKeep")}</DialogClose>
-            <Button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                startTransition(async () => {
-                  const result = await revealReservationsAction(wishlistId);
-                  if (result.ok) setOffers(result.offers);
-                  else setError(result.error);
-                });
-              }}
-            >
-              {t("surprise.revealConfirm")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmForm
+        title={t("surprise.revealTitle")}
+        description={t("surprise.revealBody")}
+        confirmLabel={t("surprise.revealConfirm")}
+        cancelLabel={t("surprise.revealKeep")}
+        triggerLabel={t("surprise.reveal")}
+        confirmVariant="default"
+        disabled={pending}
+        onConfirm={() =>
+          startTransition(async () => {
+            const result = await revealReservationsAction(wishlistId);
+            if (result.ok) setOffers(result.offers);
+            else setError(result.error);
+          })
+        }
+      />
     </div>
   );
 }

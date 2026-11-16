@@ -31,14 +31,15 @@ Textes dans `locales/{fr,en}/list.json` (partagé par le site et l'app), refus d
 | Onglet « Réservations » | inchangé, avec compteur | sans compteur ; `hiddenHint` + bouton « Voir les réservations » → dialogue → lignes habituelles |
 | « Voir comme invité » | lien direct | dialogue `guestView*`, puis la vue invité |
 
-Composants nouveaux : `components/site/surprise-mode-form.tsx` (case + server action), `components/site/reservations-reveal.tsx`, `components/site/guest-view-link.tsx`.
+Composants nouveaux : `components/site/surprise-mode-form.tsx` (case + server action), `components/site/reservations-reveal.tsx`, `components/site/reservation-card.tsx`. « Voir comme invité » et « Voir les réservations » réutilisent `components/site/confirm-form.tsx` (lien `href` ou rappel `onConfirm`).
 
 ## App (`mobile/app/(app)/lists/[listId]/`)
 
 | Écran | Changement | `testID` |
 |-------|------------|----------|
 | `share.tsx` | carte « Garder la surprise » (même place que sur le site), case à cocher, désactivée hors ligne, message `saved`/`cleared` | `share.surprise`, `share.surprise-toggle`, `share.surprise-saved` |
-| `ListScreen` (onglets) | pas de compteur sur « Réservations » en mode surprise | `list.tab-reservations` (existant) |
+| `ListScreen` (onglets) | pas de compteur sur « Réservations » en mode surprise | `tab-reservations` (existant) |
+| `ListScreen` (« Voir la liste partagée ») | en mode surprise, `ConfirmDialog` `guestView*` avant d'ouvrir la vue invité, comme sur le site | `list.view-as-guest`, `list.guest-view-confirm` |
 | `reservations.tsx` | en mode surprise : `hiddenHint`, bouton, `ConfirmDialog`, puis lignes en mémoire ; hors ligne : bouton désactivé + `NetworkNote` | `reservations.hidden`, `reservations.reveal`, `reservations.reveal-confirm`, `reservations.item-<id>` (existant) |
 | `archives.tsx` | sur une idée réservée : `archives.reservedHint` à la place de « Remettre dans la liste » | `archives.reserved-hint` |
 | suppression / déplacement d'une idée | affiche `errors:itemLockedSurprise` reçu du serveur | (existants) |
