@@ -133,7 +133,9 @@ export function LabelEditor({ listId, kind, labels, disabled }: { listId: string
             variant="neutral"
             size="sm"
             disabled={locked || !draft.trim()}
-            onPress={() => void run(() => addLabel(listId, kind, draft.trim()), () => setDraft(""))}
+            onPress={() => void run(async () => {
+              await addLabel(listId, kind, draft.trim());
+            }, () => setDraft(""))}
           />
         </Field>
         {error ? <Alert variant="destructive" testID={`settings.${kind}-error`}>{error}</Alert> : null}

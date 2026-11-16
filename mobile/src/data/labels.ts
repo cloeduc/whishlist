@@ -1,4 +1,4 @@
-import { api, done, ok } from "@/api/client";
+import { api, done, ok, type Schemas } from "@/api/client";
 
 import { refreshList } from "./store";
 
@@ -7,11 +7,15 @@ import { refreshList } from "./store";
 
 export type LabelKind = "types" | "people";
 
-export async function addLabel(listId: string, kind: LabelKind, label: string): Promise<void> {
+/** Adds a category or a « qui »; returns the one created (the first one when commas create several). */
+export async function addLabel(listId: string, kind: LabelKind, label: string): Promise<Schemas["Label"]> {
   const path = { listId };
-  if (kind === "types") await ok(api.POST("/lists/{listId}/types", { params: { path }, body: { label } }));
-  else await ok(api.POST("/lists/{listId}/people", { params: { path }, body: { label } }));
+  const created =
+    kind === "types"
+      ? await ok(api.POST("/lists/{listId}/types", { params: { path }, body: { label } }))
+      : await ok(api.POST("/lists/{listId}/people", { params: { path }, body: { label } }));
   await refreshList(listId);
+  return created;
 }
 
 export async function renameLabel(listId: string, kind: LabelKind, id: string, label: string): Promise<void> {

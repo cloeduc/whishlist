@@ -79,6 +79,7 @@ import {
 } from "./commands/public-list";
 import type { LlmImpact } from "../domain/llm-impact";
 import type { OffrirRow } from "../domain/offrir";
+import type { LabelView } from "./api/views";
 import { isLocale, localeCookie, type Locale } from "../i18n/config";
 import { withLocale } from "../i18n/locale-path";
 import { canonicalInternalPath } from "../site/legacy-paths";
@@ -548,12 +549,15 @@ export async function deleteTypeAction(formData: FormData) {
   return labelFormAction(formData, "type", "delete", "typeId");
 }
 
-export async function manageLabelAction(input: LabelInput): Promise<{ ok: true } | { ok: false; error: string }> {
+/** `label`: the created or changed label; with commas on « add », the first one created (023). */
+export async function manageLabelAction(
+  input: LabelInput,
+): Promise<{ ok: true; label: LabelView | null } | { ok: false; error: string }> {
   await memberId();
   const result = await manageLabel(await actionContext(), input);
   if (!result.ok) return { ok: false, error: result.error };
   refresh();
-  return { ok: true };
+  return { ok: true, label: result.label };
 }
 
 export async function addPersonAction(formData: FormData) {

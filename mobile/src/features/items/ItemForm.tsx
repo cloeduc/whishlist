@@ -6,6 +6,7 @@ import { MAX_DESCRIPTION } from "../../../../src/domain/description";
 
 import { useCapabilities } from "@/data/capabilities";
 import { enrich, type ItemInput } from "@/data/items";
+import { addLabel } from "@/data/labels";
 import { errorText } from "@/features/errors";
 import { translateError } from "@/i18n";
 import { useOnline } from "@/network";
@@ -64,13 +65,20 @@ export function ItemForm({
   /** Link received from a share: fill from the link as soon as possible (once). */
   autoFill?: boolean;
 }) {
-  const { t } = useTranslation(["list", "common"]);
+  const { t } = useTranslation(["list", "common", "mobile"]);
   const online = useOnline();
   const capabilities = useCapabilities();
   const [draft, setDraft] = useState<Draft>(initial);
   const [enriching, setEnriching] = useState(false);
   const [enrichError, setEnrichError] = useState<string | null>(null);
   const [usedLlm, setUsedLlm] = useState(false);
+  /** « + Nouvelle catégorie » (023): a category created from the form, then chosen for the idea. */
+  const [newType, setNewType] = useState<{ open: boolean; name: string; error: string | null; busy: boolean }>({
+    open: false,
+    name: "",
+    error: null,
+    busy: false,
+  });
 
   function set<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -96,6 +104,23 @@ export function ItemForm({
       setEnrichError(errorText(caught));
     } finally {
       setEnriching(false);
+    }
+  }
+
+  async function addCategory() {
+    const name = newType.name.trim();
+    if (!name) {
+      setNewType((current) => ({ ...current, error: translateError("typeNeedsName") }));
+      return;
+    }
+    setNewType((current) => ({ ...current, busy: true, error: null }));
+    try {
+      const created = await addLabel(list.id, "types", name);
+      // Only the category changes: everything else typed stays as it is.
+      set("typeId", created.id);
+      setNewType({ open: false, name: "", error: null, busy: false });
+    } catch (caught) {
+      setNewType((current) => ({ ...current, busy: false, error: errorText(caught) }));
     }
   }
 
@@ -155,8 +180,52 @@ export function ItemForm({
         />
       </Field>
       <Field label={t("form.type")}>
-        <Select label={t("form.type")} value={draft.typeId} options={categories} onChange={(value) => set("typeId", value)} />
+        <Select
+          testID="item-form.type"
+          actionTestID="item-form.new-type"
+          label={t("form.type")}
+          value={draft.typeId}
+          options={categories}
+          onChange={(value) => set("typeId", value)}
+          action={{
+            label: t("form.newTypeOption"),
+            // Created on the server, like in the settings: online only, and for a list already sent.
+            disabled: !online || Boolean(list.localOnly),
+            hint: t("mobile:offline.needsNetwork"),
+            onPress: () => setNewType({ open: true, name: "", error: null, busy: false }),
+          }}
+        />
       </Field>
+      {newType.open ? (
+        <Field label={t("categories.newType")}>
+          <Input
+            testID="item-form.new-type-name"
+            accessibilityLabel={t("categories.newType")}
+            value={newType.name}
+            onChangeText={(name) => setNewType((current) => ({ ...current, name }))}
+            placeholder={t("categories.newTypePlaceholder")}
+          />
+          {newType.error ? (
+            <Alert testID="item-form.new-type-error" variant="destructive">
+              {newType.error}
+            </Alert>
+          ) : null}
+          <Button
+            testID="item-form.new-type-add"
+            title={t("categories.addTypeAria")}
+            variant="neutral"
+            fullWidth
+            disabled={newType.busy || !online}
+            onPress={() => void addCategory()}
+          />
+          <Button
+            testID="item-form.new-type-cancel"
+            title={t("common:actions.cancel")}
+            variant="link"
+            onPress={() => setNewType({ open: false, name: "", error: null, busy: false })}
+          />
+        </Field>
+      ) : null}
       <Field label={t("form.person")}>
         <Select label={t("form.person")} value={draft.personId} options={people} onChange={(value) => set("personId", value)} />
       </Field>

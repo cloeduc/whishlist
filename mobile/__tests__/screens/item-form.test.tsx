@@ -13,6 +13,7 @@ import { setTransport, stopSync } from "@/offline/sync";
 
 import { fakeFetch, json } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
+import { setOnline } from "../helpers/network";
 
 let mockParams: Record<string, string> = {};
 jest.mock("expo-router", () => ({
@@ -212,4 +213,77 @@ test("the pre-fill button is disabled offline, with the explanation", async () =
   listener({ isConnected: false, isInternetReachable: false, type: NetInfoStateType.none, details: null, isWifiEnabled: false });
   await waitFor(() => expect(screen.getByTestId("enrich")).toBeDisabled());
   expect(screen.getByText(i18n.t("mobile:offline.needsNetwork"))).toBeOnTheScreen();
+});
+
+// 023 US1: « + Nouvelle catégorie » from the form.
+
+const withGames: Schemas["MemberList"] = { ...list, categories: [...list.categories, { id: "t-books", label: "Livres", sortOrder: 1 }] };
+
+async function openNewCategory() {
+  await setOnline(true);
+  await fireEvent.press(screen.getByTestId("item-form.type"));
+  await fireEvent.press(await screen.findByTestId("item-form.new-type"));
+  return screen.findByTestId("item-form.new-type-name");
+}
+
+test("a new category from the form is created, chosen, and the rest of the form stays (023)", async () => {
+  let sent: unknown = null;
+  let created = false;
+  routes({
+    "GET /capabilities": () => json(200, { apiVersion: "1.9.0", enrich: false, mail: false }),
+    "POST /lists/w/types": async (request) => {
+      sent = await request.json();
+      created = true;
+      return json(201, { id: "t-books", label: "Livres" });
+    },
+    "GET /lists/w": () => json(200, created ? withGames : list),
+  });
+  await renderForm();
+  await fireEvent.changeText(screen.getByLabelText("Nom du cadeau"), "Roman");
+  await fireEvent.changeText(screen.getByLabelText("Prix (€)"), "12");
+  await fireEvent.changeText(await openNewCategory(), "Livres");
+  await fireEvent.press(screen.getByTestId("item-form.new-type-add"));
+  await waitFor(() => expect(screen.queryByTestId("item-form.new-type-name")).toBeNull());
+  expect(sent).toEqual({ label: "Livres" });
+  expect(screen.getByTestId("item-form.type")).toHaveTextContent("Livres");
+  expect(screen.getByLabelText("Nom du cadeau").props.value).toBe("Roman");
+  expect(screen.getByLabelText("Prix (€)").props.value).toBe("12");
+});
+
+test("a category that already exists: the settings' message, nothing chosen, the name stays (023)", async () => {
+  routes({
+    "GET /capabilities": () => json(200, { apiVersion: "1.9.0", enrich: false, mail: false }),
+    "POST /lists/w/types": () => json(400, { error: { code: "typeExists", message: "x" } }),
+  });
+  await renderForm();
+  await fireEvent.changeText(await openNewCategory(), "jeux");
+  await fireEvent.press(screen.getByTestId("item-form.new-type-add"));
+  expect(await screen.findByTestId("item-form.new-type-error")).toHaveTextContent(i18n.t("errors:typeExists"));
+  expect(screen.getByTestId("item-form.new-type-name").props.value).toBe("jeux");
+  expect(screen.getByTestId("item-form.type")).toHaveTextContent("Jeux");
+});
+
+test("an empty name is refused without asking the server; « Annuler » keeps the chosen category (023)", async () => {
+  const server = routes({ "GET /capabilities": () => json(200, { apiVersion: "1.9.0", enrich: false, mail: false }) });
+  await renderForm();
+  await fireEvent.changeText(await openNewCategory(), "   ");
+  await fireEvent.press(screen.getByTestId("item-form.new-type-add"));
+  expect(await screen.findByTestId("item-form.new-type-error")).toHaveTextContent(i18n.t("errors:typeNeedsName"));
+  await fireEvent.press(screen.getByTestId("item-form.new-type-cancel"));
+  expect(screen.queryByTestId("item-form.new-type-name")).toBeNull();
+  expect(screen.getByTestId("item-form.type")).toHaveTextContent("Jeux");
+  expect(server.calls).not.toContain("POST /lists/w/types");
+});
+
+test("offline, or a list not sent yet: « + Nouvelle catégorie » is disabled with the explanation (023)", async () => {
+  routes({ "GET /capabilities": () => json(200, { apiVersion: "1.9.0", enrich: false, mail: false }) });
+  watchNetwork();
+  const listener = jest.mocked(NetInfo.addEventListener).mock.calls[0][0];
+  await renderForm();
+  listener({ isConnected: false, isInternetReachable: false, type: NetInfoStateType.none, details: null, isWifiEnabled: false });
+  await fireEvent.press(screen.getByTestId("item-form.type"));
+  const row = await screen.findByTestId("item-form.new-type");
+  await waitFor(() => expect(row).toBeDisabled());
+  await fireEvent.press(row);
+  expect(screen.queryByTestId("item-form.new-type-name")).toBeNull();
 });

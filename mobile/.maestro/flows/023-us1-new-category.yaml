@@ -1,0 +1,58 @@
+# 023 US1: a list created in the app has a single category (« Livres »); from the idea form,
+# « + Nouvelle catégorie » creates « Jeux » and chooses it, and the saved idea sits in « Jeux ».
+appId: app.ohyoushouldnt.mobile
+name: "023 US1 — Create a category from the idea form"
+tags:
+  - 023-us1
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runScript: ../scripts/unique.js
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: alex@example.test
+- runFlow:
+    file: ../subflows/create-list.yaml
+    env:
+      TITLE: Catégories ${output.unique}
+- runFlow: ../subflows/open-new-item.yaml
+- tapOn:
+    id: item-form.name
+- inputText: Puzzle ${output.unique}
+- hideKeyboard
+
+# The category field only offers « Livres »; « + Nouvelle catégorie » creates « Jeux ».
+- scrollUntilVisible:
+    element:
+      id: item-form.type
+- tapOn:
+    id: item-form.type
+- tapOn:
+    id: item-form.new-type
+- tapOn:
+    id: item-form.new-type-name
+- inputText: Jeux
+- hideKeyboard
+- tapOn:
+    id: item-form.new-type-add
+- extendedWaitUntil:
+    notVisible:
+      id: item-form.new-type-name
+    timeout: 10000
+- assertVisible:
+    id: item-form.type
+    text: .*Jeux.*
+- assertVisible: Puzzle ${output.unique}
+
+# Saved in « Jeux ».
+- runFlow: ../subflows/submit-item-form.yaml
+- extendedWaitUntil:
+    visible:
+      id: list.screen
+    timeout: 20000
+- runFlow:
+    file: ../subflows/open-category.yaml
+    env:
+      CATEGORY: Jeux
+      ITEM: Puzzle ${output.unique}

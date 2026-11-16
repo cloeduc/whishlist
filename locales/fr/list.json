@@ -186,7 +186,8 @@
     "aiCo2": "Environ {{grams}} g de CO₂e — soit l’équivalent d’environ {{beef}} g de viande rouge",
     "aiDisclaimer": "Ordres de grandeur indicatifs, pas un bilan carbone certifié.",
     "secondHandOk": "L’occasion me va",
-    "secondHandOkHint": "La personne qui offre le verra sur la liste partagée."
+    "secondHandOkHint": "La personne qui offre le verra sur la liste partagée.",
+    "newTypeOption": "+ Nouvelle catégorie"
   },
   "transfer": {
     "open": "Déplacer ou copier…",

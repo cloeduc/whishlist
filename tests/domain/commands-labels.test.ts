@@ -52,6 +52,25 @@ test("categories and « qui »: add, rename, remove when unused", async () => {
   });
 });
 
+test("adding a category returns the created one, the first one when commas create several (023)", async () => {
+  const doc = apiDoc();
+  const alex = ctx(doc.users[0]!);
+  await withStore(doc, async () => {
+    const two = await manageLabel(alex, { kind: "type", op: "add", wishlistId: "w", label: "Livres, Cuisine" });
+    assert.ok(two.ok);
+    assert.equal(two.label?.label, "Livres");
+    assert.deepEqual(two.labels.map((label) => label.label), ["Livres", "Cuisine"]);
+    assert.deepEqual(await manageLabel(alex, { kind: "type", op: "add", wishlistId: "w", label: "  " }), {
+      ok: false,
+      error: "typeNeedsName",
+    });
+    assert.deepEqual(await manageLabel(alex, { kind: "type", op: "add", wishlistId: "w", label: "livres" }), {
+      ok: false,
+      error: "typeExists",
+    });
+  });
+});
+
 test("reorder the categories", async () => {
   const doc = apiDoc();
   doc.types.push({ id: "t2", wishlistId: "w", label: "Livres", sortOrder: 1 });
