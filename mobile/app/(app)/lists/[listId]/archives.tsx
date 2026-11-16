@@ -23,6 +23,8 @@ export default function Archives() {
     <ListScreen tab="archives">
       {(list) => {
         const archived = list.items.filter((item) => item.archived);
+        // A reserved idea comes back only when its reservation is cancelled (020); in surprise mode `reservations` is empty.
+        const reserved = new Set(list.reservations.map((reservation) => reservation.itemId));
         return (
           <>
             <View style={{ gap: tokens.space[3] }}>
@@ -42,7 +44,13 @@ export default function Archives() {
                       <Badge>{list.people.find((p) => p.id === item.personId)?.label ?? ""}</Badge>
                       {item.pending ? <PendingBadge /> : null}
                     </View>
-                    <Button testID="archives.restore" title={t("archives.restore")} variant="neutral" onPress={() => void patchItem(list.id, item.id, { archived: false })} />
+                    {reserved.has(item.id) ? (
+                      <Text testID="archives.reserved-hint" size="sm" color={tokens.colors.mutedForeground}>
+                        {t("archives.reservedHint")}
+                      </Text>
+                    ) : (
+                      <Button testID="archives.restore" title={t("archives.restore")} variant="neutral" onPress={() => void patchItem(list.id, item.id, { archived: false })} />
+                    )}
                     <Button testID="archives.delete" title={t("archives.deleteForever")} variant="destructive" onPress={() => setToDelete(item)} />
                   </CardContent>
                 </Card>

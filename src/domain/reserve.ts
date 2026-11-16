@@ -37,7 +37,7 @@ export function reserveItem(
     return { ok: false, error: "fieldTooLong" };
   }
   const item = doc.items.find((i) => i.id === input.itemId && i.wishlistId === input.wishlistId);
-  // A reserved idea is archived: we say why it can no longer be offered.
+  // An already reserved idea: we say why it can no longer be offered.
   if (item && doc.reservations.some((r) => r.itemId === item.id)) {
     return { ok: false, error: "itemAlreadyReserved" };
   }
@@ -54,9 +54,8 @@ export function reserveItem(
     userId: input.userId?.trim() ? input.userId.trim() : null,
     createdAt: (input.now ?? new Date()).toISOString(),
   };
+  // The idea is not archived: the reservation alone says it is taken (020).
   const next = clone(doc);
-  const nextItem = next.items.find((i) => i.id === item.id);
-  if (nextItem) nextItem.archived = true;
   next.reservations.push(reservation);
   return { ok: true, doc: next, reservation };
 }

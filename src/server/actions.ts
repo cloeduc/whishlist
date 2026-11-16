@@ -48,7 +48,7 @@ import {
   resendEmailVerification,
 } from "./commands/email";
 import { manageLabel, reorderTypes, type LabelInput } from "./commands/labels";
-import { createList, updateSettings } from "./commands/lists";
+import { createList, setSurpriseMode, updateSettings } from "./commands/lists";
 import {
   clearReadPassword,
   deleteList,
@@ -607,6 +607,15 @@ export async function clearReadPasswordAction(formData: FormData) {
   const wishlistId = String(formData.get("wishlistId") ?? "");
   const result = await clearReadPassword(await actionContext(), { wishlistId });
   return sharingResult(wishlistId, formData, result, "readPasswordCleared");
+}
+
+/** « Ne pas voir les cadeaux réservés » (020): `enabled` is "1" or "0". */
+export async function setSurpriseModeAction(formData: FormData) {
+  await memberId();
+  const wishlistId = String(formData.get("wishlistId") ?? "");
+  const enabled = String(formData.get("enabled") ?? "") === "1";
+  const result = await setSurpriseMode(await actionContext(), { wishlistId, enabled });
+  return sharingResult(wishlistId, formData, result, enabled ? "surprise" : "surpriseCleared");
 }
 
 export async function unlockPublicListAction(prev: FormState, formData: FormData): Promise<FormState> {

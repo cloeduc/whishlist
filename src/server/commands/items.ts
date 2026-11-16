@@ -12,6 +12,7 @@ import {
   setItemType as setItemTypeRule,
   updateItem,
 } from "../../domain/items";
+import { asSeenBy } from "../../domain/surprise";
 import { estimateLlmImpact, type LlmImpact } from "../../domain/llm-impact";
 import { fetchOgImage } from "../../domain/og-image";
 import { parsePrice } from "../../domain/price";
@@ -59,7 +60,8 @@ async function writeItem(
     if (!saved.ok) return { doc, result: saved };
     const item = itemIn(saved.doc, wishlistId, saved.itemId);
     if (!item) return { doc, result: { ok: false, error: "itemMissing" } };
-    return { doc: saved.doc, result: { ok: true, item } };
+    // Returned as the member sees it: a reserved idea is « archived » outside surprise mode (020).
+    return { doc: saved.doc, result: { ok: true, item: asSeenBy(saved.doc, item, actorId) } };
   });
 }
 

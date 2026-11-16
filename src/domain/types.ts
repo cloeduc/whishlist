@@ -41,6 +41,8 @@ export interface Membership {
   userId: string;
   role: Role;
   joinedAt: string;
+  /** « Ne pas voir les cadeaux réservés »: this member does not see reservations on this list. */
+  surpriseMode: boolean;
 }
 
 export interface Subscription {

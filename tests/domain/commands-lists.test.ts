@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { before, test } from "node:test";
 import { formatPrice } from "../../src/domain/price";
-import { listMine, readMemberList } from "../../src/server/commands/lists";
+import { listMine, readMemberList, setSurpriseMode } from "../../src/server/commands/lists";
 import { apiDoc, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtures";
 
 before(ensurePasswordHash);
@@ -9,8 +9,8 @@ before(ensurePasswordHash);
 function docWithCamilleList() {
   const doc = apiDoc();
   doc.wishlists.push({ ...doc.wishlists[0]!, id: "w2", title: "Liste de Camille", readToken: "rt2", inviteToken: "it2" });
-  doc.memberships.push({ wishlistId: "w2", userId: "camille", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z" });
-  doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-03T00:00:00.000Z" });
+  doc.memberships.push({ wishlistId: "w2", userId: "camille", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z", surpriseMode: false });
+  doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-03T00:00:00.000Z", surpriseMode: false });
   return doc;
 }
 
@@ -93,5 +93,42 @@ test("a non-member gets notMember, like a missing list for the API", async () =>
       ok: false,
       error: "notMember",
     });
+  });
+});
+
+test("surprise mode: only for the member who chose it, reservations left out and the reserved idea among the ideas (020)", async () => {
+  const doc = docWithCamilleList();
+  await withStore(doc, async () => {
+    const alex = ctx(doc.users[0]!);
+    assert.deepEqual(await setSurpriseMode(ctx(), { wishlistId: "w", enabled: true }), { ok: false, error: "unauthorized" });
+    const stranger = { ...doc.users[0]!, id: "sam", email: "sam@example.test" };
+    assert.deepEqual(await setSurpriseMode(ctx(stranger), { wishlistId: "w", enabled: true }), { ok: false, error: "notMember" });
+
+    const on = await setSurpriseMode(alex, { wishlistId: "w", enabled: true });
+    assert.ok(on.ok);
+    assert.equal(on.list.surpriseMode, true);
+    assert.deepEqual(on.list.reservations, []);
+    assert.deepEqual(
+      on.list.items.map((item) => [item.id, item.archived]),
+      [
+        ["gift", false],
+        ["gift2", false],
+        ["taken", false],
+      ],
+    );
+    const mine = await listMine(alex);
+    assert.equal(mine.ok && mine.lists.find((entry) => entry.id === "w")?.itemCount, 3);
+
+    // Camille, member of the same list, still sees the reservation.
+    const camille = await readMemberList(ctx(doc.users[1]!), { wishlistId: "w" });
+    assert.ok(camille.ok);
+    assert.equal(camille.list.surpriseMode, false);
+    assert.deepEqual(camille.list.reservations.map((reservation) => reservation.id), ["r-taken"]);
+    assert.equal(camille.list.items.find((item) => item.id === "taken")?.archived, true);
+
+    const off = await setSurpriseMode(alex, { wishlistId: "w", enabled: false });
+    assert.ok(off.ok);
+    assert.equal(off.list.surpriseMode, false);
+    assert.deepEqual(off.list.reservations.map((reservation) => reservation.id), ["r-taken"]);
   });
 });

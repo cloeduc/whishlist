@@ -19,6 +19,7 @@ import {
   setItemArchivedFormAction,
 } from "../../../src/server/actions";
 import { hasReadPassword } from "../../../src/domain/read-password";
+import { memberShelf, reservedItemIds, surpriseModeOf } from "../../../src/domain/surprise";
 import { resolveTheme } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { AppearanceForm } from "@/components/site/appearance-form";
@@ -26,7 +27,9 @@ import { ConfirmForm } from "@/components/site/confirm-form";
 import { CopyLinkField } from "@/components/site/copy-link-field";
 import { InviteEmailForm } from "@/components/site/invite-email-form";
 import { LiveGiftMark } from "@/components/site/live-gift-mark";
+import { GuestViewLink } from "@/components/site/guest-view-link";
 import { ReadPasswordForm } from "@/components/site/read-password-form";
+import { SurpriseModeForm } from "@/components/site/surprise-mode-form";
 import { WishlistThemeScope } from "@/components/site/wishlist-theme-scope";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -81,12 +84,16 @@ export default async function EditListPage({
     .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label));
   const people = doc.people.filter((person) => person.wishlistId === id);
   const items = doc.items.filter((item) => item.wishlistId === id).sort((a, b) => a.sortOrder - b.sortOrder);
-  const activeItems = items.filter((item) => !item.archived);
-  const archivedItems = items.filter((item) => item.archived);
+  // Shelf as this member sees it: in surprise mode a reserved idea stays among the ideas (020).
+  const surpriseMode = surpriseModeOf(doc, id, user.id);
+  const reservedIds = reservedItemIds(doc, id);
+  const activeItems = items.filter((item) => memberShelf(item, reservedIds.has(item.id), surpriseMode) === "ideas");
+  const archivedItems = items.filter((item) => memberShelf(item, reservedIds.has(item.id), surpriseMode) === "archives");
   const members = doc.memberships
     .filter((entry) => entry.wishlistId === id)
     .map((entry) => ({ ...entry, user: doc.users.find((account) => account.id === entry.userId) }));
-  const reservations = listOffrir(doc, id);
+  // In surprise mode nothing about reservations reaches the page, not even their number (020).
+  const reservations = surpriseMode ? [] : listOffrir(doc, id);
   const personLabel = new Map(people.map((person) => [person.id, person.label]));
   const typeLabel = new Map(types.map((type) => [type.id, type.label]));
   const ideaItems = activeItems.map((item) => ({
@@ -131,9 +138,13 @@ export default async function EditListPage({
           <LiveGiftMark className="size-12" />
           <h1 className="text-2xl font-medium tracking-tight">{list.title}</h1>
         </div>
-        <LinkButton href={readUrl} variant="outline" size="sm">
-          {t("viewAsGuest")}
-        </LinkButton>
+        {surpriseMode ? (
+          <GuestViewLink href={readUrl} label={t("viewAsGuest")} />
+        ) : (
+          <LinkButton href={readUrl} variant="outline" size="sm">
+            {t("viewAsGuest")}
+          </LinkButton>
+        )}
       </div>
       {error ? (
         <Alert variant="destructive">
@@ -148,6 +159,11 @@ export default async function EditListPage({
       {query.ok === "readPassword" ? (
         <Alert>
           <AlertDescription>{t("share.readPasswordSaved")}</AlertDescription>
+        </Alert>
+      ) : null}
+      {query.ok === "surprise" || query.ok === "surpriseCleared" ? (
+        <Alert>
+          <AlertDescription>{t(query.ok === "surprise" ? "surprise.saved" : "surprise.cleared")}</AlertDescription>
         </Alert>
       ) : null}
       {query.ok === "readPasswordCleared" ? (
@@ -230,15 +246,20 @@ export default async function EditListPage({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-wrap gap-2">
-                  <form action={setItemArchivedFormAction}>
-                    <input type="hidden" name="wishlistId" value={id} />
-                    <input type="hidden" name="itemId" value={item.id} />
-                    <input type="hidden" name="archived" value="0" />
-                    <input type="hidden" name="tab" value="archive" />
-                    <Button type="submit" variant="outline" size="sm">
-                      {t("archives.restore")}
-                    </Button>
-                  </form>
+                  {/* A reserved idea comes back only when its reservation is cancelled (020). Never shown in surprise mode. */}
+                  {reservedIds.has(item.id) && !surpriseMode ? (
+                    <p className="w-full text-sm text-muted-foreground">{t("archives.reservedHint")}</p>
+                  ) : (
+                    <form action={setItemArchivedFormAction}>
+                      <input type="hidden" name="wishlistId" value={id} />
+                      <input type="hidden" name="itemId" value={item.id} />
+                      <input type="hidden" name="archived" value="0" />
+                      <input type="hidden" name="tab" value="archive" />
+                      <Button type="submit" variant="outline" size="sm">
+                        {t("archives.restore")}
+                      </Button>
+                    </form>
+                  )}
                   <ConfirmForm
                     title={t("confirm.deleteArchiveTitle")}
                     description={t("confirm.deleteArchiveBody", { name: item.name })}
@@ -260,7 +281,9 @@ export default async function EditListPage({
       {tab === "reservations" ? (
         <section className="flex flex-col gap-3">
           <h2 className="text-lg font-medium">{t("reservations.title")}</h2>
-          {reservations.length === 0 ? (
+          {surpriseMode ? (
+            <p className="text-muted-foreground">{t("surprise.hiddenHint")}</p>
+          ) : reservations.length === 0 ? (
             <Empty>
               <EmptyHeader>
                 <EmptyTitle>{t("reservations.empty")}</EmptyTitle>
@@ -387,6 +410,7 @@ export default async function EditListPage({
               </CardContent>
             </Card>
           ) : null}
+          <SurpriseModeForm wishlistId={id} enabled={surpriseMode} />
           <Card>
             <CardHeader>
               <CardTitle>{t("share.members")}</CardTitle>

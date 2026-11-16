@@ -22,7 +22,7 @@ before(ensurePasswordHash);
 
 function docWithCamille() {
   const doc = apiDoc();
-  doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-03T00:00:00.000Z" });
+  doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-03T00:00:00.000Z", surpriseMode: false });
   return doc;
 }
 

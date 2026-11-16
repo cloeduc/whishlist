@@ -58,6 +58,15 @@ test("moving a reserved idea: refused, nothing changes", () => {
   assert.equal(doc.items.find((i) => i.id === "liseuse")?.wishlistId, "w1");
 });
 
+test("surprise mode: moving a reserved idea is refused with a message that does not say it is reserved (020)", () => {
+  const doc = reserve(lists(), "liseuse");
+  doc.memberships.find((m) => m.wishlistId === "w1" && m.userId === "alex")!.surpriseMode = true;
+  assert.deepEqual(moveItem(doc, toChristmas), { ok: false, error: "itemLockedSurprise" });
+  // Copying stays allowed, and a free idea still moves.
+  assert.ok(copyItem(doc, { ...toChristmas, id: "copy" }).ok);
+  assert.ok(moveItem(doc, { ...toChristmas, itemId: "roman" }).ok);
+});
+
 test("rights: member of both lists; category and « qui » must belong to the target list", () => {
   const doc = lists();
   assert.deepEqual(moveItem(doc, { ...toChristmas, targetWishlistId: "w3", typeId: "w3-books", personId: "w3-alex" }), { ok: false, error: "notMember" });

@@ -50,7 +50,7 @@ export function apiDoc(): Database {
     fromTemplate: false,
     createdAt: "2026-01-01T00:00:00.000Z",
   });
-  data.memberships.push({ wishlistId: "w", userId: "alex", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z" });
+  data.memberships.push({ wishlistId: "w", userId: "alex", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z", surpriseMode: false });
   data.types.push({ id: "t", wishlistId: "w", label: "Jeux", sortOrder: 0 });
   data.people.push({ id: "p", wishlistId: "w", label: "Alex" });
   for (const [id, sortOrder] of [
@@ -71,7 +71,8 @@ export function apiDoc(): Database {
       description: null,
       personId: "p",
       sortOrder,
-      archived: id === "taken",
+      // "taken" is reserved below: since 020 a reservation does not archive its idea.
+      archived: false,
     });
   }
   data.reservations.push({
@@ -111,6 +112,7 @@ export function apiDocWithSecondList(): Database {
     userId: "camille",
     role: "owner",
     joinedAt: "2026-01-05T00:00:00.000Z",
+    surpriseMode: false,
   });
   data.types.push({ id: "t-camille", wishlistId: "w-camille", label: "Livres", sortOrder: 0 });
   data.people.push({ id: "p-camille", wishlistId: "w-camille", label: "Camille" });

@@ -89,6 +89,7 @@ doc.memberships.push({
   userId: member.value.id,
   role: "member",
   joinedAt: "2026-10-21T08:05:00.000Z",
+  surpriseMode: false,
 });
 
 doc.reservations.push({

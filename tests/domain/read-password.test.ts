@@ -28,6 +28,7 @@ function doc(): Database {
     userId: "owner",
     role: "owner",
     joinedAt: "2026-01-01T00:00:00.000Z",
+    surpriseMode: false,
   });
   return data;
 }
@@ -73,6 +74,7 @@ test("policy: too short / non-member", async () => {
     userId: "member",
     role: "member",
     joinedAt: "2026-01-02T00:00:00.000Z",
+    surpriseMode: false,
   });
   const member = await setReadPassword(withMember, {
     wishlistId: "w",

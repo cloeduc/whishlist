@@ -41,6 +41,7 @@ export const memberships = sqliteTable(
       .references(() => users.id),
     role: text("role").$type<Role>().notNull(),
     joinedAt: text("joined_at").notNull(),
+    surpriseMode: integer("surprise_mode", { mode: "boolean" }).notNull().default(false),
   },
   (table) => [
     primaryKey({ columns: [table.wishlistId, table.userId] }),

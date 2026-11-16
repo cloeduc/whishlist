@@ -45,7 +45,13 @@ const FIELDS: { [K in keyof Database]: Record<string, FieldCheck> } = {
     fromTemplate: "boolean",
     createdAt: "string",
   },
-  memberships: { wishlistId: "string", userId: "string", role: ["owner", "member"], joinedAt: "string" },
+  memberships: {
+    wishlistId: "string",
+    userId: "string",
+    role: ["owner", "member"],
+    joinedAt: "string",
+    surpriseMode: "boolean?",
+  },
   subscriptions: {
     wishlistId: "string",
     userId: "string",
@@ -183,9 +189,14 @@ export function normalizeDocument(doc: Database): Database {
     if (list.readPasswordHash === undefined) list.readPasswordHash = null;
     list.theme = resolveTheme(list.theme);
   }
+  for (const membership of doc.memberships) {
+    if (membership.surpriseMode === undefined) membership.surpriseMode = false;
+  }
+  // A reservation no longer archives its idea (020): same rule as migration 0006.
+  const reservedItemIds = new Set(doc.reservations.map((reservation) => reservation.itemId));
   for (const item of doc.items) {
     if (item.imageUrl === undefined) item.imageUrl = null;
-    if (item.archived === undefined) item.archived = false;
+    if (item.archived === undefined || reservedItemIds.has(item.id)) item.archived = false;
     if (item.secondHandOk === undefined) item.secondHandOk = false;
     if (item.description === undefined) item.description = null;
   }

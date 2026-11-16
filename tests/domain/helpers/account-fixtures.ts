@@ -16,7 +16,7 @@ function addList(doc: Database, id: string, title: string, members: [string, Rol
     createdAt: "2026-01-01T00:00:00.000Z",
   });
   for (const [userId, role, joinedAt] of members) {
-    doc.memberships.push({ wishlistId: id, userId, role, joinedAt });
+    doc.memberships.push({ wishlistId: id, userId, role, joinedAt, surpriseMode: false });
   }
   doc.types.push({ id: `${id}-type`, wishlistId: id, label: `Catégorie ${id}`, sortOrder: 0 });
   doc.people.push({ id: `${id}-person`, wishlistId: id, label: `Qui ${id}` });

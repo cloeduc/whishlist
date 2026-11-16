@@ -6,6 +6,7 @@ import { listDefaults, memberListTitles, numberedTitle } from "../../domain/list
 import { addPerson, addType, splitLabels } from "../../domain/items";
 import { updateWishlistSettings } from "../../domain/membership";
 import { followedListsOf } from "../../domain/subscription";
+import { setSurpriseMode as setSurpriseModeRule } from "../../domain/surprise";
 import type { WishlistTheme } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import { getTranslationsFor } from "../../i18n/server";
@@ -29,7 +30,7 @@ export async function listMine(
     .filter((membership) => membership.userId === active.user.id)
     .flatMap((membership) => {
       const wishlist = doc.wishlists.find((entry) => entry.id === membership.wishlistId);
-      return wishlist ? [toListSummary(doc, wishlist, membership.role, ctx.locale, ctx.origin)] : [];
+      return wishlist ? [toListSummary(doc, wishlist, membership, ctx.locale, ctx.origin)] : [];
     });
   const subscriptions = followedListsOf(doc, active.user.id).map(({ wishlist, subscription }) =>
     toSubscribedListSummary(doc, wishlist, subscription, ctx.locale, ctx.origin),
@@ -56,7 +57,7 @@ export async function memberListView(
   const membership = findMembership(doc, wishlistId, userId);
   const wishlist = doc.wishlists.find((entry) => entry.id === wishlistId);
   if (!membership || !wishlist) return { ok: false, error: "notMember" };
-  return { ok: true, list: toMemberListView(doc, wishlist, membership.role, ctx.locale, ctx.origin) };
+  return { ok: true, list: toMemberListView(doc, wishlist, membership, ctx.locale, ctx.origin) };
 }
 
 /**
@@ -129,6 +130,21 @@ export async function updateSettings(
   if (!active.ok) return active;
   const saved = await updateDocument<CommandResult>((doc) => {
     const result = updateWishlistSettings(doc, { ...input, actorId: active.user.id });
+    return result.ok ? { doc: result.doc, result: { ok: true } } : { doc, result };
+  });
+  if (!saved.ok) return saved;
+  return memberListView(ctx, input.wishlistId, active.user.id);
+}
+
+/** « Ne pas voir les cadeaux réservés » for the signed-in member only (020); returns the list as they now see it. */
+export async function setSurpriseMode(
+  ctx: CommandContext,
+  input: { wishlistId: string; enabled: boolean },
+): Promise<CommandResult<{ list: MemberListView }>> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  const saved = await updateDocument<CommandResult>((doc) => {
+    const result = setSurpriseModeRule(doc, { ...input, actorId: active.user.id });
     return result.ok ? { doc: result.doc, result: { ok: true } } : { doc, result };
   });
   if (!saved.ok) return saved;

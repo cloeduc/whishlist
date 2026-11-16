@@ -89,6 +89,28 @@ test("list_lists and get_list: the account's lists; an idea says whether it is r
   });
 });
 
+test("surprise mode: get_list says no idea is reserved, delete_idea gives the neutral refusal (020)", async () => {
+  const doc = apiDoc();
+  doc.memberships[0]!.surpriseMode = true;
+  await withStore(doc, async () => {
+    const alex = client(doc.users[0]!);
+    assert.deepEqual(json(await alex.call("list_lists", {})), [{ id: "w", title: "Liste d'Alex", role: "owner", ideas: 3 }]);
+    const ideas = json(await alex.call("get_list", { listId: "w" })).ideas as { id: string; reserved: boolean; archived: boolean }[];
+    assert.deepEqual(
+      ideas.map((idea) => [idea.id, idea.reserved, idea.archived]),
+      [
+        ["gift", false, false],
+        ["gift2", false, false],
+        ["taken", false, false],
+      ],
+    );
+    const refused = await alex.call("delete_idea", { listId: "w", ideaId: "taken" });
+    assert.equal(refused.isError, true);
+    assert.match(refused.content[0]!.text, /itemLockedSurprise/);
+    assert.doesNotMatch(refused.content[0]!.text, /itemHasReservation/);
+  });
+});
+
 test("get_list of a list the account is not a member of: translated refusal, like the API", async () => {
   const doc = apiDoc();
   await withStore(doc, async () => {
@@ -179,7 +201,7 @@ test("delete_idea: deletes; a reserved idea is refused, as on the site", async (
 /** Alex becomes a member of Camille's list, which also has a « jeux » category. */
 function transferDoc() {
   const doc = apiDocWithSecondList();
-  doc.memberships.push({ wishlistId: "w-camille", userId: "alex", role: "member", joinedAt: "2026-01-06T00:00:00.000Z" });
+  doc.memberships.push({ wishlistId: "w-camille", userId: "alex", role: "member", joinedAt: "2026-01-06T00:00:00.000Z", surpriseMode: false });
   doc.types.push({ id: "t-camille-jeux", wishlistId: "w-camille", label: "jeux", sortOrder: 1 });
   return doc;
 }
@@ -251,7 +273,7 @@ test("rename_* and delete_*: category and « qui » by name; a label still in us
 
 test("create_list, rename_list, delete_list: only the owner deletes; a non-member does not see the list", async () => {
   const doc = apiDoc();
-  doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-01T00:00:00.000Z" });
+  doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-01T00:00:00.000Z", surpriseMode: false });
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
     const created = json(await alex.call("create_list", { title: "Noël", category: "Livres", for: "Alex" })).created;

@@ -101,6 +101,7 @@ export function acceptInvite(
     userId: input.userId,
     role: "member",
     joinedAt: (input.now ?? new Date()).toISOString(),
+    surpriseMode: false,
   });
   return { ok: true, doc: next, wishlistId: wishlist.id };
 }

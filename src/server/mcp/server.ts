@@ -97,7 +97,7 @@ export function buildMcpServer(ctx: CommandContext): McpServer {
     "get_list",
     {
       description:
-        "Read one wish list: its categories, its people (who the gifts are for) and its ideas. Archived ideas are left out unless includeArchived is true. `price` is in euros, as add_idea and update_idea take it. `reserved` only says whether a giver has reserved an idea; who reserved it is never shown, to keep the surprise.",
+        "Read one wish list: its categories, its people (who the gifts are for) and its ideas. Archived ideas are left out unless includeArchived is true. `price` is in euros, as add_idea and update_idea take it. `reserved` only says whether a giver has reserved an idea; who reserved it is never shown, to keep the surprise. When the user chose not to see reservations on this list (surprise mode), `reserved` is always false and a reserved idea is not archived: do not try to guess.",
       inputSchema: z.object({ listId: ID, includeArchived: z.boolean().optional() }),
       annotations: READ,
     },

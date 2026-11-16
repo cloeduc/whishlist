@@ -10,6 +10,7 @@
   "itemMissing": "This idea doesn’t exist.",
   "itemHasReservation": "This idea has a reservation. Cancel it first.",
   "itemReservedCannotMove": "This idea is reserved, so it stays on its list: otherwise the person who reserved it couldn’t find it anymore. You can copy it instead.",
+  "itemLockedSurprise": "This idea cannot be deleted or moved right now. See the reservations to find out more.",
   "typeNeedsName": "Enter a category name.",
   "typeExists": "This category is already on this list.",
   "personExists": "This recipient is already on this list.",

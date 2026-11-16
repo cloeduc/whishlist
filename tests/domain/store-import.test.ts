@@ -75,6 +75,9 @@ test("import: old fields get their default value", async () => {
     delete item.imageUrl;
     delete item.archived;
     delete (legacy.reservations[0] as Partial<Doc["reservations"][number]>).userId;
+    // Before 020 a reservation archived its idea, and memberships had no surprise mode.
+    legacy.items.find((entry) => entry.id === "taken")!.archived = true;
+    delete (legacy.memberships[0] as Partial<Doc["memberships"][number]>).surpriseMode;
     legacy.types.push({ id: "t0", wishlistId: "w", label: "Autres", sortOrder: 0 });
     // The first files had no sortOrder on labels.
     for (const type of legacy.types) delete (type as Partial<Doc["types"][number]>).sortOrder;
@@ -97,6 +100,8 @@ test("import: old fields get their default value", async () => {
     assert.equal(doc.items[0].imageUrl, null);
     assert.equal(doc.items[0].archived, false);
     assert.equal(doc.reservations[0].userId, null);
+    assert.equal(doc.items.find((entry) => entry.id === "taken")?.archived, false);
+    assert.equal(doc.memberships[0].surpriseMode, false);
     // Missing sortOrder: alphabetical order recomputed (Autres, Jeux).
     assert.deepEqual(
       doc.types.map((t) => [t.id, t.sortOrder]),
@@ -353,5 +358,47 @@ test("migration 0001: accounts of an existing database are verified at their cre
     const doc = await readDocument();
     assert.equal(doc.users[0].emailVerifiedAt, "2026-03-01T00:00:00.000Z");
     assert.deepEqual(doc.emailConfirmations, []);
+  });
+});
+
+test("migration 0006: a reserved idea is no longer archived, memberships start without surprise mode", async () => {
+  await withTempDataPath(async () => {
+    const { readMigrationFiles } = await import("drizzle-orm/migrator");
+    const migrations = readMigrationFiles({ migrationsFolder: path.join(process.cwd(), "drizzle") });
+    const before = migrations.slice(0, migrations.findIndex((migration) => migration.sql.join("").includes("surprise_mode")));
+    // Database as in prod before 020: a reservation archived its idea.
+    const old = new Database(databaseFilePath());
+    old.exec("CREATE TABLE __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric)");
+    for (const migration of before) {
+      for (const statement of migration.sql) if (statement.trim()) old.exec(statement);
+      old.prepare("INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)").run(migration.hash, migration.folderMillis);
+    }
+    old.prepare("INSERT INTO meta (key, value) VALUES ('legacy_import', 'none')").run();
+    old.exec(`
+      INSERT INTO users (id, email, password_hash, display_name, created_at) VALUES ('u', 'u@example.test', 'h', 'U', '2026-03-01T00:00:00.000Z');
+      INSERT INTO wishlists (id, title, theme, read_token, invite_token, from_template, created_at)
+        VALUES ('w', 'L', '{}', 'read-w', 'invite-w', 0, '2026-03-01T00:00:00.000Z');
+      INSERT INTO memberships (wishlist_id, user_id, role, joined_at) VALUES ('w', 'u', 'owner', '2026-03-01T00:00:00.000Z');
+      INSERT INTO types (id, wishlist_id, label) VALUES ('t', 'w', 'Jeux');
+      INSERT INTO people (id, wishlist_id, label) VALUES ('p', 'w', 'U');
+      INSERT INTO items (id, wishlist_id, name, type_id, person_id, sort_order, archived) VALUES
+        ('taken', 'w', 'Réservée', 't', 'p', 0, 1),
+        ('stored', 'w', 'Archivée', 't', 'p', 1, 1),
+        ('free', 'w', 'Libre', 't', 'p', 2, 0);
+      INSERT INTO reservations (id, wishlist_id, item_id, created_at) VALUES ('r', 'w', 'taken', '2026-03-02T00:00:00.000Z');
+    `);
+    old.close();
+
+    const doc = await readDocument();
+    assert.deepEqual(
+      doc.items.map((item) => [item.id, item.archived]),
+      [
+        ["taken", false],
+        ["stored", true],
+        ["free", false],
+      ],
+    );
+    assert.equal(doc.memberships[0].surpriseMode, false);
+    assert.equal(doc.reservations.length, 1);
   });
 });

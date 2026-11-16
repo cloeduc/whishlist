@@ -17,6 +17,7 @@
     "empty": "No archived ideas yet.",
     "emptyHint": "Ideas you archive will appear here.",
     "restore": "Restore to list",
+    "reservedHint": "This idea is reserved: cancel the reservation to put it back in the list.",
     "deleteForever": "Delete permanently"
   },
   "reservations": {
@@ -28,6 +29,23 @@
     "cancelBody": "This gift will be available to reserve again.",
     "cancelConfirm": "Cancel reservation",
     "cancelKeep": "Keep reservation"
+  },
+  "surprise": {
+    "title": "Keep the surprise",
+    "description": "Reserved ideas stay in your list, without you knowing which ones. Other members still see the reservations.",
+    "toggle": "Don’t show me reserved gifts",
+    "saved": "Surprise mode on: you no longer see reserved gifts.",
+    "cleared": "Surprise mode off: you see reserved gifts again.",
+    "hiddenHint": "You chose not to see reserved gifts.",
+    "reveal": "See reservations",
+    "revealTitle": "See reservations?",
+    "revealBody": "You are about to see which gifts have been reserved.",
+    "revealConfirm": "See reservations",
+    "revealKeep": "Keep the surprise",
+    "guestViewTitle": "Open the guest view?",
+    "guestViewBody": "The guest view leaves out gifts that are already reserved: comparing it with your list, you might guess which ones are.",
+    "guestViewConfirm": "Open the guest view",
+    "guestViewKeep": "Stay here"
   },
   "confirm": {
     "keep": "Keep",
