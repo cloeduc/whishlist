@@ -47,6 +47,8 @@ Les vérifications « visible sur le site » des stories restent manuelles aussi
 | 020-us1 | Story entière : mode surprise sur le site (carte, idées, archives, refus neutres, vue invité) | Sur le site, qui n'a pas de suite e2e ; dans l'app, le même comportement est vérifié par `020-us3` | [020 quickstart, US1](../../specs/020-surprise-mode/quickstart.md#us1--activer-le-mode-et-ne-plus-voir-les-réservations-site) |
 | 020-us2 | Story entière : voir les réservations sur demande sur le site | Sur le site, qui n'a pas de suite e2e ; dans l'app, la révélation est vérifiée par `020-us3` | [020 quickstart, US2](../../specs/020-surprise-mode/quickstart.md#us2--voir-volontairement-les-réservations) |
 | 020-us3 | Téléphone hors ligne : aucune réservation gardée sur le téléphone, bouton désactivé (scénario 4) | Demande le mode avion (Android seulement) ; couvert par `reservations.test.tsx` | [020 quickstart, US3](../../specs/020-surprise-mode/quickstart.md#us3--lapp-mobile) |
+| 021-us1 | Story entière : fenêtre « Nouvelle version disponible » sur iPhone | Demande une version plus récente publiée sur l'App Store ; règles et fenêtre couvertes par `update-prompt.test.tsx` | [021 quickstart, US1](../../specs/021-app-update-prompt/quickstart.md#us1--iphone) |
+| 021-us2 | Story entière : mise à jour flexible de Google Play sur Android | Demande deux versions dans la Play Console (partage interne d'app) ; branche Android couverte par `update-prompt.test.tsx` | [021 quickstart, US2](../../specs/021-app-update-prompt/quickstart.md#us2--android) |
 
 ## Partage vers l'app (PR #15, sans spec)
 

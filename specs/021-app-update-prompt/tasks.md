@@ -96,9 +96,9 @@ Chaque phase de story se termine par « Commit de la story » : `npm run lint`, 
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T020 [P] Ajouter `"021": "specs/021-app-update-prompt/spec.md"` à `mobile/__tests__/e2e/coverage.test.ts` et, dans `mobile/.maestro/exclusions.md`, deux lignes « Story entière » pour `021-us1` et `021-us2` (il faut une vraie version publiée sur un store ; couvert par `update-prompt.test.tsx`), avec un lien vers les sections du quickstart
-- [ ] T021 [P] Passer la version de l'app à 1.2.0 dans `mobile/app.config.ts` (`version`), la première qui embarque la feature (research R8)
-- [ ] T022 Commit Polish : contrôles verts, puis `chore: record the 021 e2e exclusions and bump the app to 1.2.0`, sans demander
+- [X] T020 [P] Ajouter `"021": "specs/021-app-update-prompt/spec.md"` à `mobile/__tests__/e2e/coverage.test.ts` et, dans `mobile/.maestro/exclusions.md`, deux lignes « Story entière » pour `021-us1` et `021-us2` (il faut une vraie version publiée sur un store ; couvert par `update-prompt.test.tsx`), avec un lien vers les sections du quickstart
+- [X] T021 [P] Passer la version de l'app à 1.2.0 dans `mobile/app.config.ts` (`version`), la première qui embarque la feature (research R8)
+- [X] T022 Commit Polish : contrôles verts, puis `chore: record the 021 e2e exclusions and bump the app to 1.2.0`, sans demander
 
 ---
 
