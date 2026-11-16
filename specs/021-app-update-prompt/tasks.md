@@ -67,7 +67,7 @@ Chaque phase de story se termine par « Commit de la story » : `npm run lint`, 
 - [X] T011 [P] [US1] Ajouter les clés `update.title`, `update.body`, `update.now`, `update.later` de `contracts/screens.md` à `locales/fr/mobile.json` et `locales/en/mobile.json` (à côté du bloc `upgrade`, vouvoiement)
 - [X] T012 [US1] Créer `mobile/src/features/update/UpdatePrompt.tsx` : au montage (démarrage) et sur `AppState` → `active`, si `shouldCheck` → `setLastCheckAt`, `checkForUpdate()` (erreurs avalées en silence) ; sur iOS, si `updateAvailable` et `shouldPrompt` → `ConfirmDialog` (`mobile/src/ui/ConfirmDialog.tsx`, `destructive={false}`, `testID="update.prompt"`) ; « Mettre à jour » → `startUpdate()` (erreur avalée) ; « Plus tard » → `setSnooze({ storeVersion, at: now })` ; rien si `__DEV__` ou `Platform.OS === "web"` ; une seule vérification en cours à la fois
 - [X] T013 [US1] Monter `<UpdatePrompt />` dans `mobile/app/_layout.tsx`, après la pile d'écrans (par-dessus tout écran, y compris après un lien, FR-010), hors de l'écran `UpgradeRequired`
-- [ ] T014 [US1] Vérifier à la main quickstart.md, section US1 (si une version plus ancienne que celle de l'App Store peut être installée ; sinon le noter dans le commit et dans la tâche) — **pas fait** : l’App Store publie la 1.0.0 et un build local porte 1.1.0, la fenêtre ne peut pas apparaître ; à faire avec la 1.2.0 publiée (installer une 1.1 face à elle) ou un build Release de numéro plus bas
+- [ ] T014 [US1] Vérifier à la main quickstart.md, section US1 (si une version plus ancienne que celle de l'App Store peut être installée ; sinon le noter dans le commit et dans la tâche) — **pas fait** : l’App Store publie la 1.0.0 et un build local porte 1.1.0, la fenêtre ne peut pas apparaître ; à faire avec la 1.1.1 publiée (installer une 1.1.0 face à elle) ou un build Release de numéro plus bas
 - [X] T015 [US1] Commit de la story : contrôles verts, puis `feat: tell iPhone users a new app version is available (US1)` (avec Setup et Foundational), sans demander
 
 **Checkpoint**: la fenêtre iOS marche ; Android ne fait encore rien.
@@ -87,7 +87,7 @@ Chaque phase de story se termine par « Commit de la story » : `npm run lint`, 
 ### Implementation
 
 - [X] T017 [US2] `mobile/src/features/update/UpdatePrompt.tsx` : branche Android : si `updateAvailable`, `flexibleAllowed` et `shouldPrompt` → `startUpdate(false)` (mode flexible imposé, jamais immédiat) ; `addUpdateListener("updateCancelled", …)` → `setSnooze({ storeVersion, at: now })` ; l'installation après téléchargement est faite par la lib (research R2), aucune fenêtre de l'app
-- [ ] T018 [US2] Vérifier à la main quickstart.md, section US2 (partage interne d'app ; sinon le noter) — **pas fait** : demande deux versions dans la Play Console (partage interne d’app) ; à faire avec la 1.2.0
+- [ ] T018 [US2] Vérifier à la main quickstart.md, section US2 (partage interne d'app ; sinon le noter) — **pas fait** : demande deux versions dans la Play Console (partage interne d’app) ; à faire avec la 1.1.1
 - [X] T019 [US2] Commit de la story : contrôles verts, puis `feat: offer the Google Play in-app update on Android (US2)`, sans demander
 
 **Checkpoint**: les deux stories marchent.
@@ -97,7 +97,7 @@ Chaque phase de story se termine par « Commit de la story » : `npm run lint`, 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
 - [X] T020 [P] Ajouter `"021": "specs/021-app-update-prompt/spec.md"` à `mobile/__tests__/e2e/coverage.test.ts` et, dans `mobile/.maestro/exclusions.md`, deux lignes « Story entière » pour `021-us1` et `021-us2` (il faut une vraie version publiée sur un store ; couvert par `update-prompt.test.tsx`), avec un lien vers les sections du quickstart
-- [X] T021 [P] Passer la version de l'app à 1.2.0 dans `mobile/app.config.ts` (`version`), la première qui embarque la feature (research R8)
+- [X] T021 [P] Passer la version de l'app à 1.1.1 (d'abord 1.2.0, ramenée à 1.1.1 à la demande de l'utilisatrice) dans `mobile/app.config.ts` (`version`), la première qui embarque la feature (research R8)
 - [X] T022 Commit Polish : contrôles verts, puis `chore: record the 021 e2e exclusions and bump the app to 1.2.0`, sans demander
 
 ---
@@ -130,7 +130,7 @@ Task: "Compléter mobile/__tests__/offline/snapshot.test.ts"
 2. US1 (iPhone, le store en production) → commit (MVP).
 3. US2 (Android) → commit.
 4. Polish → commit ; revue `wishlist-feature-review`.
-5. Publier 1.2.0 sur les deux stores (EAS) : à faire par l'utilisatrice, hors de ces tâches.
+5. Publier 1.1.1 sur les deux stores (EAS) : à faire par l'utilisatrice, hors de ces tâches.
 
 ## Notes
 

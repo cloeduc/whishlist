@@ -13,8 +13,8 @@ Les tests jest couvrent les règles (24 h, 7 jours, nouvelle version), la fenêt
 
 ## Préparer deux versions
 
-1. Version N (par exemple 1.2.0) : la première qui embarque la feature. Construire et publier (EAS) sur les deux stores, ou au moins sur une piste de test.
-2. Version N+1 (1.2.1, même code, numéro plus haut) : la publier sur le store.
+1. Version N (par exemple 1.1.1) : la première qui embarque la feature. Construire et publier (EAS) sur les deux stores, ou au moins sur une piste de test.
+2. Version N+1 (1.1.2, même code, numéro plus haut) : la publier sur le store.
 
 ## US1 : iPhone
 

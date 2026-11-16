@@ -28,7 +28,7 @@ Approche : la lib `expo-in-app-updates` 0.13 (research R1, R2), une règle pure 
 
 **Constraints**: silencieux hors ligne et en cas d'erreur ; rien en build de développement ; pas de style en dur ; textes FR/EN.
 
-**Scale/Scope**: 1 dépendance native, 1 module de règles, 1 composant, 4 clés i18n par langue, 1 changement de `clearAll`, configuration iOS (`AppStoreID`, `AppStoreCountry`), nouveaux builds EAS (1.2.0).
+**Scale/Scope**: 1 dépendance native, 1 module de règles, 1 composant, 4 clés i18n par langue, 1 changement de `clearAll`, configuration iOS (`AppStoreID`, `AppStoreCountry`), nouveaux builds EAS (1.1.1).
 
 ## Constitution Check
 
@@ -65,7 +65,7 @@ specs/021-app-update-prompt/
 ```text
 mobile/
 ├── package.json                     # expo-in-app-updates (npx expo install)
-├── app.config.ts                    # ios.infoPlist : AppStoreID, AppStoreCountry ; version 1.2.0
+├── app.config.ts                    # ios.infoPlist : AppStoreID, AppStoreCountry ; version 1.1.1
 ├── app/_layout.tsx                  # monte <UpdatePrompt />
 ├── src/update/policy.ts             # shouldCheck, shouldPrompt (pures)
 ├── src/update/state.ts              # lecture / écriture de device.update.* dans meta
@@ -86,7 +86,7 @@ locales/{fr,en}/mobile.json          # update.*
 1. **Fondation** : installer la lib, configuration iOS, `policy.ts` et `state.ts` avec leurs tests, `clearAll`.
 2. **US1 (iPhone)** : `UpdatePrompt` (fenêtre, « Mettre à jour », « Plus tard »), textes, tests.
 3. **US2 (Android)** : branche Android de `UpdatePrompt` (proposition flexible, report sur refus), tests.
-4. **Polish** : exclusions Maestro et couverture, version 1.2.0, note de publication.
+4. **Polish** : exclusions Maestro et couverture, version 1.1.1, note de publication.
 
 ## Complexity Tracking
 

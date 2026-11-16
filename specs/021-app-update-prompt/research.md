@@ -43,7 +43,7 @@ Le report s'enregistre après « Plus tard » (iOS) ou `updateCancelled` (Androi
 
 ## R8. Publication et versions
 
-La lib contient du code natif : il faut de nouveaux builds (EAS) pour les deux stores, avec un numéro de version au-dessus de 1.1.0 (1.2.0). Les versions 1.0 et 1.1 ne préviendront de rien. Pas de changement du serveur ni du contrat d'API.
+La lib contient du code natif : il faut de nouveaux builds (EAS) pour les deux stores, avec un numéro de version au-dessus de 1.1.0 (1.1.1). Les versions 1.0 et 1.1.0 ne préviendront de rien. Pas de changement du serveur ni du contrat d'API.
 
 L'écran existant `UpgradeRequired` (API trop ancienne, 410) reste tel quel ; lui ajouter un bouton vers le store serait le début de la mise à jour obligatoire, hors périmètre.
 
