@@ -74,9 +74,9 @@ Branche : `023-add-category-from-idea`, créée depuis `staging` avant le premie
 
 ### Implementation
 
-- [ ] T013 [US2] `components/site/item-form.tsx` : dernière `<NativeSelectOption value="__new__">` (`form.newTypeOption`) dans le choix de catégorie ; la choisir garde `draft.typeId` inchangé et ouvre un bloc sous le champ : `Field` + `FieldLabel` (`categories.newType`), `Input` (placeholder `categories.newTypePlaceholder`), `Button` « Ajouter la catégorie » (`categories.addTypeAria`), `Button` `variant="link"` « Annuler » (`common:actions.cancel`), `FormRefusal` pour l'erreur ; « Ajouter » : nom vide → `typeNeedsName` sans appel ; sinon `manageLabelAction({ wishlistId, kind: "type", op: "add", label })` dans une transition → succès : `setField("typeId", result.label.id)` et bloc fermé ; refus : code d'erreur affiché, bloc ouvert ; aucun autre champ du brouillon modifié (lire `node_modules/next/dist/docs/` sur les server functions appelées depuis un composant client avant d'écrire)
-- [ ] T014 [US2] Vérifier à la main quickstart.md, section US2, sur la base de démo (serveur de dev) : ajout et modification, doublon, nom vide, « Annuler »
-- [ ] T015 [US2] Commit de la story : contrôles verts, puis `feat: create a category from the idea form on the website (US2)`, sans demander
+- [X] T013 [US2] `components/site/item-form.tsx` : dernière `<NativeSelectOption value="__new__">` (`form.newTypeOption`) dans le choix de catégorie ; la choisir garde `draft.typeId` inchangé et ouvre un bloc sous le champ : `Field` + `FieldLabel` (`categories.newType`), `Input` (placeholder `categories.newTypePlaceholder`), `Button` « Ajouter la catégorie » (`categories.addTypeAria`), `Button` `variant="link"` « Annuler » (`common:actions.cancel`), `FormRefusal` pour l'erreur ; « Ajouter » : nom vide → `typeNeedsName` sans appel ; sinon `manageLabelAction({ wishlistId, kind: "type", op: "add", label })` dans une transition → succès : `setField("typeId", result.label.id)` et bloc fermé ; refus : code d'erreur affiché, bloc ouvert ; aucun autre champ du brouillon modifié (lire `node_modules/next/dist/docs/` sur les server functions appelées depuis un composant client avant d'écrire)
+- [X] T014 [US2] Vérifier à la main quickstart.md, section US2, sur la base de démo (serveur de dev) : ajout et modification, doublon, nom vide, « Annuler »
+- [X] T015 [US2] Commit de la story : contrôles verts, puis `feat: create a category from the idea form on the website (US2)`, sans demander
 
 ---
 

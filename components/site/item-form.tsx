@@ -13,12 +13,17 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { PriorityStarPicker } from "@/components/site/priority-star-picker";
 import { MAX_DESCRIPTION } from "@/src/domain/description";
 import type { LlmImpact } from "@/src/domain/llm-impact";
+import { FormRefusal } from "@/components/site/form-refusal";
 import {
   enrichFromUrlAction,
+  manageLabelAction,
   saveItemAction,
   type ItemFormDraft,
   type SaveItemState,
 } from "@/src/server/actions";
+
+/** Value of the « + Nouvelle catégorie » option (023); never a category id. */
+const NEW_TYPE = "__new__";
 
 function initialDraft(input: {
   item?: {
@@ -92,6 +97,13 @@ export function ItemForm({
   const [enrichPending, startEnrich] = useTransition();
   const [impact, setImpact] = useState<LlmImpact | null>(null);
   const [usedLlm, setUsedLlm] = useState(false);
+  /** « + Nouvelle catégorie » (023): a category created from the form, then chosen for the idea. */
+  const [newType, setNewType] = useState<{ open: boolean; name: string; error: string | null }>({
+    open: false,
+    name: "",
+    error: null,
+  });
+  const [newTypePending, startNewType] = useTransition();
 
   if (state !== appliedState) {
     setAppliedState(state);
@@ -103,6 +115,24 @@ export function ItemForm({
 
   function setField<K extends keyof ItemFormDraft>(key: K, value: ItemFormDraft[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function addCategory() {
+    const label = newType.name.trim();
+    if (!label) {
+      setNewType((current) => ({ ...current, error: "typeNeedsName" }));
+      return;
+    }
+    startNewType(async () => {
+      const result = await manageLabelAction({ wishlistId, kind: "type", op: "add", label });
+      if (!result.ok) {
+        setNewType((current) => ({ ...current, error: result.error }));
+        return;
+      }
+      // Only the category changes: everything else typed stays as it is.
+      if (result.label) setField("typeId", result.label.id);
+      setNewType({ open: false, name: "", error: null });
+    });
   }
 
   function enrich() {
@@ -241,7 +271,11 @@ export function ItemForm({
               name="typeId"
               className="w-full"
               value={draft.typeId}
-              onChange={(e) => setField("typeId", e.target.value)}
+              onChange={(e) => {
+                // « + Nouvelle catégorie » is an action, not a value: the chosen category stays.
+                if (e.target.value === NEW_TYPE) setNewType({ open: true, name: "", error: null });
+                else setField("typeId", e.target.value);
+              }}
               required
             >
               {types.map((type) => (
@@ -249,7 +283,40 @@ export function ItemForm({
                   {type.label}
                 </NativeSelectOption>
               ))}
+              <NativeSelectOption value={NEW_TYPE}>{t("form.newTypeOption")}</NativeSelectOption>
             </NativeSelect>
+            {newType.open ? (
+              <div className="flex flex-col gap-2">
+                <FieldLabel htmlFor={`${id}-new-type`}>{t("categories.newType")}</FieldLabel>
+                <Input
+                  id={`${id}-new-type`}
+                  value={newType.name}
+                  placeholder={t("categories.newTypePlaceholder")}
+                  onChange={(e) => setNewType((current) => ({ ...current, name: e.target.value }))}
+                  onKeyDown={(e) => {
+                    // Enter adds the category, it does not submit the idea.
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addCategory();
+                    }
+                  }}
+                />
+                <FormRefusal code={newType.error} />
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" variant="neutral" size="sm" disabled={newTypePending} onClick={addCategory}>
+                    {t("categories.addTypeAria")}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="sm"
+                    onClick={() => setNewType({ open: false, name: "", error: null })}
+                  >
+                    {t("common:actions.cancel")}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
           </Field>
           <Field>
             <FieldLabel htmlFor={`${id}-person`}>{t("form.person")}</FieldLabel>
