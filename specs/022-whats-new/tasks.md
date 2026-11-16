@@ -95,8 +95,8 @@ Chaque phase de story se termine par « Commit de la story » : `npm run lint`, 
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T023 [P] Ajouter `"022": "specs/022-whats-new/spec.md"` à `mobile/__tests__/e2e/coverage.test.ts` ; dans `mobile/.maestro/exclusions.md`, une ligne `022-us1` : « Fenêtre après une vraie mise à jour (version vue plus ancienne) » — la suite efface l'app à chaque parcours, couvert par `whats-new.test.tsx`, lien vers quickstart US1
-- [ ] T024 Commit Polish : contrôles verts, puis `chore: record the 022 e2e coverage`, sans demander
+- [X] T023 [P] Ajouter `"022": "specs/022-whats-new/spec.md"` à `mobile/__tests__/e2e/coverage.test.ts` ; dans `mobile/.maestro/exclusions.md`, une ligne `022-us1` : « Fenêtre après une vraie mise à jour (version vue plus ancienne) » — la suite efface l'app à chaque parcours, couvert par `whats-new.test.tsx`, lien vers quickstart US1
+- [X] T024 Commit Polish : contrôles verts, puis `chore: record the 022 e2e coverage`, sans demander
 
 ---
 

@@ -17,6 +17,7 @@ const specs = {
   "018": "specs/018-english-urls/spec.md",
   "020": "specs/020-surprise-mode/spec.md",
   "021": "specs/021-app-update-prompt/spec.md",
+  "022": "specs/022-whats-new/spec.md",
 };
 
 function storiesOf(feature: string, file: string): string[] {
