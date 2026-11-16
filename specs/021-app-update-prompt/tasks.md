@@ -82,13 +82,13 @@ Chaque phase de story se termine par « Commit de la story » : `npm run lint`, 
 
 ### Tests
 
-- [ ] T016 [P] [US2] Compléter `mobile/__tests__/features/update-prompt.test.tsx` (`Platform.OS = "android"`) : mise à jour disponible et `flexibleAllowed` → `startUpdate(false)` appelé, aucune fenêtre de l'app ; `flexibleAllowed: false` → rien ; événement `updateCancelled` → report enregistré avec la `storeVersion` ; report de moins de 7 jours → `startUpdate` pas appelé ; `startUpdate` rejette → rien d'affiché ; désabonnement de l'écouteur au démontage
+- [X] T016 [P] [US2] Compléter `mobile/__tests__/features/update-prompt.test.tsx` (`Platform.OS = "android"`) : mise à jour disponible et `flexibleAllowed` → `startUpdate(false)` appelé, aucune fenêtre de l'app ; `flexibleAllowed: false` → rien ; événement `updateCancelled` → report enregistré avec la `storeVersion` ; report de moins de 7 jours → `startUpdate` pas appelé ; `startUpdate` rejette → rien d'affiché ; désabonnement de l'écouteur au démontage
 
 ### Implementation
 
-- [ ] T017 [US2] `mobile/src/features/update/UpdatePrompt.tsx` : branche Android : si `updateAvailable`, `flexibleAllowed` et `shouldPrompt` → `startUpdate(false)` (mode flexible imposé, jamais immédiat) ; `addUpdateListener("updateCancelled", …)` → `setSnooze({ storeVersion, at: now })` ; l'installation après téléchargement est faite par la lib (research R2), aucune fenêtre de l'app
-- [ ] T018 [US2] Vérifier à la main quickstart.md, section US2 (partage interne d'app ; sinon le noter)
-- [ ] T019 [US2] Commit de la story : contrôles verts, puis `feat: offer the Google Play in-app update on Android (US2)`, sans demander
+- [X] T017 [US2] `mobile/src/features/update/UpdatePrompt.tsx` : branche Android : si `updateAvailable`, `flexibleAllowed` et `shouldPrompt` → `startUpdate(false)` (mode flexible imposé, jamais immédiat) ; `addUpdateListener("updateCancelled", …)` → `setSnooze({ storeVersion, at: now })` ; l'installation après téléchargement est faite par la lib (research R2), aucune fenêtre de l'app
+- [ ] T018 [US2] Vérifier à la main quickstart.md, section US2 (partage interne d'app ; sinon le noter) — **pas fait** : demande deux versions dans la Play Console (partage interne d’app) ; à faire avec la 1.2.0
+- [X] T019 [US2] Commit de la story : contrôles verts, puis `feat: offer the Google Play in-app update on Android (US2)`, sans demander
 
 **Checkpoint**: les deux stories marchent.
 

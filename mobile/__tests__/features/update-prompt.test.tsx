@@ -100,3 +100,52 @@ describe("iOS", () => {
     await waitFor(() => expect(check).toHaveBeenCalledTimes(2));
   });
 });
+
+describe("Android", () => {
+  const { __emit: emit } = jest.requireMock<{ __emit: (name: string, event: unknown) => void }>("expo-in-app-updates");
+
+  beforeEach(() => {
+    jest.replaceProperty(Platform, "OS", "android");
+  });
+
+  test("a newer Play version: Google's flexible offer, no dialog of the app (021 US2)", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "12", flexibleAllowed: true });
+    await renderPrompt();
+    await waitFor(() => expect(start).toHaveBeenCalledWith(false));
+    expect(screen.queryByText(i18n.t("mobile:update.title"))).toBeNull();
+  });
+
+  test("flexible update not allowed by Google Play: nothing", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "12", flexibleAllowed: false });
+    await renderPrompt();
+    expect(start).not.toHaveBeenCalled();
+  });
+
+  test("refusing Google's offer silences this version for 7 days", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "12", flexibleAllowed: true });
+    const first = await renderPrompt();
+    await waitFor(() => expect(start).toHaveBeenCalled());
+    await act(async () => emit("updateCancelled", {}));
+    await waitFor(async () => expect((await getSnooze())?.storeVersion).toBe("12"));
+    await first.unmount();
+    start.mockClear();
+    await renderPrompt();
+    expect(start).not.toHaveBeenCalled();
+  });
+
+  test("starting the update fails: nothing shown", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "12", flexibleAllowed: true });
+    start.mockRejectedValue(new Error("ERR_START_UPDATE"));
+    await renderPrompt();
+    await waitFor(() => expect(start).toHaveBeenCalled());
+    expect(screen.queryByText(i18n.t("mobile:update.title"))).toBeNull();
+  });
+
+  test("the listener is removed when the prompt goes away", async () => {
+    check.mockResolvedValue({ updateAvailable: true, storeVersion: "12", flexibleAllowed: true });
+    const first = await renderPrompt();
+    await first.unmount();
+    await act(async () => emit("updateCancelled", {}));
+    expect(await getSnooze()).toBeNull();
+  });
+});
