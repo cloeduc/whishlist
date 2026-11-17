@@ -220,5 +220,13 @@
     "editTitle": "Modifier l’idée cadeau",
     "emptyCategory": "Aucune idée dans cette catégorie."
   },
-  "secondHandBadge": "Occasion OK"
+  "secondHandBadge": "Occasion OK",
+  "accessHelp": {
+    "title": "Cette adresse sert à gérer la liste",
+    "body": "Elle n’ouvre la liste qu’aux personnes qui la gèrent. Vous n’en faites pas partie avec ce compte.",
+    "howTo": "Pour voir la liste et réserver une idée, demandez le lien de la liste à la personne qui vous a envoyé cette adresse. Elle le trouve dans l’onglet « Partage » de sa liste.",
+    "followedBody": "Vous suivez déjà cette liste : vous pouvez l’ouvrir pour la consulter.",
+    "viewFollowed": "Voir la liste",
+    "backToLists": "Mes listes"
+  }
 }

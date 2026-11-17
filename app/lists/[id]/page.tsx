@@ -5,6 +5,7 @@ import { toOffrirRows } from "../../../src/domain/offrir";
 import { formatPrice, priceInput } from "../../../src/domain/price";
 import { IdeasAccordion } from "@/components/site/ideas-accordion";
 import { LinkButton } from "@/components/site/link-button";
+import { ListAccessHelp } from "@/components/site/list-access-help";
 import { llmConfigured } from "@/src/domain/product-llm";
 import { ItemForm } from "@/components/site/item-form";
 import { LabelChips } from "@/components/site/label-chips";
@@ -56,9 +57,8 @@ export default async function EditListPage({
   const { id } = await params;
   const query = await searchParams;
   const tab = parseListTab(query.tab);
-  const [t, tErrors, user, doc, locale] = await Promise.all([
+  const [t, user, doc, locale] = await Promise.all([
     getTranslations("list"),
-    getTranslations("errors"),
     currentUser(),
     getDocument(),
     getLocale(),
@@ -69,14 +69,7 @@ export default async function EditListPage({
   const list = doc.wishlists.find((entry) => entry.id === id);
   if (!list) notFound();
   const membership = findMembership(doc, id, user.id);
-  if (!membership) {
-    return (
-      <main className="flex flex-col gap-2">
-        <h1 className="text-2xl font-medium tracking-tight">{tErrors("accessDenied")}</h1>
-        <p className="text-muted-foreground">{tErrors("notMember")}</p>
-      </main>
-    );
-  }
+  if (!membership) return <ListAccessHelp />;
   const base = await origin();
   const readUrl = `${base}${withLocale(locale, `/l/${list.readToken}`)}`;
   const inviteUrl = `${base}${withLocale(locale, `/invite/${list.inviteToken}`)}`;
