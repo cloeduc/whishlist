@@ -142,6 +142,11 @@ export function text(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
+/** A field that must be sent as a string or `null` (024: a followed list's names); missing or anything else is refused. */
+export function isTextOrNull(value: unknown): value is string | null {
+  return value === null || typeof value === "string";
+}
+
 /** Optional field: missing → `undefined`; present but not a string → `""` (refused by the command). */
 export function optionalText(value: unknown): string | undefined {
   return value === undefined ? undefined : text(value);

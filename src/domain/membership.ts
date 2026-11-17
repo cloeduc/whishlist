@@ -2,13 +2,9 @@ import { clone, findMembership } from "./access";
 import { parseThemeForm, resolveTheme, type WishlistTheme } from "./theme";
 import { newToken } from "./tokens";
 import type { Database, Membership, Wishlist } from "./types";
+import { blankToNull } from "./text";
 
 const SUBTITLE_MAX = 280;
-
-function blankToNull(value: string | null | undefined): string | null {
-  const trimmed = (value ?? "").trim();
-  return trimmed ? trimmed : null;
-}
 
 function validHttpUrl(url: string | null): boolean {
   if (url === null) return true;

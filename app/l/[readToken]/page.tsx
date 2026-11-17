@@ -17,7 +17,7 @@ import {
   toPublicItem,
 } from "../../../src/domain/read";
 import { followedDisplay } from "../../../src/domain/followed-display";
-import { findSubscription, ownerName, viewerRelation } from "../../../src/domain/subscription";
+import { findSubscription, followNamesOf, viewerRelation } from "../../../src/domain/subscription";
 import { resolveTheme, themeToCssVars } from "../../../src/domain/theme";
 import { subscribeAction, unsubscribeAction } from "../../../src/server/actions";
 import { getDocument } from "../../../src/store/db";
@@ -110,12 +110,7 @@ export default async function ReadPage({
   // The subscriber's own names (024): only for an account that follows the list.
   const subscription = isSubscribed && activeAccount ? findSubscription(doc, list.id, activeAccount.id) : null;
   const shown = subscription
-    ? followedDisplay({
-        title: list.title,
-        customTitle: subscription.customTitle,
-        ownerName: ownerName(doc, list.id),
-        customOwnerName: subscription.customOwnerName,
-      })
+    ? followedDisplay({ title: list.title, ...followNamesOf(doc, list, subscription) })
     : { title: list.title, person: null };
   const types = doc.types.filter((type) => type.wishlistId === list.id);
   const people = doc.people.filter((person) => person.wishlistId === list.id);

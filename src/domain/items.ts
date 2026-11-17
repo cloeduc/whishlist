@@ -2,17 +2,13 @@ import { clone, findMembership } from "./access";
 import { MAX_DESCRIPTION, normalizeDescription } from "./description";
 import { normalizePriority } from "./priority";
 import { surpriseModeOf } from "./surprise";
+import { blankToNull } from "./text";
 import { newId } from "./tokens";
 
 import type { Database, Item } from "./types";
 
 // Pure, also used by the browser (label chips): kept out of this module, which imports node:crypto.
 export { splitLabels } from "./split-labels";
-
-function blankToNull(value: string | null | undefined): string | null {
-  const trimmed = (value ?? "").trim();
-  return trimmed ? trimmed : null;
-}
 
 function validUrl(url: string | null): boolean {
   if (url === null) return true;

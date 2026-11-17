@@ -4,6 +4,7 @@ import { apiStatusFor, publicErrorCode } from "../../src/server/api/errors";
 import {
   apiError,
   apiLocaleFrom,
+  isTextOrNull,
   originDecision,
   parseAllowedOrigins,
   readJsonBody,
@@ -214,4 +215,11 @@ test("readJsonBody: a body sent in chunks, without a declared size, is cut at 64
   const req = new Request("http://localhost/api/v1/x", init);
   assert.deepEqual(await readJsonBody(req), { ok: false, error: "payloadTooLarge" });
   assert.ok(sent < 1024 * 1024, "la lecture s'arrête avant la fin du flux");
+});
+
+test("isTextOrNull (024, PUT /subscriptions/{readToken}): a string or null, nothing else", () => {
+  assert.equal(isTextOrNull("Noël"), true);
+  assert.equal(isTextOrNull(""), true);
+  assert.equal(isTextOrNull(null), true);
+  for (const value of [undefined, 3, {}, [], true]) assert.equal(isTextOrNull(value), false);
 });

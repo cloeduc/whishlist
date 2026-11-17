@@ -3,7 +3,7 @@ import { mustConfirmEmail } from "../../domain/email-confirmation";
 import { listPublicVisibleItems, mineReservationIdsFor, sortItems } from "../../domain/read";
 import { formatPrice } from "../../domain/price";
 import { hasReadPassword } from "../../domain/read-password";
-import { findSubscription, isSubscriptionUnlocked, ownerName, viewerRelation } from "../../domain/subscription";
+import { findSubscription, followNamesOf, isSubscriptionUnlocked, viewerRelation } from "../../domain/subscription";
 import { reservedItemIds } from "../../domain/reserve";
 import { memberShelf, surpriseModeOf, visibleReservations } from "../../domain/surprise";
 import type { Database, Item, Reservation, Role, Subscription, User, WishlistTheme, Wishlist } from "../../domain/types";
@@ -38,14 +38,6 @@ export type FollowNamesView = {
   customOwnerName: string | null;
   ownerName: string | null;
 };
-
-export function followNamesOf(doc: Database, subscription: Subscription): FollowNamesView {
-  return {
-    customTitle: subscription.customTitle,
-    customOwnerName: subscription.customOwnerName,
-    ownerName: ownerName(doc, subscription.wishlistId),
-  };
-}
 
 export type PublicListView = {
   title: string;
@@ -115,7 +107,7 @@ export function toPublicListView(
     theme: wishlist.theme,
     subscribed,
     isMember,
-    follow: subscription ? followNamesOf(doc, subscription) : null,
+    follow: subscription ? followNamesOf(doc, wishlist, subscription) : null,
     categories: categoriesOf(doc, wishlist.id),
     people: peopleOf(doc, wishlist.id),
     items,
@@ -264,7 +256,7 @@ export function toSubscribedListSummary(
     readUrl: siteUrl(origin, locale, `/l/${wishlist.readToken}`),
     subscribedAt: subscription.createdAt,
     locked,
-    ...followNamesOf(doc, subscription),
+    ...followNamesOf(doc, wishlist, subscription),
   };
 }
 

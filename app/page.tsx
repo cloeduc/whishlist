@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "../src/auth/current";
 import { followedDisplay } from "../src/domain/followed-display";
-import { followedListsOf, isSubscriptionUnlocked, ownerName } from "../src/domain/subscription";
+import { followedListsOf, followNamesOf, isSubscriptionUnlocked } from "../src/domain/subscription";
 import { resolveTheme } from "../src/domain/theme";
 import { subscribeByLinkAction, unsubscribeAction } from "../src/server/actions";
 import { getDocument } from "../src/store/db";
@@ -77,13 +77,7 @@ export default async function HomePage({
     .map((membership) => doc.wishlists.find((list) => list.id === membership.wishlistId))
     .filter((list) => list !== undefined);
   const followed = followedListsOf(doc, user.id).map(({ wishlist, subscription }) => {
-    const names = {
-      readToken: wishlist.readToken,
-      title: wishlist.title,
-      customTitle: subscription.customTitle,
-      ownerName: ownerName(doc, wishlist.id),
-      customOwnerName: subscription.customOwnerName,
-    };
+    const names = { readToken: wishlist.readToken, title: wishlist.title, ...followNamesOf(doc, wishlist, subscription) };
     return {
       list: wishlist,
       locked: !isSubscriptionUnlocked(wishlist, subscription),

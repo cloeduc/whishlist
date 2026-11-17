@@ -54,6 +54,19 @@ test("import: the whole file is taken as is, then marked imported", async () => 
   });
 });
 
+test("import: a subscription from before 024 gets null names", async () => {
+  await withTempDataPath(async (dataPath) => {
+    const legacy = JSON.parse(JSON.stringify(apiDoc())) as Doc;
+    legacy.subscriptions = [
+      { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-11-02T00:00:00.000Z" } as Doc["subscriptions"][number],
+    ];
+    await writeFile(dataPath, JSON.stringify(legacy), "utf8");
+    const doc = await readDocument();
+    assert.equal(doc.subscriptions[0]!.customTitle, null);
+    assert.equal(doc.subscriptions[0]!.customOwnerName, null);
+  });
+});
+
 test("import: old fields get their default value", async () => {
   await withTempDataPath(async (dataPath) => {
     const legacy = JSON.parse(JSON.stringify(apiDoc())) as Record<string, unknown> & Doc;

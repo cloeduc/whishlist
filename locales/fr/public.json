@@ -103,7 +103,6 @@
     "person": "À qui est cette liste",
     "personHint": "Par défaut : {{name}}",
     "save": "Enregistrer",
-    "reset": "Revenir aux noms de la liste",
-    "saved": "Noms enregistrés"
+    "reset": "Revenir aux noms de la liste"
   }
 }

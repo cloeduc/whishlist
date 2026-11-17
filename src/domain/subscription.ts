@@ -1,5 +1,6 @@
 import { clone, findMembership } from "./access";
 import { hasReadPassword } from "./read-password";
+import { blankToNull } from "./text";
 import type { Database, Subscription, Wishlist } from "./types";
 
 /**
@@ -160,8 +161,8 @@ export function renameSubscription(
   if (!findSubscription(doc, input.wishlistId, input.userId) || findMembership(doc, input.wishlistId, input.userId)) {
     return { ok: false, error: "listMissing" };
   }
-  const customTitle = cleanName(input.customTitle);
-  const customOwnerName = cleanName(input.customOwnerName);
+  const customTitle = blankToNull(input.customTitle);
+  const customOwnerName = blankToNull(input.customOwnerName);
   if ((customTitle?.length ?? 0) > MAX_FOLLOWED_NAME || (customOwnerName?.length ?? 0) > MAX_FOLLOWED_NAME) {
     return { ok: false, error: "followedNameTooLong" };
   }
@@ -172,7 +173,18 @@ export function renameSubscription(
   return { ok: true, doc: next, subscription: target };
 }
 
-function cleanName(value: string | null): string | null {
-  const trimmed = value?.trim() ?? "";
-  return trimmed ? trimmed : null;
+/**
+ * The names a subscriber sees for a list they follow (024), for them only. The owner's name is kept
+ * from a subscriber who lost access (read password changed), like the rest of the list.
+ */
+export function followNamesOf(
+  doc: Database,
+  wishlist: Wishlist,
+  subscription: Subscription,
+): { customTitle: string | null; customOwnerName: string | null; ownerName: string | null } {
+  return {
+    customTitle: subscription.customTitle,
+    customOwnerName: subscription.customOwnerName,
+    ownerName: isSubscriptionUnlocked(wishlist, subscription) ? ownerName(doc, wishlist.id) : null,
+  };
 }

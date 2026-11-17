@@ -16,8 +16,7 @@ Nouvelles clés, FR et EN, au vouvoiement.
 | `public:followNames.person` | À qui est cette liste | Whose list this is |
 | `public:followNames.personHint` | Par défaut : {{name}} | By default: {{name}} |
 | `public:followNames.save` | Enregistrer | Save |
-| `public:followNames.reset` | Revenir aux noms de la liste | Use the list's names |
-| `public:followNames.saved` | Noms enregistrés | Names saved |
+| `public:followNames.reset` | Revenir aux noms de la liste | Use the list’s names |
 | `errors:followedNameTooLong` | Ce nom est trop long (80 caractères au plus). | This name is too long (80 characters at most). |
 
 `personHint` n'est affiché que si `ownerName` existe. Les textes du dialogue sont dans `public` parce que l'app les affiche sur l'écran de la liste suivie (namespace déjà chargé) et le site dans « Mes listes ».

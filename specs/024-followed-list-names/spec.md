@@ -31,14 +31,14 @@ Sur une liste suivie (carte de « Mes listes » sur le site, écran de la liste 
 
 **Why this priority**: c'est le problème de départ : plusieurs listes suivies avec le même titre ne se distinguent pas.
 
-**Independent Test**: sur la base de démo, suivre deux listes, renommer l'une : la carte et l'en-tête de la liste ouverte affichent le nouveau nom, sur le site comme dans l'app ; un membre de la liste voit toujours le titre d'origine ; « Revenir au titre de la liste » rétablit le titre.
+**Independent Test**: sur la base de démo, suivre deux listes, renommer l'une : la carte et l'en-tête de la liste ouverte affichent le nouveau nom, sur le site comme dans l'app ; un membre de la liste voit toujours le titre d'origine ; « Revenir aux noms de la liste » rétablit le titre (et la personne par défaut).
 
 **Acceptance Scenarios**:
 
 1. **Given** un abonné qui suit une liste « Ma liste », **When** il la renomme « Noël de Léa », **Then** la carte affiche « Noël de Léa », sur le site et dans l'app.
 2. **Given** une liste suivie renommée « Noël de Léa », **When** l'abonné l'ouvre, **Then** l'en-tête de la liste affiche « Noël de Léa » (page publique sur le site, écran de la liste dans l'app).
 3. **Given** une liste suivie renommée, **When** un membre de la liste change son titre, **Then** l'abonné garde son propre nom sur la carte.
-4. **Given** une liste suivie renommée, **When** l'abonné choisit « Revenir au titre de la liste » (ou enregistre un nom vide), **Then** la carte affiche de nouveau le titre choisi par les membres, à jour.
+4. **Given** une liste suivie renommée, **When** l'abonné choisit « Revenir aux noms de la liste » (ou enregistre un nom vide), **Then** la carte affiche de nouveau le titre choisi par les membres, à jour ; « Revenir aux noms de la liste » efface aussi la personne choisie (le nom du propriétaire revient).
 5. **Given** une liste suivie renommée, **When** un membre de la liste, ou un autre abonné, consulte la liste, **Then** il ne voit pas ce nom.
 6. **Given** l'app hors ligne, **When** l'abonné veut renommer une liste suivie, **Then** l'action est indisponible avec une explication, comme les autres actions sur les listes suivies.
 

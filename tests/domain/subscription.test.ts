@@ -5,6 +5,7 @@ import { extractReadToken } from "../../src/domain/read-link";
 import {
   findSubscription,
   followedListsOf,
+  followNamesOf,
   isSubscriptionUnlocked,
   MAX_FOLLOWED_NAME,
   ownerName,
@@ -270,4 +271,15 @@ test("ownerName is the current owner's display name", () => {
   doc.users.find((u) => u.id === "camille")!.displayName = "  ";
   assert.equal(ownerName(doc, "other"), null);
   assert.equal(ownerName(doc, "missing"), null);
+});
+
+test("followNamesOf hides the owner's name from a subscriber who lost access (read password changed)", () => {
+  const named = renameSubscription(accountDoc(), { wishlistId: "other", userId: "lou", customTitle: "Noël", customOwnerName: null });
+  assert.ok(named.ok);
+  const doc = named.doc;
+  const subscription = findSubscription(doc, "other", "lou")!;
+  const list = doc.wishlists.find((w) => w.id === "other")!;
+  assert.deepEqual(followNamesOf(doc, list, subscription), { customTitle: "Noël", customOwnerName: null, ownerName: "Camille" });
+  list.readPasswordHash = "scrypt$new-read-secret";
+  assert.deepEqual(followNamesOf(doc, list, subscription), { customTitle: "Noël", customOwnerName: null, ownerName: null });
 });

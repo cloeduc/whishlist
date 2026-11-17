@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { exportAccount } from "../../src/domain/account";
 import { exportFileName, isExportFileName } from "../../src/domain/export-file";
+import { renameSubscription } from "../../src/domain/subscription";
 import type { Locale } from "../../src/i18n/config";
 import { accountDoc } from "./helpers/account-fixtures";
 
@@ -163,4 +164,20 @@ test("a pending address change appears in the export (FR-020)", () => {
     createdAt: "2026-10-28T10:00:00.000Z",
   });
   assert.equal(exportAccount(doc, "lou", SITE, NOW)?.account.pendingEmail, "lou.b@example.test");
+});
+
+test("subscriptions: the names a subscriber chose are in their export only (024)", () => {
+  const named = renameSubscription(accountDoc(), {
+    wishlistId: "other",
+    userId: "lou",
+    customTitle: "Noël de Camille",
+    customOwnerName: "Ma sœur",
+  });
+  assert.ok(named.ok);
+  const lou = exportAccount(named.doc, "lou", SITE, NOW)!;
+  assert.equal(lou.subscriptions[0]!.customTitle, "Noël de Camille");
+  assert.equal(lou.subscriptions[0]!.customOwnerName, "Ma sœur");
+  const camille = exportAccount(named.doc, "camille", SITE, NOW)!;
+  assert.ok(!JSON.stringify(camille).includes("Ma sœur"));
+  assert.ok(!JSON.stringify(camille).includes("Noël de Camille"));
 });

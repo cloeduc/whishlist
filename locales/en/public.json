@@ -103,7 +103,6 @@
     "person": "Whose list this is",
     "personHint": "By default: {{name}}",
     "save": "Save",
-    "reset": "Use the list's names",
-    "saved": "Names saved"
+    "reset": "Use the list’s names"
   }
 }
