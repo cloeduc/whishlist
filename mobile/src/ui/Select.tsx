@@ -11,6 +11,9 @@ import { Text } from "./Text";
 
 export type SelectOption = { value: string; label: string };
 
+/** One row of the sheet (an option or the action). */
+const rowStyle = { minHeight: tokens.touchTarget, paddingHorizontal: tokens.space[3], justifyContent: "center" } as const;
+
 /** Last row of the sheet, after the options: an action rather than a value (« + Nouvelle catégorie »). */
 export type SelectAction = { label: string; onPress: () => void; disabled?: boolean; hint?: string };
 
@@ -103,12 +106,7 @@ export function Select({
                     onChange(option.value);
                     setOpen(false);
                   }}
-                  boxStyle={{
-                    minHeight: tokens.touchTarget,
-                    paddingHorizontal: tokens.space[3],
-                    justifyContent: "center",
-                    backgroundColor: active ? palette.main : tokens.colors.white,
-                  }}
+                  boxStyle={{ ...rowStyle, backgroundColor: active ? palette.main : tokens.colors.white }}
                 >
                   <Text size="sm" color={active ? tokens.colors.white : tokens.colors.black}>
                     {option.label}
@@ -128,12 +126,7 @@ export function Select({
                     action.onPress();
                   }}
                   style={{ opacity: action.disabled ? 0.5 : 1 }}
-                  boxStyle={{
-                    minHeight: tokens.touchTarget,
-                    paddingHorizontal: tokens.space[3],
-                    justifyContent: "center",
-                    backgroundColor: tokens.colors.white,
-                  }}
+                  boxStyle={{ ...rowStyle, backgroundColor: tokens.colors.white }}
                 >
                   <Text size="sm" weight="heading">
                     {action.label}

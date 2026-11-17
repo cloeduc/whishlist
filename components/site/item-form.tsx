@@ -14,9 +14,9 @@ import { PriorityStarPicker } from "@/components/site/priority-star-picker";
 import { MAX_DESCRIPTION } from "@/src/domain/description";
 import type { LlmImpact } from "@/src/domain/llm-impact";
 import { FormRefusal } from "@/components/site/form-refusal";
+import { useAddLabel } from "@/components/site/use-add-label";
 import {
   enrichFromUrlAction,
-  manageLabelAction,
   saveItemAction,
   type ItemFormDraft,
   type SaveItemState,
@@ -98,12 +98,8 @@ export function ItemForm({
   const [impact, setImpact] = useState<LlmImpact | null>(null);
   const [usedLlm, setUsedLlm] = useState(false);
   /** « + Nouvelle catégorie » (023): a category created from the form, then chosen for the idea. */
-  const [newType, setNewType] = useState<{ open: boolean; name: string; error: string | null }>({
-    open: false,
-    name: "",
-    error: null,
-  });
-  const [newTypePending, startNewType] = useTransition();
+  const [newType, setNewType] = useState<{ open: boolean; name: string }>({ open: false, name: "" });
+  const addingType = useAddLabel(wishlistId, "type");
 
   if (state !== appliedState) {
     setAppliedState(state);
@@ -118,21 +114,16 @@ export function ItemForm({
   }
 
   function addCategory() {
-    const label = newType.name.trim();
-    if (!label) {
-      setNewType((current) => ({ ...current, error: "typeNeedsName" }));
-      return;
-    }
-    startNewType(async () => {
-      const result = await manageLabelAction({ wishlistId, kind: "type", op: "add", label });
-      if (!result.ok) {
-        setNewType((current) => ({ ...current, error: result.error }));
-        return;
-      }
+    addingType.add(newType.name, (created) => {
       // Only the category changes: everything else typed stays as it is.
-      if (result.label) setField("typeId", result.label.id);
-      setNewType({ open: false, name: "", error: null });
+      if (created) setField("typeId", created.id);
+      setNewType({ open: false, name: "" });
     });
+  }
+
+  function closeNewType() {
+    addingType.clearError();
+    setNewType({ open: false, name: "" });
   }
 
   function enrich() {
@@ -273,11 +264,14 @@ export function ItemForm({
               value={draft.typeId}
               onChange={(e) => {
                 // « + Nouvelle catégorie » is an action, not a value: the chosen category stays.
-                if (e.target.value === NEW_TYPE) setNewType({ open: true, name: "", error: null });
+                if (e.target.value === NEW_TYPE) setNewType({ open: true, name: "" });
                 else setField("typeId", e.target.value);
               }}
               required
             >
+              {/* No category left (all removed in the settings): an empty choice, so that
+                  « + Nouvelle catégorie » is never selected by default and the idea cannot be sent without one. */}
+              {draft.typeId === "" ? <NativeSelectOption value="" disabled hidden /> : null}
               {types.map((type) => (
                 <NativeSelectOption key={type.id} value={type.id}>
                   {type.label}
@@ -301,17 +295,19 @@ export function ItemForm({
                     }
                   }}
                 />
-                <FormRefusal code={newType.error} />
+                <FormRefusal code={addingType.error} />
                 <div className="flex flex-wrap gap-2">
-                  <Button type="button" variant="neutral" size="sm" disabled={newTypePending} onClick={addCategory}>
-                    {t("categories.addTypeAria")}
-                  </Button>
                   <Button
                     type="button"
-                    variant="link"
+                    variant="neutral"
                     size="sm"
-                    onClick={() => setNewType({ open: false, name: "", error: null })}
+                    disabled={addingType.pending || !newType.name.trim()}
+                    onClick={addCategory}
+                    aria-label={t("categories.addTypeAria")}
                   >
+                    {t("categories.add")}
+                  </Button>
+                  <Button type="button" variant="link" size="sm" onClick={closeNewType}>
                     {t("common:actions.cancel")}
                   </Button>
                 </div>
