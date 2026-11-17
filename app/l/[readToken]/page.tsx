@@ -147,6 +147,7 @@ export default async function ReadPage({
         <WishlistCover coverImageUrl={list.coverImageUrl} theme={theme} size="md" alt={list.title} />
         <div className="flex min-w-0 flex-col gap-2">
           <h1 className="text-2xl font-bold tracking-tight">{shown.title}</h1>
+          {shown.person ? <p className="font-medium">{shown.person}</p> : null}
           {list.subtitle ? <p className="text-muted-foreground text-pretty">{list.subtitle}</p> : null}
           <p className="text-muted-foreground text-pretty text-sm">{t("intro")}</p>
         </div>

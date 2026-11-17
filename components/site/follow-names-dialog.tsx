@@ -32,16 +32,17 @@ export function FollowNamesDialog({ names, displayedTitle }: { names: FollowName
   const id = useId();
   const [open, setOpen] = useState(false);
   const [customTitle, setCustomTitle] = useState(names.customTitle ?? "");
+  const [customOwnerName, setCustomOwnerName] = useState(names.customOwnerName ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function save(next: { customTitle: string | null }) {
+  function save(next: { customTitle: string | null; customOwnerName: string | null }) {
     setError(null);
     startTransition(async () => {
       const result = await renameFollowedListAction({
         readToken: names.readToken,
         customTitle: next.customTitle,
-        customOwnerName: names.customOwnerName,
+        customOwnerName: next.customOwnerName,
       });
       if (!result.ok) {
         setError(result.error);
@@ -59,6 +60,7 @@ export function FollowNamesDialog({ names, displayedTitle }: { names: FollowName
         if (next) {
           setError(null);
           setCustomTitle(names.customTitle ?? "");
+          setCustomOwnerName(names.customOwnerName ?? "");
         }
       }}
     >
@@ -72,7 +74,7 @@ export function FollowNamesDialog({ names, displayedTitle }: { names: FollowName
           className="flex flex-col gap-4"
           onSubmit={(event) => {
             event.preventDefault();
-            save({ customTitle });
+            save({ customTitle, customOwnerName });
           }}
         >
           <DialogHeader>
@@ -91,9 +93,21 @@ export function FollowNamesDialog({ names, displayedTitle }: { names: FollowName
               />
               <FieldDescription>{t("followNames.listNameHint", { title: names.title })}</FieldDescription>
             </Field>
+            <Field>
+              <FieldLabel htmlFor={`${id}-person`}>{t("followNames.person")}</FieldLabel>
+              <Input
+                id={`${id}-person`}
+                value={customOwnerName}
+                placeholder={names.ownerName ?? undefined}
+                onChange={(event) => setCustomOwnerName(event.target.value)}
+              />
+              {names.ownerName ? (
+                <FieldDescription>{t("followNames.personHint", { name: names.ownerName })}</FieldDescription>
+              ) : null}
+            </Field>
           </FieldGroup>
           <DialogFooter className="flex-wrap gap-2">
-            <Button type="button" variant="link" disabled={pending} onClick={() => save({ customTitle: null })}>
+            <Button type="button" variant="link" disabled={pending} onClick={() => save({ customTitle: null, customOwnerName: null })}>
               {t("followNames.reset")}
             </Button>
             <Button type="submit" disabled={pending}>

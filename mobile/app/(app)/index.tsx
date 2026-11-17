@@ -116,6 +116,11 @@ export default function MyLists() {
                   <ListCover coverImageUrl={sub.coverImageUrl} theme={sub.theme} size={48} framed={false} />
                   <View style={{ flex: 1, gap: tokens.space[1] }}>
                     <Text weight="heading">{followedDisplay(sub).title}</Text>
+                    {followedDisplay(sub).person ? (
+                      <Text testID={`lists.shared-person-${sub.readToken}`} size="sm">
+                        {followedDisplay(sub).person}
+                      </Text>
+                    ) : null}
                     {sub.subtitle ? (
                       <Text size="sm" color={tokens.colors.mutedForeground} numberOfLines={2}>
                         {sub.subtitle}

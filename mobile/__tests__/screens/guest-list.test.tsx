@@ -38,6 +38,8 @@ test("without an account: the list, its categories, and « Réserver ce cadeau �
   await render(<GuestList />);
   expect(await screen.findByTestId("guest.title")).toHaveTextContent("Liste d'Alex");
   expect(screen.getByText("Idée i1")).toBeOnTheScreen();
+  // Not followed (024): no person's name.
+  expect(screen.queryByTestId("guest.person")).toBeNull();
   expect(screen.queryByText(/Modifier|Archiver/)).toBeNull();
   await fireEvent.press(screen.getByTestId("guest.offer-0"));
   expect(router.push).toHaveBeenCalledWith("/guest/rt/reserve?itemId=i1");
@@ -193,6 +195,7 @@ test("a followed list shows the subscriber's name in its header (024), and offer
   });
   await render(<GuestList />);
   expect(await screen.findByTestId("guest.title")).toHaveTextContent("Noël d'Alex");
+  expect(screen.getByTestId("guest.person")).toHaveTextContent("Alex");
   await fireEvent.press(screen.getByTestId("guest.rename"));
   expect(router.push).toHaveBeenCalledWith("/guest/rt/names");
 });

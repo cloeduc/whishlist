@@ -17,6 +17,11 @@ export function GuestListHeader({ list }: { list: Schemas["PublicList"] }) {
         <Text testID="guest.title" size="title" accessibilityRole="header">
           {shown.title}
         </Text>
+        {shown.person ? (
+          <Text testID="guest.person">
+            {shown.person}
+          </Text>
+        ) : null}
         {list.subtitle ? <Text color={tokens.colors.mutedForeground}>{list.subtitle}</Text> : null}
       </View>
     </View>

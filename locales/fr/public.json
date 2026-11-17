@@ -100,6 +100,8 @@
     "body": "Ces noms ne sont visibles que par vous.",
     "listName": "Nom de la liste",
     "listNameHint": "Titre choisi par la liste : « {{title}} »",
+    "person": "À qui est cette liste",
+    "personHint": "Par défaut : {{name}}",
     "save": "Enregistrer",
     "reset": "Revenir aux noms de la liste",
     "saved": "Noms enregistrés"

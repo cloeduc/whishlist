@@ -80,11 +80,11 @@ Branche : `024-followed-list-names`, déjà créée depuis `staging`.
 
 **Independent Test**: quickstart.md, section US2 ; jest (T021).
 
-- [ ] T019 [US2] Textes `public:followNames.person` et `public:followNames.personHint` (FR, EN) ; `components/site/follow-names-dialog.tsx` : second champ « À qui est cette liste » prérempli avec `customOwnerName`, placeholder et aide = `ownerName` (aide masquée sans `ownerName`) ; `app/page.tsx` et `app/l/[readToken]/page.tsx` : personne (`followedDisplay().person`) sous le titre quand elle existe, pour un abonné seulement
-- [ ] T020 [US2] App : `mobile/app/(app)/index.tsx` (personne sous le titre, `lists.shared-person-<readToken>`), `GuestListHeader.tsx` (`guest.person`), `mobile/app/guest/[readToken]/names.tsx` (champ `guest-names.person`, placeholder = `ownerName`)
-- [ ] T021 [US2] Tests jest : personne par défaut = `ownerName` ; `customOwnerName` la remplace ; effacée → `ownerName` revient ; liste ouverte sans la suivre (`follow: null`) → aucune personne ; compléter le parcours Maestro `024-us1` si un `id` de la personne est utile (sinon tag inchangé)
-- [ ] T022 [US2] Vérifier à la main quickstart.md US2, étapes 1 à 6 (site et app)
-- [ ] T023 [US2] Commit de la story : contrôles verts, puis `feat: show and name whose followed list it is (US2)`, sans demander
+- [X] T019 [US2] Textes `public:followNames.person` et `public:followNames.personHint` (FR, EN) ; `components/site/follow-names-dialog.tsx` : second champ « À qui est cette liste » prérempli avec `customOwnerName`, placeholder et aide = `ownerName` (aide masquée sans `ownerName`) ; `app/page.tsx` et `app/l/[readToken]/page.tsx` : personne (`followedDisplay().person`) sous le titre quand elle existe, pour un abonné seulement
+- [X] T020 [US2] App : `mobile/app/(app)/index.tsx` (personne sous le titre, `lists.shared-person-<readToken>`), `GuestListHeader.tsx` (`guest.person`), `mobile/app/guest/[readToken]/names.tsx` (champ `guest-names.person`, placeholder = `ownerName`)
+- [X] T021 [US2] Tests jest : personne par défaut = `ownerName` ; `customOwnerName` la remplace ; effacée → `ownerName` revient ; liste ouverte sans la suivre (`follow: null`) → aucune personne ; parcours Maestro `024-us1` inchangé (US2 couverte par jest et le quickstart, ligne d'exclusion en Polish)
+- [X] T022 [US2] Vérifier à la main quickstart.md US2, étapes 1 à 6 (site et app)
+- [X] T023 [US2] Commit de la story : contrôles verts, puis `feat: show and name whose followed list it is (US2)`, sans demander
 
 ---
 

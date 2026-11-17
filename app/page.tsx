@@ -195,6 +195,7 @@ export default async function HomePage({
                       </CardTitle>
                       {locked ? <Badge variant="outline">{t("followed.lockedBadge")}</Badge> : null}
                     </div>
+                    {display.person ? <p className="text-sm font-medium">{display.person}</p> : null}
                     {list.subtitle ? (
                       <CardDescription className="line-clamp-2">{list.subtitle}</CardDescription>
                     ) : null}

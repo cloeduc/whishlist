@@ -237,7 +237,7 @@ describe("followed list names (024)", () => {
     await fireEvent.changeText(field, "Noël de Camille");
     await fireEvent.press(screen.getByTestId("guest-names.save"));
     await waitFor(() => expect(router.back).toHaveBeenCalled());
-    expect(sent).toEqual([{ customTitle: "Noël de Camille", customOwnerName: null }]);
+    expect(sent).toEqual([{ customTitle: "Noël de Camille", customOwnerName: "" }]);
   });
 
   test("« Revenir aux noms de la liste » sends null names", async () => {
@@ -269,6 +269,38 @@ describe("followed list names (024)", () => {
     expect(await screen.findByText("Ce nom est trop long (80 caractères au plus).")).toBeOnTheScreen();
     expect(screen.getByTestId("guest-names.list-name").props.value).toBe("x".repeat(81));
     expect(router.back).not.toHaveBeenCalled();
+  });
+
+  test("US2: the card shows the owner's name, or the subscriber's name for the person", async () => {
+    let subscriptions: object[] = [sharedSummary];
+    fakeFetch({ "GET /lists": () => json(200, { lists: [], subscriptions }) });
+    const view = await render(<MyLists />);
+    expect(await screen.findByTestId("lists.shared-person-demo-list-lecture")).toHaveTextContent("Camille");
+    await view.unmount();
+
+    resetStore();
+    subscriptions = [{ ...sharedSummary, customOwnerName: "Ma sœur" }];
+    await render(<MyLists />);
+    expect(await screen.findByTestId("lists.shared-person-demo-list-lecture")).toHaveTextContent("Ma sœur");
+  });
+
+  test("US2: the names screen sends the person's name, the owner's name as placeholder", async () => {
+    const sent: unknown[] = [];
+    fakeFetch({
+      "GET /lists": () => json(200, { lists: [], subscriptions: [sharedSummary] }),
+      "PUT /subscriptions/demo-list-lecture": async (req) => {
+        sent.push(await req.json());
+        return json(200, sharedSummary);
+      },
+    });
+    await render(<FollowedListNames />);
+    const person = await screen.findByTestId("guest-names.person");
+    await waitFor(() => expect(person.props.placeholder).toBe("Camille"));
+    expect(screen.getByText("Par défaut : Camille")).toBeOnTheScreen();
+    await fireEvent.changeText(person, "Ma sœur");
+    await fireEvent.press(screen.getByTestId("guest-names.save"));
+    await waitFor(() => expect(router.back).toHaveBeenCalled());
+    expect(sent).toEqual([{ customTitle: "", customOwnerName: "Ma sœur" }]);
   });
 
   test("« Renommer » shows on a followed list only, and needs the network", async () => {

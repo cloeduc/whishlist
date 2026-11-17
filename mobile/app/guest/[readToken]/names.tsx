@@ -24,20 +24,19 @@ export default function FollowedListNames() {
   const followed = useFollowedList(readToken);
   const online = useOnline();
   const [customTitle, setCustomTitle] = useState<string | null>(null);
+  const [customOwnerName, setCustomOwnerName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   // The field starts from the saved name, once the local copy is read.
   const titleValue = customTitle ?? followed?.customTitle ?? "";
+  const personValue = customOwnerName ?? followed?.customOwnerName ?? "";
 
-  async function save(names: { customTitle: string | null }) {
+  async function save(names: { customTitle: string | null; customOwnerName: string | null }) {
     if (!followed) return;
     setBusy(true);
     setError(null);
     try {
-      const result = await renameFollowedList(readToken, {
-        customTitle: names.customTitle,
-        customOwnerName: followed.customOwnerName,
-      });
+      const result = await renameFollowedList(readToken, names);
       if (!result.ok) {
         setError(translateError(result.error));
         return;
@@ -72,6 +71,18 @@ export default function FollowedListNames() {
               onChangeText={setCustomTitle}
             />
           </Field>
+          <Field
+            label={t("followNames.person")}
+            description={followed?.ownerName ? t("followNames.personHint", { name: followed.ownerName }) : undefined}
+          >
+            <Input
+              testID="guest-names.person"
+              accessibilityLabel={t("followNames.person")}
+              placeholder={followed?.ownerName ?? undefined}
+              value={personValue}
+              onChangeText={setCustomOwnerName}
+            />
+          </Field>
           {error ? (
             <Alert variant="destructive" testID="guest-names.error">
               {error}
@@ -83,14 +94,14 @@ export default function FollowedListNames() {
             title={t("followNames.save")}
             fullWidth
             disabled={!online || busy || !followed}
-            onPress={() => void save({ customTitle: titleValue })}
+            onPress={() => void save({ customTitle: titleValue, customOwnerName: personValue })}
           />
           <Button
             testID="guest-names.reset"
             title={t("followNames.reset")}
             variant="link"
             disabled={!online || busy || !followed}
-            onPress={() => void save({ customTitle: null })}
+            onPress={() => void save({ customTitle: null, customOwnerName: null })}
           />
         </CardContent>
       </Card>
