@@ -90,9 +90,9 @@ Branche : `024-followed-list-names`, déjà créée depuis `staging`.
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T024 [P] `mobile/__tests__/e2e/coverage.test.ts` : `"024": "specs/024-followed-list-names/spec.md"` ; ligne `024-us2` dans `mobile/.maestro/exclusions.md` si US2 n'a pas de parcours propre (couverte par jest et quickstart)
-- [ ] T025 [P] FAQ ou guide du site (`locales/*/` des pages de contenu) : une phrase sur « Renommer » dans la partie des listes suivies, si cette partie existe
-- [ ] T026 Commit Polish : contrôles verts, puis `chore: record the 024 e2e coverage`, sans demander
+- [X] T024 [P] `mobile/__tests__/e2e/coverage.test.ts` : `"024": "specs/024-followed-list-names/spec.md"` ; ligne `024-us2` dans `mobile/.maestro/exclusions.md` si US2 n'a pas de parcours propre (couverte par jest et quickstart)
+- [X] T025 [P] FAQ ou guide du site (`locales/*/` des pages de contenu) : une phrase sur « Renommer » dans la partie des listes suivies, si cette partie existe — sans objet : la FAQ et le guide ne parlent pas des listes suivies
+- [X] T026 Commit Polish : contrôles verts, puis `chore: record the 024 e2e coverage`, sans demander
 
 ---
 
