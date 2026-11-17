@@ -254,6 +254,21 @@ export function useIsFollowed(readToken: string): boolean {
   return store.subscriptions?.body.some((subscription) => subscription.readToken === readToken) ?? false;
 }
 
+/**
+ * The followed list of this link (024: its names), from the local copy of `GET /lists`, refreshed from
+ * the server when this copy does not have it yet. null while unknown.
+ */
+export function useFollowedList(readToken: string): Schemas["SubscribedListSummary"] | null {
+  const store = useStore();
+  useEffect(() => {
+    void (async () => {
+      if (!state.subscriptions) await loadLists();
+      if (!state.subscriptions?.body.some((subscription) => subscription.readToken === readToken)) await refreshLists();
+    })();
+  }, [readToken]);
+  return store.subscriptions?.body.find((subscription) => subscription.readToken === readToken) ?? null;
+}
+
 export function useMemberList(listId: string): {
   list: ViewList | null;
   /** Local copy and queue read: a null `list` then means « unknown on this phone ». */

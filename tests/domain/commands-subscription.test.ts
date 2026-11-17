@@ -4,6 +4,7 @@ import { setReadPassword } from "../../src/domain/read-password";
 import { listMine, readMemberList } from "../../src/server/commands/lists";
 import {
   readPublicList,
+  renameFollowedList,
   reserve,
   subscribeToList,
   unlockPublicList,
@@ -296,6 +297,65 @@ test("31 follow requests in 15 minutes: the 31st is refused", async () => {
     await assert.rejects(
       subscribeToList(ctx(camille), { urlOrToken: "rt-alex-1234", isUnlocked: noUnlock }),
       isRateLimitError,
+    );
+  });
+});
+
+test("renameFollowedList: names seen by the subscriber only, never by a member or a visitor", async () => {
+  const doc = subDoc();
+  const alex = doc.users[0]!;
+  const camille = doc.users[1]!;
+  const read = (account: typeof alex | null) =>
+    readPublicList(ctx(account), { readToken: "rt-alex-1234", isUnlocked: noUnlock, claimedIds: none });
+
+  await withStore(doc, async () => {
+    // Not followed yet: refused.
+    assert.deepEqual(
+      await renameFollowedList(ctx(camille), { readToken: "rt-alex-1234", customTitle: "Noël", customOwnerName: null }),
+      { ok: false, error: "listMissing" },
+    );
+    const sub = await subscribeToList(ctx(camille), { urlOrToken: "rt-alex-1234", isUnlocked: noUnlock });
+    assert.equal(sub.ok, true);
+    if (!sub.ok) return;
+    assert.equal(sub.subscription.customTitle, null);
+    assert.equal(sub.subscription.ownerName, "Alex");
+
+    const named = await renameFollowedList(ctx(camille), {
+      readToken: "rt-alex-1234",
+      customTitle: " Noël d'Alex ",
+      customOwnerName: "Mon frère",
+    });
+    assert.equal(named.ok, true);
+    if (!named.ok) return;
+    assert.equal(named.subscription.customTitle, "Noël d'Alex");
+    assert.equal(named.subscription.customOwnerName, "Mon frère");
+    assert.equal(named.subscription.title, sub.subscription.title);
+
+    const asSubscriber = await read(camille);
+    assert.ok(asSubscriber.ok);
+    if (asSubscriber.ok) {
+      assert.deepEqual(asSubscriber.list.follow, { customTitle: "Noël d'Alex", customOwnerName: "Mon frère", ownerName: "Alex" });
+    }
+    for (const account of [alex, null]) {
+      const other = await read(account);
+      assert.ok(other.ok);
+      if (other.ok) {
+        assert.equal(other.list.follow, null);
+        assert.ok(!JSON.stringify(other.list).includes("Mon frère"));
+      }
+    }
+
+    const listed = await listMine(ctx(camille));
+    assert.ok(listed.ok);
+    if (listed.ok) assert.equal(listed.subscriptions[0]!.customTitle, "Noël d'Alex");
+
+    assert.deepEqual(
+      await renameFollowedList(ctx(camille), { readToken: "rt-alex-1234", customTitle: "x".repeat(81), customOwnerName: null }),
+      { ok: false, error: "followedNameTooLong" },
+    );
+    assert.deepEqual(
+      await renameFollowedList(ctx(camille), { readToken: "missing-token", customTitle: null, customOwnerName: null }),
+      { ok: false, error: "listMissing" },
     );
   });
 });

@@ -72,6 +72,7 @@ import {
 } from "./commands/items";
 import {
   cancelOwn,
+  renameFollowedList,
   reserve,
   subscribeToList,
   unlockPublicList,
@@ -840,6 +841,24 @@ export async function unsubscribeAction(formData: FormData) {
   await unsubscribeFromList(await actionContext(), { readToken });
   if (returnTo === "list") return localeRedirect(`/l/${readToken}`);
   return localeRedirect("/#following");
+}
+
+/** Names a followed list and its person, for the connected account only (024). */
+export async function renameFollowedListAction(input: {
+  readToken: string;
+  customTitle: string | null;
+  customOwnerName: string | null;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  await memberId();
+  try {
+    const result = await renameFollowedList(await actionContext(), input);
+    if (!result.ok) return { ok: false, error: result.error };
+  } catch (error) {
+    if (isRateLimitError(error)) return { ok: false, error: "rateLimited" };
+    throw error;
+  }
+  refresh();
+  return { ok: true };
 }
 
 export async function setLocaleAction(locale: Locale) {

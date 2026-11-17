@@ -145,12 +145,16 @@ export function accountDoc(): Database {
       userId: "lou",
       readPasswordHash: null,
       createdAt: "2026-04-04T00:00:00.000Z",
+      customTitle: null,
+      customOwnerName: null,
     },
     {
       wishlistId: "solo",
       userId: "camille",
       readPasswordHash: null,
       createdAt: "2026-04-02T00:00:00.000Z",
+      customTitle: null,
+      customOwnerName: null,
     },
   );
   return doc;

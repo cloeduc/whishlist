@@ -16,7 +16,8 @@ import {
   mineReservationIdsFor,
   toPublicItem,
 } from "../../../src/domain/read";
-import { viewerRelation } from "../../../src/domain/subscription";
+import { followedDisplay } from "../../../src/domain/followed-display";
+import { findSubscription, ownerName, viewerRelation } from "../../../src/domain/subscription";
 import { resolveTheme, themeToCssVars } from "../../../src/domain/theme";
 import { subscribeAction, unsubscribeAction } from "../../../src/server/actions";
 import { getDocument } from "../../../src/store/db";
@@ -106,6 +107,16 @@ export default async function ReadPage({
   const mineIds = mineReservationIdsFor(doc, list.id, user?.id ?? null, claimedIds);
   const activeAccount = user && !user.mustChangePassword ? user : null;
   const { isMember, subscribed: isSubscribed } = viewerRelation(doc, list.id, activeAccount?.id ?? null);
+  // The subscriber's own names (024): only for an account that follows the list.
+  const subscription = isSubscribed && activeAccount ? findSubscription(doc, list.id, activeAccount.id) : null;
+  const shown = subscription
+    ? followedDisplay({
+        title: list.title,
+        customTitle: subscription.customTitle,
+        ownerName: ownerName(doc, list.id),
+        customOwnerName: subscription.customOwnerName,
+      })
+    : { title: list.title, person: null };
   const types = doc.types.filter((type) => type.wishlistId === list.id);
   const people = doc.people.filter((person) => person.wishlistId === list.id);
   const qui = people.some((person) => person.id === query.qui) ? query.qui! : null;
@@ -135,7 +146,7 @@ export default async function ReadPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <WishlistCover coverImageUrl={list.coverImageUrl} theme={theme} size="md" alt={list.title} />
         <div className="flex min-w-0 flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">{list.title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{shown.title}</h1>
           {list.subtitle ? <p className="text-muted-foreground text-pretty">{list.subtitle}</p> : null}
           <p className="text-muted-foreground text-pretty text-sm">{t("intro")}</p>
         </div>

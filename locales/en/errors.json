@@ -85,6 +85,7 @@
   "serverError": "Something went wrong. Try again later.",
   "idInvalid": "Invalid identifier.",
   "idConflict": "This identifier is already in use.",
+  "followedNameTooLong": "This name is too long (80 characters at most).",
   "subscriptionLinkInvalid": "Enter a valid shared wish list link.",
   "alreadyMember": "You’re already a member of this list.",
   "apiKeyNeedsName": "Give the key a name.",

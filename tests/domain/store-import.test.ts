@@ -218,8 +218,8 @@ test("rejected: each integrity check names the collection and the id, never the 
       "duplicate subscription",
       (d) =>
         d.subscriptions.push(
-          { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-01T00:00:00.000Z" },
-          { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-02T00:00:00.000Z" },
+          { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-01T00:00:00.000Z", customTitle: null, customOwnerName: null },
+          { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-02T00:00:00.000Z", customTitle: null, customOwnerName: null },
         ),
       /^subscriptions: duplicate subscription \(w\/camille\)/m,
     ],
@@ -231,6 +231,8 @@ test("rejected: each integrity check names the collection and the id, never the 
           userId: "camille",
           readPasswordHash: null,
           createdAt: "2026-01-01T00:00:00.000Z",
+          customTitle: null,
+          customOwnerName: null,
         }),
       /^subscriptions: w-9\/camille → wishlistId missing \(w-9\)/m,
     ],

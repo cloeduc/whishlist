@@ -2,14 +2,19 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-
 import { router, useLocalSearchParams } from "expo-router";
 import { Linking } from "react-native";
 
+import NetInfo from "@react-native-community/netinfo";
+
 import MyLists from "../../app/(app)/index";
+import FollowedListNames from "../../app/guest/[readToken]/names";
 import FollowSharedList from "../../app/(app)/shared/follow";
 import { signIn } from "@/auth/session";
 import { resetStore } from "@/data/store";
+import { GuestFollow } from "@/features/guest/GuestFollow";
 import { i18n } from "@/i18n";
 
 import { fakeFetch, json, me } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
+import { setOnline } from "../helpers/network";
 
 jest.mock("expo-router", () => ({
   useFocusEffect: jest.fn(),
@@ -55,6 +60,9 @@ const sharedSummary = {
   readUrl: "https://ohyoushouldnt.example.test/l/demo-list-lecture",
   subscribedAt: "2026-11-02T10:00:00.000Z",
   locked: false,
+  customTitle: null,
+  customOwnerName: null,
+  ownerName: "Camille",
 };
 
 beforeEach(async () => {
@@ -199,4 +207,84 @@ test("FollowSharedList (US4): camera refused, a message points to the settings a
   await fireEvent.press(screen.getByTestId("follow.open-settings"));
   expect(openSettings).toHaveBeenCalled();
   expect(screen.getByTestId("follow.link")).toBeOnTheScreen();
+});
+
+describe("followed list names (024)", () => {
+  test("MyLists shows the name the subscriber gave the list", async () => {
+    fakeFetch({
+      "GET /lists": () => json(200, { lists: [], subscriptions: [{ ...sharedSummary, customTitle: "Noël de Camille" }] }),
+    });
+    await render(<MyLists />);
+    expect(await screen.findByText("Noël de Camille")).toBeOnTheScreen();
+    expect(screen.queryByText("Liste de Camille")).toBeNull();
+  });
+
+  test("the names screen saves the list name, then goes back", async () => {
+    const sent: unknown[] = [];
+    let current: Omit<typeof sharedSummary, "customTitle"> & { customTitle: string | null } = { ...sharedSummary };
+    fakeFetch({
+      "GET /lists": () => json(200, { lists: [], subscriptions: [current] }),
+      "PUT /subscriptions/demo-list-lecture": async (req) => {
+        const body = (await req.json()) as { customTitle: string | null; customOwnerName: string | null };
+        sent.push(body);
+        current = { ...current, customTitle: body.customTitle };
+        return json(200, current);
+      },
+    });
+    await render(<FollowedListNames />);
+    const field = await screen.findByTestId("guest-names.list-name");
+    await waitFor(() => expect(field.props.placeholder).toBe("Liste de Camille"));
+    await fireEvent.changeText(field, "Noël de Camille");
+    await fireEvent.press(screen.getByTestId("guest-names.save"));
+    await waitFor(() => expect(router.back).toHaveBeenCalled());
+    expect(sent).toEqual([{ customTitle: "Noël de Camille", customOwnerName: null }]);
+  });
+
+  test("« Revenir aux noms de la liste » sends null names", async () => {
+    const sent: unknown[] = [];
+    fakeFetch({
+      "GET /lists": () => json(200, { lists: [], subscriptions: [{ ...sharedSummary, customTitle: "Noël" }] }),
+      "PUT /subscriptions/demo-list-lecture": async (req) => {
+        sent.push(await req.json());
+        return json(200, sharedSummary);
+      },
+    });
+    await render(<FollowedListNames />);
+    await waitFor(() => expect(screen.getByTestId("guest-names.list-name").props.value).toBe("Noël"));
+    await fireEvent.press(screen.getByTestId("guest-names.reset"));
+    await waitFor(() => expect(router.back).toHaveBeenCalled());
+    expect(sent).toEqual([{ customTitle: null, customOwnerName: null }]);
+  });
+
+  test("a name too long is refused with its message, the typed name stays", async () => {
+    fakeFetch({
+      "GET /lists": () => json(200, { lists: [], subscriptions: [sharedSummary] }),
+      "PUT /subscriptions/demo-list-lecture": () =>
+        json(400, { error: { code: "followedNameTooLong", message: "too long" } }),
+    });
+    await render(<FollowedListNames />);
+    const field = await screen.findByTestId("guest-names.list-name");
+    await fireEvent.changeText(field, "x".repeat(81));
+    await fireEvent.press(screen.getByTestId("guest-names.save"));
+    expect(await screen.findByText("Ce nom est trop long (80 caractères au plus).")).toBeOnTheScreen();
+    expect(screen.getByTestId("guest-names.list-name").props.value).toBe("x".repeat(81));
+    expect(router.back).not.toHaveBeenCalled();
+  });
+
+  test("« Renommer » shows on a followed list only, and needs the network", async () => {
+    fakeFetch({});
+    const view = await render(<GuestFollow readToken="demo-list-lecture" subscribed={false} canRename onChanged={jest.fn()} />);
+    expect(screen.queryByTestId("guest.rename")).toBeNull();
+    await view.rerender(<GuestFollow readToken="demo-list-lecture" subscribed canRename onChanged={jest.fn()} />);
+    await fireEvent.press(screen.getByTestId("guest.rename"));
+    expect(router.push).toHaveBeenCalledWith("/guest/demo-list-lecture/names");
+
+    await setOnline(true);
+    await act(async () => {
+      await NetInfo.fetch();
+    });
+    await setOnline(false);
+    expect(screen.getByTestId("guest.rename")).toBeDisabled();
+    expect(screen.getByText(/Cette action demande une connexion/)).toBeOnTheScreen();
+  });
 });

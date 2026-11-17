@@ -41,6 +41,8 @@
     "unfollowTitle": "Ne plus suivre « {{title}} » ?",
     "unfollowBody": "Elle sera retirée de vos listes suivies. Vos réservations sur cette liste resteront actives.",
     "unfollowConfirm": "Ne plus suivre",
-    "unfollowKeep": "Continuer à suivre"
+    "unfollowKeep": "Continuer à suivre",
+    "rename": "Renommer",
+    "renameAria": "Renommer « {{title}} »"
   }
 }

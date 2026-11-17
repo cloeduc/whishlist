@@ -6,6 +6,9 @@ import {
   findSubscription,
   followedListsOf,
   isSubscriptionUnlocked,
+  MAX_FOLLOWED_NAME,
+  ownerName,
+  renameSubscription,
   subscribeWishlist,
   syncSubscriptionUnlock,
   unsubscribeWishlist,
@@ -58,6 +61,8 @@ test("subscribeWishlist creates a subscription and stays idempotent", () => {
     userId: "alex",
     readPasswordHash: null,
     createdAt: "2026-11-02T10:00:00.000Z",
+    customTitle: null,
+    customOwnerName: null,
   });
 
   const again = subscribeWishlist(created.doc, { wishlistId: "other", userId: "alex", verifiedHash: null });
@@ -163,7 +168,7 @@ test("deleteWishlist deletes the list's subscriptions", () => {
 test("followedListsOf keeps only followed lists the account is not a member of", () => {
   const doc = accountDoc();
   // Lou follows "other"; we add a subscription to "solo", which they are a member of.
-  doc.subscriptions.push({ wishlistId: "solo", userId: "lou", readPasswordHash: null, createdAt: "2026-04-05T00:00:00.000Z" });
+  doc.subscriptions.push({ wishlistId: "solo", userId: "lou", readPasswordHash: null, createdAt: "2026-04-05T00:00:00.000Z", customTitle: null, customOwnerName: null });
   assert.deepEqual(
     followedListsOf(doc, "lou").map(({ wishlist }) => wishlist.id),
     ["other"],
@@ -179,4 +184,90 @@ test("viewerRelation tells member, subscriber and visitor apart", () => {
   assert.deepEqual(viewerRelation(doc, "solo", "lou"), { isMember: true, subscribed: false });
   assert.deepEqual(viewerRelation(doc, "other", "alex"), { isMember: false, subscribed: false });
   assert.deepEqual(viewerRelation(doc, "other", null), { isMember: false, subscribed: false });
+});
+
+test("renameSubscription stores trimmed names, and an empty name goes back to the list's own", () => {
+  const doc = accountDoc();
+  const named = renameSubscription(doc, {
+    wishlistId: "other",
+    userId: "lou",
+    customTitle: "  Noël de Camille  ",
+    customOwnerName: "Ma sœur",
+  });
+  assert.ok(named.ok);
+  const stored = findSubscription(named.doc, "other", "lou")!;
+  assert.equal(stored.customTitle, "Noël de Camille");
+  assert.equal(stored.customOwnerName, "Ma sœur");
+  // The input document is not changed.
+  assert.equal(findSubscription(doc, "other", "lou")!.customTitle, null);
+
+  const reset = renameSubscription(named.doc, { wishlistId: "other", userId: "lou", customTitle: "   ", customOwnerName: null });
+  assert.ok(reset.ok);
+  assert.equal(findSubscription(reset.doc, "other", "lou")!.customTitle, null);
+  assert.equal(findSubscription(reset.doc, "other", "lou")!.customOwnerName, null);
+});
+
+test("renameSubscription accepts 80 characters and refuses 81", () => {
+  const doc = accountDoc();
+  const longest = "a".repeat(MAX_FOLLOWED_NAME);
+  assert.ok(renameSubscription(doc, { wishlistId: "other", userId: "lou", customTitle: longest, customOwnerName: longest }).ok);
+  const tooLong = "a".repeat(MAX_FOLLOWED_NAME + 1);
+  assert.deepEqual(renameSubscription(doc, { wishlistId: "other", userId: "lou", customTitle: tooLong, customOwnerName: null }), {
+    ok: false,
+    error: "followedNameTooLong",
+  });
+  assert.deepEqual(renameSubscription(doc, { wishlistId: "other", userId: "lou", customTitle: null, customOwnerName: tooLong }), {
+    ok: false,
+    error: "followedNameTooLong",
+  });
+});
+
+test("renameSubscription refuses an account that does not follow the list", () => {
+  const doc = accountDoc();
+  // Alex neither follows nor belongs to `other`; Lou is a member of `shared`.
+  assert.deepEqual(renameSubscription(doc, { wishlistId: "other", userId: "alex", customTitle: "X", customOwnerName: null }), {
+    ok: false,
+    error: "listMissing",
+  });
+  assert.deepEqual(renameSubscription(doc, { wishlistId: "shared", userId: "lou", customTitle: "X", customOwnerName: null }), {
+    ok: false,
+    error: "listMissing",
+  });
+});
+
+test("the names survive a repeated subscription and go away with the subscription", () => {
+  const named = renameSubscription(accountDoc(), { wishlistId: "other", userId: "lou", customTitle: "Noël", customOwnerName: "Cam" });
+  assert.ok(named.ok);
+  const again = subscribeWishlist(named.doc, { wishlistId: "other", userId: "lou", verifiedHash: null });
+  assert.ok(again.ok);
+  assert.equal(findSubscription(again.doc, "other", "lou")!.customTitle, "Noël");
+
+  const left = unsubscribeWishlist(named.doc, { wishlistId: "other", userId: "lou" });
+  assert.ok(left.ok);
+  const back = subscribeWishlist(left.doc, { wishlistId: "other", userId: "lou", verifiedHash: null });
+  assert.ok(back.ok);
+  assert.equal(back.subscription.customTitle, null);
+  assert.equal(back.subscription.customOwnerName, null);
+
+  const joined = acceptInvite(named.doc, { token: "invite-other", userId: "lou" });
+  assert.ok(joined.ok);
+  assert.equal(findSubscription(joined.doc, "other", "lou"), null);
+});
+
+test("ownerName is the current owner's display name", () => {
+  const doc = accountDoc();
+  assert.equal(ownerName(doc, "other"), "Camille");
+  assert.equal(ownerName(doc, "shared"), "Lou");
+  // A transfer: the new owner's name.
+  for (const membership of doc.memberships.filter((m) => m.wishlistId === "shared")) {
+    membership.role = membership.userId === "alex" ? "owner" : "member";
+  }
+  assert.equal(ownerName(doc, "shared"), "Alex");
+  // A new display name is read each time.
+  doc.users.find((u) => u.id === "alex")!.displayName = "Alexandre";
+  assert.equal(ownerName(doc, "shared"), "Alexandre");
+  // An empty name, or no member at all.
+  doc.users.find((u) => u.id === "camille")!.displayName = "  ";
+  assert.equal(ownerName(doc, "other"), null);
+  assert.equal(ownerName(doc, "missing"), null);
 });

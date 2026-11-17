@@ -92,6 +92,16 @@
     "unfollowConfirm": "Ne plus suivre",
     "unfollowKeep": "Continuer à suivre",
     "followedTitle": "Liste ajoutée à vos listes suivies",
-    "followedBody": "Vous la retrouverez à tout moment dans « Mes listes »."
+    "followedBody": "Vous la retrouverez à tout moment dans « Mes listes ».",
+    "rename": "Renommer"
+  },
+  "followNames": {
+    "title": "Renommer cette liste",
+    "body": "Ces noms ne sont visibles que par vous.",
+    "listName": "Nom de la liste",
+    "listNameHint": "Titre choisi par la liste : « {{title}} »",
+    "save": "Enregistrer",
+    "reset": "Revenir aux noms de la liste",
+    "saved": "Noms enregistrés"
   }
 }

@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { currentUser } from "../src/auth/current";
-import { followedListsOf, isSubscriptionUnlocked } from "../src/domain/subscription";
+import { followedDisplay } from "../src/domain/followed-display";
+import { followedListsOf, isSubscriptionUnlocked, ownerName } from "../src/domain/subscription";
 import { resolveTheme } from "../src/domain/theme";
 import { subscribeByLinkAction, unsubscribeAction } from "../src/server/actions";
 import { getDocument } from "../src/store/db";
 import { ConfirmForm } from "@/components/site/confirm-form";
+import { FollowNamesDialog } from "@/components/site/follow-names-dialog";
 import { GiftMark } from "@/components/site/gift-mark";
 import { GuestHero } from "@/components/site/guest-hero";
 import { LinkButton } from "@/components/site/link-button";
@@ -74,10 +76,21 @@ export default async function HomePage({
     .filter((membership) => membership.userId === user.id)
     .map((membership) => doc.wishlists.find((list) => list.id === membership.wishlistId))
     .filter((list) => list !== undefined);
-  const followed = followedListsOf(doc, user.id).map(({ wishlist, subscription }) => ({
-    list: wishlist,
-    locked: !isSubscriptionUnlocked(wishlist, subscription),
-  }));
+  const followed = followedListsOf(doc, user.id).map(({ wishlist, subscription }) => {
+    const names = {
+      readToken: wishlist.readToken,
+      title: wishlist.title,
+      customTitle: subscription.customTitle,
+      ownerName: ownerName(doc, wishlist.id),
+      customOwnerName: subscription.customOwnerName,
+    };
+    return {
+      list: wishlist,
+      locked: !isSubscriptionUnlocked(wishlist, subscription),
+      names,
+      display: followedDisplay(names),
+    };
+  });
   const followError = query.fe ? await translateError(query.fe) : null;
   return (
     <main className="flex flex-col gap-8">
@@ -161,7 +174,7 @@ export default async function HomePage({
           <p className="text-sm text-muted-foreground">{t("followed.empty")}</p>
         ) : (
           <div className="flex flex-col gap-3">
-            {followed.map(({ list, locked }) => (
+            {followed.map(({ list, locked, names, display }) => (
               <Card key={list.id} size="sm" className="relative">
                 <CardHeader className="flex flex-row items-center gap-3">
                   <WishlistCover
@@ -177,7 +190,7 @@ export default async function HomePage({
                           href={withLocale(locale, `/l/${list.readToken}`)}
                           className="hover:underline after:absolute after:inset-0 after:rounded-base focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-solid focus-visible:after:outline-offset-2 focus-visible:after:outline-black"
                         >
-                          {list.title}
+                          {display.title}
                         </Link>
                       </CardTitle>
                       {locked ? <Badge variant="outline">{t("followed.lockedBadge")}</Badge> : null}
@@ -186,9 +199,10 @@ export default async function HomePage({
                       <CardDescription className="line-clamp-2">{list.subtitle}</CardDescription>
                     ) : null}
                   </div>
-                  <div className="relative z-10 shrink-0">
+                  <div className="relative z-10 flex shrink-0 flex-wrap justify-end gap-2">
+                    <FollowNamesDialog names={names} displayedTitle={display.title} />
                     <ConfirmForm
-                      title={t("followed.unfollowTitle", { title: list.title })}
+                      title={t("followed.unfollowTitle", { title: display.title })}
                       description={t("followed.unfollowBody")}
                       confirmLabel={t("followed.unfollowConfirm")}
                       cancelLabel={t("followed.unfollowKeep")}

@@ -11,6 +11,7 @@ import { reserveItem } from "../../domain/reserve";
 import { extractReadToken } from "../../domain/read-link";
 import {
   findSubscription,
+  renameSubscription,
   subscribeWishlist,
   syncSubscriptionUnlock,
   unsubscribeWishlist,
@@ -163,6 +164,40 @@ export async function unsubscribeFromList(
   });
   if (!result.ok) return result;
   return { ok: true, wishlist };
+}
+
+/**
+ * Names a followed list and the person whose list it is, for the connected account only (024).
+ * `null` or an empty name goes back to the list's title, or to its owner's display name.
+ */
+export async function renameFollowedList(
+  ctx: CommandContext,
+  input: { readToken: string; customTitle: string | null; customOwnerName: string | null },
+): Promise<CommandResult<{ subscription: SubscribedListSummaryView }>> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  rateLimitForIp(`subscribe:${active.user.id}`, ctx.ip, 30, 15 * 60 * 1000);
+  const doc = await readDocument();
+  const wishlist = findWishlistByReadToken(doc, input.readToken);
+  if (!wishlist) return { ok: false, error: "listMissing" };
+  type Saved = { ok: true; subscription: SubscribedListSummaryView } | { ok: false; error: string };
+  return updateDocument<Saved>((current) => {
+    const result = renameSubscription(current, {
+      wishlistId: wishlist.id,
+      userId: active.user.id,
+      customTitle: input.customTitle,
+      customOwnerName: input.customOwnerName,
+    });
+    if (!result.ok) return { doc: current, result };
+    const freshList = result.doc.wishlists.find((entry) => entry.id === wishlist.id)!;
+    return {
+      doc: result.doc,
+      result: {
+        ok: true,
+        subscription: toSubscribedListSummary(result.doc, freshList, result.subscription, ctx.locale, ctx.origin),
+      },
+    };
+  });
 }
 
 export async function reserve(

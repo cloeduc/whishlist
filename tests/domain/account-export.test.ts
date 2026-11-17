@@ -102,6 +102,8 @@ test("subscriptions: only the lists this account follows, never who follows its 
       subtitle: null,
       publicUrl: "https://ohyoushouldnt.example.test/l/read-other",
       subscribedAt: "2026-04-04T00:00:00.000Z",
+      customTitle: null,
+      customOwnerName: null,
     },
   ]);
 });

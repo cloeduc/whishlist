@@ -92,6 +92,16 @@
     "unfollowConfirm": "Unfollow",
     "unfollowKeep": "Keep following",
     "followedTitle": "Added to your followed lists",
-    "followedBody": "You can find it anytime under “My wish lists”."
+    "followedBody": "You can find it anytime under “My wish lists”.",
+    "rename": "Rename"
+  },
+  "followNames": {
+    "title": "Rename this list",
+    "body": "Only you can see these names.",
+    "listName": "List name",
+    "listNameHint": "Title chosen by the list: “{{title}}”",
+    "save": "Save",
+    "reset": "Use the list's names",
+    "saved": "Names saved"
   }
 }

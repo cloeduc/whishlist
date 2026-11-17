@@ -61,6 +61,8 @@ export const subscriptions = sqliteTable(
       .references(() => users.id),
     readPasswordHash: text("read_password_hash"),
     createdAt: text("created_at").notNull(),
+    customTitle: text("custom_title"),
+    customOwnerName: text("custom_owner_name"),
   },
   (table) => [
     primaryKey({ columns: [table.wishlistId, table.userId] }),

@@ -85,6 +85,7 @@
   "serverError": "Une erreur est survenue. Réessayez plus tard.",
   "idInvalid": "Identifiant invalide.",
   "idConflict": "Cet identifiant est déjà utilisé.",
+  "followedNameTooLong": "Ce nom est trop long (80 caractères au plus).",
   "subscriptionLinkInvalid": "Saisissez le lien valide d'une liste partagée.",
   "alreadyMember": "Vous faites déjà partie des membres de cette liste.",
   "apiKeyNeedsName": "Donnez un nom à la clé.",

@@ -28,7 +28,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @example 1.9.0 */
+                            /** @example 1.10.0 */
                             apiVersion: string;
                             /** @description Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page). */
                             enrich: boolean;
@@ -2364,7 +2364,44 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
+        /**
+         * Nommer une liste suivie et la personne à qui elle est (depuis 1.10.0)
+         * @description Noms visibles du seul compte connecté. Une chaîne vide ou faite d'espaces vaut null (retour au titre de la liste, ou au nom du propriétaire). 80 caractères au plus.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    readToken: components["parameters"]["readToken"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        customTitle: string | null;
+                        customOwnerName: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Noms enregistrés */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SubscribedListSummary"];
+                    };
+                };
+                400: components["responses"]["Error"];
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
         post?: never;
         /** Se désabonner d'une liste suivie */
         delete: {
@@ -2474,13 +2511,24 @@ export interface components {
             subscribed: boolean;
             /** @description Depuis 1.7.0. */
             isMember: boolean;
+            /** @description Depuis 1.10.0. Noms de la liste pour le compte connecté s'il la suit ; null sinon (visiteur, membre, non connecté). Le nom du propriétaire n'est jamais donné à qui ne suit pas. */
+            follow: components["schemas"]["FollowNames"] | null;
             categories: components["schemas"]["Category"][];
             people: components["schemas"]["Label"][];
             items: components["schemas"]["PublicItem"][];
         };
+        FollowNames: {
+            /** @description Nom donné à la liste par le compte connecté. */
+            customTitle: string | null;
+            /** @description Nom donné à la personne par le compte connecté. */
+            customOwnerName: string | null;
+            /** @description Nom d'affichage du propriétaire actuel de la liste. */
+            ownerName: string | null;
+        };
         SubscribedListSummary: {
             id: string;
             readToken: string;
+            /** @description Titre choisi par les membres. */
             title: string;
             subtitle: string | null;
             coverImageUrl: string | null;
@@ -2490,6 +2538,12 @@ export interface components {
             /** Format: date-time */
             subscribedAt: string;
             locked: boolean;
+            /** @description Depuis 1.10.0. Nom donné à la liste par le compte connecté. */
+            customTitle: string | null;
+            /** @description Depuis 1.10.0. Nom donné à la personne par le compte connecté. */
+            customOwnerName: string | null;
+            /** @description Depuis 1.10.0. Nom d'affichage du propriétaire actuel de la liste. */
+            ownerName: string | null;
         };
         ListSummary: {
             id: string;

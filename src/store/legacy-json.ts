@@ -57,6 +57,8 @@ const FIELDS: { [K in keyof Database]: Record<string, FieldCheck> } = {
     userId: "string",
     readPasswordHash: "string?",
     createdAt: "string",
+    customTitle: "string?",
+    customOwnerName: "string?",
   },
   types: { id: "string", wishlistId: "string", label: "string", sortOrder: "number?" },
   people: { id: "string", wishlistId: "string", label: "string" },
@@ -176,6 +178,8 @@ export function normalizeDocument(doc: Database): Database {
   if (!doc.apiKeys) doc.apiKeys = [];
   for (const subscription of doc.subscriptions) {
     if (subscription.readPasswordHash === undefined) subscription.readPasswordHash = null;
+    if (subscription.customTitle === undefined) subscription.customTitle = null;
+    if (subscription.customOwnerName === undefined) subscription.customOwnerName = null;
   }
   for (const user of doc.users) {
     // Accounts from before address validation: verified by default (010, FR-005b).

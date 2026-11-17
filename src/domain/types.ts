@@ -51,6 +51,10 @@ export interface Subscription {
   /** Hash of the read password when the subscription was created or unlocked. */
   readPasswordHash: string | null;
   createdAt: string;
+  /** Name the subscriber gives the list, for them only (024). null: the list's title. */
+  customTitle: string | null;
+  /** Name the subscriber gives the person whose list it is (024). null: the owner's display name. */
+  customOwnerName: string | null;
 }
 
 export interface WishType {

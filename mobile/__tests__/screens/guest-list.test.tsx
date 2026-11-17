@@ -175,7 +175,27 @@ const summary = {
   readUrl: "https://api.example.test/l/rt",
   subscribedAt: "2026-11-02T10:00:00.000Z",
   locked: false,
+  customTitle: null,
+  customOwnerName: null,
+  ownerName: "Alex",
 };
+
+test("a followed list shows the subscriber's name in its header (024), and offers « Renommer »", async () => {
+  await signedIn();
+  fakeFetch({
+    "GET /public/lists/rt": () =>
+      json(200, {
+        ...publicList(),
+        subscribed: true,
+        follow: { customTitle: "Noël d'Alex", customOwnerName: null, ownerName: "Alex" },
+      }),
+    "GET /lists": () => json(200, { lists: [], subscriptions: [{ ...summary, customTitle: "Noël d'Alex" }] }),
+  });
+  await render(<GuestList />);
+  expect(await screen.findByTestId("guest.title")).toHaveTextContent("Noël d'Alex");
+  await fireEvent.press(screen.getByTestId("guest.rename"));
+  expect(router.push).toHaveBeenCalledWith("/guest/rt/names");
+});
 
 test("with an account: follow the list, then unfollow it after confirmation", async () => {
   await signedIn();

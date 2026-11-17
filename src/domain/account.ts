@@ -116,6 +116,9 @@ export type ExportedSubscription = {
   subtitle: string | null;
   publicUrl: string;
   subscribedAt: string;
+  /** Names the account gave the list and its person (024), null if none. */
+  customTitle: string | null;
+  customOwnerName: string | null;
 };
 
 export type AccountExport = {
@@ -233,6 +236,8 @@ export function exportAccount(
     subtitle: wishlist.subtitle,
     publicUrl: `${site.origin}${withLocale(site.locale, `/l/${wishlist.readToken}`)}`,
     subscribedAt: subscription.createdAt,
+    customTitle: subscription.customTitle,
+    customOwnerName: subscription.customOwnerName,
   }));
 
   return {

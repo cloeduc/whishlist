@@ -198,7 +198,7 @@ function Ready({
       <Text size="sm" color={tokens.colors.mutedForeground}>
         {t("intro")}
       </Text>
-      <GuestFollow readToken={readToken} subscribed={list.subscribed} isMember={list.isMember} onChanged={reload} />
+      <GuestFollow readToken={readToken} subscribed={list.subscribed} isMember={list.isMember} canRename onChanged={reload} />
       {categories.length > 1 ? (
         <PillTabs
           scroll

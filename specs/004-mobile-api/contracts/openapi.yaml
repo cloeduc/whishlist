@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Oh, You Shouldn't! API
-  version: "1.9.0"
+  version: "1.10.0"
   description: |
     Accès aux listes pour un client autre que le site (app mobile, script).
 
@@ -40,6 +40,8 @@ info:
       Une réservation n'archive plus l'idée : `MemberItem.archived` reste vrai pour une idée réservée hors
       mode surprise (comme avant), mais plus en mode surprise. Supprimer ou déplacer une idée réservée en
       mode surprise rend `itemLockedSurprise` (400).
+    - 1.10.0 : noms d'une liste suivie (feature 024). `customTitle`, `customOwnerName` et `ownerName` dans
+      `SubscribedListSummary` ; `follow` dans `PublicList` ; `PUT /subscriptions/{readToken}` pour les choisir.
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -84,7 +86,7 @@ paths:
                 type: object
                 required: [apiVersion, enrich, mail, analytics]
                 properties:
-                  apiVersion: { type: string, example: "1.9.0" }
+                  apiVersion: { type: string, example: "1.10.0" }
                   enrich:
                     type: boolean
                     description: Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page).
@@ -1241,6 +1243,33 @@ paths:
   /subscriptions/{readToken}:
     parameters:
       - $ref: "#/components/parameters/readToken"
+    put:
+      tags: [lists]
+      summary: Nommer une liste suivie et la personne à qui elle est (depuis 1.10.0)
+      description: >
+        Noms visibles du seul compte connecté. Une chaîne vide ou faite d'espaces vaut null
+        (retour au titre de la liste, ou au nom du propriétaire). 80 caractères au plus.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customTitle, customOwnerName]
+              properties:
+                customTitle: { type: [string, "null"] }
+                customOwnerName: { type: [string, "null"] }
+      responses:
+        "200":
+          description: Noms enregistrés
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubscribedListSummary" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
     delete:
       tags: [lists]
       summary: Se désabonner d'une liste suivie
@@ -1396,7 +1425,7 @@ components:
 
     PublicList:
       type: object
-      required: [title, subtitle, coverImageUrl, theme, subscribed, isMember, categories, people, items]
+      required: [title, subtitle, coverImageUrl, theme, subscribed, isMember, follow, categories, people, items]
       properties:
         title: { type: string }
         subtitle: { type: [string, "null"] }
@@ -1404,17 +1433,32 @@ components:
         theme: { $ref: "#/components/schemas/Theme" }
         subscribed: { type: boolean, description: Depuis 1.7.0. }
         isMember: { type: boolean, description: Depuis 1.7.0. }
+        follow:
+          description: >
+            Depuis 1.10.0. Noms de la liste pour le compte connecté s'il la suit ; null sinon
+            (visiteur, membre, non connecté). Le nom du propriétaire n'est jamais donné à qui ne suit pas.
+          oneOf:
+            - $ref: "#/components/schemas/FollowNames"
+            - type: "null"
         categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
         people: { type: array, items: { $ref: "#/components/schemas/Label" } }
         items: { type: array, items: { $ref: "#/components/schemas/PublicItem" } }
 
+    FollowNames:
+      type: object
+      required: [customTitle, customOwnerName, ownerName]
+      properties:
+        customTitle: { type: [string, "null"], description: Nom donné à la liste par le compte connecté. }
+        customOwnerName: { type: [string, "null"], description: Nom donné à la personne par le compte connecté. }
+        ownerName: { type: [string, "null"], description: Nom d'affichage du propriétaire actuel de la liste. }
+
     SubscribedListSummary:
       type: object
-      required: [id, readToken, title, subtitle, coverImageUrl, theme, itemCount, readUrl, subscribedAt, locked]
+      required: [id, readToken, title, subtitle, coverImageUrl, theme, itemCount, readUrl, subscribedAt, locked, customTitle, customOwnerName, ownerName]
       properties:
         id: { type: string }
         readToken: { type: string }
-        title: { type: string }
+        title: { type: string, description: Titre choisi par les membres. }
         subtitle: { type: [string, "null"] }
         coverImageUrl: { type: [string, "null"] }
         theme: { $ref: "#/components/schemas/Theme" }
@@ -1422,6 +1466,9 @@ components:
         readUrl: { type: string }
         subscribedAt: { type: string, format: date-time }
         locked: { type: boolean }
+        customTitle: { type: [string, "null"], description: Depuis 1.10.0. Nom donné à la liste par le compte connecté. }
+        customOwnerName: { type: [string, "null"], description: Depuis 1.10.0. Nom donné à la personne par le compte connecté. }
+        ownerName: { type: [string, "null"], description: Depuis 1.10.0. Nom d'affichage du propriétaire actuel de la liste. }
 
     ListSummary:
       type: object
