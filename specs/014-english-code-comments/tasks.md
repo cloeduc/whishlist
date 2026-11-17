@@ -190,11 +190,11 @@ US1 (règle) → US2 (commentaires et garde-fou, l'essentiel du volume) → US3 
 
 <!-- Commentaires qui contredisent le code, ou messages visibles écrits en dur, relevés pendant la traduction. À traiter hors de cette feature. -->
 
-- `mobile/.maestro/subflows/login.yaml:2` : dit que la liste de démo « n'existe que dans `tmp/e2e/wishlist.json` » ; les données sont en SQLite depuis la 008 (le chemin est la valeur de `WISHLIST_DATA_PATH`, qui mène au `.db`). Un peu daté.
-- `mobile/.maestro/flows/005-us1-auth.yaml:27` : « Alex logs in, then logs out » ; la déconnexion n'arrive qu'après la relance (l. 42). Mineur.
-- `tests/domain/list-defaults.test.ts:15` : « fills a gap: 2 taken, 3 free » dit l'inverse de l'assertion (`["L", "L 3"]` → `"L 2"` : 3 est pris, 2 est libre).
-- `src/domain/filters.ts:5-11` : `BUDGETS[].label` en français (« Moins de 20 € »…) n'est plus lu : le site et l'app affichent `t(`budgets.${id}`)`. Champ mort, à retirer.
-- `mobile/app/dev/catalog.tsx:48-166` : catalogue de composants de dev, textes français en dur (hors i18n). Écran de dev seulement.
+- `mobile/.maestro/subflows/login.yaml:2` : dit que la liste de démo « n'existe que dans `tmp/e2e/wishlist.json` » ; les données sont en SQLite depuis la 008 (le chemin est la valeur de `WISHLIST_DATA_PATH`, qui mène au `.db`). Un peu daté. **Corrigé le 2026-11-17 (WISH-3).**
+- `mobile/.maestro/flows/005-us1-auth.yaml:27` : « Alex logs in, then logs out » ; la déconnexion n'arrive qu'après la relance (l. 42). Mineur. **Corrigé le 2026-11-17 (WISH-3).**
+- `tests/domain/list-defaults.test.ts:15` : « fills a gap: 2 taken, 3 free » dit l'inverse de l'assertion (`["L", "L 3"]` → `"L 2"` : 3 est pris, 2 est libre). **Corrigé le 2026-11-17 (WISH-3).**
+- `src/domain/filters.ts:5-11` : `BUDGETS[].label` en français (« Moins de 20 € »…) n'est plus lu : le site et l'app affichent `t(`budgets.${id}`)`. Champ mort, à retirer. **Corrigé le 2026-11-17 (WISH-3).**
+- `mobile/app/dev/catalog.tsx:48-166` : catalogue de composants de dev, textes français en dur (hors i18n). Écran de dev seulement. **Corrigé le 2026-11-17 (WISH-3).**
 - `src/domain/product-llm.ts:72` et `:124` : le prompt envoyé au modèle est en français. Laissé tel quel : c'est une entrée du modèle qui règle la langue de sa réponse, pas un message technique. Décision de l'utilisateur (2026-11-03) : on le laisse en français.
 - `specs/007-mobile-e2e-maestro/contracts/e2e-command.md` (l. 35, 61-68) et d'autres fichiers de la 007 citent les anciens messages français du lanceur e2e : spec d'une feature passée, non modifiée.
 

@@ -24,7 +24,7 @@ import { StarPicker, Stars } from "@/ui/Stars";
 import { Text } from "@/ui/Text";
 
 // Development screen (T032): all the components, to compare with the site's.
-// Hard-coded texts: it exists only in the development client, never in a distributed build.
+// Hard-coded English sample texts: it exists only in the development client, never in a distributed build.
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -43,111 +43,111 @@ function Components() {
   const [priority, setPriority] = useState("3");
   return (
     <>
-      <Section title="Boutons">
-        <Button title="Se connecter" fullWidth />
-        <Button title="Voir la liste partagée" variant="neutral" />
-        <Button title="Supprimer" variant="destructive" />
-        <Button title="Remplir depuis le lien" variant="neutral" disabled fullWidth />
-        <Button title="Mot de passe oublié ?" variant="link" />
+      <Section title="Buttons">
+        <Button title="Log in" fullWidth />
+        <Button title="View the shared list" variant="neutral" />
+        <Button title="Delete" variant="destructive" />
+        <Button title="Fill from the link" variant="neutral" disabled fullWidth />
+        <Button title="Forgot your password?" variant="link" />
         <View style={{ flexDirection: "row", gap: tokens.space[3] }}>
           <Button title="xs" size="xs" />
           <Button title="sm" size="sm" />
           <Button title="lg" size="lg" />
         </View>
       </Section>
-      <Section title="Onglets">
+      <Section title="Tabs">
         <PillTabs
           active={tab}
           onChange={setTab}
           tabs={[
-            { key: "ideas", label: "Idées (8)" },
+            { key: "ideas", label: "Ideas (8)" },
             { key: "archives", label: "Archives (1)" },
-            { key: "reservations", label: "Réservations (1)" },
-            { key: "share", label: "Partage" },
-            { key: "settings", label: "Réglages" },
+            { key: "reservations", label: "Reservations (1)" },
+            { key: "share", label: "Sharing" },
+            { key: "settings", label: "Settings" },
           ]}
         />
       </Section>
-      <Section title="Carte et champs">
+      <Section title="Card and fields">
         <Card>
           <CardHeader>
-            <CardTitle>Ajouter une idée cadeau</CardTitle>
-            <CardDescription>Collez un lien pour récupérer les informations.</CardDescription>
+            <CardTitle>Add a gift idea</CardTitle>
+            <CardDescription>Paste a link to fetch the details.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Field label="Nom du cadeau" description="Une aide sous le champ.">
-              <Input placeholder="Ex. : 18,50" accessibilityLabel="Nom du cadeau" />
+            <Field label="Gift name" description="A hint below the field.">
+              <Input placeholder="E.g. 18.50" accessibilityLabel="Gift name" />
             </Field>
-            <Field label="Prix (€)" error="Saisissez un prix valide, par exemple 18,50.">
-              <Input invalid defaultValue="abc" accessibilityLabel="Prix" />
+            <Field label="Price (€)" error="Enter a valid price, for example 18.50.">
+              <Input invalid defaultValue="abc" accessibilityLabel="Price" />
             </Field>
-            <Field label="Catégorie">
+            <Field label="Category">
               <Select
-                label="Catégorie"
+                label="Category"
                 value={category}
                 onChange={setCategory}
                 options={[
-                  { value: "books", label: "Livres" },
-                  { value: "games", label: "Jeux" },
+                  { value: "books", label: "Books" },
+                  { value: "games", label: "Games" },
                 ]}
               />
             </Field>
-            <Field label="Niveau d'envie">
+            <Field label="How much I want it">
               <StarPicker value={priority} onChange={setPriority} />
             </Field>
           </CardContent>
           <CardFooter>
-            <Button title="Ajouter l'idée" fullWidth />
+            <Button title="Add the idea" fullWidth />
           </CardFooter>
         </Card>
-        <Card onPress={() => {}} accessibilityLabel="Carte cliquable">
+        <Card onPress={() => {}} accessibilityLabel="Pressable card">
           <CardHeader>
-            <CardTitle>Carte cliquable</CardTitle>
-            <CardDescription>{"Elle s’enfonce à l’appui."}</CardDescription>
+            <CardTitle>Pressable card</CardTitle>
+            <CardDescription>{"It sinks when pressed."}</CardDescription>
           </CardHeader>
         </Card>
-        <CollapsibleCard title="Carte repliable" description="Touchez l’en-tête pour la déplier.">
-          <Field label="Nom affiché">
-            <Input accessibilityLabel="Nom affiché" />
+        <CollapsibleCard title="Collapsible card" description="Tap the header to expand it.">
+          <Field label="Display name">
+            <Input accessibilityLabel="Display name" />
           </Field>
         </CollapsibleCard>
-        <CollapsibleCard title="Carte dépliée au départ" defaultExpanded>
-          <Button title="Enregistrer" fullWidth />
+        <CollapsibleCard title="Card expanded at first" defaultExpanded>
+          <Button title="Save" fullWidth />
         </CollapsibleCard>
       </Section>
-      <Section title="Badges et étoiles">
+      <Section title="Badges and stars">
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: tokens.space[3] }}>
           <Badge>Alex</Badge>
-          <Badge>24,90 €</Badge>
-          <Badge variant="default">Bleu</Badge>
-          <Badge variant="highlight">En attente</Badge>
-          <Badge variant="destructive">Refusé</Badge>
+          <Badge>€24.90</Badge>
+          <Badge variant="default">Blue</Badge>
+          <Badge variant="highlight">Pending</Badge>
+          <Badge variant="destructive">Refused</Badge>
         </View>
         <Stars value="4" />
       </Section>
-      <Section title="Alertes et vide">
-        <Alert title="Hors ligne · dernière mise à jour à 14 h 05">2 changements en attente.</Alert>
+      <Section title="Alerts and empty state">
+        <Alert title="Offline · last updated at 2:05 PM">2 changes pending.</Alert>
         <Alert
           variant="destructive"
-          title="Cette idée n'existe pas."
+          title="This idea no longer exists."
           actions={
             <>
-              <Button title="Corriger" variant="neutral" size="sm" />
-              <Button title="Abandonner" variant="neutral" size="sm" />
+              <Button title="Fix" variant="neutral" size="sm" />
+              <Button title="Discard" variant="neutral" size="sm" />
             </>
           }
         />
-        <Empty title="Aucune liste" description="Créez votre première liste." />
+        <Empty title="No lists" description="Create your first list." />
       </Section>
-      <Section title="Page de contenu">
-        <ContentPage eyebrow="Informations légales" title="Mentions légales" intro="Qui publie le site, comment il est hébergé, et où écrire.">
-          <ContentSection title="Éditeur">
-            <ContentText>Ce site est édité à titre non professionnel, par un particulier.</ContentText>
+      <Section title="Content page">
+        <ContentPage eyebrow="Legal information" title="Legal notice" intro="Who publishes the site, how it is hosted, and where to write.">
+          <ContentSection title="Publisher">
+            <ContentText>This site is published on a non-professional basis, by a private individual.</ContentText>
           </ContentSection>
         </ContentPage>
         <Separator />
       </Section>
-      <Section title="Cadeau">
+      <Section title="Gift">
         <View style={{ flexDirection: "row", gap: tokens.space[4], alignItems: "center" }}>
           <GiftMark size={48} />
           <GiftMark size={48} framed={false} />
@@ -163,7 +163,7 @@ export default function Catalog() {
     <Screen>
       <BrandHeader />
       <Components />
-      <Text size="title">Thème de liste</Text>
+      <Text size="title">List theme</Text>
       <ListThemeProvider theme={{ primary: "#b4235a", accent: "#1f7a4d", highlight: "#f4a300", background: "#fff1f5" }}>
         <View style={{ backgroundColor: "#fff1f5", gap: tokens.space[6], padding: tokens.space[3] }}>
           <Components />

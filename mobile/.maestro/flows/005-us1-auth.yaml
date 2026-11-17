@@ -24,7 +24,7 @@ tags:
 - assertNotVisible:
     id: lists.screen
 
-# Alex logs in, then logs out.
+# Alex logs in, the session survives a relaunch, then Alex logs out.
 - runFlow: ../subflows/launch-clean.yaml
 - runFlow:
     file: ../subflows/login.yaml
