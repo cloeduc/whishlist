@@ -76,10 +76,11 @@ const KEPT_FIELDS_BY_ACTION: Record<string, string> = {
   sendInviteAction: "INVITE_EMAIL_KEPT_FIELDS",
   setReadPasswordAction: "READ_PASSWORD_KEPT_FIELDS",
   joinGroupGiftAction: "GROUP_GIFT_JOIN_KEPT_FIELDS",
+  unlockGroupGiftAction: "READ_UNLOCK_KEPT_FIELDS",
 };
 
 test("each form action refuses with its own list of kept fields", () => {
-  assert.equal(Object.keys(KEPT_FIELDS_BY_ACTION).length, 14);
+  assert.equal(Object.keys(KEPT_FIELDS_BY_ACTION).length, 15);
   for (const [action, list] of Object.entries(KEPT_FIELDS_BY_ACTION)) {
     const lists = [...actionBody(action).matchAll(/refusal\([^)]*?\b(\w+_KEPT_FIELDS)\)/g)].map((match) => match[1]);
     assert.ok(lists.length > 0, `${action} never calls refusal()`);

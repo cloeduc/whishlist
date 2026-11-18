@@ -152,6 +152,10 @@
     "markCompleteKeep": "Laisser ouvert",
     "reopen": "Rouvrir le cadeau",
     "closed": "Ce cadeau commun est complet : il n'est plus possible d'y participer.",
-    "completeHint": "Le cadeau est complet : il n'est plus proposé aux autres personnes."
+    "completeHint": "Le cadeau est complet : il n'est plus proposé aux autres personnes.",
+    "invite": "Inviter à participer",
+    "inviteHint": "Envoyez ce lien aux personnes qui veulent participer avec vous : il ne montre que ce cadeau, pas le reste de la liste.",
+    "inviteLink": "Lien du cadeau commun",
+    "copyLink": "Copier le lien du cadeau commun"
   }
 }

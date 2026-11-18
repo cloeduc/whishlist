@@ -1,4 +1,4 @@
-import { currentUser } from "../../../src/auth/current";
+import { currentUser, origin } from "../../../src/auth/current";
 import { canAccessPublicList } from "../../../src/auth/public-list";
 import { listClaimedReservationIds } from "../../../src/auth/reservation-claim";
 import { findGroupGiftByToken, groupGiftDetail } from "../../../src/domain/group-gift";
@@ -6,13 +6,16 @@ import { formatPrice } from "../../../src/domain/price";
 import { getDocument } from "../../../src/store/db";
 import { leaveGroupGiftAction, setGroupGiftStatusAction } from "../../../src/server/actions";
 import { ConfirmForm } from "@/components/site/confirm-form";
+import { CopyLinkField } from "@/components/site/copy-link-field";
 import { GroupGiftJoinForm } from "@/components/site/group-gift-join-form";
+import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { intlLocale } from "@/src/i18n/config";
+import { withLocale } from "@/src/i18n/locale-path";
 import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import { groupGiftSummaryText } from "@/src/site/group-gift-text";
 import { ExternalLinkIcon } from "lucide-react";
@@ -42,11 +45,12 @@ export default async function GroupGiftPage({
 }) {
   const { token } = await params;
   const query = await searchParams;
-  const [t, locale, doc, user] = await Promise.all([
+  const [t, locale, doc, user, siteOrigin] = await Promise.all([
     getTranslations("public"),
     getLocale(),
     getDocument(),
     currentUser(),
+    origin(),
   ]);
   const gift = findGroupGiftByToken(doc, token);
   const list = gift ? doc.wishlists.find((entry) => entry.id === gift.wishlistId) : undefined;
@@ -62,12 +66,16 @@ export default async function GroupGiftPage({
   }
   if (!(await canAccessPublicList(doc, list, user))) {
     return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyTitle>{t("unlock.heading")}</EmptyTitle>
-          <EmptyDescription>{t("unlock.description")}</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
+      <ReadUnlockForm
+        giftToken={token}
+        title={list.title}
+        heading={t("unlock.heading")}
+        description={t("unlock.description")}
+        passwordLabel={t("unlock.password")}
+        passwordHint={t("unlock.passwordHint")}
+        submit={t("unlock.submit")}
+        error={null}
+      />
     );
   }
   const account = user && !user.mustChangePassword ? user : null;
@@ -135,7 +143,9 @@ export default async function GroupGiftPage({
       <Card size="sm">
         <CardHeader>
           <CardTitle>{groupGiftSummaryText(t, detail, priceLocale)}</CardTitle>
-          <CardDescription>{t("groupGift.totalLine", { amount: price(detail.totalCents) })}</CardDescription>
+          {detail.totalCents > 0 ? (
+            <CardDescription>{t("groupGift.totalLine", { amount: price(detail.totalCents) })}</CardDescription>
+          ) : null}
         </CardHeader>
         <CardContent>
           <h2 className="mb-2 text-base font-medium">{t("groupGift.participantsTitle")}</h2>
@@ -230,6 +240,23 @@ export default async function GroupGiftPage({
           <AlertDescription>{t("groupGift.closed")}</AlertDescription>
         </Alert>
       )}
+
+      {detail.me ? (
+        <Card size="sm">
+          <CardHeader>
+            <CardTitle>{t("groupGift.invite")}</CardTitle>
+            <CardDescription>{t("groupGift.inviteHint")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CopyLinkField
+              id="group-gift-link"
+              label={t("groupGift.inviteLink")}
+              value={`${siteOrigin}${withLocale(locale, `/g/${token}`)}`}
+              copyLabel={t("groupGift.copyLink")}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
     </main>
   );
 }

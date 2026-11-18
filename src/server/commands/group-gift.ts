@@ -13,6 +13,7 @@ import type { Database, GroupGift, GroupGiftStatus, Reservation, Wishlist } from
 import { intlLocale } from "../../i18n/config";
 import { readDocument, updateDocument } from "../../store/db";
 import { rateLimitForIp } from "../rate-limit";
+import { unlockWishlist } from "./public-list";
 import { publicAccount, type CommandContext, type CommandResult } from "./context";
 
 /**
@@ -139,4 +140,20 @@ export async function setStatus(
   });
   if (!result.ok) return result;
   return { ok: true, wishlist };
+}
+
+/**
+ * The list's read password, typed on the gift's page: the same proof as unlocking the list.
+ * Same rate limit bucket as the list's link (keyed on the list, never shown).
+ */
+export async function unlockGroupGift(
+  ctx: CommandContext,
+  input: { token: string; password: string },
+): Promise<CommandResult<{ wishlist: Wishlist; unlockToken: string | null; expiresAt: string | null }>> {
+  const doc = await readDocument();
+  const gift = findGroupGiftByToken(doc, input.token);
+  const wishlist = gift ? doc.wishlists.find((w) => w.id === gift.wishlistId) : undefined;
+  if (!gift || !wishlist) return { ok: false, error: "groupGiftMissing" };
+  rateLimitForIp(`read-unlock:${wishlist.readToken.slice(0, 12)}`, ctx.ip, 20, 15 * 60 * 1000);
+  return unlockWishlist(ctx, doc, wishlist, input.password);
 }

@@ -152,6 +152,10 @@
     "markCompleteKeep": "Keep it open",
     "reopen": "Reopen the gift",
     "closed": "This group gift is complete: you can no longer chip in.",
-    "completeHint": "The gift is complete: it is no longer offered to other people."
+    "completeHint": "The gift is complete: it is no longer offered to other people.",
+    "invite": "Invite others to chip in",
+    "inviteHint": "Send this link to people who want to chip in with you: it shows this gift only, not the rest of the list.",
+    "inviteLink": "Group gift link",
+    "copyLink": "Copy the group gift link"
   }
 }

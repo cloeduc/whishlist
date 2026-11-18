@@ -34,7 +34,12 @@ import { isRateLimitError } from "./rate-limit";
 import { actionContext } from "./action-context";
 import { deleteOwnAccount } from "./commands/account";
 import { createMyApiKey, revokeMyApiKey } from "./commands/api-keys";
-import { joinGroupGift, leaveGroupGift, setStatus as setGroupGiftStatus } from "./commands/group-gift";
+import {
+  joinGroupGift,
+  leaveGroupGift,
+  setStatus as setGroupGiftStatus,
+  unlockGroupGift,
+} from "./commands/group-gift";
 import {
   changeOwnPassword,
   checkCredentials,
@@ -846,6 +851,25 @@ export async function leaveGroupGiftAction(formData: FormData) {
   }
   if (!result.ok) return localeRedirect(`/g/${token}?e=${result.error}`);
   await revokeReservationClaim(result.wishlist.readToken, reservationId);
+  return localeRedirect(`/g/${token}`);
+}
+
+/** The list's read password typed on a group gift's page (028). */
+export async function unlockGroupGiftAction(prev: FormState, formData: FormData): Promise<FormState> {
+  const token = String(formData.get("giftToken") ?? "");
+  const password = String(formData.get("password") ?? "");
+  let result: Awaited<ReturnType<typeof unlockGroupGift>>;
+  try {
+    result = await unlockGroupGift(await actionContext(), { token, password });
+  } catch (error) {
+    if (isRateLimitError(error)) return refusal(prev, "rateLimited", formData, READ_UNLOCK_KEPT_FIELDS);
+    throw error;
+  }
+  if (!result.ok) {
+    if (result.error === "groupGiftMissing") return localeRedirect(`/g/${token}`);
+    return refusal(prev, "badPassword", formData, READ_UNLOCK_KEPT_FIELDS);
+  }
+  await grantReadUnlock(result.wishlist);
   return localeRedirect(`/g/${token}`);
 }
 

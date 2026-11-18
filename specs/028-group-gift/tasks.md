@@ -133,13 +133,13 @@ Chaque phase de user story se termine par une tâche **« Commit de la story »*
 
 **Independent Test**: quickstart.md § US3.
 
-- [ ] T047 [P] [US3] Tests : `tests/domain/commands-public-list.test.ts` ou nouveau `tests/domain/commands-group-gift.test.ts` (liste protégée : `readPasswordRequired` sans déverrouillage, corps sans `readToken` ; déverrouillage par le cadeau valable pour la liste ; jeton inconnu → `groupGiftMissing`) ; `tests/domain/sitemap.test.ts` / robots (`/g/` interdit) ; `tests/domain/analytics.test.ts` (jeton masqué)
-- [ ] T048 [US3] `src/auth/public-list.ts` et `src/server/commands/group-gift.ts` : `unlockGroupGift(ctx, { token, password })` qui pose la même preuve de déverrouillage que la liste (même seau de débit que `unlockPublicList`) ; `src/server/actions.ts` : action de déverrouillage depuis la page du cadeau
-- [ ] T049 [US3] `app/g/[token]/page.tsx` : formulaire de mot de passe (composant existant de la liste publique) ; section `components/site/group-gift-invite.tsx` « Inviter à participer » avec copie du lien absolu (origine publique du site, `withLocale`) pour les participants
-- [ ] T050 [P] [US3] `app/robots.ts` : `Disallow: /g/` ; `src/site/analytics-public.ts` : masquer `/g/<token>` comme `/l/<readToken>`
-- [ ] T051 [P] [US3] Textes FR/EN (`invite`, `copyLink`, copié) dans `locales/{fr,en}/public.json`
-- [ ] T052 [US3] Parcours quickstart.md § US3 (dont : le HTML de la page ne contient pas le `readToken`)
-- [ ] T053 [US3] Commit de la story : lint, types et tests verts, puis `feat: share a group gift link (US3)`, sans demander
+- [X] T047 [P] [US3] Tests : `tests/domain/commands-public-list.test.ts` ou nouveau `tests/domain/commands-group-gift.test.ts` (liste protégée : `readPasswordRequired` sans déverrouillage, corps sans `readToken` ; déverrouillage par le cadeau valable pour la liste ; jeton inconnu → `groupGiftMissing`) ; `tests/domain/sitemap.test.ts` / robots (`/g/` interdit) ; `tests/domain/analytics.test.ts` (jeton masqué)
+- [X] T048 [US3] `src/auth/public-list.ts` et `src/server/commands/group-gift.ts` : `unlockGroupGift(ctx, { token, password })` qui pose la même preuve de déverrouillage que la liste (même seau de débit que `unlockPublicList`) ; `src/server/actions.ts` : action de déverrouillage depuis la page du cadeau
+- [X] T049 [US3] `app/g/[token]/page.tsx` : formulaire de mot de passe (composant existant de la liste publique) ; section `components/site/group-gift-invite.tsx` « Inviter à participer » avec copie du lien absolu (origine publique du site, `withLocale`) pour les participants
+- [X] T050 [P] [US3] `app/robots.ts` : `Disallow: /g/` ; `src/site/analytics-public.ts` : masquer `/g/<token>` comme `/l/<readToken>`
+- [X] T051 [P] [US3] Textes FR/EN (`invite`, `copyLink`, copié) dans `locales/{fr,en}/public.json`
+- [X] T052 [US3] Parcours quickstart.md § US3 (dont : le HTML de la page ne contient pas le `readToken`)
+- [X] T053 [US3] Commit de la story : lint, types et tests verts, puis `feat: share a group gift link (US3)`, sans demander
 
 ---
 

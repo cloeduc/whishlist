@@ -17,7 +17,7 @@ import {
   syncSubscriptionUnlock,
   unsubscribeWishlist,
 } from "../../domain/subscription";
-import type { Reservation, Wishlist } from "../../domain/types";
+import type { Database, Reservation, Wishlist } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import {
   toPublicListView,
@@ -54,7 +54,20 @@ export async function unlockPublicList(
   const doc = await readDocument();
   const wishlist = findWishlistByReadToken(doc, input.readToken);
   if (!wishlist) return { ok: false, error: "listMissing" };
-  if (!(await verifyReadPassword(wishlist, input.password))) return { ok: false, error: "badPassword" };
+  return unlockWishlist(ctx, doc, wishlist, input.password);
+}
+
+/**
+ * Checks the list's read password and gives the unlock proof (cookie on the site, `unlockToken` for the API).
+ * Shared by the list's link and a group gift's link (028); the caller applies the rate limit.
+ */
+export async function unlockWishlist(
+  ctx: CommandContext,
+  doc: Database,
+  wishlist: Wishlist,
+  password: string,
+): Promise<CommandResult<{ wishlist: Wishlist; unlockToken: string | null; expiresAt: string | null }>> {
+  if (!(await verifyReadPassword(wishlist, password))) return { ok: false, error: "badPassword" };
   const account = publicAccount(ctx);
   const subscription = account ? findSubscription(doc, wishlist.id, account.id) : null;
   if (account && subscription && subscription.readPasswordHash !== wishlist.readPasswordHash) {

@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { before, test } from "node:test";
+import { verifyReadUnlock } from "../../src/auth/read-unlock";
 import { verifyReservationClaims } from "../../src/auth/reservation-claim";
 import { setReadPassword } from "../../src/domain/read-password";
-import { joinGroupGift, leaveGroupGift, readGroupGift, setStatus } from "../../src/server/commands/group-gift";
+import { joinGroupGift, leaveGroupGift, readGroupGift, setStatus, unlockGroupGift } from "../../src/server/commands/group-gift";
 import { readPublicList, reserve } from "../../src/server/commands/public-list";
 import { readDocument } from "../../src/store/db";
 import { apiDoc, ctx, ensurePasswordHash, TEST_SECRET, withStore } from "./helpers/api-fixtures";
@@ -134,5 +135,25 @@ test("status command: a participant by claim marks it complete; a stranger is re
     assert.equal((await readDocument()).groupGifts[0]?.status, "complete");
     const join = await joinGroupGift(ctx(), { token: "tok-g", isUnlocked: noUnlock, claimsFor: noClaims });
     assert.deepEqual(join, { ok: false, error: "groupGiftComplete" });
+  });
+});
+
+test("unlock from the gift's page: the list's password, the same proof as the list; never its read link", async () => {
+  const saved = await setReadPassword(docWithGroupGift(), { wishlistId: "w", actorId: "alex", password: "lecture-demo" });
+  assert.ok(saved.ok);
+  await withStore(saved.doc, async () => {
+    assert.deepEqual(await unlockGroupGift(ctx(), { token: "tok-g", password: "mauvais-mot" }), {
+      ok: false,
+      error: "badPassword",
+    });
+    assert.deepEqual(await unlockGroupGift(ctx(), { token: "nope", password: "lecture-demo" }), {
+      ok: false,
+      error: "groupGiftMissing",
+    });
+    const unlocked = await unlockGroupGift(ctx(), { token: "tok-g", password: "lecture-demo" });
+    assert.equal(unlocked.ok, true);
+    if (!unlocked.ok) return;
+    assert.ok(unlocked.unlockToken);
+    assert.equal(verifyReadUnlock(unlocked.wishlist, unlocked.unlockToken!, TEST_SECRET), true);
   });
 });
