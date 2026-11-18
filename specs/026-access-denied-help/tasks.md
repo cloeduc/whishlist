@@ -108,11 +108,11 @@ Aucune : pas de donnée ni de route d'API (data-model.md).
 
 ### Implementation for User Story 4
 
-- [ ] T027 [P] [US4] Ajouter `share.action` (« Partager » / « Share ») et `share.addressNote` (texte de `contracts/screens.md`) dans `locales/fr/list.json` et `locales/en/list.json`
-- [ ] T028 [US4] Dans `app/lists/[id]/page.tsx`, ajouter dans l'en-tête (à côté du titre) un `LinkButton` `share.action` vers `withLocale(locale, tabHref(id, "sharing"))`, masqué quand `tab === "sharing"` (FR-006)
-- [ ] T029 [US4] Dans l'onglet Partage de `app/lists/[id]/page.tsx`, afficher `share.addressNote` sous `share.description` (FR-007)
-- [ ] T030 [US4] Vérifier à la main quickstart US4 sur chaque onglet, en français et en anglais, y compris en largeur de téléphone
-- [ ] T031 [US4] Commit de la story : contrôles verts, puis `feat: make the list sharing action visible (US4)`, sans demander
+- [X] T027 [P] [US4] Ajouter `share.action` (« Partager » / « Share ») et `share.addressNote` (texte de `contracts/screens.md`) dans `locales/fr/list.json` et `locales/en/list.json`
+- [X] T028 [US4] Dans `app/lists/[id]/page.tsx`, ajouter dans l'en-tête (à côté du titre) un `LinkButton` `share.action` vers `withLocale(locale, tabHref(id, "sharing"))`, masqué quand `tab === "sharing"` (FR-006)
+- [X] T029 [US4] Dans l'onglet Partage de `app/lists/[id]/page.tsx`, afficher `share.addressNote` sous `share.description` (FR-007)
+- [X] T030 [US4] Vérifier à la main quickstart US4 sur chaque onglet, en français et en anglais, y compris en largeur de téléphone
+- [X] T031 [US4] Commit de la story : contrôles verts, puis `feat: make the list sharing action visible (US4)`, sans demander
 
 ---
 

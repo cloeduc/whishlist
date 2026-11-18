@@ -131,7 +131,9 @@
     "owner": "Propriétaire",
     "member": "Membre",
     "remove": "Retirer de la liste",
-    "leave": "Quitter cette liste"
+    "leave": "Quitter cette liste",
+    "action": "Partager",
+    "addressNote": "L’adresse de cette page est réservée aux personnes qui gèrent la liste. Pour partager, envoyez le lien de la liste."
   },
   "settings": {
     "title": "Réglages",

@@ -131,7 +131,9 @@
     "owner": "Owner",
     "member": "Member",
     "remove": "Remove from list",
-    "leave": "Leave this list"
+    "leave": "Leave this list",
+    "action": "Share",
+    "addressNote": "The address of this page is only for the people who manage the list. To share it, send the list link."
   },
   "settings": {
     "title": "Settings",

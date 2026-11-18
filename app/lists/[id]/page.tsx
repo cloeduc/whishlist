@@ -137,23 +137,31 @@ export default async function EditListPage({
           <LiveGiftMark className="size-12" />
           <h1 className="text-2xl font-medium tracking-tight">{list.title}</h1>
         </div>
-        {surpriseMode ? (
-          // The guest view leaves reserved ideas out: compared with « Idées », it would tell them apart (020).
-          <ConfirmForm
-            title={t("surprise.guestViewTitle")}
-            description={t("surprise.guestViewBody")}
-            confirmLabel={t("surprise.guestViewConfirm")}
-            cancelLabel={t("surprise.guestViewKeep")}
-            triggerLabel={t("viewAsGuest")}
-            triggerSize="sm"
-            confirmVariant="default"
-            href={readUrl}
-          />
-        ) : (
-          <LinkButton href={readUrl} variant="outline" size="sm">
-            {t("viewAsGuest")}
-          </LinkButton>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* The way to the list link, from every tab: the address of this page is not the one to send (026). */}
+          {tab === "sharing" ? null : (
+            <LinkButton href={tabHref(id, "sharing")} size="sm">
+              {t("share.action")}
+            </LinkButton>
+          )}
+          {surpriseMode ? (
+            // The guest view leaves reserved ideas out: compared with « Idées », it would tell them apart (020).
+            <ConfirmForm
+              title={t("surprise.guestViewTitle")}
+              description={t("surprise.guestViewBody")}
+              confirmLabel={t("surprise.guestViewConfirm")}
+              cancelLabel={t("surprise.guestViewKeep")}
+              triggerLabel={t("viewAsGuest")}
+              triggerSize="sm"
+              confirmVariant="default"
+              href={readUrl}
+            />
+          ) : (
+            <LinkButton href={readUrl} variant="outline" size="sm">
+              {t("viewAsGuest")}
+            </LinkButton>
+          )}
+        </div>
       </div>
       {error ? (
         <Alert variant="destructive">
@@ -309,6 +317,7 @@ export default async function EditListPage({
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl font-bold tracking-tight">{t("share.title")}</h2>
             <p className="text-muted-foreground text-pretty">{t("share.description")}</p>
+            <p className="text-muted-foreground text-pretty">{t("share.addressNote")}</p>
           </div>
           <Card>
             <CardHeader>
