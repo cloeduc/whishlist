@@ -58,6 +58,8 @@ export function reserveItem(
     note: blank(input.note),
     userId: input.userId?.trim() ? input.userId.trim() : null,
     createdAt: (input.now ?? new Date()).toISOString(),
+    groupGiftId: null,
+    amountCents: null,
   };
   // The idea is not archived: the reservation alone says it is taken (020).
   const next = clone(doc);

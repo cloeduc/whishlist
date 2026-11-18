@@ -1,5 +1,6 @@
+import { groupGiftTotals } from "./group-gift";
 import { formatPrice } from "./price";
-import type { Database, Reservation } from "./types";
+import type { Database, GroupGiftStatus, Reservation } from "./types";
 
 export interface OffrirRow {
   reservationId: string;
@@ -19,6 +20,8 @@ export interface MyOfferRow {
   fromName: string | null;
   note: string | null;
   createdAt: string;
+  /** Participation in a group gift (028): its link, state, the person's share and what is left. */
+  groupGift: { token: string; status: GroupGiftStatus; amountCents: number | null; remainingCents: number | null } | null;
 }
 
 export function listOffrir(doc: Database, wishlistId: string): OffrirRow[] {
@@ -52,6 +55,7 @@ export function listMyOffers(doc: Database, userId: string, locale = "fr-FR"): M
       const list = doc.wishlists.find((entry) => entry.id === reservation.wishlistId);
       const item = doc.items.find((i) => i.id === reservation.itemId);
       const type = item ? doc.types.find((t) => t.id === item.typeId) : undefined;
+      const gift = reservation.groupGiftId ? doc.groupGifts.find((g) => g.id === reservation.groupGiftId) : undefined;
       return {
         reservationId: reservation.id,
         itemName: item?.name ?? "—",
@@ -62,6 +66,14 @@ export function listMyOffers(doc: Database, userId: string, locale = "fr-FR"): M
         fromName: reservation.fromName,
         note: reservation.note,
         createdAt: reservation.createdAt,
+        groupGift: gift
+          ? {
+              token: gift.token,
+              status: gift.status,
+              amountCents: reservation.amountCents,
+              remainingCents: groupGiftTotals(doc, gift, item).remainingCents,
+            }
+          : null,
       };
     })
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));

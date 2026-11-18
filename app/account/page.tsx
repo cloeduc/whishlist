@@ -2,6 +2,7 @@ import { listApiKeys } from "../../src/domain/api-keys";
 import { origin } from "../../src/auth/current";
 import { requireUser } from "../../src/auth/guard";
 import { listMyOffers } from "../../src/domain/offrir";
+import { formatPrice } from "../../src/domain/price";
 import { previewAccountDeletion } from "../../src/domain/account";
 import { pendingEmailChange } from "../../src/domain/email-confirmation";
 import {
@@ -185,8 +186,40 @@ export default async function AccountPage({
                     {offer.fromName ? (
                       <Badge variant="secondary">{t("account.offeredAs", { name: offer.fromName })}</Badge>
                     ) : null}
+                    {offer.groupGift ? <Badge variant="outline">{t("account.offersGroupGift")}</Badge> : null}
+                    {offer.groupGift?.status === "complete" ? (
+                      <Badge variant="secondary">{t("account.offersComplete")}</Badge>
+                    ) : null}
                   </div>
+                  {offer.groupGift ? (
+                    <p className="text-sm">
+                      {[
+                        offer.groupGift.amountCents !== null
+                          ? t("account.offersAmount", {
+                              amount: formatPrice(offer.groupGift.amountCents, intlLocale(locale)),
+                            })
+                          : null,
+                        offer.groupGift.remainingCents !== null && offer.groupGift.remainingCents > 0
+                          ? t("account.offersRemaining", {
+                              amount: formatPrice(offer.groupGift.remainingCents, intlLocale(locale)),
+                            })
+                          : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  ) : null}
                   {offer.note ? <p className="text-sm text-pretty">{offer.note}</p> : null}
+                  {offer.groupGift ? (
+                    <LinkButton
+                      href={`/g/${offer.groupGift.token}`}
+                      variant="link"
+                      size="sm"
+                      className="h-auto w-fit px-0"
+                    >
+                      {t("account.openGroupGift")}
+                    </LinkButton>
+                  ) : null}
                   {offer.listReadToken ? (
                     <LinkButton
                       href={`/l/${offer.listReadToken}`}

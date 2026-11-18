@@ -100,6 +100,8 @@ doc.reservations.push({
   note: "Je m’en occupe !",
   userId: null,
   createdAt: "2026-10-21T09:00:00.000Z",
+  groupGiftId: null,
+  amountCents: null,
 });
 
 const otherListCreated = createWishlist(doc, {

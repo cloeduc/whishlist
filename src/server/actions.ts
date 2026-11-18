@@ -24,6 +24,7 @@ import {
   READ_UNLOCK_KEPT_FIELDS,
   refusal,
   REGISTER_KEPT_FIELDS,
+  GROUP_GIFT_JOIN_KEPT_FIELDS,
   RESERVATION_KEPT_FIELDS,
   RESET_PASSWORD_KEPT_FIELDS,
   type FormState,
@@ -33,6 +34,7 @@ import { isRateLimitError } from "./rate-limit";
 import { actionContext } from "./action-context";
 import { deleteOwnAccount } from "./commands/account";
 import { createMyApiKey, revokeMyApiKey } from "./commands/api-keys";
+import { joinGroupGift, leaveGroupGift } from "./commands/group-gift";
 import {
   changeOwnPassword,
   checkCredentials,
@@ -80,6 +82,7 @@ import {
 } from "./commands/public-list";
 import type { LlmImpact } from "../domain/llm-impact";
 import type { OffrirRow } from "../domain/offrir";
+import type { Wishlist } from "../domain/types";
 import type { LabelView } from "./api/views";
 import { isLocale, localeCookie, type Locale } from "../i18n/config";
 import { withLocale } from "../i18n/locale-path";
@@ -732,6 +735,8 @@ export async function reserveAction(prev: FormState, formData: FormData): Promis
   const itemId = String(formData.get("itemId") ?? "");
   const fromName = String(formData.get("fromName") ?? "");
   const note = String(formData.get("note") ?? "");
+  const mode = formData.get("mode") === "group" ? "group" : "single";
+  const amount = String(formData.get("amount") ?? "");
   // Anti-bot honeypot (must stay empty).
   if (String(formData.get("website") ?? "").trim()) {
     return localeRedirect(`/l/${readToken}?ok=1`);
@@ -749,6 +754,8 @@ export async function reserveAction(prev: FormState, formData: FormData): Promis
       typeId,
       fromName,
       note,
+      mode,
+      amount,
       isUnlocked: hasReadUnlock,
     });
   } catch (error) {
@@ -761,6 +768,7 @@ export async function reserveAction(prev: FormState, formData: FormData): Promis
     return backToForm(result.error);
   }
   await grantReservationClaim(readToken, result.reservation.id);
+  if (result.groupGiftToken) return localeRedirect(`/g/${result.groupGiftToken}?ok=1`);
   return localeRedirect(`/l/${readToken}?ok=1`);
 }
 
@@ -775,6 +783,59 @@ export async function cancelMyReservationAction(formData: FormData) {
   }
   await revokeReservationClaim(readToken, reservationId);
   return localeRedirect(`/l/${readToken}`);
+}
+
+/** Claims of the gift's list, read from its cookie: the read link stays on the server. */
+function claimsFromCookie(list: Wishlist): Promise<Set<string>> {
+  return listClaimedReservationIds(list.readToken);
+}
+
+/** « Participer » on the gift's page (028). */
+export async function joinGroupGiftAction(prev: FormState, formData: FormData): Promise<FormState> {
+  const token = String(formData.get("token") ?? "");
+  if (String(formData.get("website") ?? "").trim()) return localeRedirect(`/g/${token}?ok=1`);
+  const backToForm = (error: string) => {
+    refresh();
+    return refusal(prev, error, formData, GROUP_GIFT_JOIN_KEPT_FIELDS);
+  };
+  let result: Awaited<ReturnType<typeof joinGroupGift>>;
+  try {
+    result = await joinGroupGift(await actionContext(), {
+      token,
+      fromName: String(formData.get("fromName") ?? ""),
+      note: String(formData.get("note") ?? ""),
+      amount: String(formData.get("amount") ?? ""),
+      isUnlocked: hasReadUnlock,
+      claimsFor: claimsFromCookie,
+    });
+  } catch (error) {
+    if (isRateLimitError(error)) return backToForm("rateLimited");
+    throw error;
+  }
+  if (!result.ok) {
+    if (result.error === "groupGiftMissing" || result.error === "readPasswordRequired") {
+      return localeRedirect(`/g/${token}`);
+    }
+    return backToForm(result.error);
+  }
+  await grantReservationClaim(result.wishlist.readToken, result.reservation.id);
+  return localeRedirect(`/g/${token}?ok=1`);
+}
+
+/** « Retirer ma participation » (028). */
+export async function leaveGroupGiftAction(formData: FormData) {
+  const token = String(formData.get("token") ?? "");
+  const reservationId = String(formData.get("reservationId") ?? "");
+  let result: Awaited<ReturnType<typeof leaveGroupGift>>;
+  try {
+    result = await leaveGroupGift(await actionContext(), { token, reservationId, claimsFor: claimsFromCookie });
+  } catch (error) {
+    if (isRateLimitError(error)) return localeRedirect(`/g/${token}?e=rateLimited`);
+    throw error;
+  }
+  if (!result.ok) return localeRedirect(`/g/${token}?e=${result.error}`);
+  await revokeReservationClaim(result.wishlist.readToken, reservationId);
+  return localeRedirect(`/g/${token}`);
 }
 
 export async function joinInviteAction(token: string) {

@@ -35,6 +35,8 @@ function edgeDoc(): Database {
     note: null,
     userId: "camille",
     createdAt: "2026-01-03T00:00:00.000Z",
+    groupGiftId: null,
+    amountCents: null,
   });
   doc.passwordResets.push({
     id: "pr",

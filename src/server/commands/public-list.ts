@@ -4,6 +4,7 @@ import { READ_UNLOCK_TTL_SEC, signReadUnlock } from "../../auth/read-unlock";
 import { signReservationClaim } from "../../auth/reservation-claim";
 import { sessionSecret } from "../../auth/session";
 import { findMembership } from "../../domain/access";
+import { parseAmount, startGroupGift } from "../../domain/group-gift";
 import { cancelOwnReservation } from "../../domain/items";
 import { findWishlistByReadToken, mineReservationIdsFor } from "../../domain/read";
 import { hasReadPassword, verifyReadPassword } from "../../domain/read-password";
@@ -208,10 +209,19 @@ export async function reserve(
     typeId?: string;
     fromName?: string;
     note?: string;
+    /** « Réserver seul » (default) or « Lancer un cadeau commun » (028). */
+    mode?: "single" | "group";
+    /** Group gift only: as typed (site) or already in cents (API). */
+    amount?: string | number | null;
     isUnlocked: IsUnlocked;
   },
-): Promise<CommandResult<{ wishlist: Wishlist; reservation: Reservation; claim: string | null }>> {
+): Promise<
+  CommandResult<{ wishlist: Wishlist; reservation: Reservation; claim: string | null; groupGiftToken: string | null }>
+> {
   rateLimitForIp(`reserve:${input.readToken.slice(0, 12)}`, ctx.ip, 15, 60 * 60 * 1000);
+  const group = input.mode === "group";
+  const amountCents = !group ? null : typeof input.amount === "string" ? parseAmount(input.amount) : (input.amount ?? null);
+  if (amountCents === "invalid") return { ok: false, error: "invalidAmount" };
   const account = publicAccount(ctx);
   const doc = await readDocument();
   const wishlist = findWishlistByReadToken(doc, input.readToken);
@@ -219,22 +229,32 @@ export async function reserve(
   if (!(await canAccessPublicListWith(doc, wishlist, account, input.isUnlocked))) {
     return { ok: false, error: "readPasswordRequired" };
   }
-  type Reserved = { ok: true; reservation: Reservation } | { ok: false; error: string };
+  type Reserved = { ok: true; reservation: Reservation; groupGiftToken: string | null } | { ok: false; error: string };
   const result = await updateDocument<Reserved>((current) => {
-    const saved = reserveItem(current, {
+    const fields = {
       wishlistId: wishlist.id,
       itemId: input.itemId,
       typeId: input.typeId,
       fromName: input.fromName,
       note: input.note,
       userId: account?.id ?? null,
-    });
-    return { doc: saved.ok ? saved.doc : current, result: saved };
+    };
+    if (group) {
+      const started = startGroupGift(current, { ...fields, amountCents });
+      if (!started.ok) return { doc: current, result: started };
+      return {
+        doc: started.doc,
+        result: { ok: true, reservation: started.reservation, groupGiftToken: started.groupGift.token },
+      };
+    }
+    const saved = reserveItem(current, fields);
+    if (!saved.ok) return { doc: current, result: saved };
+    return { doc: saved.doc, result: { ok: true, reservation: saved.reservation, groupGiftToken: null } };
   });
   if (!result.ok) return result;
   const secret = sessionSecret();
   const claim = secret ? signReservationClaim(input.readToken, result.reservation.id, secret) : null;
-  return { ok: true, wishlist, reservation: result.reservation, claim };
+  return { ok: true, wishlist, reservation: result.reservation, claim, groupGiftToken: result.groupGiftToken };
 }
 
 export async function cancelOwn(

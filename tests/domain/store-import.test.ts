@@ -75,6 +75,8 @@ test("import: old fields get their default value", async () => {
     delete (legacy as Partial<Doc>).passwordResets;
     delete (legacy as Partial<Doc>).emailConfirmations;
     delete (legacy as Partial<Doc>).apiKeys;
+    delete (legacy as Partial<Doc>).groupGifts;
+    delete (legacy as Partial<Doc>).groupGiftMessages;
     const user = legacy.users[0] as Partial<Doc["users"][number]>;
     delete user.sessionVersion;
     delete user.mustChangePassword;
@@ -88,6 +90,9 @@ test("import: old fields get their default value", async () => {
     delete item.imageUrl;
     delete item.archived;
     delete (legacy.reservations[0] as Partial<Doc["reservations"][number]>).userId;
+    // Before 028 a reservation had no group gift nor amount.
+    delete (legacy.reservations[0] as Partial<Doc["reservations"][number]>).groupGiftId;
+    delete (legacy.reservations[0] as Partial<Doc["reservations"][number]>).amountCents;
     // Before 020 a reservation archived its idea, and memberships had no surprise mode.
     legacy.items.find((entry) => entry.id === "taken")!.archived = true;
     delete (legacy.memberships[0] as Partial<Doc["memberships"][number]>).surpriseMode;
@@ -102,6 +107,10 @@ test("import: old fields get their default value", async () => {
     assert.deepEqual(doc.passwordResets, []);
     assert.deepEqual(doc.emailConfirmations, []);
     assert.deepEqual(doc.apiKeys, []);
+    assert.deepEqual(doc.groupGifts, []);
+    assert.deepEqual(doc.groupGiftMessages, []);
+    assert.equal(doc.reservations[0].groupGiftId, null);
+    assert.equal(doc.reservations[0].amountCents, null);
     // Account from before address validation: verified at its creation date (010, FR-005b).
     assert.equal(doc.users[0].emailVerifiedAt, doc.users[0].createdAt);
     assert.equal(doc.users[0].sessionVersion, 0);
@@ -415,5 +424,46 @@ test("migration 0006: a reserved idea is no longer archived, memberships start w
     );
     assert.equal(doc.memberships[0].surpriseMode, false);
     assert.equal(doc.reservations.length, 1);
+  });
+});
+
+test("migration 0008: existing reservations stay reservations on one's own", async () => {
+  await withTempDataPath(async () => {
+    const { readMigrationFiles } = await import("drizzle-orm/migrator");
+    const migrations = readMigrationFiles({ migrationsFolder: path.join(process.cwd(), "drizzle") });
+    const before = migrations.slice(0, migrations.findIndex((migration) => migration.sql.join("").includes("group_gifts")));
+    const old = new Database(databaseFilePath());
+    old.exec("CREATE TABLE __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric)");
+    for (const migration of before) {
+      for (const statement of migration.sql) if (statement.trim()) old.exec(statement);
+      old.prepare("INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)").run(migration.hash, migration.folderMillis);
+    }
+    old.prepare("INSERT INTO meta (key, value) VALUES ('legacy_import', 'none')").run();
+    old.exec(`
+      INSERT INTO users (id, email, password_hash, display_name, created_at) VALUES ('u', 'u@example.test', 'h', 'U', '2026-03-01T00:00:00.000Z');
+      INSERT INTO wishlists (id, title, theme, read_token, invite_token, from_template, created_at)
+        VALUES ('w', 'L', '{}', 'read-w', 'invite-w', 0, '2026-03-01T00:00:00.000Z');
+      INSERT INTO types (id, wishlist_id, label) VALUES ('t', 'w', 'Jeux');
+      INSERT INTO people (id, wishlist_id, label) VALUES ('p', 'w', 'U');
+      INSERT INTO items (id, wishlist_id, name, type_id, person_id, sort_order, archived) VALUES ('taken', 'w', 'Réservée', 't', 'p', 0, 0);
+      INSERT INTO reservations (id, wishlist_id, item_id, from_name, user_id, created_at)
+        VALUES ('r', 'w', 'taken', 'Sam', 'u', '2026-03-02T00:00:00.000Z');
+    `);
+    old.close();
+
+    const doc = await readDocument();
+    assert.equal(doc.reservations.length, 1);
+    assert.equal(doc.reservations[0].fromName, "Sam");
+    assert.equal(doc.reservations[0].groupGiftId, null);
+    assert.equal(doc.reservations[0].amountCents, null);
+    assert.deepEqual(doc.groupGifts, []);
+    // The idea stays unique for reservations on one's own.
+    assert.throws(
+      () =>
+        openStore()
+          .writer.prepare("INSERT INTO reservations (id, wishlist_id, item_id, created_at) VALUES ('r2', 'w', 'taken', 'x')")
+          .run(),
+      /UNIQUE/,
+    );
   });
 });

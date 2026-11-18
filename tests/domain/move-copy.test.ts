@@ -34,7 +34,7 @@ function lists(): Database {
 const toChristmas = { wishlistId: "w1", actorId: "alex", itemId: "liseuse", targetWishlistId: "w2", typeId: "w2-books", personId: "w2-alex" };
 
 function reserve(doc: Database, itemId: string): Database {
-  doc.reservations.push({ id: "r1", wishlistId: "w1", itemId, fromName: "Sam", note: null, userId: null, createdAt: "2026-01-02" });
+  doc.reservations.push({ id: "r1", wishlistId: "w1", itemId, fromName: "Sam", note: null, userId: null, createdAt: "2026-01-02", groupGiftId: null, amountCents: null });
   return doc;
 }
 

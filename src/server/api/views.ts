@@ -90,13 +90,13 @@ export function toPublicListView(
   mineIds: ReadonlySet<string>,
   viewerId: string | null = null,
 ): PublicListView {
-  const reservationByItem = new Map(
-    doc.reservations.filter((r) => r.wishlistId === wishlist.id).map((r) => [r.itemId, r.id]),
+  // A participation in a group gift is « mine » like a reservation: an older app shows it as reserved by the visitor.
+  const mineByItem = new Map(
+    doc.reservations.filter((r) => r.wishlistId === wishlist.id && mineIds.has(r.id)).map((r) => [r.itemId, r.id]),
   );
   const items = listPublicVisibleItems(doc, wishlist.id, mineIds).map((item) => {
-    const reservationId = reservationByItem.get(item.id) ?? null;
-    const mine = Boolean(reservationId && mineIds.has(reservationId));
-    return { ...itemBase(item, locale), mine, reservationId: mine ? reservationId : null };
+    const reservationId = mineByItem.get(item.id) ?? null;
+    return { ...itemBase(item, locale), mine: reservationId !== null, reservationId };
   });
   const { isMember, subscribed } = viewerRelation(doc, wishlist.id, viewerId);
   const subscription = subscribed && viewerId ? findSubscription(doc, wishlist.id, viewerId) : null;

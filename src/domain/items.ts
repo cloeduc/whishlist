@@ -1,5 +1,6 @@
 import { clone, findMembership } from "./access";
 import { MAX_DESCRIPTION, normalizeDescription } from "./description";
+import { pruneGroupGifts } from "./group-gift";
 import { normalizePriority } from "./priority";
 import { surpriseModeOf } from "./surprise";
 import { blankToNull } from "./text";
@@ -483,6 +484,8 @@ function removeReservation(doc: Database, wishlistId: string, reservationId: str
   );
   if (!reservation) return null;
   next.reservations = next.reservations.filter((r) => r.id !== reservation.id);
+  // The last participation of a group gift takes the gift and its thread with it (028).
+  pruneGroupGifts(next);
   return next;
 }
 

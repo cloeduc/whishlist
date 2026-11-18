@@ -115,6 +115,8 @@ test("the preview does not count a reservation on a list that will be erased", (
     note: null,
     userId: "lou",
     createdAt: "2026-04-05T00:00:00.000Z",
+    groupGiftId: null,
+    amountCents: null,
   });
   assert.equal(previewAccountDeletion(doc, "lou").reservationsKept, 2);
 });

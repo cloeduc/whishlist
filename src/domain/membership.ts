@@ -69,6 +69,9 @@ export function wipeWishlist(doc: Database, wishlistId: string): void {
   doc.views = doc.views.filter((v) => v.wishlistId !== wishlistId);
   doc.items = doc.items.filter((i) => i.wishlistId !== wishlistId);
   doc.reservations = doc.reservations.filter((r) => r.wishlistId !== wishlistId);
+  const gifts = new Set(doc.groupGifts.filter((g) => g.wishlistId === wishlistId).map((g) => g.id));
+  doc.groupGifts = doc.groupGifts.filter((g) => !gifts.has(g.id));
+  doc.groupGiftMessages = doc.groupGiftMessages.filter((m) => !gifts.has(m.groupGiftId));
 }
 
 /** List of the invite link, or `undefined` (empty, unknown or regenerated token). */
