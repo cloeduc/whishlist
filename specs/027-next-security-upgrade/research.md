@@ -100,3 +100,24 @@ Avant de coder, lire la documentation livrée avec le paquet (`node_modules/next
 
 - `npm audit --omit=dev` : « found 0 vulnerabilities » (FR-003, SC-001).
 - `next dev` lancé 3 fois de suite : « Ready » en 160 à 400 ms, `GET /` 200, aucun avertissement de vulnérabilité ni arrêt (SC-002).
+
+### Image Docker et parcours (US2, T008 – T012)
+
+Image `whishlist:027` construite (`docker build`, sans erreur), lancée sur une base de démo neuve (`tmp/027/`, mot de passe jetable). Les variables passées sont `SESSION_SECRET` et `APP_URL`. Le serveur affiche `Next.js 16.4.6` et « Ready ».
+
+En production, une requête sans IP de confiance est refusée (`rateLimited`), comme prévu par `missingIpPolicy`. Pour reproduire Cloudflare, un petit relais local ajoute `X-Real-IP` devant le conteneur. Ce n'est pas un changement de la montée.
+
+- **Visiteur sans compte** (navigateur) : la liste publique `/l/demo-list-lecture` s'affiche comme avant. Réservation « Carnet relié » avec nom et petit mot, puis bandeau « Cadeau réservé ». `/listes` répond 301 vers `/lists`. En-tête CSP avec nonce, aucun message CSP ni erreur dans la console.
+- **Membre** (navigateur) : connexion `alex@example.test`, création de « Liste site 027 », ajout d'une idée (« Idées (1) »). Le passage en anglais mène à `/en/lists/…` avec `lang="en"` et les textes traduits. Les images de `/guide` passent par `/_next/image` (200, `image/webp`).
+- **API** (`curl`) :
+  - `/api/v1/capabilities` répond `Content-Encoding: gzip` quand le client l'accepte, et sans compression avec `identity`. Le corps décompressé est identique.
+  - Connexion, réservation sans compte (201), création de liste et d'idée (201) : réponses conformes au contrat.
+- **MCP** : avec une clé de démo créée dans `/en/account`, `initialize` répond en `text/event-stream`, compressé en gzip (85 ms) ou non (6 ms) selon `Accept-Encoding`, avec la réponse entière. `tools/list` rend les 18 outils. **T011 non nécessaire** : la compression ne bloque pas le flux, puisque Next vide le tampon à chaque morceau.
+- **App mobile** : pas relancée sur simulateur. Ses 415 tests sont verts, l'API rend les mêmes corps, et en prod Cloudflare compresse déjà les réponses que l'app reçoit : la compression faite par Next ne change rien pour elle.
+- **Relais Umami** : sans variable Umami, `/u/script.js` répond 404 comme avant. Pas de vérification avec une instance Umami réelle, faute d'amont local. Les en-têtes de cadrage ne sont plus recopiés depuis l'amont (voir plus haut).
+
+### Bilan (FR-008, FR-009)
+
+- Aucun changement de 16.4.3 à 16.4.6 ne demande de modifier le code du site. La seule nouveauté visible est la compression des réponses des route handlers, sans effet sur l'API ni sur le MCP.
+- Le site n'utilise pas la mise en cache de fonctions (`'use cache'`, `unstable_cache`) : l'exposition aux deux avis du ticket était nulle. Une future évolution du cache part d'une version corrigée.
+- Exposition faible à GHSA-pc58 par le relais Umami, fermée par la montée.

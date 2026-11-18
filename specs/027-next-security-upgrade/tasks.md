@@ -65,22 +65,22 @@ Aucune : la montée elle-même est l'objet de US1.
 
 ### Implementation for User Story 2
 
-- [ ] T008 [US2] Construire l'image (`docker build -t whishlist:027 .`), préparer la démo (`npm run demo:data -- tmp/demo-wishlist.json`) et lancer le conteneur sur ces données selon l'étape 3 du quickstart. Les variables sont celles du tableau du `README.md` et de `deploy/compose.prod.yml`. Vérifier que l'image démarre, répond et lit les données (FR-006).
-- [ ] T009 [US2] Dérouler les étapes 4 et 5 du quickstart sur le conteneur :
+- [X] T008 [US2] Construire l'image (`docker build -t whishlist:027 .`), préparer la démo (`npm run demo:data -- tmp/demo-wishlist.json`) et lancer le conteneur sur ces données selon l'étape 3 du quickstart. Les variables sont celles du tableau du `README.md` et de `deploy/compose.prod.yml`. Vérifier que l'image démarre, répond et lit les données (FR-006).
+- [X] T009 [US2] Dérouler les étapes 4 et 5 du quickstart sur le conteneur :
   - Visiteur : liste publique sans compte, réservation, redirection d'une ancienne adresse française.
   - CSP : en-tête `Content-Security-Policy` avec nonce, aucun script bloqué dans la console.
   - Membre : connexion avec `alex@example.test`, création d'une liste et d'une idée, changement de langue, images de `/guide` et `/about`.
 
   Consigner le résultat dans `research.md` (FR-007).
-- [ ] T010 [US2] Dérouler l'étape 6 du quickstart (research.md, R4) :
+- [X] T010 [US2] Dérouler l'étape 6 du quickstart (research.md, R4) :
   - `curl` sur `/api/v1/capabilities`, avec et sans `Accept-Encoding: gzip`.
   - App mobile pointée sur le conteneur (`EXPO_PUBLIC_API_URL`) : connexion, ouverture d'une liste, ajout d'une idée.
   - `initialize` MCP sur `/api/mcp` avec une clé d'API de démo.
 
   Consigner dans `research.md` si les réponses sont compressées et si l'app et le MCP fonctionnent.
-- [ ] T011 [US2] Seulement si T010 montre que la compression bloque ou casse la réponse MCP en flux : dans `app/api/mcp/route.ts`, empêcher la compression de cette seule réponse, par le moyen documenté dans `node_modules/next/dist/docs/` pour 16.4.6 (option ou en-tête prévu pour les route handlers). Ajouter un commentaire en anglais qui cite le changement de 16.4.6. Vérifier de nouveau l'étape 6. Sinon, marquer la tâche « non nécessaire » avec la raison.
-- [ ] T012 [US2] Dérouler l'étape 7 du quickstart (relais Umami `/u/script.js` et `/u/api/send` si la variable Umami est définie, `404` sinon), et consigner le résultat dans `research.md`.
-- [ ] T013 [US2] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit des fichiers de cette story sans demander :
+- [X] T011 [US2] *Non nécessaire : le flux MCP passe compressé (research.md, « Image Docker et parcours »).* Seulement si T010 montre que la compression bloque ou casse la réponse MCP en flux : dans `app/api/mcp/route.ts`, empêcher la compression de cette seule réponse, par le moyen documenté dans `node_modules/next/dist/docs/` pour 16.4.6 (option ou en-tête prévu pour les route handlers). Ajouter un commentaire en anglais qui cite le changement de 16.4.6. Vérifier de nouveau l'étape 6. Sinon, marquer la tâche « non nécessaire » avec la raison.
+- [X] T012 [US2] Dérouler l'étape 7 du quickstart (relais Umami `/u/script.js` et `/u/api/send` si la variable Umami est définie, `404` sinon), et consigner le résultat dans `research.md`.
+- [X] T013 [US2] Commit de la story : `npm run lint`, `npm run typecheck` et `npm test` verts, puis créer le commit des fichiers de cette story sans demander :
   - `fix: keep the MCP stream uncompressed after the Next.js 16.4.6 upgrade (US2)`, avec `app/api/mcp/route.ts` et `research.md`, si T011 a changé du code ;
   - sinon `chore: verify the site after the Next.js 16.4.6 upgrade (US2)`, avec `research.md` seul.
 
