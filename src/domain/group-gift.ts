@@ -217,6 +217,23 @@ export function setGroupGiftStatus(
   return { ok: true, doc: next };
 }
 
+/**
+ * A participant with an account changes or clears the amount they put in (US4), open or complete.
+ * A participation made without an account cannot change: the claim only proves it, it does not edit it.
+ */
+export function setParticipationAmount(
+  doc: Database,
+  input: { groupGiftId: string; reservationId: string; userId: string | null; amountCents: number | null },
+): { ok: true; doc: Database } | Failure {
+  const reservation = doc.reservations.find((r) => r.id === input.reservationId && r.groupGiftId === input.groupGiftId);
+  if (!reservation) return { ok: false, error: "reservationMissing" };
+  if (!input.userId || reservation.userId !== input.userId) return { ok: false, error: "accessDenied" };
+  if (!validAmount(input.amountCents)) return { ok: false, error: "invalidAmount" };
+  const next = clone(doc);
+  next.reservations.find((r) => r.id === reservation.id)!.amountCents = input.amountCents;
+  return { ok: true, doc: next };
+}
+
 /** « Annuler le cadeau commun »: a member of the list removes every participation, the thread and the link. */
 export function cancelGroupGiftAsMember(
   doc: Database,
@@ -302,7 +319,7 @@ export function groupGiftDetail(
       amountCents: r.amountCents,
       note: r.note,
       mine,
-      editable: false,
+      editable: mine && viewer.userId !== null && r.userId === viewer.userId,
     };
   };
   return {

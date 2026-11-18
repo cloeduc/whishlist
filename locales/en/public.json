@@ -156,6 +156,10 @@
     "invite": "Invite others to chip in",
     "inviteHint": "Send this link to people who want to chip in with you: it shows this gift only, not the rest of the list.",
     "inviteLink": "Group gift link",
-    "copyLink": "Copy the group gift link"
+    "copyLink": "Copy the group gift link",
+    "changeAmount": "Your amount",
+    "changeAmountHint": "Leave it empty if you would rather not say.",
+    "saveAmount": "Save",
+    "noAccountHint": "With an account, you could change your amount and talk with the other participants."
   }
 }

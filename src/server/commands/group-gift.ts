@@ -7,6 +7,7 @@ import {
   leaveGroupGift as leaveGift,
   parseAmount,
   setGroupGiftStatus,
+  setParticipationAmount,
   type GroupGiftDetail,
 } from "../../domain/group-gift";
 import type { Database, GroupGift, GroupGiftStatus, Reservation, Wishlist } from "../../domain/types";
@@ -156,4 +157,31 @@ export async function unlockGroupGift(
   if (!gift || !wishlist) return { ok: false, error: "groupGiftMissing" };
   rateLimitForIp(`read-unlock:${wishlist.readToken.slice(0, 12)}`, ctx.ip, 20, 15 * 60 * 1000);
   return unlockWishlist(ctx, doc, wishlist, input.password);
+}
+
+/** A participant with an account changes or clears their amount (US4). */
+export async function setAmount(
+  ctx: CommandContext,
+  input: { token: string; reservationId: string; amount: string | number | null },
+): Promise<CommandResult<{ wishlist: Wishlist }>> {
+  rateLimitForIp("group-gift:amount", ctx.ip, 30, 60 * 60 * 1000);
+  const account = publicAccount(ctx);
+  if (!account) return { ok: false, error: "unauthorized" };
+  const amountCents = typeof input.amount === "string" ? parseAmount(input.amount) : input.amount;
+  if (amountCents === "invalid") return { ok: false, error: "invalidAmount" };
+  const doc = await readDocument();
+  const gift = findGroupGiftByToken(doc, input.token);
+  const wishlist = gift ? doc.wishlists.find((w) => w.id === gift.wishlistId) : undefined;
+  if (!gift || !wishlist) return { ok: false, error: "groupGiftMissing" };
+  const result = await updateDocument((current) => {
+    const saved = setParticipationAmount(current, {
+      groupGiftId: gift.id,
+      reservationId: input.reservationId,
+      userId: account.id,
+      amountCents,
+    });
+    return { doc: saved.ok ? saved.doc : current, result: saved };
+  });
+  if (!result.ok) return result;
+  return { ok: true, wishlist };
 }

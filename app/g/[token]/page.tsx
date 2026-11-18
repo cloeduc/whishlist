@@ -2,11 +2,12 @@ import { currentUser, origin } from "../../../src/auth/current";
 import { canAccessPublicList } from "../../../src/auth/public-list";
 import { listClaimedReservationIds } from "../../../src/auth/reservation-claim";
 import { findGroupGiftByToken, groupGiftDetail } from "../../../src/domain/group-gift";
-import { formatPrice } from "../../../src/domain/price";
+import { formatPrice, priceInput } from "../../../src/domain/price";
 import { getDocument } from "../../../src/store/db";
 import { leaveGroupGiftAction, setGroupGiftStatusAction } from "../../../src/server/actions";
 import { ConfirmForm } from "@/components/site/confirm-form";
 import { CopyLinkField } from "@/components/site/copy-link-field";
+import { GroupGiftAmountForm } from "@/components/site/group-gift-amount-form";
 import { GroupGiftJoinForm } from "@/components/site/group-gift-join-form";
 import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -185,6 +186,15 @@ export default async function GroupGiftPage({
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
+            {detail.me.editable ? (
+              <GroupGiftAmountForm
+                token={token}
+                reservationId={detail.me.reservationId}
+                amount={priceInput(detail.me.amountCents, priceLocale)}
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">{t("groupGift.noAccountHint")}</p>
+            )}
             {detail.status === "complete" ? (
               <p className="text-sm text-muted-foreground">{t("groupGift.completeHint")}</p>
             ) : null}

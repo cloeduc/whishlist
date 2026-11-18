@@ -149,13 +149,13 @@ Chaque phase de user story se termine par une tâche **« Commit de la story »*
 
 **Independent Test**: quickstart.md § US4.
 
-- [ ] T054 [P] [US4] Tests dans `tests/domain/group-gift.test.ts` : `setParticipationAmount` par le compte lié (ouvert et complet) ; `accessDenied` pour une participation sans compte (même avec preuve) ou d'un autre compte ; `invalidAmount` ; `null` → « montant non précisé » ; reste recalculé ; `me.editable` vrai seulement pour une participation liée au compte
-- [ ] T055 [US4] `src/domain/group-gift.ts` : `setParticipationAmount(doc, { groupGiftId, reservationId, userId, amountCents })` ; `groupGiftDetail` : `me.editable`
-- [ ] T056 [US4] `src/server/commands/group-gift.ts` (`setAmount`, 30/h) ; `src/server/actions.ts` : `setGroupGiftAmountAction`
-- [ ] T057 [US4] `components/site/group-gift-mine.tsx` : champ montant modifiable (compte) ou phrase `public:groupGift.noAccountHint` (sans compte)
-- [ ] T058 [P] [US4] Textes FR/EN dans `locales/{fr,en}/public.json`
-- [ ] T059 [US4] Parcours quickstart.md § US4
-- [ ] T060 [US4] Commit de la story : lint, types et tests verts, puis `feat: let signed-in participants change their amount (US4)`, sans demander
+- [X] T054 [P] [US4] Tests dans `tests/domain/group-gift.test.ts` : `setParticipationAmount` par le compte lié (ouvert et complet) ; `accessDenied` pour une participation sans compte (même avec preuve) ou d'un autre compte ; `invalidAmount` ; `null` → « montant non précisé » ; reste recalculé ; `me.editable` vrai seulement pour une participation liée au compte
+- [X] T055 [US4] `src/domain/group-gift.ts` : `setParticipationAmount(doc, { groupGiftId, reservationId, userId, amountCents })` ; `groupGiftDetail` : `me.editable`
+- [X] T056 [US4] `src/server/commands/group-gift.ts` (`setAmount`, 30/h) ; `src/server/actions.ts` : `setGroupGiftAmountAction`
+- [X] T057 [US4] `components/site/group-gift-mine.tsx` : champ montant modifiable (compte) ou phrase `public:groupGift.noAccountHint` (sans compte)
+- [X] T058 [P] [US4] Textes FR/EN dans `locales/{fr,en}/public.json`
+- [X] T059 [US4] Parcours quickstart.md § US4
+- [X] T060 [US4] Commit de la story : lint, types et tests verts, puis `feat: let signed-in participants change their amount (US4)`, sans demander
 
 ---
 

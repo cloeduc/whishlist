@@ -3,7 +3,7 @@ import { before, test } from "node:test";
 import { verifyReadUnlock } from "../../src/auth/read-unlock";
 import { verifyReservationClaims } from "../../src/auth/reservation-claim";
 import { setReadPassword } from "../../src/domain/read-password";
-import { joinGroupGift, leaveGroupGift, readGroupGift, setStatus, unlockGroupGift } from "../../src/server/commands/group-gift";
+import { joinGroupGift, leaveGroupGift, readGroupGift, setAmount, setStatus, unlockGroupGift } from "../../src/server/commands/group-gift";
 import { readPublicList, reserve } from "../../src/server/commands/public-list";
 import { readDocument } from "../../src/store/db";
 import { apiDoc, ctx, ensurePasswordHash, TEST_SECRET, withStore } from "./helpers/api-fixtures";
@@ -155,5 +155,26 @@ test("unlock from the gift's page: the list's password, the same proof as the li
     if (!unlocked.ok) return;
     assert.ok(unlocked.unlockToken);
     assert.equal(verifyReadUnlock(unlocked.wishlist, unlocked.unlockToken!, TEST_SECRET), true);
+  });
+});
+
+test("amount command: signed in only, as typed, then refused for someone else's participation", async () => {
+  await withStore(docWithGroupGift(), async () => {
+    const doc = await readDocument();
+    const alex = doc.users.find((u) => u.id === "alex")!;
+    assert.deepEqual(await setAmount(ctx(), { token: "tok-g", reservationId: "p-sam", amount: "9" }), {
+      ok: false,
+      error: "unauthorized",
+    });
+    assert.deepEqual(await setAmount(ctx(alex), { token: "tok-g", reservationId: "p-alex", amount: "x" }), {
+      ok: false,
+      error: "invalidAmount",
+    });
+    assert.equal((await setAmount(ctx(alex), { token: "tok-g", reservationId: "p-alex", amount: "12,40" })).ok, true);
+    assert.equal((await readDocument()).reservations.find((r) => r.id === "p-alex")?.amountCents, 1240);
+    assert.deepEqual(await setAmount(ctx(alex), { token: "tok-g", reservationId: "p-sam", amount: "1" }), {
+      ok: false,
+      error: "accessDenied",
+    });
   });
 });

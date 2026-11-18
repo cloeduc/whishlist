@@ -24,6 +24,7 @@ import {
   READ_UNLOCK_KEPT_FIELDS,
   refusal,
   REGISTER_KEPT_FIELDS,
+  GROUP_GIFT_AMOUNT_KEPT_FIELDS,
   GROUP_GIFT_JOIN_KEPT_FIELDS,
   RESERVATION_KEPT_FIELDS,
   RESET_PASSWORD_KEPT_FIELDS,
@@ -37,6 +38,7 @@ import { createMyApiKey, revokeMyApiKey } from "./commands/api-keys";
 import {
   joinGroupGift,
   leaveGroupGift,
+  setAmount as setGroupGiftAmount,
   setStatus as setGroupGiftStatus,
   unlockGroupGift,
 } from "./commands/group-gift";
@@ -851,6 +853,27 @@ export async function leaveGroupGiftAction(formData: FormData) {
   }
   if (!result.ok) return localeRedirect(`/g/${token}?e=${result.error}`);
   await revokeReservationClaim(result.wishlist.readToken, reservationId);
+  return localeRedirect(`/g/${token}`);
+}
+
+/** A participant with an account changes their amount (028, US4). */
+export async function setGroupGiftAmountAction(prev: FormState, formData: FormData): Promise<FormState> {
+  const token = String(formData.get("token") ?? "");
+  let result: Awaited<ReturnType<typeof setGroupGiftAmount>>;
+  try {
+    result = await setGroupGiftAmount(await actionContext(), {
+      token,
+      reservationId: String(formData.get("reservationId") ?? ""),
+      amount: String(formData.get("amount") ?? ""),
+    });
+  } catch (error) {
+    if (isRateLimitError(error)) return refusal(prev, "rateLimited", formData, GROUP_GIFT_AMOUNT_KEPT_FIELDS);
+    throw error;
+  }
+  if (!result.ok) {
+    if (result.error === "groupGiftMissing") return localeRedirect(`/g/${token}`);
+    return refusal(prev, result.error, formData, GROUP_GIFT_AMOUNT_KEPT_FIELDS);
+  }
   return localeRedirect(`/g/${token}`);
 }
 

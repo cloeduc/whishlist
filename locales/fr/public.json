@@ -156,6 +156,10 @@
     "invite": "Inviter à participer",
     "inviteHint": "Envoyez ce lien aux personnes qui veulent participer avec vous : il ne montre que ce cadeau, pas le reste de la liste.",
     "inviteLink": "Lien du cadeau commun",
-    "copyLink": "Copier le lien du cadeau commun"
+    "copyLink": "Copier le lien du cadeau commun",
+    "changeAmount": "Votre montant",
+    "changeAmountHint": "Laissez vide si vous préférez ne pas l'indiquer.",
+    "saveAmount": "Enregistrer",
+    "noAccountHint": "Avec un compte, vous pourriez changer votre montant et échanger avec les autres participants."
   }
 }

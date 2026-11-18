@@ -11,6 +11,7 @@ import {
   parseAmount,
   pruneGroupGifts,
   setGroupGiftStatus,
+  setParticipationAmount,
   startGroupGift,
 } from "../../src/domain/group-gift";
 import { cancelReservation, deleteItem } from "../../src/domain/items";
@@ -412,4 +413,37 @@ test("members: cancelling the whole group gift frees the idea; only a member of 
   assert.deepEqual(cancelled.doc.groupGifts, []);
   assert.deepEqual(cancelled.doc.groupGiftMessages, []);
   assert.deepEqual(cancelled.doc.reservations.map((r) => r.id), ["r-taken"]);
+});
+
+test("amount: a participant with an account changes or clears it; nobody else can", () => {
+  const doc = docWithGroupGift();
+  const changed = setParticipationAmount(doc, { groupGiftId: "g", reservationId: "p-alex", userId: "alex", amountCents: 1400 });
+  assert.ok(changed.ok);
+  assert.equal(groupGiftTotals(changed.doc, changed.doc.groupGifts[0]).remainingCents, 90);
+  const cleared = setParticipationAmount(changed.doc, { groupGiftId: "g", reservationId: "p-alex", userId: "alex", amountCents: null });
+  assert.ok(cleared.ok);
+  assert.equal(cleared.doc.reservations.find((r) => r.id === "p-alex")!.amountCents, null);
+  // Sam chipped in without an account: the claim proves it but does not edit it.
+  assert.deepEqual(setParticipationAmount(doc, { groupGiftId: "g", reservationId: "p-sam", userId: null, amountCents: 900 }), {
+    ok: false,
+    error: "accessDenied",
+  });
+  assert.deepEqual(setParticipationAmount(doc, { groupGiftId: "g", reservationId: "p-alex", userId: "camille", amountCents: 900 }), {
+    ok: false,
+    error: "accessDenied",
+  });
+  assert.deepEqual(setParticipationAmount(doc, { groupGiftId: "g", reservationId: "p-alex", userId: "alex", amountCents: 0 }), {
+    ok: false,
+    error: "invalidAmount",
+  });
+  doc.groupGifts[0].status = "complete";
+  assert.ok(setParticipationAmount(doc, { groupGiftId: "g", reservationId: "p-alex", userId: "alex", amountCents: 700 }).ok);
+});
+
+test("amount: only one's own participation linked to the account is editable", () => {
+  const doc = docWithGroupGift();
+  assert.equal(groupGiftDetail(doc, doc.groupGifts[0], { userId: "alex", claimedIds: new Set() }).me?.editable, true);
+  assert.equal(groupGiftDetail(doc, doc.groupGifts[0], { userId: null, claimedIds: new Set(["p-sam"]) }).me?.editable, false);
+  const asAlex = groupGiftDetail(doc, doc.groupGifts[0], { userId: "alex", claimedIds: new Set() });
+  assert.deepEqual(asAlex.participations?.map((p) => p.editable), [false, true]);
 });
