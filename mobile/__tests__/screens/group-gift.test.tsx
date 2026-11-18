@@ -49,6 +49,7 @@ const gift = (extra: object = {}) => ({
   participantNames: ["Sam"],
   me: null,
   participations: null,
+  thread: null,
   claimKey: "ck-rt",
   ...extra,
 });
@@ -176,4 +177,44 @@ test("a gift that no longer exists", async () => {
   fakeFetch({ "GET /public/group-gifts/gift-tok": () => json(404, { error: { code: "groupGiftMissing", message: "x" } }) });
   await render(<GroupGiftScreen />);
   expect(await screen.findByTestId("gift.missing")).toBeOnTheScreen();
+});
+
+test("thread (US5): a participant with an account writes and deletes their message; none without an account", async () => {
+  await signIn({ token: "secret-token", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
+  const message = { id: "m1", authorName: "Alex", body: "On se retrouve samedi", createdAt: "2026-02-01T10:00:00.000Z", mine: true };
+  const other = { id: "m0", authorName: null as string | null, body: "Bonjour", createdAt: "2026-02-01T09:00:00.000Z", mine: false };
+  let messages = [other];
+  let posted: Record<string, unknown> = {};
+  const mine = { me: participation({ reservationId: "p1", mine: true, editable: true }), participations: [] };
+  fakeFetch({
+    "GET /public/group-gifts/gift-tok": () => json(200, gift({ ...mine, thread: { messages } })),
+    "POST /public/group-gifts/gift-tok/messages": async (request) => {
+      posted = await request.json();
+      messages = [other, message];
+      return json(201, message);
+    },
+    "DELETE /public/group-gifts/gift-tok/messages/m1": () => {
+      messages = [other];
+      return new Response(null, { status: 204 });
+    },
+  });
+  await render(<GroupGiftScreen />);
+  expect(await screen.findByTestId("gift.message-0")).toHaveTextContent(/Ancien participant.*Bonjour/);
+  await fireEvent.changeText(screen.getByTestId("gift.message"), "On se retrouve samedi");
+  await fireEvent.press(screen.getByTestId("gift.send"));
+  expect(await screen.findByTestId("gift.message-1")).toHaveTextContent(/Vous.*On se retrouve samedi/);
+  expect(posted).toEqual({ body: "On se retrouve samedi" });
+  await fireEvent.press(screen.getByTestId("gift.delete-message-1"));
+  await waitFor(() => expect(screen.queryByTestId("gift.message-1")).toBeNull());
+});
+
+test("thread (US5): no thread for a participant without an account", async () => {
+  await saveClaim({ giftToken: "gift-tok", claimKey: "ck-rt" }, "p1", "claim-p1");
+  fakeFetch({
+    "GET /public/group-gifts/gift-tok": () =>
+      json(200, gift({ me: participation({ reservationId: "p1", mine: true }), participations: [participation({ reservationId: "p1", mine: true })] })),
+  });
+  await render(<GroupGiftScreen />);
+  await screen.findByTestId("gift.leave");
+  expect(screen.queryByTestId("gift.thread")).toBeNull();
 });

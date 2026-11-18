@@ -25,6 +25,7 @@ const STATUS_BY_CODE: Record<string, number> = {
   accountMissing: 404,
   inviteLinkBroken: 404,
   groupGiftMissing: 404,
+  messageMissing: 404,
 
   itemAlreadyReserved: 409,
   groupGiftComplete: 409,

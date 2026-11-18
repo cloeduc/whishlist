@@ -8,9 +8,11 @@ import {
   parseAmount,
   setGroupGiftStatus,
   setParticipationAmount,
+  postGroupGiftMessage,
+  deleteGroupGiftMessage,
   type GroupGiftDetail,
 } from "../../domain/group-gift";
-import type { Database, GroupGift, GroupGiftStatus, Reservation, Wishlist } from "../../domain/types";
+import type { Database, GroupGift, GroupGiftMessage, GroupGiftStatus, Reservation, Wishlist } from "../../domain/types";
 import { intlLocale } from "../../i18n/config";
 import { readDocument, updateDocument } from "../../store/db";
 import { rateLimitForIp } from "../rate-limit";
@@ -184,4 +186,36 @@ export async function setAmount(
   });
   if (!result.ok) return result;
   return { ok: true, wishlist };
+}
+
+/** A message in the participants' thread (US5): a participant with an account. */
+export async function postMessage(
+  ctx: CommandContext,
+  input: { token: string; body: string },
+): Promise<CommandResult<{ message: GroupGiftMessage }>> {
+  rateLimitForIp("group-gift:message", ctx.ip, 30, 60 * 60 * 1000);
+  const account = publicAccount(ctx);
+  if (!account) return { ok: false, error: "unauthorized" };
+  type Posted = { ok: true; message: GroupGiftMessage } | { ok: false; error: string };
+  return updateDocument<Posted>((current) => {
+    const gift = findGroupGiftByToken(current, input.token);
+    if (!gift) return { doc: current, result: { ok: false, error: "groupGiftMissing" } };
+    const saved = postGroupGiftMessage(current, { groupGiftId: gift.id, userId: account.id, body: input.body });
+    return { doc: saved.ok ? saved.doc : current, result: saved };
+  });
+}
+
+/** Its author removes a message. */
+export async function deleteMessage(
+  ctx: CommandContext,
+  input: { token: string; messageId: string },
+): Promise<CommandResult> {
+  const account = publicAccount(ctx);
+  if (!account) return { ok: false, error: "unauthorized" };
+  return updateDocument<CommandResult>((current) => {
+    const gift = findGroupGiftByToken(current, input.token);
+    if (!gift) return { doc: current, result: { ok: false, error: "groupGiftMissing" } };
+    const saved = deleteGroupGiftMessage(current, { groupGiftId: gift.id, messageId: input.messageId, userId: account.id });
+    return saved.ok ? { doc: saved.doc, result: { ok: true } } : { doc: current, result: saved };
+  });
 }

@@ -4,7 +4,7 @@ import { clone } from "./access";
 import { pendingEmailChange } from "./email-confirmation";
 import { leaveWishlist, pickHeir, wipeWishlist } from "./membership";
 import { followedListsOf } from "./subscription";
-import type { Database, Role, WishlistTheme } from "./types";
+import type { Database, GroupGiftStatus, Role, WishlistTheme } from "./types";
 
 export type AccountDeletionPreview = {
   /** Lists where they are the only member: deleted. */
@@ -71,6 +71,13 @@ export function deleteAccount(
   }
   for (const reservation of next.reservations) {
     if (reservation.userId === userId) reservation.userId = null;
+  }
+  // Their messages in a group gift's thread stay, signed « Ancien participant » (028).
+  for (const message of next.groupGiftMessages) {
+    if (message.userId === userId) {
+      message.userId = null;
+      message.authorName = null;
+    }
   }
   next.subscriptions = next.subscriptions.filter((s) => s.userId !== userId);
   next.apiSessions = next.apiSessions.filter((s) => s.userId !== userId);
@@ -140,7 +147,11 @@ export type AccountExport = {
     fromName: string | null;
     note: string | null;
     createdAt: string;
+    /** Participation in a group gift (028): its state and the amount put in. */
+    groupGift: { status: GroupGiftStatus; amountCents: number | null } | null;
   }[];
+  /** Messages written in group gifts' threads (028). */
+  groupGiftMessages: { item: string | null; body: string; createdAt: string }[];
 };
 
 /**
@@ -229,7 +240,20 @@ export function exportAccount(
       fromName: r.fromName,
       note: r.note,
       createdAt: r.createdAt,
+      groupGift: r.groupGiftId
+        ? {
+            status: doc.groupGifts.find((g) => g.id === r.groupGiftId)?.status ?? "open",
+            amountCents: r.amountCents,
+          }
+        : null,
     }));
+
+  const groupGiftMessages = doc.groupGiftMessages
+    .filter((m) => m.userId === userId)
+    .map((m) => {
+      const gift = doc.groupGifts.find((g) => g.id === m.groupGiftId);
+      return { item: gift ? (itemName.get(gift.itemId) ?? null) : null, body: m.body, createdAt: m.createdAt };
+    });
 
   const subscriptions: ExportedSubscription[] = followedListsOf(doc, userId).map(({ wishlist, subscription }) => ({
     title: wishlist.title,
@@ -254,5 +278,6 @@ export function exportAccount(
     lists,
     subscriptions,
     myReservations,
+    groupGiftMessages,
   };
 }

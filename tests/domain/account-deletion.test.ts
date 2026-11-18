@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { deleteAccount, previewAccountDeletion } from "../../src/domain/account";
 import type { Database } from "../../src/domain/types";
 import { accountDoc } from "./helpers/account-fixtures";
+import { withLouGroupGift } from "./helpers/group-gift-fixtures";
 
 function deleted(doc: Database = accountDoc(), userId = "lou"): Database {
   const result = deleteAccount(doc, { userId });
@@ -135,4 +136,19 @@ test("the account's email confirmation requests disappear with it", () => {
     });
   }
   assert.deepEqual(deleted(doc).emailConfirmations, []);
+});
+
+test("group gift (028): the participation stays, unlinked; the messages stay, signed « Ancien participant »", () => {
+  const after = deleted(withLouGroupGift(accountDoc()));
+  const participation = after.reservations.find((r) => r.id === "r-other");
+  assert.equal(participation?.userId, null);
+  assert.equal(participation?.amountCents, 1500);
+  assert.deepEqual(after.groupGiftMessages.find((m) => m.id === "m-lou"), {
+    id: "m-lou",
+    groupGiftId: "g-other",
+    userId: null,
+    authorName: null,
+    body: "Je m'occupe du paquet",
+    createdAt: "2026-04-06T00:00:00.000Z",
+  });
 });

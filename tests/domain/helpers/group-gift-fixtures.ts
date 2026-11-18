@@ -39,3 +39,23 @@ export function docWithGroupGift(): Database {
   );
   return doc;
 }
+
+/**
+ * `accountDoc()` where Lou's reservation on Camille's list (`r-other`) is a participation in a group gift
+ * (`g-other`, 15 €), and Lou wrote one message in its thread (028).
+ */
+export function withLouGroupGift(doc: Database): Database {
+  doc.groupGifts.push({ ...gift("g-other", "other-item"), wishlistId: "other" });
+  const participation = doc.reservations.find((r) => r.id === "r-other")!;
+  participation.groupGiftId = "g-other";
+  participation.amountCents = 1500;
+  doc.groupGiftMessages.push({
+    id: "m-lou",
+    groupGiftId: "g-other",
+    userId: "lou",
+    authorName: "Lou",
+    body: "Je m'occupe du paquet",
+    createdAt: "2026-04-06T00:00:00.000Z",
+  });
+  return doc;
+}

@@ -11,8 +11,10 @@ import { groupGiftSummaryText } from "../../../src/site/group-gift-text";
 import { siteOrigin, type Schemas } from "@/api/client";
 import { useServerAction } from "@/features/errors";
 import {
+  deleteGroupGiftMessage,
   joinGroupGift,
   leaveGroupGift,
+  postGroupGiftMessage,
   setGroupGiftAmount,
   setGroupGiftStatus,
   unlockGroupGift,
@@ -216,6 +218,8 @@ function Ready({
       ) : (
         <Alert testID="gift.closed">{t("groupGift.closed")}</Alert>
       )}
+
+      {gift.thread ? <Thread token={token} messages={gift.thread.messages} reload={reload} /> : null}
 
       {gift.me ? (
         <Card>
@@ -460,6 +464,93 @@ function Mine({
         onKeep={() => setConfirm(null)}
         testID="gift.leave-confirm"
       />
+    </Card>
+  );
+}
+
+/** The participants' thread (US5), for a participant with an account. No live update: pull to refresh. */
+function Thread({
+  token,
+  messages,
+  reload,
+}: {
+  token: string;
+  messages: Schemas["GroupGiftMessage"][];
+  reload: () => void;
+}) {
+  const { t } = useTranslation(["public", "errors"]);
+  const online = useOnline();
+  const [body, setBody] = useState("");
+  const dates = new Intl.DateTimeFormat(intlLocale(currentLocale()), { dateStyle: "short", timeStyle: "short" });
+  const send = useServerAction(
+    useCallback(async () => {
+      await postGroupGiftMessage(token, body);
+      setBody("");
+      reload();
+    }, [token, body, reload]),
+  );
+  const remove = useServerAction(
+    useCallback(
+      async (messageId: string) => {
+        await deleteGroupGiftMessage(token, messageId);
+        reload();
+      },
+      [token, reload],
+    ),
+  );
+  const error = send.error ?? remove.error;
+  return (
+    <Card testID="gift.thread">
+      <CardHeader>
+        <CardTitle>{t("groupGift.thread")}</CardTitle>
+        <CardDescription>{t("groupGift.threadHint")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {messages.length === 0 ? (
+          <Text size="sm" color={tokens.colors.mutedForeground}>
+            {t("groupGift.threadEmpty")}
+          </Text>
+        ) : null}
+        {messages.map((message, index) => (
+          <View key={message.id} testID={`gift.message-${index}`} style={{ gap: tokens.space[1] }}>
+            <Text size="sm" color={tokens.colors.mutedForeground}>
+              {`${message.mine ? t("groupGift.you") : (message.authorName ?? t("groupGift.formerParticipant"))} · ${dates.format(
+                new Date(message.createdAt),
+              )}`}
+            </Text>
+            <Text>{message.body}</Text>
+            {message.mine ? (
+              <Button
+                testID={`gift.delete-message-${index}`}
+                title={t("groupGift.deleteMessage")}
+                accessibilityLabel={t("groupGift.deleteMessageAria", { date: dates.format(new Date(message.createdAt)) })}
+                variant="link"
+                size="sm"
+                disabled={!online || remove.busy}
+                onPress={() => void remove.run(message.id)}
+              />
+            ) : null}
+          </View>
+        ))}
+        <Field label={t("groupGift.message")}>
+          <Input
+            testID="gift.message"
+            accessibilityLabel={t("groupGift.message")}
+            value={body}
+            onChangeText={setBody}
+            multiline
+            maxLength={2000}
+          />
+        </Field>
+        {error ? <Alert variant="destructive">{error}</Alert> : null}
+        <Button
+          testID="gift.send"
+          title={t("groupGift.send")}
+          disabled={!online || send.busy || !body.trim()}
+          onPress={() => void send.run()}
+        />
+        <NetworkNote />
+      </CardContent>
     </Card>
   );
 }

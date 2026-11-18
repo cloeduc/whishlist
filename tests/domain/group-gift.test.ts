@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   cancelGroupGiftAsMember,
+  deleteGroupGiftMessage,
   groupGiftDetail,
   groupGiftTotals,
   joinGroupGift,
@@ -9,6 +10,7 @@ import {
   MAX_AMOUNT_CENTS,
   ownParticipation,
   parseAmount,
+  postGroupGiftMessage,
   pruneGroupGifts,
   setGroupGiftStatus,
   setParticipationAmount,
@@ -446,4 +448,75 @@ test("amount: only one's own participation linked to the account is editable", (
   assert.equal(groupGiftDetail(doc, doc.groupGifts[0], { userId: null, claimedIds: new Set(["p-sam"]) }).me?.editable, false);
   const asAlex = groupGiftDetail(doc, doc.groupGifts[0], { userId: "alex", claimedIds: new Set() });
   assert.deepEqual(asAlex.participations?.map((p) => p.editable), [false, true]);
+});
+
+test("thread: a participant with an account writes; the name is frozen; nobody else can", () => {
+  const doc = docWithGroupGift();
+  const posted = postGroupGiftMessage(doc, { groupGiftId: "g", userId: "alex", body: "  Je commande lundi  ", now: new Date("2026-02-03T00:00:00.000Z") });
+  assert.ok(posted.ok);
+  assert.equal(posted.message.body, "Je commande lundi");
+  assert.equal(posted.message.authorName, "Alex");
+  // Without an account (Sam's claim), not a participant (Camille), or a member who does not chip in: refused.
+  assert.deepEqual(postGroupGiftMessage(doc, { groupGiftId: "g", userId: null, body: "x" }), { ok: false, error: "accessDenied" });
+  assert.deepEqual(postGroupGiftMessage(doc, { groupGiftId: "g", userId: "camille", body: "x" }), { ok: false, error: "accessDenied" });
+  assert.deepEqual(postGroupGiftMessage(doc, { groupGiftId: "g", userId: "alex", body: "   " }), { ok: false, error: "messageEmpty" });
+  assert.deepEqual(postGroupGiftMessage(doc, { groupGiftId: "g", userId: "alex", body: "x".repeat(2001) }), {
+    ok: false,
+    error: "fieldTooLong",
+  });
+  assert.deepEqual(postGroupGiftMessage(doc, { groupGiftId: "nope", userId: "alex", body: "x" }), {
+    ok: false,
+    error: "groupGiftMissing",
+  });
+});
+
+test("thread: the account's name when the participation has none; only its author deletes a message", () => {
+  const doc = docWithGroupGift();
+  doc.reservations.find((r) => r.id === "p-alex")!.fromName = null;
+  const posted = postGroupGiftMessage(doc, { groupGiftId: "g", userId: "alex", body: "Salut", id: "m1" });
+  assert.ok(posted.ok);
+  assert.equal(posted.message.authorName, "Alex");
+  assert.deepEqual(deleteGroupGiftMessage(posted.doc, { groupGiftId: "g", messageId: "m1", userId: "camille" }), {
+    ok: false,
+    error: "accessDenied",
+  });
+  assert.deepEqual(deleteGroupGiftMessage(posted.doc, { groupGiftId: "g", messageId: "nope", userId: "alex" }), {
+    ok: false,
+    error: "messageMissing",
+  });
+  const removed = deleteGroupGiftMessage(posted.doc, { groupGiftId: "g", messageId: "m1", userId: "alex" });
+  assert.ok(removed.ok);
+  assert.deepEqual(removed.doc.groupGiftMessages, []);
+});
+
+test("thread: shown to a participant with an account only, oldest first; a withdrawn one keeps their signed messages", () => {
+  const doc = docWithGroupGift();
+  doc.reservations.push(chipIn("p-camille", "g", "gift", { fromName: "Cam", userId: "camille" }));
+  doc.groupGiftMessages.push(
+    { id: "m1", groupGiftId: "g", userId: "camille", authorName: "Cam", body: "Premier", createdAt: "2026-02-01T00:00:00.000Z" },
+    { id: "m2", groupGiftId: "g", userId: "alex", authorName: "Alex", body: "Second", createdAt: "2026-02-02T00:00:00.000Z" },
+  );
+  const asAlex = groupGiftDetail(doc, doc.groupGifts[0], { userId: "alex", claimedIds: new Set() });
+  assert.deepEqual(asAlex.thread?.messages.map((m) => [m.body, m.authorName, m.mine]), [
+    ["Premier", "Cam", false],
+    ["Second", "Alex", true],
+  ]);
+  // Sam chips in without an account, and someone who does not chip in: no thread.
+  assert.equal(groupGiftDetail(doc, doc.groupGifts[0], { userId: null, claimedIds: new Set(["p-sam"]) }).thread, null);
+  assert.equal(groupGiftDetail(doc, doc.groupGifts[0], { userId: "nobody", claimedIds: new Set() }).thread, null);
+  // Camille withdraws: no more access, her message stays signed.
+  const left = leaveGroupGift(doc, { groupGiftId: "g", reservationId: "p-camille", userId: "camille", claimedIds: new Set() });
+  assert.ok(left.ok);
+  assert.equal(groupGiftDetail(left.doc, left.doc.groupGifts[0], { userId: "camille", claimedIds: new Set() }).thread, null);
+  assert.equal(
+    groupGiftDetail(left.doc, left.doc.groupGifts[0], { userId: "alex", claimedIds: new Set() }).thread?.messages[0].authorName,
+    "Cam",
+  );
+});
+
+test("thread: never in the members' rows nor in what the assistant reads", () => {
+  const doc = docWithGroupGift();
+  doc.groupGiftMessages.push({ id: "m1", groupGiftId: "g", userId: "alex", authorName: "Alex", body: "Secret du cadeau", createdAt: "x" });
+  assert.equal(JSON.stringify(listOffrir(doc, "w")).includes("Secret du cadeau"), false);
+  assert.equal(JSON.stringify(memberReservations(doc, doc.reservations)).includes("Secret du cadeau"), false);
 });

@@ -51,7 +51,9 @@ info:
       `PublicList.claimKey` : clé où ranger les claims de la liste, sans son lien. `POST …/reservations`
       accepte `mode` (`single` par défaut, `group`) et `amountCents`, et rend `claimKey` et `groupGiftToken`.
       Routes `/public/group-gifts/{token}` : lire le cadeau, le déverrouiller, participer, changer son
-      montant, se retirer, le déclarer complet ou le rouvrir. Elles ne donnent jamais le lien de la liste.
+      montant, se retirer, le déclarer complet ou le rouvrir, et le fil des participants avec un compte
+      (`GroupGift.thread`, `POST`/`DELETE …/messages`). Elles ne donnent jamais le lien de la liste.
+      L'export du compte gagne `myReservations[].groupGift` et `groupGiftMessages`.
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -413,6 +415,52 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/GroupGift" }
         "400": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/messages:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    post:
+      tags: [public]
+      summary: Écrire dans le fil d'un cadeau commun (participant avec compte, depuis 1.11.0)
+      description: Aucune notification n'est envoyée. Les membres de la liste ne voient jamais ce fil.
+      security: [{ bearer: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, maxLength: 2000 }
+      responses:
+        "201":
+          description: Message ajouté
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupGiftMessage" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/messages/{messageId}:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+      - name: messageId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [public]
+      summary: Supprimer son message du fil (depuis 1.11.0)
+      security: [{ bearer: [] }]
+      responses:
+        "204": { description: Supprimé }
+        "401": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
 
@@ -1582,7 +1630,7 @@ components:
                 mustChangePassword, readPasswordRequired, invalidJson, payloadTooLarge,
                 unsupportedMediaType, originNotAllowed, apiVersionUnsupported, notFound.
                 Depuis 1.11.0 : groupGiftMissing (404), groupGiftComplete et groupGiftAlreadyJoined (409),
-                invalidAmount, invalidStatus.
+                invalidAmount, invalidStatus, messageEmpty, messageMissing (404).
               example: itemAlreadyReserved
             message: { type: string }
 
@@ -1683,7 +1731,7 @@ components:
     GroupGift:
       type: object
       required:
-        [token, status, listTitle, item, participantCount, totalCents, remainingCents, goalReached, participantNames, me, participations, claimKey]
+        [token, status, listTitle, item, participantCount, totalCents, remainingCents, goalReached, participantNames, me, participations, thread, claimKey]
       properties:
         token: { type: string }
         status: { type: string, enum: [open, complete] }
@@ -1717,7 +1765,28 @@ components:
           type: [array, "null"]
           items: { $ref: "#/components/schemas/GroupGiftParticipation" }
           description: Pour les participants seulement (montants et messages) ; null sinon.
+        thread:
+          description: Fil des participants qui ont un compte (participation liée au compte connecté) ; null sinon.
+          oneOf:
+            - type: "null"
+            - type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  description: Les 200 derniers, du plus ancien au plus récent.
+                  items: { $ref: "#/components/schemas/GroupGiftMessage" }
         claimKey: { type: string, description: Voir `PublicList.claimKey`. }
+
+    GroupGiftMessage:
+      type: object
+      required: [id, authorName, body, createdAt, mine]
+      properties:
+        id: { type: string }
+        authorName: { type: [string, "null"], description: null = « Ancien participant » (compte supprimé). }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+        mine: { type: boolean }
 
     PublicList:
       type: object
@@ -1930,7 +1999,7 @@ components:
     AccountExport:
       type: object
       additionalProperties: false
-      required: [format, version, exportedAt, account, lists, subscriptions, myReservations]
+      required: [format, version, exportedAt, account, lists, subscriptions, myReservations, groupGiftMessages]
       properties:
         format: { const: ohyoushouldnt-export }
         version: { const: 1 }
@@ -1971,12 +2040,33 @@ components:
           items:
             type: object
             additionalProperties: false
-            required: [listTitle, item, fromName, note, createdAt]
+            required: [listTitle, item, fromName, note, createdAt, groupGift]
             properties:
               listTitle: { type: string }
               item: { type: [string, "null"] }
               fromName: { type: [string, "null"] }
               note: { type: [string, "null"] }
+              createdAt: { type: string, format: date-time }
+              groupGift:
+                description: Depuis 1.11.0. Participation à un cadeau commun, avec le montant annoncé ; null pour une réservation seule.
+                oneOf:
+                  - type: "null"
+                  - type: object
+                    additionalProperties: false
+                    required: [status, amountCents]
+                    properties:
+                      status: { type: string, enum: [open, complete] }
+                      amountCents: { type: [integer, "null"] }
+        groupGiftMessages:
+          type: array
+          description: Depuis 1.11.0. Messages écrits par le compte dans le fil d'un cadeau commun.
+          items:
+            type: object
+            additionalProperties: false
+            required: [item, body, createdAt]
+            properties:
+              item: { type: [string, "null"] }
+              body: { type: string }
               createdAt: { type: string, format: date-time }
 
     ExportedList:

@@ -4,7 +4,7 @@ import { groupGiftOfItem, groupGiftTotals, ownParticipation, participationsOf, t
 import { formatPrice } from "./price";
 import { MAX_FROM_NAME, MAX_NOTE } from "./reserve";
 import { newId, newToken } from "./tokens";
-import type { Database, GroupGift, GroupGiftStatus, Reservation } from "./types";
+import type { Database, GroupGift, GroupGiftMessage, GroupGiftStatus, Reservation } from "./types";
 
 /**
  * « Cadeau commun » (feature 028): several people chip in for one idea. Each participation is a
@@ -185,6 +185,59 @@ export function setParticipationAmount(
   return { ok: true, doc: next };
 }
 
+/** Longest message of the thread: the same as a reservation's message. */
+export const MAX_MESSAGE = MAX_NOTE;
+
+/** The thread is for participants with an account (US5): their participation linked to that account. */
+function threadParticipation(doc: Database, groupGiftId: string, userId: string | null): Reservation | null {
+  if (!userId) return null;
+  return participationsOf(doc, groupGiftId).find((r) => r.userId === userId) ?? null;
+}
+
+/**
+ * A message in the gift's thread. The author's name is frozen now (the participation's name, otherwise
+ * the account's), so their messages stay signed if they withdraw later.
+ */
+export function postGroupGiftMessage(
+  doc: Database,
+  input: { groupGiftId: string; userId: string | null; body: string; now?: Date; id?: string },
+): { ok: true; doc: Database; message: GroupGiftMessage } | Failure {
+  if (!doc.groupGifts.some((g) => g.id === input.groupGiftId)) return { ok: false, error: "groupGiftMissing" };
+  const participation = threadParticipation(doc, input.groupGiftId, input.userId);
+  if (!participation || !input.userId) return { ok: false, error: "accessDenied" };
+  const body = input.body.trim();
+  if (!body) return { ok: false, error: "messageEmpty" };
+  if (body.length > MAX_MESSAGE) return { ok: false, error: "fieldTooLong" };
+  const user = doc.users.find((u) => u.id === input.userId);
+  const message: GroupGiftMessage = {
+    id: input.id ?? newId(),
+    groupGiftId: input.groupGiftId,
+    userId: input.userId,
+    authorName: participation.fromName ?? user?.displayName ?? null,
+    body,
+    createdAt: (input.now ?? new Date()).toISOString(),
+  };
+  const next = clone(doc);
+  next.groupGiftMessages.push(message);
+  return { ok: true, doc: next, message };
+}
+
+/** Its author removes a message (no editing). */
+export function deleteGroupGiftMessage(
+  doc: Database,
+  input: { groupGiftId: string; messageId: string; userId: string | null },
+): { ok: true; doc: Database } | Failure {
+  const message = doc.groupGiftMessages.find((m) => m.id === input.messageId && m.groupGiftId === input.groupGiftId);
+  if (!message) return { ok: false, error: "messageMissing" };
+  if (!input.userId || message.userId !== input.userId) return { ok: false, error: "accessDenied" };
+  const next = clone(doc);
+  next.groupGiftMessages = next.groupGiftMessages.filter((m) => m.id !== message.id);
+  return { ok: true, doc: next };
+}
+
+/** Messages shown in the thread: the last ones, oldest first. */
+export const THREAD_LENGTH = 200;
+
 /** « Annuler le cadeau commun »: a member of the list removes every participation, the thread and the link. */
 export function cancelGroupGiftAsMember(
   doc: Database,
@@ -229,6 +282,17 @@ export interface GroupGiftDetail extends GroupGiftTotals {
   me: GroupGiftParticipationView | null;
   /** Amounts and messages: for participants only. */
   participations: GroupGiftParticipationView[] | null;
+  /** The participants' thread (US5): only for a participant with an account; null otherwise. */
+  thread: { messages: GroupGiftMessageView[] } | null;
+}
+
+export interface GroupGiftMessageView {
+  id: string;
+  /** null → « Ancien participant » (account deleted). */
+  authorName: string | null;
+  body: string;
+  createdAt: string;
+  mine: boolean;
 }
 
 /**
@@ -275,5 +339,19 @@ export function groupGiftDetail(
     participantNames: participations.map((r) => r.fromName),
     me: own ? view(own) : null,
     participations: own ? participations.map(view) : null,
+    thread: threadParticipation(doc, gift.id, viewer.userId)
+      ? {
+          messages: doc.groupGiftMessages
+            .filter((m) => m.groupGiftId === gift.id)
+            .slice(-THREAD_LENGTH)
+            .map((m) => ({
+              id: m.id,
+              authorName: m.authorName,
+              body: m.body,
+              createdAt: m.createdAt,
+              mine: viewer.userId !== null && m.userId === viewer.userId,
+            })),
+        }
+      : null,
   };
 }

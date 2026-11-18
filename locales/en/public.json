@@ -160,6 +160,15 @@
     "changeAmount": "Your amount",
     "changeAmountHint": "Leave it empty if you would rather not say.",
     "saveAmount": "Save",
-    "noAccountHint": "With an account, you could change your amount and talk with the other participants."
+    "noAccountHint": "With an account, you could change your amount and talk with the other participants.",
+    "thread": "Messages between participants",
+    "threadHint": "Only participants with an account read and write here. People who manage the list never see these messages.",
+    "threadEmpty": "No message yet.",
+    "message": "Your message",
+    "send": "Send",
+    "deleteMessage": "Delete",
+    "deleteMessageAria": "Delete your message from {{date}}",
+    "formerParticipant": "Former participant",
+    "you": "You"
   }
 }

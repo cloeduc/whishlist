@@ -195,16 +195,16 @@ Chaque phase de user story se termine par une tâche **« Commit de la story »*
 
 **Independent Test**: quickstart.md § US5, puis US7 étape 4 avec le fil.
 
-- [ ] T077 [P] [US5] Tests dans `tests/domain/group-gift.test.ts` : `postGroupGiftMessage` (participant avec compte ; `accessDenied` sans compte, non-participant, membre non participant ; `messageEmpty` ; `fieldTooLong` au-delà de 2000) ; `authorName` figé (nom de participation, sinon nom du compte) ; `deleteGroupGiftMessage` par l'auteur seulement ; participant retiré : plus d'accès, messages gardés et signés ; cadeau supprimé → messages supprimés ; `thread` dans `groupGiftDetail` : 200 derniers, ordre de création, `null` sauf participant avec compte
-- [ ] T078 [P] [US5] Tests compte dans `tests/domain/account-deletion.test.ts` (messages : `userId` et `authorName` à `null` → « Ancien participant » ; participations gardées, détachées) et `tests/domain/account-export.test.ts` (`groupGiftMessages`, `myReservations[].groupGift`)
-- [ ] T079 [US5] `src/domain/group-gift.ts` : `postGroupGiftMessage`, `deleteGroupGiftMessage`, `thread` dans `groupGiftDetail` ; `src/domain/account.ts` : `deleteAccount` anonymise les messages ; export `groupGiftMessages` et `myReservations[].groupGift: { status, amountCents }`
-- [ ] T080 [US5] `src/server/commands/group-gift.ts` (`postMessage`, `deleteMessage`, 30/h) ; `src/server/actions.ts` : `postGroupGiftMessageAction`, `deleteGroupGiftMessageAction`
-- [ ] T081 [US5] `components/site/group-gift-thread.tsx` sur `app/g/[token]/page.tsx` (liste, champ, « Envoyer », « Supprimer », `formerParticipant`) ; phrase pour le participant sans compte
-- [ ] T082 [US5] API : contrat (`GroupGiftMessage`, `GroupGift.thread`, `POST …/messages`, `DELETE …/messages/{messageId}`, export), routes `app/api/v1/public/group-gifts/[token]/messages/route.ts` et `…/messages/[messageId]/route.ts`, vues ; `api:types`
-- [ ] T083 [US5] App : section fil dans `mobile/src/features/group-gift/` et `mobile/app/gift/[token].tsx` (`gift.message`, `gift.send`) ; tests jest ; parcours Maestro `mobile/.maestro/flows/028-us5-group-gift-thread.yaml` (tag `028-us5`, compte de démo participant : écrire un message, le voir, le supprimer)
-- [ ] T084 [P] [US5] Textes FR/EN (`thread`, `send`, `deleteMessage`, `formerParticipant`, `messageEmpty`) dans `locales/{fr,en}/public.json`, `errors.json`
-- [ ] T085 [US5] Parcours quickstart.md § US5 et US7 étape 4 ; lint, types et tests du site et de l'app
-- [ ] T086 [US5] Commit de la story : tout vert, puis `feat: message thread for group gift participants (US5)`, sans demander
+- [X] T077 [P] [US5] Tests dans `tests/domain/group-gift.test.ts` : `postGroupGiftMessage` (participant avec compte ; `accessDenied` sans compte, non-participant, membre non participant ; `messageEmpty` ; `fieldTooLong` au-delà de 2000) ; `authorName` figé (nom de participation, sinon nom du compte) ; `deleteGroupGiftMessage` par l'auteur seulement ; participant retiré : plus d'accès, messages gardés et signés ; cadeau supprimé → messages supprimés ; `thread` dans `groupGiftDetail` : 200 derniers, ordre de création, `null` sauf participant avec compte
+- [X] T078 [P] [US5] Tests compte dans `tests/domain/account-deletion.test.ts` (messages : `userId` et `authorName` à `null` → « Ancien participant » ; participations gardées, détachées) et `tests/domain/account-export.test.ts` (`groupGiftMessages`, `myReservations[].groupGift`)
+- [X] T079 [US5] `src/domain/group-gift.ts` : `postGroupGiftMessage`, `deleteGroupGiftMessage`, `thread` dans `groupGiftDetail` ; `src/domain/account.ts` : `deleteAccount` anonymise les messages ; export `groupGiftMessages` et `myReservations[].groupGift: { status, amountCents }`
+- [X] T080 [US5] `src/server/commands/group-gift.ts` (`postMessage`, `deleteMessage`, 30/h) ; `src/server/actions.ts` : `postGroupGiftMessageAction`, `deleteGroupGiftMessageAction`
+- [X] T081 [US5] `components/site/group-gift-thread.tsx` sur `app/g/[token]/page.tsx` (liste, champ, « Envoyer », « Supprimer », `formerParticipant`) ; phrase pour le participant sans compte
+- [X] T082 [US5] API : contrat (`GroupGiftMessage`, `GroupGift.thread`, `POST …/messages`, `DELETE …/messages/{messageId}`, export), routes `app/api/v1/public/group-gifts/[token]/messages/route.ts` et `…/messages/[messageId]/route.ts`, vues ; `api:types`
+- [X] T083 [US5] App : section fil dans `mobile/src/features/group-gift/` et `mobile/app/gift/[token].tsx` (`gift.message`, `gift.send`) ; tests jest ; parcours Maestro `mobile/.maestro/flows/028-us5-group-gift-thread.yaml` (tag `028-us5`, compte de démo participant : écrire un message, le voir, le supprimer)
+- [X] T084 [P] [US5] Textes FR/EN (`thread`, `send`, `deleteMessage`, `formerParticipant`, `messageEmpty`) dans `locales/{fr,en}/public.json`, `errors.json`
+- [X] T085 [US5] Parcours quickstart.md § US5 et US7 étape 4 ; lint, types et tests du site et de l'app
+- [X] T086 [US5] Commit de la story : tout vert, puis `feat: message thread for group gift participants (US5)`, sans demander
 
 ---
 

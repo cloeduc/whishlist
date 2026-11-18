@@ -41,7 +41,7 @@ test("no list of kept fields holds a password or the anti-bot field", () => {
   const lists = (Object.entries(formState) as [string, unknown][]).filter(
     (entry): entry is [string, readonly string[]] => entry[0].endsWith("_KEPT_FIELDS") && Array.isArray(entry[1]),
   );
-  assert.equal(lists.length, 15);
+  assert.equal(lists.length, 16);
   for (const [name, fields] of lists) {
     for (const field of fields) {
       assert.doesNotMatch(field, /password|confirm/i, `${name} keeps ${field}`);
@@ -78,10 +78,11 @@ const KEPT_FIELDS_BY_ACTION: Record<string, string> = {
   joinGroupGiftAction: "GROUP_GIFT_JOIN_KEPT_FIELDS",
   unlockGroupGiftAction: "READ_UNLOCK_KEPT_FIELDS",
   setGroupGiftAmountAction: "GROUP_GIFT_AMOUNT_KEPT_FIELDS",
+  postGroupGiftMessageAction: "GROUP_GIFT_MESSAGE_KEPT_FIELDS",
 };
 
 test("each form action refuses with its own list of kept fields", () => {
-  assert.equal(Object.keys(KEPT_FIELDS_BY_ACTION).length, 16);
+  assert.equal(Object.keys(KEPT_FIELDS_BY_ACTION).length, 17);
   for (const [action, list] of Object.entries(KEPT_FIELDS_BY_ACTION)) {
     const lists = [...actionBody(action).matchAll(/refusal\([^)]*?\b(\w+_KEPT_FIELDS)\)/g)].map((match) => match[1]);
     assert.ok(lists.length > 0, `${action} never calls refusal()`);

@@ -9,6 +9,7 @@ import { ConfirmForm } from "@/components/site/confirm-form";
 import { CopyLinkField } from "@/components/site/copy-link-field";
 import { GroupGiftAmountForm } from "@/components/site/group-gift-amount-form";
 import { GroupGiftJoinForm } from "@/components/site/group-gift-join-form";
+import { GroupGiftThread } from "@/components/site/group-gift-thread";
 import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -250,6 +251,26 @@ export default async function GroupGiftPage({
           <AlertDescription>{t("groupGift.closed")}</AlertDescription>
         </Alert>
       )}
+
+      {detail.thread ? (
+        <Card size="sm" id="thread">
+          <CardHeader>
+            <CardTitle>{t("groupGift.thread")}</CardTitle>
+            <CardDescription>{t("groupGift.threadHint")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <GroupGiftThread
+              token={token}
+              messages={detail.thread.messages.map((message) => ({
+                ...message,
+                dateLabel: new Intl.DateTimeFormat(priceLocale, { dateStyle: "short", timeStyle: "short" }).format(
+                  new Date(message.createdAt),
+                ),
+              }))}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
 
       {detail.me ? (
         <Card size="sm">

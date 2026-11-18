@@ -629,6 +629,107 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/group-gifts/{token}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Écrire dans le fil d'un cadeau commun (participant avec compte, depuis 1.11.0)
+         * @description Aucune notification n'est envoyée. Les membres de la liste ne voient jamais ce fil.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        body: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Message ajouté */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupGiftMessage"];
+                    };
+                };
+                400: components["responses"]["Error"];
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/group-gifts/{token}/messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Supprimer son message du fil (depuis 1.11.0) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                    messageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Supprimé */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/register": {
         parameters: {
             query?: never;
@@ -2848,7 +2949,7 @@ export interface components {
                  *     mustChangePassword, readPasswordRequired, invalidJson, payloadTooLarge,
                  *     unsupportedMediaType, originNotAllowed, apiVersionUnsupported, notFound.
                  *     Depuis 1.11.0 : groupGiftMissing (404), groupGiftComplete et groupGiftAlreadyJoined (409),
-                 *     invalidAmount, invalidStatus.
+                 *     invalidAmount, invalidStatus, messageEmpty, messageMissing (404).
                  * @example itemAlreadyReserved
                  */
                 code: string;
@@ -2961,8 +3062,22 @@ export interface components {
             me: components["schemas"]["GroupGiftParticipation"] | null;
             /** @description Pour les participants seulement (montants et messages) ; null sinon. */
             participations: components["schemas"]["GroupGiftParticipation"][] | null;
+            /** @description Fil des participants qui ont un compte (participation liée au compte connecté) ; null sinon. */
+            thread: null | {
+                /** @description Les 200 derniers, du plus ancien au plus récent. */
+                messages: components["schemas"]["GroupGiftMessage"][];
+            };
             /** @description Voir `PublicList.claimKey`. */
             claimKey: string;
+        };
+        GroupGiftMessage: {
+            id: string;
+            /** @description null = « Ancien participant » (compte supprimé). */
+            authorName: string | null;
+            body: string;
+            /** Format: date-time */
+            createdAt: string;
+            mine: boolean;
         };
         PublicList: {
             title: string;
@@ -3176,6 +3291,19 @@ export interface components {
                 item: string | null;
                 fromName: string | null;
                 note: string | null;
+                /** Format: date-time */
+                createdAt: string;
+                /** @description Depuis 1.11.0. Participation à un cadeau commun, avec le montant annoncé ; null pour une réservation seule. */
+                groupGift: null | {
+                    /** @enum {string} */
+                    status: "open" | "complete";
+                    amountCents: number | null;
+                };
+            }[];
+            /** @description Depuis 1.11.0. Messages écrits par le compte dans le fil d'un cadeau commun. */
+            groupGiftMessages: {
+                item: string | null;
+                body: string;
                 /** Format: date-time */
                 createdAt: string;
             }[];

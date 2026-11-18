@@ -26,6 +26,7 @@ import {
   REGISTER_KEPT_FIELDS,
   GROUP_GIFT_AMOUNT_KEPT_FIELDS,
   GROUP_GIFT_JOIN_KEPT_FIELDS,
+  GROUP_GIFT_MESSAGE_KEPT_FIELDS,
   RESERVATION_KEPT_FIELDS,
   RESET_PASSWORD_KEPT_FIELDS,
   type FormState,
@@ -36,8 +37,10 @@ import { actionContext } from "./action-context";
 import { deleteOwnAccount } from "./commands/account";
 import { createMyApiKey, revokeMyApiKey } from "./commands/api-keys";
 import {
+  deleteMessage as deleteGroupGiftMessage,
   joinGroupGift,
   leaveGroupGift,
+  postMessage as postGroupGiftMessage,
   setAmount as setGroupGiftAmount,
   setStatus as setGroupGiftStatus,
   unlockGroupGift,
@@ -875,6 +878,34 @@ export async function setGroupGiftAmountAction(prev: FormState, formData: FormDa
     return refusal(prev, result.error, formData, GROUP_GIFT_AMOUNT_KEPT_FIELDS);
   }
   return localeRedirect(`/g/${token}`);
+}
+
+/** A message in a group gift's thread (028, US5). */
+export async function postGroupGiftMessageAction(prev: FormState, formData: FormData): Promise<FormState> {
+  const token = String(formData.get("token") ?? "");
+  let result: Awaited<ReturnType<typeof postGroupGiftMessage>>;
+  try {
+    result = await postGroupGiftMessage(await actionContext(), { token, body: String(formData.get("body") ?? "") });
+  } catch (error) {
+    if (isRateLimitError(error)) return refusal(prev, "rateLimited", formData, GROUP_GIFT_MESSAGE_KEPT_FIELDS);
+    throw error;
+  }
+  if (!result.ok) {
+    if (result.error === "groupGiftMissing") return localeRedirect(`/g/${token}`);
+    return refusal(prev, result.error, formData, GROUP_GIFT_MESSAGE_KEPT_FIELDS);
+  }
+  return localeRedirect(`/g/${token}#thread`);
+}
+
+/** Its author removes a message from the thread (028, US5). */
+export async function deleteGroupGiftMessageAction(formData: FormData) {
+  const token = String(formData.get("token") ?? "");
+  const result = await deleteGroupGiftMessage(await actionContext(), {
+    token,
+    messageId: String(formData.get("messageId") ?? ""),
+  });
+  if (!result.ok) return localeRedirect(`/g/${token}?e=${result.error}`);
+  return localeRedirect(`/g/${token}#thread`);
 }
 
 /** The list's read password typed on a group gift's page (028). */

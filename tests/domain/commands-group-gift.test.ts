@@ -3,7 +3,16 @@ import { before, test } from "node:test";
 import { verifyReadUnlock } from "../../src/auth/read-unlock";
 import { claimKeyFor, verifyReservationClaims } from "../../src/auth/reservation-claim";
 import { setReadPassword } from "../../src/domain/read-password";
-import { joinGroupGift, leaveGroupGift, readGroupGift, setAmount, setStatus, unlockGroupGift } from "../../src/server/commands/group-gift";
+import {
+  deleteMessage,
+  joinGroupGift,
+  leaveGroupGift,
+  postMessage,
+  readGroupGift,
+  setAmount,
+  setStatus,
+  unlockGroupGift,
+} from "../../src/server/commands/group-gift";
 import { readPublicList, reserve } from "../../src/server/commands/public-list";
 import { amountField } from "../../src/server/api/group-gift";
 import { toGroupGiftView } from "../../src/server/api/views";
@@ -218,4 +227,19 @@ test("API: amountCents of a JSON body is an integer within the limit, or null", 
   assert.equal(amountField(null), null);
   assert.equal(amountField(1250), 1250);
   for (const value of [0, -1, 12.5, 10_000_001, "12", true]) assert.equal(amountField(value), "invalid");
+});
+
+test("thread commands: signed in only; a participant writes, then deletes their message", async () => {
+  await withStore(docWithGroupGift(), async () => {
+    const alex = (await readDocument()).users.find((u) => u.id === "alex")!;
+    assert.deepEqual(await postMessage(ctx(), { token: "tok-g", body: "x" }), { ok: false, error: "unauthorized" });
+    const posted = await postMessage(ctx(alex), { token: "tok-g", body: "On se retrouve samedi" });
+    assert.equal(posted.ok, true);
+    if (!posted.ok) return;
+    const read = await readGroupGift(ctx(alex), { token: "tok-g", isUnlocked: noUnlock, claimsFor: noClaims });
+    assert.ok(read.ok);
+    if (read.ok) assert.deepEqual(read.gift.thread?.messages.map((m) => m.body), ["On se retrouve samedi"]);
+    assert.deepEqual(await deleteMessage(ctx(alex), { token: "tok-g", messageId: posted.message.id }), { ok: true });
+    assert.deepEqual((await readDocument()).groupGiftMessages, []);
+  });
 });

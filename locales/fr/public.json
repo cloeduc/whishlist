@@ -160,6 +160,15 @@
     "changeAmount": "Votre montant",
     "changeAmountHint": "Laissez vide si vous préférez ne pas l'indiquer.",
     "saveAmount": "Enregistrer",
-    "noAccountHint": "Avec un compte, vous pourriez changer votre montant et échanger avec les autres participants."
+    "noAccountHint": "Avec un compte, vous pourriez changer votre montant et échanger avec les autres participants.",
+    "thread": "Messages entre participants",
+    "threadHint": "Seuls les participants qui ont un compte lisent et écrivent ici. Les personnes qui gèrent la liste ne voient jamais ces messages.",
+    "threadEmpty": "Pas encore de message.",
+    "message": "Votre message",
+    "send": "Envoyer",
+    "deleteMessage": "Supprimer",
+    "deleteMessageAria": "Supprimer votre message du {{date}}",
+    "formerParticipant": "Ancien participant",
+    "you": "Vous"
   }
 }

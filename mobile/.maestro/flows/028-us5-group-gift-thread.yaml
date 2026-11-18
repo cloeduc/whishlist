@@ -1,0 +1,81 @@
+# 028 US5: Sam (demo account, not a member of the demo list) starts a group gift from the list's link: as a
+# participant with an account, the gift's screen has the participants' thread; a message is written, shown,
+# then deleted. Sam then withdraws, which removes the gift.
+appId: app.ohyoushouldnt.mobile
+name: "028 US5 — Write in a group gift's thread"
+tags:
+  - 028-us5
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runFlow:
+    file: ../subflows/submit-login.yaml
+    env:
+      EMAIL: sam@example.test
+      PASSWORD: ${MAESTRO_DEMO_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 20000
+
+- openLink: ohyoushouldnt://l/demo-list-lecture
+- extendedWaitUntil:
+    visible:
+      id: guest.title
+    timeout: 20000
+- tapOn:
+    id: guest.offer-0
+- extendedWaitUntil:
+    visible:
+      id: guest-reserve.mode-group
+    timeout: 10000
+- tapOn:
+    id: guest-reserve.mode-group
+- scrollUntilVisible:
+    element:
+      id: guest-reserve.submit
+- tapOn:
+    id: guest-reserve.submit
+
+# The thread, for a participant with an account.
+- extendedWaitUntil:
+    visible:
+      id: gift.summary
+    timeout: 20000
+- scrollUntilVisible:
+    element:
+      id: gift.message
+- tapOn:
+    id: gift.message
+- inputText: Je passe à la boutique samedi
+- hideKeyboard:
+    optional: true
+- scrollUntilVisible:
+    element:
+      id: gift.send
+- tapOn:
+    id: gift.send
+- extendedWaitUntil:
+    visible: Je passe à la boutique samedi
+    timeout: 20000
+
+# Delete it: the thread is empty again.
+- tapOn:
+    id: gift.delete-message-0
+- extendedWaitUntil:
+    notVisible: Je passe à la boutique samedi
+    timeout: 20000
+
+# Withdraw: the gift no longer exists.
+- scrollUntilVisible:
+    element:
+      id: gift.leave
+    direction: UP
+- tapOn:
+    id: gift.leave
+- tapOn:
+    id: gift.leave-confirm
+- extendedWaitUntil:
+    visible:
+      id: gift.missing
+    timeout: 20000

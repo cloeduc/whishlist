@@ -87,3 +87,12 @@ export async function setGroupGiftAmount(
     }),
   );
 }
+
+/** A message in the participants' thread (US5): sent with the session, the server checks the participation. */
+export async function postGroupGiftMessage(token: string, body: string): Promise<void> {
+  await ok(api.POST("/public/group-gifts/{token}/messages", { params: { path: { token } }, body: { body: body.trim() } }));
+}
+
+export async function deleteGroupGiftMessage(token: string, messageId: string): Promise<void> {
+  await done(api.DELETE("/public/group-gifts/{token}/messages/{messageId}", { params: { path: { token, messageId } } }));
+}
