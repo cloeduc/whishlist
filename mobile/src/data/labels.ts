@@ -41,6 +41,12 @@ export async function reorderTypes(listId: string, typeIds: string[]): Promise<v
   await refreshList(listId);
 }
 
+/** « Annuler le cadeau commun » (028): every participation, the thread and the gift's link. Member action, online. */
+export async function cancelGroupGift(listId: string, groupGiftId: string): Promise<void> {
+  await done(api.DELETE("/lists/{listId}/group-gifts/{groupGiftId}", { params: { path: { listId, groupGiftId } } }));
+  await refreshList(listId);
+}
+
 /** Cancelling a reservation is a member action (constitution, principle III). */
 export async function cancelReservation(listId: string, reservationId: string): Promise<void> {
   await done(api.DELETE("/lists/{listId}/reservations/{reservationId}", { params: { path: { listId, reservationId } } }));

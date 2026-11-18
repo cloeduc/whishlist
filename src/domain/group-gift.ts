@@ -1,8 +1,10 @@
 import { clone, findMembership } from "./access";
-import { formatPrice, parsePrice } from "./price";
+import { validAmount } from "./amount";
+import { groupGiftOfItem, groupGiftTotals, ownParticipation, participationsOf, type GroupGiftTotals } from "./group-gift-view";
+import { formatPrice } from "./price";
 import { MAX_FROM_NAME, MAX_NOTE } from "./reserve";
 import { newId, newToken } from "./tokens";
-import type { Database, GroupGift, GroupGiftStatus, Item, Reservation } from "./types";
+import type { Database, GroupGift, GroupGiftStatus, Reservation } from "./types";
 
 /**
  * « Cadeau commun » (feature 028): several people chip in for one idea. Each participation is a
@@ -11,68 +13,17 @@ import type { Database, GroupGift, GroupGiftStatus, Item, Reservation } from "./
  * A group gift exists while it has at least one participation (`pruneGroupGifts`).
  */
 
-/** Largest amount a participant can announce: 100 000 €. */
-export const MAX_AMOUNT_CENTS = 10_000_000;
-
-/** Amount as typed (« 18,50 » or « 18.50 »): null when empty, "invalid" when not a positive amount within the limit. */
-export function parseAmount(input: string | null | undefined): number | null | "invalid" {
-  const cents = parsePrice(input ?? "");
-  if (cents === null) return null;
-  if (cents === "invalid") return "invalid";
-  return validAmount(cents) ? cents : "invalid";
-}
-
-export function validAmount(cents: number | null): boolean {
-  return cents === null || (Number.isInteger(cents) && cents >= 1 && cents <= MAX_AMOUNT_CENTS);
-}
-
-export function findGroupGiftByToken(doc: Database, token: string): GroupGift | null {
-  if (!token) return null;
-  return doc.groupGifts.find((gift) => gift.token === token) ?? null;
-}
-
-export function groupGiftOfItem(doc: Database, itemId: string): GroupGift | null {
-  return doc.groupGifts.find((gift) => gift.itemId === itemId) ?? null;
-}
-
-export function participationsOf(doc: Database, groupGiftId: string): Reservation[] {
-  return doc.reservations.filter((r) => r.groupGiftId === groupGiftId);
-}
-
-/** The visitor's own participation: linked to their account, or proven by a claim. */
-export function ownParticipation(
-  doc: Database,
-  groupGiftId: string,
-  userId: string | null,
-  claimedIds: ReadonlySet<string>,
-): Reservation | null {
-  return (
-    participationsOf(doc, groupGiftId).find(
-      (r) => (userId !== null && r.userId === userId) || claimedIds.has(r.id),
-    ) ?? null
-  );
-}
-
-export interface GroupGiftTotals {
-  participantCount: number;
-  totalCents: number;
-  /** What is left to gather; null when the idea has no price. Never negative. */
-  remainingCents: number | null;
-  goalReached: boolean;
-}
-
-/** Totals against the idea's current price (a price changed by a member recomputes what is left). */
-export function groupGiftTotals(doc: Database, gift: GroupGift, item?: Item): GroupGiftTotals {
-  const participations = participationsOf(doc, gift.id);
-  const totalCents = participations.reduce((sum, r) => sum + (r.amountCents ?? 0), 0);
-  const priceCents = (item ?? doc.items.find((i) => i.id === gift.itemId))?.priceCents ?? null;
-  return {
-    participantCount: participations.length,
-    totalCents,
-    remainingCents: priceCents === null ? null : Math.max(0, priceCents - totalCents),
-    goalReached: priceCents !== null && totalCents >= priceCents,
-  };
-}
+export { MAX_AMOUNT_CENTS, parseAmount, validAmount } from "./amount";
+export {
+  findGroupGiftByToken,
+  groupGiftOfItem,
+  groupGiftSummary,
+  groupGiftTotals,
+  ownParticipation,
+  participationsOf,
+  type GroupGiftSummary,
+  type GroupGiftTotals,
+} from "./group-gift-view";
 
 /** Removes, in place, every group gift left without a participation, with its messages. */
 export function pruneGroupGifts(doc: Database): void {
@@ -246,22 +197,6 @@ export function cancelGroupGiftAsMember(
   next.reservations = next.reservations.filter((r) => r.groupGiftId !== gift.id);
   pruneGroupGifts(next);
   return { ok: true, doc: next };
-}
-
-export interface GroupGiftSummary extends GroupGiftTotals {
-  token: string;
-  status: GroupGiftStatus;
-  /** The visitor chips in. */
-  mine: boolean;
-}
-
-export function groupGiftSummary(doc: Database, gift: GroupGift, mineReservationIds: ReadonlySet<string>): GroupGiftSummary {
-  return {
-    token: gift.token,
-    status: gift.status,
-    ...groupGiftTotals(doc, gift),
-    mine: participationsOf(doc, gift.id).some((r) => mineReservationIds.has(r.id)),
-  };
 }
 
 export interface GroupGiftParticipationView {

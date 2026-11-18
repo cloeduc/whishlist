@@ -1,6 +1,14 @@
 import { api, ApiError, done, ok, type Schemas } from "@/api/client";
 
-import { claimsFor, forgetReservation, forgetUnlock, saveClaim, saveUnlock, unlockTokenFor } from "./storage";
+import {
+  claimsForScope,
+  forgetReservation,
+  forgetUnlock,
+  rememberClaimKey,
+  saveClaim,
+  saveUnlock,
+  unlockTokenFor,
+} from "./storage";
 
 /**
  * Public routes of a list for the guest view (011, US4), like the site public page.
@@ -8,20 +16,33 @@ import { claimsFor, forgetReservation, forgetUnlock, saveClaim, saveUnlock, unlo
  * The bearer, if there is a session, is added by the client: the reservation is then tied to the account.
  */
 async function proofHeaders(readToken: string, withClaims: boolean) {
-  const [unlock, claims] = await Promise.all([unlockTokenFor(readToken), withClaims ? claimsFor(readToken) : []]);
+  const [unlock, claims] = await Promise.all([
+    unlockTokenFor(readToken),
+    withClaims ? claimsForScope({ readToken }) : [],
+  ]);
   return {
     ...(unlock ? { "X-Read-Unlock": unlock } : {}),
     ...(claims.length ? { "X-Reservation-Claims": claims.join(",") } : {}),
   };
 }
 
+/** The list, with its group gifts (028). */
+async function fetchGuestList(readToken: string) {
+  return ok(
+    api.GET("/public/lists/{readToken}", {
+      params: { path: { readToken }, query: { groupGifts: "true" }, header: await proofHeaders(readToken, true) },
+    }),
+  );
+}
+
 export async function readGuestList(readToken: string): Promise<Schemas["PublicList"]> {
   try {
-    return await ok(
-      api.GET("/public/lists/{readToken}", {
-        params: { path: { readToken }, header: await proofHeaders(readToken, true) },
-      }),
-    );
+    const sent = await claimsForScope({ readToken });
+    const list = await fetchGuestList(readToken);
+    // Claims received through a gift's link are filed under the list's claim key, known only now (028).
+    await rememberClaimKey({ readToken }, list.claimKey);
+    const known = await claimsForScope({ readToken });
+    return known.length > sent.length ? await fetchGuestList(readToken) : list;
   } catch (error) {
     // Token refused (password changed since): forget it, the list asks for the password again.
     if (error instanceof ApiError && error.code === "readPasswordRequired") await forgetUnlock(readToken);
@@ -36,8 +57,15 @@ export async function unlockGuestList(readToken: string, password: string): Prom
 
 export async function reserveGuestItem(
   readToken: string,
-  input: { itemId: string; typeId?: string; fromName: string; note: string },
-): Promise<void> {
+  input: {
+    itemId: string;
+    typeId?: string;
+    fromName: string;
+    note: string;
+    /** « Lancer un cadeau commun » (028), with the amount put in, in cents. */
+    group?: { amountCents: number | null };
+  },
+): Promise<{ groupGiftToken: string | null }> {
   const answer = await ok(
     api.POST("/public/lists/{readToken}/reservations", {
       params: { path: { readToken }, header: await proofHeaders(readToken, false) },
@@ -46,10 +74,18 @@ export async function reserveGuestItem(
         ...(input.typeId ? { typeId: input.typeId } : {}),
         fromName: input.fromName.trim(),
         note: input.note.trim(),
+        ...(input.group ? { mode: "group" as const, amountCents: input.group.amountCents } : {}),
       },
     }),
   );
-  if (answer.claim) await saveClaim(readToken, answer.reservationId, answer.claim);
+  if (answer.claim) {
+    await saveClaim(
+      { readToken, claimKey: answer.claimKey ?? null, giftToken: answer.groupGiftToken ?? null },
+      answer.reservationId,
+      answer.claim,
+    );
+  }
+  return { groupGiftToken: answer.groupGiftToken ?? null };
 }
 
 export async function cancelGuestReservation(readToken: string, reservationId: string): Promise<void> {

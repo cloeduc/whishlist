@@ -96,5 +96,6 @@
   "groupGiftMissing": "This group gift no longer exists.",
   "groupGiftComplete": "This group gift is complete: you can no longer chip in.",
   "groupGiftAlreadyJoined": "You're already chipping in for this group gift.",
-  "invalidAmount": "Enter a valid amount, for example 20 or 15.50."
+  "invalidAmount": "Enter a valid amount, for example 20 or 15.50.",
+  "invalidStatus": "Give the group gift's state: open or complete."
 }

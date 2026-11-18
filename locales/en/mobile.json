@@ -119,5 +119,9 @@
     "cameraDenied": "The app can't use the camera. Allow it in your phone's settings, or paste the list link.",
     "openSettings": "Open settings",
     "cameraUsage": "The camera is used to scan the QR code of a list you want to follow."
+  },
+  "groupGift": {
+    "share": "Share the gift's link",
+    "shareMessage": "Chip in with me for the group gift “{{name}}”: {{url}}"
   }
 }

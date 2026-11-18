@@ -33,7 +33,13 @@ type IsUnlocked = (list: Wishlist) => boolean | Promise<boolean>;
 
 export async function readPublicList(
   ctx: CommandContext,
-  input: { readToken: string; isUnlocked: IsUnlocked; claimedIds: ReadonlySet<string> },
+  input: {
+    readToken: string;
+    isUnlocked: IsUnlocked;
+    claimedIds: ReadonlySet<string>;
+    /** The client knows group gifts (028, `groupGifts=true`). */
+    groupGifts?: boolean;
+  },
 ): Promise<CommandResult<{ list: PublicListView }> | { ok: false; error: "readPasswordRequired"; title: string }> {
   const doc = await readDocument();
   const wishlist = findWishlistByReadToken(doc, input.readToken);
@@ -43,7 +49,10 @@ export async function readPublicList(
     return { ok: false, error: "readPasswordRequired", title: wishlist.title };
   }
   const mineIds = mineReservationIdsFor(doc, wishlist.id, account?.id ?? null, input.claimedIds);
-  return { ok: true, list: toPublicListView(doc, wishlist, ctx.locale, mineIds, account?.id ?? null) };
+  return {
+    ok: true,
+    list: toPublicListView(doc, wishlist, ctx.locale, mineIds, account?.id ?? null, { groupGifts: input.groupGifts }),
+  };
 }
 
 export async function unlockPublicList(

@@ -18,7 +18,7 @@ test("no field is masked outside PasswordInput", () => {
   expect(masked.map(({ file }) => file)).toEqual([]);
 });
 
-test("the 11 password fields (spec 016, plus the read password of 017) use PasswordInput", () => {
+test("the 12 password fields (spec 016, the read password of 017 and of a group gift, 028) use PasswordInput", () => {
   const uses = sources().flatMap(({ file, source }) => [...source.matchAll(/<PasswordInput\b/g)].map(() => file));
   expect(uses.sort()).toEqual(
     [
@@ -26,6 +26,7 @@ test("the 11 password fields (spec 016, plus the read password of 017) use Passw
       "app/(app)/shared/follow.tsx",
       "app/(auth)/login.tsx",
       "app/(auth)/register.tsx",
+      "app/gift/[token].tsx",
       "app/guest/[readToken]/index.tsx",
       "app/links/reset-password/[token].tsx",
       "src/features/account/EmailCard.tsx",

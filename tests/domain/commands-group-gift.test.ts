@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { before, test } from "node:test";
 import { verifyReadUnlock } from "../../src/auth/read-unlock";
-import { verifyReservationClaims } from "../../src/auth/reservation-claim";
+import { claimKeyFor, verifyReservationClaims } from "../../src/auth/reservation-claim";
 import { setReadPassword } from "../../src/domain/read-password";
 import { joinGroupGift, leaveGroupGift, readGroupGift, setAmount, setStatus, unlockGroupGift } from "../../src/server/commands/group-gift";
 import { readPublicList, reserve } from "../../src/server/commands/public-list";
+import { amountField } from "../../src/server/api/group-gift";
+import { toGroupGiftView } from "../../src/server/api/views";
 import { readDocument } from "../../src/store/db";
 import { apiDoc, ctx, ensurePasswordHash, TEST_SECRET, withStore } from "./helpers/api-fixtures";
 import { docWithGroupGift } from "./helpers/group-gift-fixtures";
@@ -177,4 +179,43 @@ test("amount command: signed in only, as typed, then refused for someone else's 
       error: "accessDenied",
     });
   });
+});
+
+test("API: with groupGifts=true the list shows an open group gift to everyone, and gives the claim key", async () => {
+  await withStore(docWithGroupGift(), async () => {
+    const result = await readPublicList(ctx(), { readToken: "rt", isUnlocked: noUnlock, claimedIds: new Set(), groupGifts: true });
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    assert.equal(result.list.claimKey, claimKeyFor("rt"));
+    assert.notEqual(result.list.claimKey, "rt");
+    const gift = result.list.items.find((i) => i.id === "gift");
+    assert.deepEqual(gift?.groupGift, {
+      token: "tok-g",
+      status: "open",
+      participantCount: 2,
+      totalCents: 1500,
+      remainingCents: 490,
+      goalReached: false,
+      mine: false,
+    });
+    assert.equal(result.list.items.find((i) => i.id === "gift2")?.groupGift, null);
+  });
+});
+
+test("API: the gift's view carries the claim key, never the read link", async () => {
+  await withStore(docWithGroupGift(), async () => {
+    const result = await readGroupGift(ctx(), { token: "tok-g", isUnlocked: noUnlock, claimsFor: noClaims });
+    assert.equal(result.ok, true);
+    if (!result.ok) return;
+    const view = toGroupGiftView(result.gift, result.wishlist);
+    assert.equal(view.claimKey, claimKeyFor("rt"));
+    assert.equal(JSON.stringify(view).includes('"rt"'), false);
+  });
+});
+
+test("API: amountCents of a JSON body is an integer within the limit, or null", () => {
+  assert.equal(amountField(undefined), null);
+  assert.equal(amountField(null), null);
+  assert.equal(amountField(1250), 1250);
+  for (const value of [0, -1, 12.5, 10_000_001, "12", true]) assert.equal(amountField(value), "invalid");
 });

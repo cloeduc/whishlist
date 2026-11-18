@@ -1,4 +1,4 @@
-import { groupGiftOfItem, groupGiftSummary, participationsOf, type GroupGiftSummary } from "./group-gift";
+import { groupGiftOfItem, groupGiftSummary, participationsOf, type GroupGiftSummary } from "./group-gift-view";
 import { formatPrice } from "./price";
 import type { Database, Item, View, Wishlist } from "./types";
 

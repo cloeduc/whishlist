@@ -47,6 +47,11 @@ info:
       regrouper par `groupGiftId`) ; `DELETE /lists/{listId}/group-gifts/{groupGiftId}` annule tout le
       cadeau commun (membre). Sans `groupGifts=true`, `GET /public/lists/{readToken}` traite un cadeau
       commun comme une réservation : absent pour qui n'y participe pas, `mine` pour un participant.
+      Avec `groupGifts=true`, chaque idée porte `groupGift` (résumé, visible de tous tant qu'il est ouvert).
+      `PublicList.claimKey` : clé où ranger les claims de la liste, sans son lien. `POST …/reservations`
+      accepte `mode` (`single` par défaut, `group`) et `amountCents`, et rend `claimKey` et `groupGiftToken`.
+      Routes `/public/group-gifts/{token}` : lire le cadeau, le déverrouiller, participer, changer son
+      montant, se retirer, le déclarer complet ou le rouvrir. Elles ne donnent jamais le lien de la liste.
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -91,7 +96,7 @@ paths:
                 type: object
                 required: [apiVersion, enrich, mail, analytics]
                 properties:
-                  apiVersion: { type: string, example: "1.10.0" }
+                  apiVersion: { type: string, example: "1.11.0" }
                   enrich:
                     type: boolean
                     description: Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page).
@@ -113,6 +118,13 @@ paths:
         - $ref: "#/components/parameters/readToken"
         - $ref: "#/components/parameters/readUnlock"
         - $ref: "#/components/parameters/reservationClaims"
+        - name: groupGifts
+          in: query
+          required: false
+          description: |
+            Depuis 1.11.0. `true` : le client connaît le cadeau commun ; un cadeau commun ouvert reste visible
+            de tous, avec `groupGift`. Absent : il est traité comme une réservation (anciennes versions).
+          schema: { type: string, enum: ["true"] }
       responses:
         "200":
           description: OK
@@ -183,6 +195,15 @@ paths:
                 typeId: { type: string, description: Optionnel, vérifie que l'idée est dans cette catégorie. }
                 fromName: { type: string, maxLength: 200 }
                 note: { type: string, maxLength: 2000 }
+                mode:
+                  type: string
+                  enum: [single, group]
+                  description: Depuis 1.11.0. `group` lance un cadeau commun, dont cette réservation est la première participation.
+                amountCents:
+                  type: [integer, "null"]
+                  minimum: 1
+                  maximum: 10000000
+                  description: Depuis 1.11.0, en mode `group` seulement. Montant annoncé, sans paiement.
       responses:
         "201":
           description: Réservée
@@ -194,6 +215,8 @@ paths:
                 properties:
                   reservationId: { type: string }
                   claim: { type: [string, "null"], description: À renvoyer dans `X-Reservation-Claims`. }
+                  claimKey: { type: string, description: Depuis 1.11.0. Voir `PublicList.claimKey`. }
+                  groupGiftToken: { type: [string, "null"], description: "Depuis 1.11.0. En mode `group` : jeton du cadeau (lien `/g/<token>`)." }
         "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "409":
@@ -213,6 +236,183 @@ paths:
         - $ref: "#/components/parameters/reservationClaims"
       responses:
         "204": { description: Annulée }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    get:
+      tags: [public]
+      summary: Lire un cadeau commun par son lien (depuis 1.11.0)
+      description: |
+        L'idée, le titre de la liste et les participants ; jamais le lien de la liste ni ses autres idées.
+        Montants et messages de participation : pour les participants seulement (compte ou claim).
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupGift" }
+        "404": { $ref: "#/components/responses/Error" }
+        "423":
+          description: Mot de passe de lecture de la liste nécessaire (`readPasswordRequired`). Le corps contient aussi `title`.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - type: object
+                    properties:
+                      title: { type: string }
+
+  /public/group-gifts/{token}/unlock:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    post:
+      tags: [public]
+      summary: Déverrouiller la liste d'un cadeau commun (depuis 1.11.0)
+      description: Même `unlockToken` que `POST /public/lists/{readToken}/unlock`, sans connaître le lien de la liste.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [unlockToken, expiresAt]
+                properties:
+                  unlockToken: { type: [string, "null"] }
+                  expiresAt: { type: [string, "null"], format: date-time }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/participations:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    post:
+      tags: [public]
+      summary: Participer à un cadeau commun (depuis 1.11.0)
+      description: Sans compte possible. Avec un bearer, la participation est liée au compte (montant modifiable).
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fromName: { type: string, maxLength: 200 }
+                note: { type: string, maxLength: 2000 }
+                amountCents: { type: [integer, "null"], minimum: 1, maximum: 10000000 }
+      responses:
+        "201":
+          description: Participation enregistrée
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reservationId, claim, claimKey]
+                properties:
+                  reservationId: { type: string }
+                  claim: { type: [string, "null"], description: À renvoyer dans `X-Reservation-Claims`. }
+                  claimKey: { type: string }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409":
+          description: "`groupGiftComplete` ou `groupGiftAlreadyJoined`."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "423": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/participations/{reservationId}:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+      - $ref: "#/components/parameters/reservationId"
+    patch:
+      tags: [public]
+      summary: Changer son montant (participant avec compte, depuis 1.11.0)
+      security: [{ bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amountCents]
+              properties:
+                amountCents: { type: [integer, "null"], minimum: 1, maximum: 10000000 }
+      responses:
+        "200":
+          description: Le cadeau à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupGift" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [public]
+      summary: Retirer sa participation (depuis 1.11.0)
+      description: Compte lié ou claim valide. Le dernier retrait libère l'idée et supprime le cadeau.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/reservationClaims"
+      responses:
+        "204": { description: Retirée }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/status:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    put:
+      tags: [public]
+      summary: Déclarer le cadeau commun complet ou le rouvrir (participant, depuis 1.11.0)
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [open, complete] }
+      responses:
+        "200":
+          description: Le cadeau à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupGift" }
+        "400": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
 
@@ -1312,6 +1512,12 @@ components:
     listId: { name: listId, in: path, required: true, schema: { type: string } }
     itemId: { name: itemId, in: path, required: true, schema: { type: string } }
     reservationId: { name: reservationId, in: path, required: true, schema: { type: string } }
+    groupGiftToken:
+      name: token
+      in: path
+      required: true
+      description: Jeton du cadeau commun (lien `/g/<token>`).
+      schema: { type: string }
     readUnlock:
       name: X-Read-Unlock
       in: header
@@ -1375,6 +1581,8 @@ components:
                 Codes de `locales/*/errors.json`, plus : unauthorized, invalidCredentials,
                 mustChangePassword, readPasswordRequired, invalidJson, payloadTooLarge,
                 unsupportedMediaType, originNotAllowed, apiVersionUnsupported, notFound.
+                Depuis 1.11.0 : groupGiftMissing (404), groupGiftComplete et groupGiftAlreadyJoined (409),
+                invalidAmount, invalidStatus.
               example: itemAlreadyReserved
             message: { type: string }
 
@@ -1443,10 +1651,77 @@ components:
         description: { type: [string, "null"], description: "Depuis 1.5.0. Contexte écrit par la liste : ce qu'est le produit, pourquoi il fait envie." }
         mine: { type: boolean, description: Réservée par ce client. }
         reservationId: { type: [string, "null"], description: Seulement si `mine`. }
+        groupGift:
+          description: Depuis 1.11.0, avec `groupGifts=true` seulement. null si l'idée n'est pas un cadeau commun.
+          oneOf:
+            - $ref: "#/components/schemas/GroupGiftSummary"
+            - type: "null"
+
+    GroupGiftSummary:
+      type: object
+      required: [token, status, participantCount, totalCents, remainingCents, goalReached, mine]
+      properties:
+        token: { type: string, description: Lien `/g/<token>`. }
+        status: { type: string, enum: [open, complete] }
+        participantCount: { type: integer }
+        totalCents: { type: integer, description: Somme des montants annoncés. }
+        remainingCents: { type: [integer, "null"], description: "Prix moins total, jamais négatif ; null si l'idée n'a pas de prix." }
+        goalReached: { type: boolean }
+        mine: { type: boolean, description: Ce client participe. }
+
+    GroupGiftParticipation:
+      type: object
+      required: [reservationId, name, amountCents, note, mine, editable]
+      properties:
+        reservationId: { type: [string, "null"], description: Seulement pour la sienne. }
+        name: { type: [string, "null"], description: null = « Anonyme ». }
+        amountCents: { type: [integer, "null"] }
+        note: { type: [string, "null"] }
+        mine: { type: boolean }
+        editable: { type: boolean, description: Sienne et liée au compte connecté (montant modifiable). }
+
+    GroupGift:
+      type: object
+      required:
+        [token, status, listTitle, item, participantCount, totalCents, remainingCents, goalReached, participantNames, me, participations, claimKey]
+      properties:
+        token: { type: string }
+        status: { type: string, enum: [open, complete] }
+        listTitle: { type: string }
+        item:
+          type: object
+          required: [name, typeLabel, url, imageUrl, priceCents, priceLabel, description, secondHandOk]
+          properties:
+            name: { type: string }
+            typeLabel: { type: string }
+            url: { type: [string, "null"] }
+            imageUrl: { type: [string, "null"] }
+            priceCents: { type: [integer, "null"] }
+            priceLabel: { type: [string, "null"] }
+            description: { type: [string, "null"] }
+            secondHandOk: { type: boolean }
+        participantCount: { type: integer }
+        totalCents: { type: integer }
+        remainingCents: { type: [integer, "null"] }
+        goalReached: { type: boolean }
+        participantNames:
+          type: array
+          items: { type: [string, "null"] }
+          description: Pour tout visiteur qui a accès ; null = « Anonyme ».
+        me:
+          description: La participation de ce client, ou null.
+          oneOf:
+            - $ref: "#/components/schemas/GroupGiftParticipation"
+            - type: "null"
+        participations:
+          type: [array, "null"]
+          items: { $ref: "#/components/schemas/GroupGiftParticipation" }
+          description: Pour les participants seulement (montants et messages) ; null sinon.
+        claimKey: { type: string, description: Voir `PublicList.claimKey`. }
 
     PublicList:
       type: object
-      required: [title, subtitle, coverImageUrl, theme, subscribed, isMember, follow, categories, people, items]
+      required: [title, subtitle, coverImageUrl, theme, subscribed, isMember, follow, categories, people, items, claimKey]
       properties:
         title: { type: string }
         subtitle: { type: [string, "null"] }
@@ -1464,6 +1739,11 @@ components:
         categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
         people: { type: array, items: { $ref: "#/components/schemas/Label" } }
         items: { type: array, items: { $ref: "#/components/schemas/PublicItem" } }
+        claimKey:
+          type: string
+          description: |
+            Depuis 1.11.0. Clé opaque de cette liste : le client range sous elle les claims de la liste et ceux
+            reçus par un lien de cadeau commun, qui ne donne pas le lien de la liste.
 
     FollowNames:
       type: object

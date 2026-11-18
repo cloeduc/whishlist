@@ -134,3 +134,33 @@ test("outside surprise mode: « Voir la liste partagée » opens the guest view 
   expect(guestViewOpenings()).toBe(1);
   expect(screen.queryByTestId("list.guest-view-confirm")).toBeNull();
 });
+
+test("group gift (028): one card with each participant, never an amount; a member cancels it all", async () => {
+  const chipIn = (id: string, fromName: string | null) => ({
+    ...reservation,
+    id,
+    itemId: "bike",
+    itemName: "Vélo",
+    fromName,
+    note: null,
+    groupGiftId: "g",
+    groupGiftStatus: "complete" as const,
+  });
+  const list = { ...surpriseList, surpriseMode: false, reservations: [reservation, chipIn("p1", "Sam"), chipIn("p2", null)] };
+  let cancelled = false;
+  await renderTab(list, {
+    "DELETE /lists/w/group-gifts/g": () => {
+      cancelled = true;
+      return new Response(null, { status: 204 });
+    },
+  });
+  const card = await screen.findByTestId("reservations.group-gift-g");
+  expect(card).toHaveTextContent(/Cadeau commun · 2 participants/);
+  expect(card).toHaveTextContent(/Complet/);
+  expect(card).toHaveTextContent(/De la part de Sam/);
+  expect(card).toHaveTextContent(/De la part de Anonyme/);
+  expect(screen.getByTestId("tab-reservations")).toHaveTextContent(`${i18n.t("list:tabs.reservations")} (2)`);
+  await fireEvent.press(screen.getByTestId("reservations.cancel-group-gift-g"));
+  await fireEvent.press(screen.getByTestId("reservations.cancel-group-gift-confirm"));
+  await waitFor(() => expect(cancelled).toBe(true));
+});

@@ -1,4 +1,4 @@
-import type { GroupGiftTotals } from "../domain/group-gift";
+import type { GroupGiftTotals } from "../domain/group-gift-view";
 import { formatPrice } from "../domain/price";
 
 type Translate = (key: string, options?: Record<string, unknown>) => string;

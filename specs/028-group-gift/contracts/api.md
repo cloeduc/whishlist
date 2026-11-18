@@ -1,6 +1,6 @@
 # Contrat API : Cadeau commun (028)
 
-Changements à reporter dans `specs/004-mobile-api/contracts/openapi.yaml` (version mineure suivante ; 1.10.0 au moment du plan), puis `npm --prefix mobile run api:types`. `tests/domain/api-contract.test.ts` vérifie que chaque opération a sa route. Montants en centimes (entiers), comme `priceCents`.
+Changements à reporter dans `specs/004-mobile-api/contracts/openapi.yaml` (version mineure suivante ; 1.10.0 au moment du plan), puis `npm --prefix mobile run api:types`. `tests/domain/api-contract.test.ts` vérifie que chaque opération a sa route. Montants en centimes (entiers), comme `priceCents`. Écarts avec la mise en œuvre : une erreur de validation répond 400 (règle de l'API), `readPasswordRequired` 423, et `MemberReservation` porte `groupGiftId` et `groupGiftStatus` au lieu d'une liste `groupGifts` séparée ; le contrat OpenAPI 1.11.0 fait foi.
 
 ## Schémas
 
@@ -80,8 +80,8 @@ AccountExport: + groupGiftMessages: [{ item, body, createdAt }]
 | `groupGiftMissing` | 404 | Ce cadeau commun n'existe plus. |
 | `groupGiftComplete` | 409 | Ce cadeau commun est complet : il n'est plus possible d'y participer. |
 | `groupGiftAlreadyJoined` | 409 | Vous participez déjà à ce cadeau commun. |
-| `invalidAmount` | 422 | Indiquez un montant valide (par exemple 20 ou 15,50). |
-| `messageEmpty` | 422 | Écrivez un message avant de l'envoyer. |
+| `invalidAmount` | 400 | Indiquez un montant valide (par exemple 20 ou 15,50). |
+| `messageEmpty` | 400 | Écrivez un message avant de l'envoyer. |
 
 ## Assistant (MCP)
 

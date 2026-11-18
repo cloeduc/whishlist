@@ -1,4 +1,4 @@
-import { groupGiftTotals } from "./group-gift";
+import { groupGiftTotals } from "./group-gift-view";
 import { formatPrice } from "./price";
 import type { Database, GroupGiftStatus, Reservation } from "./types";
 

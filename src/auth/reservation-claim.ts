@@ -6,9 +6,16 @@ import { sessionSecret } from "./session";
 
 const TTL_SEC = 60 * 60 * 24 * 90; // 90 days
 
+/**
+ * Opaque key of a list's claims, the same digest as the cookie's name: a client files its claims under it
+ * without knowing the read link (a group gift's link, 028).
+ */
+export function claimKeyFor(readToken: string): string {
+  return createHmac("sha256", "wl-res-claim").update(readToken).digest("base64url").slice(0, 16);
+}
+
 function cookieName(readToken: string): string {
-  const digest = createHmac("sha256", "wl-res-claim").update(readToken).digest("base64url").slice(0, 16);
-  return `wl_rc_${digest}`;
+  return `wl_rc_${claimKeyFor(readToken)}`;
 }
 
 function macClaims(readToken: string, iat: number, idsCsv: string, secret: string): string {

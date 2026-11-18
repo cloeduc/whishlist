@@ -1,6 +1,8 @@
 import "server-only";
 import { mustConfirmEmail } from "../../domain/email-confirmation";
-import { listPublicVisibleItems, mineReservationIdsFor, sortItems } from "../../domain/read";
+import { claimKeyFor } from "../../auth/reservation-claim";
+import { groupGiftOfItem, groupGiftSummary, type GroupGiftDetail, type GroupGiftSummary } from "../../domain/group-gift";
+import { listPublicVisibleItems, mineReservationIdsFor, sortItems, type PublicListOptions } from "../../domain/read";
 import { formatPrice } from "../../domain/price";
 import { hasReadPassword } from "../../domain/read-password";
 import { findSubscription, followNamesOf, isSubscriptionUnlocked, viewerRelation } from "../../domain/subscription";
@@ -40,6 +42,8 @@ export type PublicItemView = {
   description: string | null;
   mine: boolean;
   reservationId: string | null;
+  /** Since 1.11.0, with `groupGifts=true` only: the idea is a group gift (028). */
+  groupGift?: GroupGiftSummary | null;
 };
 
 /** The names a subscriber sees for a list they follow (024), for them only. */
@@ -61,6 +65,8 @@ export type PublicListView = {
   categories: CategoryView[];
   people: LabelView[];
   items: PublicItemView[];
+  /** Since 1.11.0: key to file this list's claims under, without its read link (028). */
+  claimKey: string;
 };
 
 export function categoriesOf(doc: Database, wishlistId: string): CategoryView[] {
@@ -92,21 +98,30 @@ function itemBase(item: Item, locale: Locale) {
   };
 }
 
-/** Same content as the public page: free ideas, plus this client's. */
+/**
+ * Same content as the public page: free ideas, plus this client's. A group gift (028) is shown to everyone
+ * only to a client that asks (`groupGifts`); an older app sees it as a reservation.
+ */
 export function toPublicListView(
   doc: Database,
   wishlist: Wishlist,
   locale: Locale,
   mineIds: ReadonlySet<string>,
   viewerId: string | null = null,
+  options: PublicListOptions = {},
 ): PublicListView {
   // A participation in a group gift is « mine » like a reservation: an older app shows it as reserved by the visitor.
   const mineByItem = new Map(
     doc.reservations.filter((r) => r.wishlistId === wishlist.id && mineIds.has(r.id)).map((r) => [r.itemId, r.id]),
   );
-  const items = listPublicVisibleItems(doc, wishlist.id, mineIds).map((item) => {
+  const items = listPublicVisibleItems(doc, wishlist.id, mineIds, options).map((item) => {
     const reservationId = mineByItem.get(item.id) ?? null;
-    return { ...itemBase(item, locale), mine: reservationId !== null, reservationId };
+    const view: PublicItemView = { ...itemBase(item, locale), mine: reservationId !== null, reservationId };
+    if (options.groupGifts) {
+      const gift = groupGiftOfItem(doc, item.id);
+      view.groupGift = gift ? groupGiftSummary(doc, gift, mineIds) : null;
+    }
+    return view;
   });
   const { isMember, subscribed } = viewerRelation(doc, wishlist.id, viewerId);
   const subscription = subscribed && viewerId ? findSubscription(doc, wishlist.id, viewerId) : null;
@@ -121,7 +136,15 @@ export function toPublicListView(
     categories: categoriesOf(doc, wishlist.id),
     people: peopleOf(doc, wishlist.id),
     items,
+    claimKey: claimKeyFor(wishlist.readToken),
   };
+}
+
+/** A group gift's page for a client (028): never the list's read link. */
+export type GroupGiftView = GroupGiftDetail & { claimKey: string };
+
+export function toGroupGiftView(detail: GroupGiftDetail, wishlist: Wishlist): GroupGiftView {
+  return { ...detail, claimKey: claimKeyFor(wishlist.readToken) };
 }
 
 export type MeView = {
