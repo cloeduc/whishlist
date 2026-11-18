@@ -76,7 +76,7 @@ export function ReservationForm({
           <FieldLegend variant="label">{t("reserve.modeLabel")}</FieldLegend>
           <RadioGroup
             name="mode"
-            defaultValue={mode}
+            value={mode}
             onValueChange={(value) => setMode(value === "group" ? "group" : "single")}
           >
             <ModeChoice value="single" label={t("reserve.modeSingle")} hint={t("reserve.modeSingleHint")} />

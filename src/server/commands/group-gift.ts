@@ -6,9 +6,10 @@ import {
   joinGroupGift as joinGift,
   leaveGroupGift as leaveGift,
   parseAmount,
+  setGroupGiftStatus,
   type GroupGiftDetail,
 } from "../../domain/group-gift";
-import type { Database, GroupGift, Reservation, Wishlist } from "../../domain/types";
+import type { Database, GroupGift, GroupGiftStatus, Reservation, Wishlist } from "../../domain/types";
 import { intlLocale } from "../../i18n/config";
 import { readDocument, updateDocument } from "../../store/db";
 import { rateLimitForIp } from "../rate-limit";
@@ -107,6 +108,30 @@ export async function leaveGroupGift(
     const saved = leaveGift(current, {
       groupGiftId: gift.id,
       reservationId: input.reservationId,
+      userId: publicAccount(ctx)?.id ?? null,
+      claimedIds,
+    });
+    return { doc: saved.ok ? saved.doc : current, result: saved };
+  });
+  if (!result.ok) return result;
+  return { ok: true, wishlist };
+}
+
+/** « Le cadeau est complet » / « Rouvrir le cadeau » (participant). */
+export async function setStatus(
+  ctx: CommandContext,
+  input: { token: string; status: GroupGiftStatus; claimsFor: ClaimsFor },
+): Promise<CommandResult<{ wishlist: Wishlist }>> {
+  rateLimitForIp("group-gift:status", ctx.ip, 30, 60 * 60 * 1000);
+  const doc = await readDocument();
+  const gift = findGroupGiftByToken(doc, input.token);
+  const wishlist = gift ? doc.wishlists.find((w) => w.id === gift.wishlistId) : undefined;
+  if (!gift || !wishlist) return { ok: false, error: "groupGiftMissing" };
+  const claimedIds = await input.claimsFor(wishlist);
+  const result = await updateDocument((current) => {
+    const saved = setGroupGiftStatus(current, {
+      groupGiftId: gift.id,
+      status: input.status,
       userId: publicAccount(ctx)?.id ?? null,
       claimedIds,
     });

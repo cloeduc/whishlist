@@ -34,7 +34,7 @@ import { isRateLimitError } from "./rate-limit";
 import { actionContext } from "./action-context";
 import { deleteOwnAccount } from "./commands/account";
 import { createMyApiKey, revokeMyApiKey } from "./commands/api-keys";
-import { joinGroupGift, leaveGroupGift } from "./commands/group-gift";
+import { joinGroupGift, leaveGroupGift, setStatus as setGroupGiftStatus } from "./commands/group-gift";
 import {
   changeOwnPassword,
   checkCredentials,
@@ -835,6 +835,21 @@ export async function leaveGroupGiftAction(formData: FormData) {
   }
   if (!result.ok) return localeRedirect(`/g/${token}?e=${result.error}`);
   await revokeReservationClaim(result.wishlist.readToken, reservationId);
+  return localeRedirect(`/g/${token}`);
+}
+
+/** « Le cadeau est complet » / « Rouvrir le cadeau » (028). */
+export async function setGroupGiftStatusAction(formData: FormData) {
+  const token = String(formData.get("token") ?? "");
+  const status = formData.get("status") === "complete" ? "complete" : "open";
+  let result: Awaited<ReturnType<typeof setGroupGiftStatus>>;
+  try {
+    result = await setGroupGiftStatus(await actionContext(), { token, status, claimsFor: claimsFromCookie });
+  } catch (error) {
+    if (isRateLimitError(error)) return localeRedirect(`/g/${token}?e=rateLimited`);
+    throw error;
+  }
+  if (!result.ok) return localeRedirect(`/g/${token}?e=${result.error}`);
   return localeRedirect(`/g/${token}`);
 }
 

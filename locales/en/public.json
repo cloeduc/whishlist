@@ -145,6 +145,13 @@
     "joinedTitle": "You're chipping in for this group gift",
     "joinedBody": "Nothing is paid here: agree with the other participants on the purchase.",
     "missing": "This group gift no longer exists.",
-    "missingHint": "Its participants withdrew, or the list changed."
+    "missingHint": "Its participants withdrew, or the list changed.",
+    "markComplete": "The gift is complete",
+    "markCompleteTitle": "Mark the gift complete?",
+    "markCompleteBody": "It will no longer be offered to people who are not chipping in. Participants can reopen it.",
+    "markCompleteKeep": "Keep it open",
+    "reopen": "Reopen the gift",
+    "closed": "This group gift is complete: you can no longer chip in.",
+    "completeHint": "The gift is complete: it is no longer offered to other people."
   }
 }

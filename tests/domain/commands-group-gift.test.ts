@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { before, test } from "node:test";
 import { verifyReservationClaims } from "../../src/auth/reservation-claim";
 import { setReadPassword } from "../../src/domain/read-password";
-import { joinGroupGift, leaveGroupGift, readGroupGift } from "../../src/server/commands/group-gift";
+import { joinGroupGift, leaveGroupGift, readGroupGift, setStatus } from "../../src/server/commands/group-gift";
 import { readPublicList, reserve } from "../../src/server/commands/public-list";
 import { readDocument } from "../../src/store/db";
 import { apiDoc, ctx, ensurePasswordHash, TEST_SECRET, withStore } from "./helpers/api-fixtures";
@@ -122,5 +122,17 @@ test("join through the gift's link, then leave with the claim of the gift's list
     });
     assert.equal(left.ok, true);
     assert.equal((await readDocument()).reservations.filter((r) => r.groupGiftId === "g").length, 2);
+  });
+});
+
+test("status command: a participant by claim marks it complete; a stranger is refused", async () => {
+  await withStore(docWithGroupGift(), async () => {
+    const denied = await setStatus(ctx(), { token: "tok-g", status: "complete", claimsFor: noClaims });
+    assert.deepEqual(denied, { ok: false, error: "accessDenied" });
+    const done = await setStatus(ctx(), { token: "tok-g", status: "complete", claimsFor: () => new Set(["p-sam"]) });
+    assert.equal(done.ok, true);
+    assert.equal((await readDocument()).groupGifts[0]?.status, "complete");
+    const join = await joinGroupGift(ctx(), { token: "tok-g", isUnlocked: noUnlock, claimsFor: noClaims });
+    assert.deepEqual(join, { ok: false, error: "groupGiftComplete" });
   });
 });

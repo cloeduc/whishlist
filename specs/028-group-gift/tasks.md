@@ -100,13 +100,13 @@ Chaque phase de user story se termine par une tâche **« Commit de la story »*
 
 **Independent Test**: quickstart.md § US2.
 
-- [ ] T032 [P] [US2] Tests dans `tests/domain/group-gift.test.ts` et `read-list.test.ts` : `setGroupGiftStatus` par un participant (compte ou preuve) ; `accessDenied` pour un non-participant ; participer à un cadeau complet → `groupGiftComplete` ; complet invisible des non-participants sur la liste, visible des participants ; retrait d'un participant sur un cadeau complet → reste complet ; dernier retrait → idée libre ; rouvrir → visible de nouveau
-- [ ] T033 [US2] `src/domain/group-gift.ts` : `setGroupGiftStatus(doc, { groupGiftId, status, userId, claimedIds, now })` (`completedAt` à la déclaration) ; `src/domain/read.ts` : cadeau `complete` visible des seuls participants
-- [ ] T034 [US2] `src/server/commands/group-gift.ts` : `setStatus` (30/h) ; `src/server/actions.ts` : `setGroupGiftStatusAction`
-- [ ] T035 [US2] `app/g/[token]/page.tsx` et `components/site/group-gift-mine.tsx` : « Le cadeau est complet » / « Rouvrir le cadeau » ; badge « Complet » ; vue d'un non-participant sur un cadeau complet → `public:groupGift.closed`, sans formulaire ; `public-item-card.tsx` : badge « Complet » pour le participant
-- [ ] T036 [P] [US2] Textes FR/EN (`markComplete`, `reopen`, `complete`, `closed`) dans `locales/{fr,en}/public.json`
-- [ ] T037 [US2] Parcours quickstart.md § US2
-- [ ] T038 [US2] Commit de la story : lint, types et tests verts, puis `feat: mark a group gift complete or reopen it (US2)`, sans demander
+- [X] T032 [P] [US2] Tests dans `tests/domain/group-gift.test.ts` et `read-list.test.ts` : `setGroupGiftStatus` par un participant (compte ou preuve) ; `accessDenied` pour un non-participant ; participer à un cadeau complet → `groupGiftComplete` ; complet invisible des non-participants sur la liste, visible des participants ; retrait d'un participant sur un cadeau complet → reste complet ; dernier retrait → idée libre ; rouvrir → visible de nouveau
+- [X] T033 [US2] `src/domain/group-gift.ts` : `setGroupGiftStatus(doc, { groupGiftId, status, userId, claimedIds, now })` (`completedAt` à la déclaration) ; `src/domain/read.ts` : cadeau `complete` visible des seuls participants
+- [X] T034 [US2] `src/server/commands/group-gift.ts` : `setStatus` (30/h) ; `src/server/actions.ts` : `setGroupGiftStatusAction`
+- [X] T035 [US2] `app/g/[token]/page.tsx` et `components/site/group-gift-mine.tsx` : « Le cadeau est complet » / « Rouvrir le cadeau » ; badge « Complet » ; vue d'un non-participant sur un cadeau complet → `public:groupGift.closed`, sans formulaire ; `public-item-card.tsx` : badge « Complet » pour le participant
+- [X] T036 [P] [US2] Textes FR/EN (`markComplete`, `reopen`, `complete`, `closed`) dans `locales/{fr,en}/public.json`
+- [X] T037 [US2] Parcours quickstart.md § US2
+- [X] T038 [US2] Commit de la story : lint, types et tests verts, puis `feat: mark a group gift complete or reopen it (US2)`, sans demander
 
 ---
 

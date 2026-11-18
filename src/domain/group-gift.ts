@@ -193,6 +193,30 @@ export function leaveGroupGift(
   return { ok: true, doc: next };
 }
 
+/**
+ * « Le cadeau est complet » / « Rouvrir le cadeau »: any participant (account or claim).
+ * A complete gift is no longer offered to people who do not chip in; nothing closes it automatically.
+ */
+export function setGroupGiftStatus(
+  doc: Database,
+  input: {
+    groupGiftId: string;
+    status: GroupGiftStatus;
+    userId: string | null;
+    claimedIds: ReadonlySet<string>;
+    now?: Date;
+  },
+): { ok: true; doc: Database } | Failure {
+  const gift = doc.groupGifts.find((g) => g.id === input.groupGiftId);
+  if (!gift) return { ok: false, error: "groupGiftMissing" };
+  if (!ownParticipation(doc, gift.id, input.userId, input.claimedIds)) return { ok: false, error: "accessDenied" };
+  const next = clone(doc);
+  const target = next.groupGifts.find((g) => g.id === gift.id)!;
+  target.status = input.status;
+  if (input.status === "complete") target.completedAt = (input.now ?? new Date()).toISOString();
+  return { ok: true, doc: next };
+}
+
 export interface GroupGiftSummary extends GroupGiftTotals {
   token: string;
   status: GroupGiftStatus;

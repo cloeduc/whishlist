@@ -145,6 +145,13 @@
     "joinedTitle": "Vous participez à ce cadeau commun",
     "joinedBody": "Rien n'est payé ici : entendez-vous avec les autres participants pour l'achat.",
     "missing": "Ce cadeau commun n'existe plus.",
-    "missingHint": "Les participants l'ont retiré, ou la liste a changé."
+    "missingHint": "Les participants l'ont retiré, ou la liste a changé.",
+    "markComplete": "Le cadeau est complet",
+    "markCompleteTitle": "Déclarer le cadeau complet ?",
+    "markCompleteBody": "Il ne sera plus proposé aux personnes qui ne participent pas. Les participants pourront le rouvrir.",
+    "markCompleteKeep": "Laisser ouvert",
+    "reopen": "Rouvrir le cadeau",
+    "closed": "Ce cadeau commun est complet : il n'est plus possible d'y participer.",
+    "completeHint": "Le cadeau est complet : il n'est plus proposé aux autres personnes."
   }
 }

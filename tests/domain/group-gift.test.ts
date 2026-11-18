@@ -9,6 +9,7 @@ import {
   ownParticipation,
   parseAmount,
   pruneGroupGifts,
+  setGroupGiftStatus,
   startGroupGift,
 } from "../../src/domain/group-gift";
 import { cancelReservation } from "../../src/domain/items";
@@ -297,4 +298,53 @@ test("my offers: a participation shows its gift, the share and what is left", ()
   assert.equal(rows.length, 1);
   assert.deepEqual(rows[0].groupGift, { token: "tok-g", status: "open", amountCents: 1000, remainingCents: 490 });
   assert.equal(listMyOffers(apiDoc(), "alex").length, 0);
+});
+
+test("complete: a participant marks it complete or reopens it; someone else cannot", () => {
+  const doc = docWithGroupGift();
+  assert.deepEqual(
+    setGroupGiftStatus(doc, { groupGiftId: "g", status: "complete", userId: "camille", claimedIds: new Set() }),
+    { ok: false, error: "accessDenied" },
+  );
+  assert.deepEqual(setGroupGiftStatus(doc, { groupGiftId: "nope", status: "complete", userId: "alex", claimedIds: new Set() }), {
+    ok: false,
+    error: "groupGiftMissing",
+  });
+  const done = setGroupGiftStatus(doc, {
+    groupGiftId: "g",
+    status: "complete",
+    userId: null,
+    claimedIds: new Set(["p-sam"]),
+    now: new Date("2026-02-02T00:00:00.000Z"),
+  });
+  assert.ok(done.ok);
+  assert.equal(done.doc.groupGifts[0].status, "complete");
+  assert.equal(done.doc.groupGifts[0].completedAt, "2026-02-02T00:00:00.000Z");
+  const reopened = setGroupGiftStatus(done.doc, { groupGiftId: "g", status: "open", userId: "alex", claimedIds: new Set() });
+  assert.ok(reopened.ok);
+  assert.equal(reopened.doc.groupGifts[0].status, "open");
+});
+
+test("complete: nobody can chip in any more; it is hidden from those who do not chip in", () => {
+  const doc = docWithGroupGift();
+  doc.groupGifts[0].status = "complete";
+  assert.deepEqual(joinGroupGift(doc, { groupGiftId: "g", claimedIds: new Set() }), { ok: false, error: "groupGiftComplete" });
+  assert.deepEqual(listPublicVisibleItems(doc, "w", new Set(), { groupGifts: true }).map((i) => i.id), ["gift2"]);
+  assert.deepEqual(
+    listPublicVisibleItems(doc, "w", new Set(["p-sam"]), { groupGifts: true }).map((i) => i.id),
+    ["gift", "gift2"],
+  );
+  assert.equal(toPublicItem(doc, doc.items[0], "fr-FR", new Set(["p-sam"])).groupGift?.status, "complete");
+});
+
+test("complete: a participant leaving keeps it complete; the last one frees the idea", () => {
+  const doc = docWithGroupGift();
+  doc.groupGifts[0].status = "complete";
+  const first = leaveGroupGift(doc, { groupGiftId: "g", reservationId: "p-sam", userId: null, claimedIds: new Set(["p-sam"]) });
+  assert.ok(first.ok);
+  assert.equal(first.doc.groupGifts[0].status, "complete");
+  const last = leaveGroupGift(first.doc, { groupGiftId: "g", reservationId: "p-alex", userId: "alex", claimedIds: new Set() });
+  assert.ok(last.ok);
+  assert.deepEqual(last.doc.groupGifts, []);
+  assert.deepEqual(listPublicVisibleItems(last.doc, "w", new Set(), { groupGifts: true }).map((i) => i.id), ["gift", "gift2"]);
 });

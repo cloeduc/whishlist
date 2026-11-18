@@ -4,11 +4,12 @@ import { listClaimedReservationIds } from "../../../src/auth/reservation-claim";
 import { findGroupGiftByToken, groupGiftDetail } from "../../../src/domain/group-gift";
 import { formatPrice } from "../../../src/domain/price";
 import { getDocument } from "../../../src/store/db";
-import { leaveGroupGiftAction } from "../../../src/server/actions";
+import { leaveGroupGiftAction, setGroupGiftStatusAction } from "../../../src/server/actions";
 import { ConfirmForm } from "@/components/site/confirm-form";
 import { GroupGiftJoinForm } from "@/components/site/group-gift-join-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { intlLocale } from "@/src/i18n/config";
@@ -103,6 +104,7 @@ export default async function GroupGiftPage({
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">{t("groupGift.badge")}</Badge>
             {detail.me ? <Badge variant="secondary">{t("groupGift.mine")}</Badge> : null}
+            {detail.status === "complete" ? <Badge variant="secondary">{t("groupGift.complete")}</Badge> : null}
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-balance">{item.name}</h1>
           <p className="text-muted-foreground text-pretty">{t("groupGift.fromList", { title: detail.listTitle })}</p>
@@ -172,19 +174,46 @@ export default async function GroupGiftPage({
                 : t("groupGift.amountUnknown")}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <ConfirmForm
-              title={t("groupGift.leaveTitle")}
-              description={t("groupGift.leaveBody")}
-              confirmLabel={t("groupGift.leaveConfirm")}
-              cancelLabel={t("groupGift.leaveKeep")}
-              action={leaveGroupGiftAction}
-              fields={{ token, reservationId: detail.me.reservationId }}
-              triggerLabel={t("groupGift.leave")}
-              triggerVariant="outline"
-              triggerSize="sm"
-              confirmVariant="destructive"
-            />
+          <CardContent className="flex flex-col gap-3">
+            {detail.status === "complete" ? (
+              <p className="text-sm text-muted-foreground">{t("groupGift.completeHint")}</p>
+            ) : null}
+            <div className="flex flex-wrap gap-2">
+              {detail.status === "open" ? (
+                <ConfirmForm
+                  title={t("groupGift.markCompleteTitle")}
+                  description={t("groupGift.markCompleteBody")}
+                  confirmLabel={t("groupGift.markComplete")}
+                  cancelLabel={t("groupGift.markCompleteKeep")}
+                  action={setGroupGiftStatusAction}
+                  fields={{ token, status: "complete" }}
+                  triggerLabel={t("groupGift.markComplete")}
+                  triggerVariant="default"
+                  triggerSize="sm"
+                  confirmVariant="default"
+                />
+              ) : (
+                <form action={setGroupGiftStatusAction}>
+                  <input type="hidden" name="token" value={token} />
+                  <input type="hidden" name="status" value="open" />
+                  <Button type="submit" size="sm" variant="outline">
+                    {t("groupGift.reopen")}
+                  </Button>
+                </form>
+              )}
+              <ConfirmForm
+                title={t("groupGift.leaveTitle")}
+                description={t("groupGift.leaveBody")}
+                confirmLabel={t("groupGift.leaveConfirm")}
+                cancelLabel={t("groupGift.leaveKeep")}
+                action={leaveGroupGiftAction}
+                fields={{ token, reservationId: detail.me.reservationId }}
+                triggerLabel={t("groupGift.leave")}
+                triggerVariant="outline"
+                triggerSize="sm"
+                confirmVariant="destructive"
+              />
+            </div>
           </CardContent>
         </Card>
       ) : detail.status === "open" ? (
@@ -196,7 +225,11 @@ export default async function GroupGiftPage({
             <GroupGiftJoinForm token={token} />
           </CardContent>
         </Card>
-      ) : null}
+      ) : (
+        <Alert>
+          <AlertDescription>{t("groupGift.closed")}</AlertDescription>
+        </Alert>
+      )}
     </main>
   );
 }
