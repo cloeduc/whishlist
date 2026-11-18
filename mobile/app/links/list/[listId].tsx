@@ -62,7 +62,7 @@ function Decide({ listId, tab }: { listId: string; tab?: string }) {
     if (screenPath) router.replace(screenPath as Href);
   }, [screenPath]);
 
-  if (target?.kind === "help") return <ListAccessHelp />;
+  if (target?.kind === "help") return <ListAccessHelp followedReadToken={target.followedReadToken} />;
   return (
     <AuthLayout title={t("links.listChecking")} testID="link-list.loading">
       {null}

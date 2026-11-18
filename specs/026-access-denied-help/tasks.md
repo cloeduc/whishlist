@@ -87,16 +87,16 @@ Aucune : pas de donnée ni de route d'API (data-model.md).
 
 ### Tests for User Story 3
 
-- [ ] T020 [P] [US3] `tests/domain/subscription.test.ts` : `viewerRelation` → abonné non membre `{ isMember: false, subscribed: true }` ; membre et abonné → `subscribed: false` ; ni l'un ni l'autre → les deux `false` (compléter seulement les cas absents)
-- [ ] T021 [P] [US3] `mobile/__tests__/screens/links-list.test.tsx` : abonné → `link-list.view-followed` visible, mène à `/guest/<readToken>` ; non abonné → absent
+- [X] T020 [P] [US3] `tests/domain/subscription.test.ts` : `viewerRelation` → abonné non membre `{ isMember: false, subscribed: true }` ; membre et abonné → `subscribed: false` ; ni l'un ni l'autre → les deux `false` (compléter seulement les cas absents)
+- [X] T021 [P] [US3] `mobile/__tests__/screens/links-list.test.tsx` : abonné → `link-list.view-followed` visible, mène à `/guest/<readToken>` ; non abonné → absent
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Dans `app/lists/[id]/page.tsx`, pour un non-membre : `viewerRelation(doc, id, user.id)` ; si `subscribed`, passer `followedReadUrl = withLocale(locale, "/l/<readToken>")` à `<ListAccessHelp>` ; le `readToken` n'est lu que dans ce cas (FR-003)
-- [ ] T023 [US3] Dans `components/site/list-access-help.tsx`, quand `followedReadUrl` est donné : `accessHelp.followedBody` à la place de `accessHelp.howTo` et `LinkButton` `accessHelp.viewFollowed` vers ce lien (la page publique applique le mot de passe de lecture, FR-004)
-- [ ] T024 [US3] Dans `mobile/src/features/lists/ListAccessHelp.tsx`, quand `followedReadToken` est donné : `accessHelp.followedBody` à la place de `accessHelp.howTo` et `Button` `accessHelp.viewFollowed` (testID `link-list.view-followed`) → `router.replace("/guest/<readToken>")`
-- [ ] T025 [US3] Vérifier à la main quickstart US3 (site et app, dont le mot de passe de lecture)
-- [ ] T026 [US3] Commit de la story : contrôles verts, puis `feat: offer the followed list on the access-denied page (US3)`, sans demander
+- [X] T022 [US3] Dans `app/lists/[id]/page.tsx`, pour un non-membre : `viewerRelation(doc, id, user.id)` ; si `subscribed`, passer `followedReadUrl = withLocale(locale, "/l/<readToken>")` à `<ListAccessHelp>` ; le `readToken` n'est lu que dans ce cas (FR-003)
+- [X] T023 [US3] Dans `components/site/list-access-help.tsx`, quand `followedReadUrl` est donné : `accessHelp.followedBody` à la place de `accessHelp.howTo` et `LinkButton` `accessHelp.viewFollowed` vers ce lien (la page publique applique le mot de passe de lecture, FR-004)
+- [X] T024 [US3] Dans `mobile/src/features/lists/ListAccessHelp.tsx`, quand `followedReadToken` est donné : `accessHelp.followedBody` à la place de `accessHelp.howTo` et `Button` `accessHelp.viewFollowed` (testID `link-list.view-followed`) → `router.replace("/guest/<readToken>")`
+- [ ] T025 [US3] Vérifier à la main quickstart US3 (site et app, dont le mot de passe de lecture) — site vérifié le 2026-11-18 (Playwright : « Voir la liste » pour l'abonné, absent sinon, mot de passe de lecture demandé) ; app à vérifier sur le simulateur (couverte par jest)
+- [X] T026 [US3] Commit de la story : contrôles verts, puis `feat: offer the followed list on the access-denied page (US3)`, sans demander
 
 ---
 

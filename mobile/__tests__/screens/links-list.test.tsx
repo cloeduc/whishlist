@@ -92,6 +92,27 @@ test("not a member: the help screen, which says nothing about the list and leads
   expect(router.replace).toHaveBeenCalledWith("/");
 });
 
+test("a follower: the help screen offers the followed list", async () => {
+  jest.mocked(useLocalSearchParams).mockReturnValue({ listId: "followed" });
+  await signInAs();
+  fakeFetch({ "GET /lists": lists });
+  await render(<ListLink />);
+  expect(await screen.findByTestId("link-list.help")).toBeOnTheScreen();
+  expect(screen.getByText(/Vous suivez déjà cette liste/)).toBeOnTheScreen();
+  expect(screen.queryByText(/demandez le lien de la liste/)).toBeNull();
+  await fireEvent.press(screen.getByTestId("link-list.view-followed"));
+  expect(router.replace).toHaveBeenCalledWith("/guest/followed-read");
+});
+
+test("not a follower: no « Voir la liste »", async () => {
+  jest.mocked(useLocalSearchParams).mockReturnValue({ listId: "someone-else" });
+  await signInAs();
+  fakeFetch({ "GET /lists": lists });
+  await render(<ListLink />);
+  expect(await screen.findByTestId("link-list.help")).toBeOnTheScreen();
+  expect(screen.queryByTestId("link-list.view-followed")).toBeNull();
+});
+
 test("without network: the decision uses the local copy of the lists", async () => {
   await signInAs();
   fakeFetch({ "GET /lists": lists });
