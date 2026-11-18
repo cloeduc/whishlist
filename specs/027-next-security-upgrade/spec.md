@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-18
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "WISH-31" — ticket Plane « Monter Next.js en 16.4.6 (vulnérabilité modérée, cache de 'use cache') ».
 

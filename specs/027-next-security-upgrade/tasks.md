@@ -90,7 +90,7 @@ Aucune : la montée elle-même est l'objet de US1.
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T014 Relire `specs/027-next-security-upgrade/research.md` (« Constat après montée ») : il répond à FR-008 (changements notés avec leur décision) et à FR-009 (pas de mise en cache de fonctions, exposition nulle ; relais Umami, exposition faible). Passer `**Status**` de `spec.md` à `Implemented`. Commit `chore: close the 027 feature docs` s'il y a un changement, sans demander.
+- [X] T014 Relire `specs/027-next-security-upgrade/research.md` (« Constat après montée ») : il répond à FR-008 (changements notés avec leur décision) et à FR-009 (pas de mise en cache de fonctions, exposition nulle ; relais Umami, exposition faible). Passer `**Status**` de `spec.md` à `Implemented`. Commit `chore: close the 027 feature docs` s'il y a un changement, sans demander.
 
 Ensuite, le hook `after_implement` lance `wishlist-feature-review`.
 
