@@ -23,9 +23,12 @@ export function clearPendingLink(): void {
   pending = null;
 }
 
+/** Link screens worth coming back to after sign-in: an invitation, a list's management address (026). */
+const RESUMABLE_LINKS = ["/links/invite/", "/links/list/"];
+
 /**
- * Sign-in or sign-up opened by `/login?next=/invite/…` (site link, or its former French form
- * `/connexion?next=/inviter/…`): the invitation is kept, as if its link had been opened.
+ * Sign-in or sign-up opened by `/login?next=/invite/…` or `/login?next=/lists/…` (site link, or its
+ * former French form `/connexion?next=/listes/…`): that link is kept, as if it had been opened.
  * Other `next` values are ignored.
  */
 export function useNextLink(): void {
@@ -33,6 +36,6 @@ export function useNextLink(): void {
   useEffect(() => {
     if (typeof next !== "string") return;
     const path = appPathForUrl(next);
-    if (path?.startsWith("/links/invite/")) setPendingLink(path);
+    if (path && RESUMABLE_LINKS.some((prefix) => path.startsWith(prefix))) setPendingLink(path);
   }, [next]);
 }

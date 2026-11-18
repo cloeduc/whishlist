@@ -101,7 +101,9 @@
   "links": {
     "confirming": "Confirming your email address…",
     "passwordSaved": "Your password is saved. Sign in with your new password.",
-    "inviteChecking": "Opening the invitation…"
+    "inviteChecking": "Opening the invitation…",
+    "listSignIn": "Log in to open this list",
+    "listChecking": "Opening the list…"
   },
   "shared": {
     "followButton": "Follow a list",

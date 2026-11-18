@@ -28,8 +28,7 @@ export interface AppLinkRoute {
 /**
  * The table lives in `app-link-routes.json`: `mobile/app.config.ts` reads it too, and Expo's config
  * loader reads JSON but not a TypeScript module outside `mobile/`.
- * No `/lists/:id`: the app opens these site pages on purpose (« Gérer le partage sur le site »),
- * and a claimed link would reopen the app instead of the browser.
+ * `/lists/:listId` (026): a member gets the list in the app, anyone else a help screen.
  */
 export const APP_LINK_ROUTES: readonly AppLinkRoute[] = routes.map((route) => ({
   sitePattern: route.site,

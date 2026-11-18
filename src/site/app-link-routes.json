@@ -6,5 +6,6 @@
   { "site": "/register", "app": "/register", "keepQuery": ["next"] },
   { "site": "/l/:readToken", "app": "/guest/:readToken", "keepQuery": ["typeId"] },
   { "site": "/l/:readToken/reserve", "app": "/guest/:readToken/reserve", "keepQuery": ["itemId", "typeId"] },
-  { "site": "/l/:readToken/types", "app": "/guest/:readToken", "keepQuery": ["typeId"] }
+  { "site": "/l/:readToken/types", "app": "/guest/:readToken", "keepQuery": ["typeId"] },
+  { "site": "/lists/:listId", "app": "/links/list/:listId", "keepQuery": ["tab"] }
 ]

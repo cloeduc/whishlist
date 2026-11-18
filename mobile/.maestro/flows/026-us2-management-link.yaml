@@ -1,0 +1,44 @@
+# 026 US2: a list's management address (/lists/<id> on the site) opens the app. Alex manages the demo
+# list: the list opens, on the « Partager » screen when the address names that tab. The other demo list
+# (Sam's) is not Alex's: the help screen, under the former French address too, then back to the lists.
+# The links open through the ohyoushouldnt:// scheme: locally, the domain is not associated with the app.
+appId: app.ohyoushouldnt.mobile
+name: "026 US2 — A list's management address opens the app"
+tags:
+  - 026-us2
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: alex@example.test
+
+# A list Alex manages: the list itself.
+- openLink: ohyoushouldnt://lists/demo-list
+- extendedWaitUntil:
+    visible:
+      id: list.screen
+    timeout: 20000
+
+# Same list, « Partage » tab of the site: the app's « Partager » screen.
+- openLink: ohyoushouldnt://lists/demo-list?tab=sharing
+- extendedWaitUntil:
+    visible:
+      id: share.share
+    timeout: 20000
+
+# Sam's list, under its former French address: the help screen, then back to the lists.
+- openLink: ohyoushouldnt://listes/demo-other-list
+- extendedWaitUntil:
+    visible:
+      id: link-list.help
+    timeout: 20000
+- assertNotVisible:
+    text: Les idées de Sam
+- tapOn:
+    id: link-list.back
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 10000

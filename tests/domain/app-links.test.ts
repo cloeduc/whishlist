@@ -24,6 +24,7 @@ test("each link in the table opens its screen, in French as under /en", () => {
     ["/l/read", "/guest/read"],
     ["/l/read/reserve", "/guest/read/reserve"],
     ["/l/read/types", "/guest/read"],
+    ["/lists/abc", "/links/list/abc"],
   ];
   assert.equal(cases.length >= APP_LINK_ROUTES.length, true);
   for (const [site, app] of cases) {
@@ -40,6 +41,8 @@ test("the former French address of each link opens the same screen (018)", () =>
     ["/connexion?next=%2Finviter%2FI", "/login?next=%2Finvite%2FI"],
     ["/inscription", "/register"],
     ["/l/read/reserver?itemId=i1", "/guest/read/reserve?itemId=i1"],
+    ["/listes/abc?onglet=partage", "/links/list/abc?tab=sharing"],
+    ["/connexion?next=%2Flistes%2Fabc", "/login?next=%2Flists%2Fabc"],
   ];
   for (const [site, app] of cases) {
     assert.equal(to(`https://${HOST}${site}`), app, site);
@@ -81,9 +84,8 @@ test("addresses the app does not handle: null", () => {
     `https://${HOST}/compte/export`,
     `https://${HOST}/account/export`,
     `https://${HOST}/api/v1/me`,
-    // Opened in the browser on purpose from the app (« Gérer le partage sur le site »).
-    `https://${HOST}/listes/abc?onglet=partage`,
-    `https://${HOST}/lists/abc?tab=sharing`,
+    `https://${HOST}/lists`,
+    `https://${HOST}/lists/abc/autre`,
     `https://${HOST}/invite/`,
     `https://${HOST}/invite//x`,
     `https://${HOST}/invite/a%2Fb`,
@@ -97,6 +99,13 @@ test("addresses the app does not handle: null", () => {
   ]) {
     assert.equal(to(url), null, url);
   }
+});
+
+test("a list's management address opens the app's link screen, with its tab only (026)", () => {
+  assert.equal(to(`https://${HOST}/lists/abc?tab=sharing&e=x`), "/links/list/abc?tab=sharing");
+  assert.equal(to(`https://${HOST}/en/lists/abc?tab=sharing`), "/links/list/abc?tab=sharing");
+  assert.equal(to(`https://${HOST}/lists/new`), "/links/list/new");
+  assert.equal(to("ohyoushouldnt://lists/abc"), "/links/list/abc");
 });
 
 test("a token is decoded then re-encoded once", () => {
@@ -121,11 +130,15 @@ test("Apple file: the published app and each path, with and without /en", () => 
     "/en/inviter/*",
     "/reinitialiser/*",
     "/inscription",
+    "/lists/*",
+    "/en/lists/*",
+    "/listes/*",
+    "/en/listes/*",
   ]) {
     assert.equal(paths.includes(path), true, path);
   }
   assert.equal(new Set(paths).size, paths.length);
-  assert.equal(paths.some((path) => path.startsWith("/guide") || path.startsWith("/listes") || path.startsWith("/lists") || path.startsWith("/compte") || path === "/"), false);
+  assert.equal(paths.some((path) => path.startsWith("/guide") || path.startsWith("/compte") || path === "/"), false);
 });
 
 test("Android file: malformed fingerprints ignored, prefixes from the table", () => {
@@ -133,11 +146,11 @@ test("Android file: malformed fingerprints ignored, prefixes from the table", ()
   assert.equal(entry!.target.package_name, "app.ohyoushouldnt.mobile");
   assert.deepEqual(entry!.target.sha256_cert_fingerprints, [FINGERPRINT]);
   const prefixes = androidPathPrefixes();
-  for (const prefix of ["/confirm-email/", "/en/confirm-email/", "/l/", "/login", "/en/register", "/confirmer-email/", "/en/confirmer-email/", "/connexion", "/en/inscription", "/inviter/", "/reinitialiser/"]) {
+  for (const prefix of ["/confirm-email/", "/en/confirm-email/", "/l/", "/login", "/en/register", "/confirmer-email/", "/en/confirmer-email/", "/connexion", "/en/inscription", "/inviter/", "/reinitialiser/", "/lists/", "/en/lists/", "/listes/", "/en/listes/"]) {
     assert.equal(prefixes.includes(prefix), true, prefix);
   }
   assert.equal(new Set(prefixes).size, prefixes.length);
-  assert.equal(prefixes.some((prefix) => prefix.includes("/listes") || prefix.includes("/lists") || prefix.includes("/compte")), false);
+  assert.equal(prefixes.some((prefix) => prefix.includes("/compte")), false);
 });
 
 function assertJsonHeaders(response: Response) {
