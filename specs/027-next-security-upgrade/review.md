@@ -1,6 +1,6 @@
 # Revue de code
 
-Revue complète, faite sur le diff depuis `staging` (point de départ de la branche, `0b997dd`). `origin/main` est en retard sur `staging`, et la commande par défaut remontait tout le travail encore non publié. Un seul fichier de code : `package.json`. `package-lock.json` est un fichier généré, et ses 12 entrées `next` / `@next/*` ont été contrôlées pendant T003. Vu la taille du diff (trois numéros de version), les cinq contrôles ont été faits directement, sans agents.
+Revue complète, faite sur le diff depuis `staging` (point de départ de la branche, `0b997dd`). `origin/main` est en retard sur `staging`, et la commande par défaut remontait tout le travail encore non publié. Un seul fichier de code : `package.json`. `package-lock.json` est un fichier généré, et ses 12 entrées `next` / `@next/*` ont été contrôlées pendant T003. Les cinq contrôles ont été faits par cinq agents en parallèle, comme le prévoit le skill. Aucun n'a trouvé de point.
 
 ## Fichiers relus
 
