@@ -210,13 +210,13 @@ Chaque phase de user story se termine par une tâche **« Commit de la story »*
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-- [ ] T087 [P] Pages de confidentialité FR/EN du site (`app/privacy/page.tsx` et ses textes) et de l'app (`mobile/app/legal/privacy.tsx`) : montant annoncé, noms visibles des autres participants et des personnes qui ont le lien du cadeau, fil de messages (qui le lit, conservation, suppression du compte)
-- [ ] T088 [P] Guide et FAQ (`locales/{fr,en}/content.json`, `app/guide/page.tsx`) : section « Offrir à plusieurs » ; captures si besoin (`npm run demo:capture`)
-- [ ] T089 [P] Données de démo `scripts/create-demo-data.mjs` : un cadeau commun ouvert à deux participants (montants, un message de fil), comptes `@example.test` seulement ; `tests/domain/demo-seed.test.ts`
-- [ ] T090 [P] Écran « Nouveautés » de l'app (`mobile/src/whats-new/`, feature 022) si la version de l'app le prévoit : une entrée « Cadeau commun »
-- [ ] T091 Vérifier `tests/domain/code-language.test.ts` (commentaires et descriptions de tests en anglais) et `server-only.test.ts` (`src/server/commands/group-gift.ts`)
-- [ ] T092 Repasser tout quickstart.md sur la base de démo, site et app
-- [ ] T093 Commit Polish : lint, types et tests verts (site et app), puis `chore: group gift docs, privacy and demo data`, sans demander
+- [X] T087 [P] Pages de confidentialité FR/EN du site (`app/privacy/page.tsx` et ses textes) et de l'app (`mobile/app/legal/privacy.tsx`) : montant annoncé, noms visibles des autres participants et des personnes qui ont le lien du cadeau, fil de messages (qui le lit, conservation, suppression du compte)
+- [X] T088 [P] Guide et FAQ (fait : une question de FAQ ; le guide en images n'a pas de nouvelle étape, ses captures restent celles d'avant) (`locales/{fr,en}/content.json`, `app/guide/page.tsx`) : section « Offrir à plusieurs » ; captures si besoin (`npm run demo:capture`)
+- [X] T089 [P] Données de démo `scripts/create-demo-data.mjs` : un cadeau commun ouvert à deux participants (montants, un message de fil), comptes `@example.test` seulement ; `tests/domain/demo-seed.test.ts`
+- [ ] T090 [P] (en attente : la version de l'app qui embarquera la 028, avec la 026, n'est pas encore choisie) Écran « Nouveautés » de l'app (`mobile/src/whats-new/`, feature 022) si la version de l'app le prévoit : une entrée « Cadeau commun »
+- [X] T091 Vérifier `tests/domain/code-language.test.ts` (commentaires et descriptions de tests en anglais) et `server-only.test.ts` (`src/server/commands/group-gift.ts`)
+- [X] T092 Repasser tout quickstart.md sur la base de démo, site et app
+- [X] T093 Commit Polish : lint, types et tests verts (site et app), puis `chore: group gift docs, privacy and demo data`, sans demander
 - [ ] T094 Rappeler à l'utilisatrice l'ordre de sortie (research R9, comme la 026) : publier la version de l'app qui contient la 028 avant de merger sur `main` ; ne pas pousser ni merger sans son accord
 
 ---

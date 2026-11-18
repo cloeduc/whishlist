@@ -44,6 +44,10 @@
         "a": "It lets others know someone intends to give that gift. No purchase or payment is made through the site."
       },
       {
+        "q": "Can several people give one gift together?",
+        "a": "Yes. When reserving an idea, choose “Start a group gift”: others can chip in, saying if they wish how much they put in, and see what is left to gather. Send them the group gift's link: it shows that gift only. Nothing is paid on the site; once you have enough, a participant marks the gift complete."
+      },
+      {
         "q": "Can I build a list with someone else?",
         "a": "Yes. Send them the editing invitation link. They’ll need to log in or create an account before joining the list."
       },
@@ -166,7 +170,7 @@
     "listsTitle": "Your lists and ideas",
     "listsBody": "Lists, their categories, the “who” labels and the ideas (name, link, image, price, priority) that you and the other members add. Every member of a list sees them.",
     "reservationsTitle": "Reservations",
-    "reservationsBody": "When someone reserves a gift: the name given, the optional note, the date, and the account if they are signed in. The members of the list see these reservations.",
+    "reservationsBody": "When someone reserves a gift: the name given, the optional note, the date, and the account if they are signed in. The members of the list see these reservations. For a group gift, each participation also keeps the amount announced, if given: the other participants see it, the list's members never do. People with the group gift's link see the participants' names. Participants with an account can also write to each other in the group gift's thread: only they read these messages, never the list's members, and they disappear with the group gift; when an account is deleted, its messages stay, signed “Former participant”.",
     "retentionTitle": "How long",
     "retentionBody": "Your data stays until you delete your account. A sign-in lasts 30 days, a password-reset link 1 hour, an address confirmation link 24 hours. Encrypted server backups are kept for 14 days: deleted data is gone from them at most 14 days later.",
     "cookiesTitle": "Cookies",

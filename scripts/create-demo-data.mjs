@@ -104,6 +104,49 @@ doc.reservations.push({
   amountCents: null,
 });
 
+// A group gift (028) on the ceramics workshop: Sam (account) and Lina chip in, Sam wrote in the thread.
+doc.groupGifts.push({
+  id: "demo-group-gift",
+  wishlistId: list.id,
+  itemId: `${list.id}:atelier`,
+  token: "demo-cadeau-commun",
+  status: "open",
+  createdAt: "2026-10-22T09:00:00.000Z",
+  completedAt: null,
+});
+doc.reservations.push(
+  {
+    id: "demo-participation-sam",
+    wishlistId: list.id,
+    itemId: `${list.id}:atelier`,
+    fromName: "Sam",
+    note: "Je peux réserver le créneau.",
+    userId: other.value.id,
+    createdAt: "2026-10-22T09:00:00.000Z",
+    groupGiftId: "demo-group-gift",
+    amountCents: 4000,
+  },
+  {
+    id: "demo-participation-lina",
+    wishlistId: list.id,
+    itemId: `${list.id}:atelier`,
+    fromName: "Lina",
+    note: null,
+    userId: null,
+    createdAt: "2026-10-22T10:00:00.000Z",
+    groupGiftId: "demo-group-gift",
+    amountCents: 3000,
+  },
+);
+doc.groupGiftMessages.push({
+  id: "demo-group-gift-message",
+  groupGiftId: "demo-group-gift",
+  userId: other.value.id,
+  authorName: "Sam",
+  body: "Il manque 40 € : quelqu’un d’autre ?",
+  createdAt: "2026-10-22T10:30:00.000Z",
+});
+
 const otherListCreated = createWishlist(doc, {
   ownerId: other.value.id,
   title: "Les idées de Sam",
@@ -196,3 +239,4 @@ console.log("Other account: sam@example.test");
 console.log(`Password: ${password}`);
 console.log("Public list (Alex & Camille): /l/demo-list-lecture");
 console.log("Public list (Sam): /l/demo-other-lecture");
+console.log("Group gift (Sam and Lina): /g/demo-cadeau-commun");
