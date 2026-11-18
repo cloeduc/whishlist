@@ -53,6 +53,9 @@ Les vérifications « visible sur le site » des stories restent manuelles aussi
 | 023-us2 | Story entière : nouvelle catégorie depuis le formulaire d'idée du site | Sur le site, qui n'a pas de suite e2e ; dans l'app, la même entrée est vérifiée par `023-us1` | [023 quickstart, US2](../../specs/023-add-category-from-idea/quickstart.md#us2--site) |
 | 024-us1 | Renommer hors ligne : bouton désactivé avec l'explication (scénario 6) | Demande le mode avion (Android seulement) ; couvert par `followed-lists.test.tsx` | [024 quickstart, US1](../../specs/024-followed-list-names/quickstart.md#us1--renommer-une-liste-suivie) |
 | 024-us2 | Story entière : voir et nommer à qui est la liste | Même écran et même enregistrement que `024-us1` ; le nom du propriétaire par défaut et son remplacement sont couverts par `followed-lists.test.tsx` et `guest-list.test.tsx`, le site se vérifie à la main | [024 quickstart, US2](../../specs/024-followed-list-names/quickstart.md#us2--à-qui-est-la-liste) |
+| 026-us1 | Story entière : page d'aide de l'adresse de gestion sur le site | Site seulement, sans test e2e (guide des agents) ; vérifiée à la main | [026 quickstart, US1](../../specs/026-access-denied-help/quickstart.md#us1--site--page-daide) |
+| 026-us3 | Story entière : « Voir la liste » pour une personne qui suit déjà la liste | Même écran que `026-us2` ; couverte par `links-list.test.tsx` côté app, à la main côté site | [026 quickstart, US3](../../specs/026-access-denied-help/quickstart.md#us3--abonné) |
+| 026-us4 | Story entière : bouton « Partager » et note de l'onglet Partage | Site seulement, sans test e2e ; vérifiée à la main | [026 quickstart, US4](../../specs/026-access-denied-help/quickstart.md#us4--propriétaire) |
 
 ## Partage vers l'app (PR #15, sans spec)
 

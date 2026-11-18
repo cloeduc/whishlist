@@ -118,9 +118,9 @@ Aucune : pas de donnée ni de route d'API (data-model.md).
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T032 [P] `mobile/__tests__/e2e/coverage.test.ts` : ajouter `"026": "specs/026-access-denied-help/spec.md"` ; dans `mobile/.maestro/exclusions.md`, lignes `026-us1` et `026-us4` (site seulement) et `026-us3` (couverte par jest et le quickstart), au format des lignes existantes
-- [ ] T033 [P] `README.md` ou `deploy/` : rien à changer (aucune variable) ; noter dans le ticket WISH-30 l'ordre de mise en prod de research R2 (app publiée sur les stores avant le merge sur `main`)
-- [ ] T034 Commit Polish : contrôles verts, puis `chore: record the 026 e2e coverage`, sans demander
+- [X] T032 [P] `mobile/__tests__/e2e/coverage.test.ts` : ajouter `"026": "specs/026-access-denied-help/spec.md"` ; dans `mobile/.maestro/exclusions.md`, lignes `026-us1` et `026-us4` (site seulement) et `026-us3` (couverte par jest et le quickstart), au format des lignes existantes
+- [X] T033 [P] `README.md` ou `deploy/` : rien à changer (aucune variable) ; noter dans le ticket WISH-30 l'ordre de mise en prod de research R2 (app publiée sur les stores avant le merge sur `main`)
+- [X] T034 Commit Polish : contrôles verts, puis `chore: record the 026 e2e coverage`, sans demander
 
 ---
 
