@@ -29,6 +29,17 @@ export function viewerRelation(
   return { isMember, subscribed: !isMember && findSubscription(doc, wishlistId, userId) !== null };
 }
 
+/**
+ * Public address offered on the help page of a list's management address (026): only to an account
+ * that follows the list without managing it, since it already has that address. Anyone else gets null,
+ * so the page reveals nothing about the list (FR-003, FR-004).
+ */
+export function followedReadPath(doc: Database, wishlistId: string, userId: string): string | null {
+  if (!viewerRelation(doc, wishlistId, userId).subscribed) return null;
+  const wishlist = doc.wishlists.find((entry) => entry.id === wishlistId);
+  return wishlist ? `/l/${wishlist.readToken}` : null;
+}
+
 export function findSubscription(
   doc: Database,
   wishlistId: string,

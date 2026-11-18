@@ -5,6 +5,7 @@ import { extractReadToken } from "../../src/domain/read-link";
 import {
   findSubscription,
   followedListsOf,
+  followedReadPath,
   followNamesOf,
   isSubscriptionUnlocked,
   MAX_FOLLOWED_NAME,
@@ -185,6 +186,19 @@ test("viewerRelation tells member, subscriber and visitor apart", () => {
   assert.deepEqual(viewerRelation(doc, "solo", "lou"), { isMember: true, subscribed: false });
   assert.deepEqual(viewerRelation(doc, "other", "alex"), { isMember: false, subscribed: false });
   assert.deepEqual(viewerRelation(doc, "other", null), { isMember: false, subscribed: false });
+  // A member who also follows their own list is a member, not a subscriber.
+  doc.subscriptions.push({ wishlistId: "solo", userId: "lou", readPasswordHash: null, createdAt: "2026-04-05T00:00:00.000Z", customTitle: null, customOwnerName: null });
+  assert.deepEqual(viewerRelation(doc, "solo", "lou"), { isMember: true, subscribed: false });
+});
+
+test("followedReadPath gives the public address to a subscriber only (026, FR-003, FR-004)", () => {
+  const doc = accountDoc();
+  const other = doc.wishlists.find((wishlist) => wishlist.id === "other")!;
+  assert.equal(followedReadPath(doc, "other", "lou"), `/l/${other.readToken}`);
+  assert.equal(followedReadPath(doc, "other", "alex"), null);
+  assert.equal(followedReadPath(doc, "missing", "lou"), null);
+  doc.subscriptions.push({ wishlistId: "solo", userId: "lou", readPasswordHash: null, createdAt: "2026-04-05T00:00:00.000Z", customTitle: null, customOwnerName: null });
+  assert.equal(followedReadPath(doc, "solo", "lou"), null);
 });
 
 test("renameSubscription stores trimmed names, and an empty name goes back to the list's own", () => {

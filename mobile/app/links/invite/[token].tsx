@@ -1,17 +1,15 @@
 import { Redirect, router, useLocalSearchParams, type Href } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { api, NetworkError, ok } from "@/api/client";
-import { useSession } from "@/auth/session";
 import { refreshList, refreshLists } from "@/data/lists";
 import { AuthLayout } from "@/features/account/AuthLayout";
+import { SignInChoices } from "@/features/account/SignInChoices";
 import { VerificationBanner } from "@/features/account/VerificationBanner";
 import { errorText, useServerAction } from "@/features/errors";
-import { clearPendingLink, setPendingLink } from "@/links/pending";
+import { useResumableLink } from "@/links/pending";
 import { useOnline } from "@/network";
-import { tokens } from "@/theme/tokens";
 import { Alert } from "@/ui/Alert";
 import { Button } from "@/ui/Button";
 import { NetworkNote } from "@/ui/NetworkNote";
@@ -30,9 +28,8 @@ type Preview =
 export default function InviteLink() {
   const { t } = useTranslation(["public", "auth", "mobile"]);
   const { token } = useLocalSearchParams<{ token: string }>();
-  const session = useSession();
   const online = useOnline();
-  const self = `/links/invite/${encodeURIComponent(token)}`;
+  const session = useResumableLink(`/links/invite/${encodeURIComponent(token)}`);
   const [preview, setPreview] = useState<Preview>({ status: "loading" });
 
   const openList = useCallback(async (listId: string) => {
@@ -42,10 +39,6 @@ export default function InviteLink() {
   }, []);
 
   const signedIn = session.status === "signedIn";
-  useEffect(() => {
-    if (session.status === "signedOut" || session.status === "mustChangePassword") setPendingLink(self);
-    else if (signedIn) clearPendingLink();
-  }, [session.status, signedIn, self]);
 
   // Read on open once signed in, and on each « Réessayer ». The initial state is « loading ».
   const [attempt, setAttempt] = useState(0);
@@ -78,18 +71,13 @@ export default function InviteLink() {
 
   if (!signedIn) {
     return (
-      <AuthLayout title={t("public:invite.title")} description={t("public:invite.body")} testID="invite.screen">
-        <View style={{ gap: tokens.space[2] }}>
-          <Button testID="invite.register" title={t("public:invite.register")} fullWidth onPress={() => router.push("/register")} />
-          <Button
-            testID="invite.login"
-            title={t("public:invite.login")}
-            variant="neutral"
-            fullWidth
-            onPress={() => router.push("/login")}
-          />
-        </View>
-      </AuthLayout>
+      <SignInChoices
+        title={t("public:invite.title")}
+        description={t("public:invite.body")}
+        screenTestID="invite.screen"
+        registerTestID="invite.register"
+        loginTestID="invite.login"
+      />
     );
   }
 

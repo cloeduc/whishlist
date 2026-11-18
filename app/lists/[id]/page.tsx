@@ -21,7 +21,7 @@ import {
 import { hasReadPassword } from "../../../src/domain/read-password";
 import { reservedItemIds } from "../../../src/domain/reserve";
 import { memberShelf, surpriseModeOf, visibleReservations } from "../../../src/domain/surprise";
-import { viewerRelation } from "../../../src/domain/subscription";
+import { followedReadPath } from "../../../src/domain/subscription";
 import { resolveTheme } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { AppearanceForm } from "@/components/site/appearance-form";
@@ -70,11 +70,7 @@ export default async function EditListPage({
   const list = doc.wishlists.find((entry) => entry.id === id);
   if (!list) notFound();
   const membership = findMembership(doc, id, user.id);
-  if (!membership) {
-    // Only an account that already follows the list gets its public address back (026, FR-003).
-    const { subscribed } = viewerRelation(doc, id, user.id);
-    return <ListAccessHelp followedReadPath={subscribed ? `/l/${list.readToken}` : null} />;
-  }
+  if (!membership) return <ListAccessHelp followedReadPath={followedReadPath(doc, id, user.id)} />;
   const base = await origin();
   const readUrl = `${base}${withLocale(locale, `/l/${list.readToken}`)}`;
   const inviteUrl = `${base}${withLocale(locale, `/invite/${list.inviteToken}`)}`;
