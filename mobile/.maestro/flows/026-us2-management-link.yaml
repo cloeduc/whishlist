@@ -16,6 +16,10 @@ tags:
 
 # A list Alex manages: the list itself.
 - openLink: ohyoushouldnt://lists/demo-list
+# iOS may ask once whether to open the link in the app.
+- tapOn:
+    text: Ouvrir|Open
+    optional: true
 - extendedWaitUntil:
     visible:
       id: list.screen
@@ -23,6 +27,10 @@ tags:
 
 # Same list, « Partage » tab of the site: the app's « Partager » screen.
 - openLink: ohyoushouldnt://lists/demo-list?tab=sharing
+# iOS may ask once whether to open the link in the app.
+- tapOn:
+    text: Ouvrir|Open
+    optional: true
 - extendedWaitUntil:
     visible:
       id: share.share
@@ -30,6 +38,10 @@ tags:
 
 # Sam's list, under its former French address: the help screen, then back to the lists.
 - openLink: ohyoushouldnt://listes/demo-other-list
+# iOS may ask once whether to open the link in the app.
+- tapOn:
+    text: Ouvrir|Open
+    optional: true
 - extendedWaitUntil:
     visible:
       id: link-list.help
