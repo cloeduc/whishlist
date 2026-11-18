@@ -3,11 +3,21 @@ import { formatPrice } from "./price";
 import type { Database, GroupGiftStatus, Reservation } from "./types";
 
 export interface OffrirRow {
+  /** Reservation on one's own; for a group gift, its first participation (a stable key). */
   reservationId: string;
   itemName: string;
   typeLabel: string;
   fromName: string | null;
   note: string | null;
+  /**
+   * A group gift (028) is one row with each participation. Members see names and messages,
+   * never amounts nor the participants' thread.
+   */
+  groupGift: {
+    id: string;
+    status: GroupGiftStatus;
+    participants: { reservationId: string; fromName: string | null; note: string | null }[];
+  } | null;
 }
 
 export interface MyOfferRow {
@@ -33,18 +43,30 @@ export function listOffrir(doc: Database, wishlistId: string): OffrirRow[] {
 
 /** Rows of the Reservations tab for the given reservations (idea, category, giver, note). */
 export function toOffrirRows(doc: Database, reservations: readonly Reservation[]): OffrirRow[] {
-  return reservations
-    .map((reservation) => {
-      const item = doc.items.find((i) => i.id === reservation.itemId);
-      const type = item ? doc.types.find((t) => t.id === item.typeId) : undefined;
-      return {
-        reservationId: reservation.id,
-        itemName: item?.name ?? "—",
-        typeLabel: type?.label ?? "",
-        fromName: reservation.fromName,
-        note: reservation.note,
-      };
-    });
+  const rows: OffrirRow[] = [];
+  const giftRows = new Map<string, OffrirRow>();
+  for (const reservation of reservations) {
+    const giftRow = reservation.groupGiftId ? giftRows.get(reservation.groupGiftId) : undefined;
+    const participant = { reservationId: reservation.id, fromName: reservation.fromName, note: reservation.note };
+    if (giftRow?.groupGift) {
+      giftRow.groupGift.participants.push(participant);
+      continue;
+    }
+    const item = doc.items.find((i) => i.id === reservation.itemId);
+    const type = item ? doc.types.find((t) => t.id === item.typeId) : undefined;
+    const gift = reservation.groupGiftId ? doc.groupGifts.find((g) => g.id === reservation.groupGiftId) : undefined;
+    const row: OffrirRow = {
+      reservationId: reservation.id,
+      itemName: item?.name ?? "—",
+      typeLabel: type?.label ?? "",
+      fromName: gift ? null : reservation.fromName,
+      note: gift ? null : reservation.note,
+      groupGift: gift ? { id: gift.id, status: gift.status, participants: [participant] } : null,
+    };
+    if (gift) giftRows.set(gift.id, row);
+    rows.push(row);
+  }
+  return rows;
 }
 
 /** Gifts reserved while signed in (userId on the reservation). */

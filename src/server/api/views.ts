@@ -6,7 +6,17 @@ import { hasReadPassword } from "../../domain/read-password";
 import { findSubscription, followNamesOf, isSubscriptionUnlocked, viewerRelation } from "../../domain/subscription";
 import { reservedItemIds } from "../../domain/reserve";
 import { memberShelf, surpriseModeOf, visibleReservations } from "../../domain/surprise";
-import type { Database, Item, Reservation, Role, Subscription, User, WishlistTheme, Wishlist } from "../../domain/types";
+import type {
+  Database,
+  GroupGiftStatus,
+  Item,
+  Reservation,
+  Role,
+  Subscription,
+  User,
+  WishlistTheme,
+  Wishlist,
+} from "../../domain/types";
 import { intlLocale, type Locale } from "../../i18n/config";
 import { withLocale } from "../../i18n/locale-path";
 import { emailConfirmationEnforced } from "../mail";
@@ -161,19 +171,25 @@ export type MemberReservationView = {
   fromName: string | null;
   note: string | null;
   createdAt: string;
+  /** Since 1.11.0: participation in a group gift (028); never its amount. */
+  groupGiftId: string | null;
+  groupGiftStatus: GroupGiftStatus | null;
 };
 
 /** Given reservations of a list, as its members see them. */
 export function memberReservations(doc: Database, reservations: readonly Reservation[]): MemberReservationView[] {
   const itemName = new Map(doc.items.map((item) => [item.id, item.name]));
+  const giftStatus = new Map(doc.groupGifts.map((gift) => [gift.id, gift.status]));
   return reservations.map((reservation) => ({
-      id: reservation.id,
-      itemId: reservation.itemId,
-      itemName: itemName.get(reservation.itemId) ?? "",
-      fromName: reservation.fromName,
-      note: reservation.note,
-      createdAt: reservation.createdAt,
-    }));
+    id: reservation.id,
+    itemId: reservation.itemId,
+    itemName: itemName.get(reservation.itemId) ?? "",
+    fromName: reservation.fromName,
+    note: reservation.note,
+    createdAt: reservation.createdAt,
+    groupGiftId: reservation.groupGiftId,
+    groupGiftStatus: reservation.groupGiftId ? (giftStatus.get(reservation.groupGiftId) ?? null) : null,
+  }));
 }
 
 export type MemberListView = {

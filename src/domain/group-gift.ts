@@ -1,4 +1,4 @@
-import { clone } from "./access";
+import { clone, findMembership } from "./access";
 import { formatPrice, parsePrice } from "./price";
 import { MAX_FROM_NAME, MAX_NOTE } from "./reserve";
 import { newId, newToken } from "./tokens";
@@ -214,6 +214,20 @@ export function setGroupGiftStatus(
   const target = next.groupGifts.find((g) => g.id === gift.id)!;
   target.status = input.status;
   if (input.status === "complete") target.completedAt = (input.now ?? new Date()).toISOString();
+  return { ok: true, doc: next };
+}
+
+/** « Annuler le cadeau commun »: a member of the list removes every participation, the thread and the link. */
+export function cancelGroupGiftAsMember(
+  doc: Database,
+  input: { wishlistId: string; actorId: string; groupGiftId: string },
+): { ok: true; doc: Database } | Failure {
+  if (!findMembership(doc, input.wishlistId, input.actorId)) return { ok: false, error: "notMember" };
+  const gift = doc.groupGifts.find((g) => g.id === input.groupGiftId && g.wishlistId === input.wishlistId);
+  if (!gift) return { ok: false, error: "groupGiftMissing" };
+  const next = clone(doc);
+  next.reservations = next.reservations.filter((r) => r.groupGiftId !== gift.id);
+  pruneGroupGifts(next);
   return { ok: true, doc: next };
 }
 

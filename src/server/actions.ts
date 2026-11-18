@@ -62,6 +62,7 @@ import {
   setReadPassword,
 } from "./commands/sharing";
 import {
+  cancelGroupGiftAsMember,
   cancelReservationAsMember,
   copyItem,
   deleteItem,
@@ -581,6 +582,16 @@ export async function cancelReservationAction(formData: FormData) {
   const wishlistId = String(formData.get("wishlistId") ?? "");
   const reservationId = String(formData.get("reservationId") ?? "");
   const result = await cancelReservationAsMember(await actionContext(), { wishlistId, reservationId });
+  if (!result.ok) return redirectToList(wishlistId, formData, result.error);
+  return redirectToList(wishlistId, formData);
+}
+
+/** « Annuler le cadeau commun » from the Reservations tab (028). */
+export async function cancelGroupGiftAction(formData: FormData) {
+  await memberId();
+  const wishlistId = String(formData.get("wishlistId") ?? "");
+  const groupGiftId = String(formData.get("groupGiftId") ?? "");
+  const result = await cancelGroupGiftAsMember(await actionContext(), { wishlistId, groupGiftId });
   if (!result.ok) return redirectToList(wishlistId, formData, result.error);
   return redirectToList(wishlistId, formData);
 }

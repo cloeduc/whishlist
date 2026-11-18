@@ -116,14 +116,14 @@ Chaque phase de user story se termine par une tâche **« Commit de la story »*
 
 **Independent Test**: quickstart.md § US6.
 
-- [ ] T039 [P] [US6] Tests : `tests/domain/offrir.test.ts` (`toOffrirRows` regroupe les participations d'un cadeau, aucune ligne ne contient `amountCents`) ; `tests/domain/surprise.test.ts` (cadeau commun rangé comme une idée réservée, en mode surprise ou non) ; `tests/domain/items.test.ts` (suppression et déplacement refusés) ; `tests/domain/group-gift.test.ts` (`cancelGroupGiftAsMember` : `notMember` ; supprime participations, messages et cadeau) ; `tests/domain/mcp-server.test.ts` (`get_list` : `reserved: true`, aucun autre détail) ; `tests/domain/account-export.test.ts` (export d'une liste par un membre : participations sans montant)
-- [ ] T040 [US6] `src/domain/offrir.ts` : `OffrirRow` + `groupGift: { id, status, participants: [{ reservationId, fromName, note }] } | null`, une entrée par cadeau ; `src/domain/group-gift.ts` : `cancelGroupGiftAsMember(doc, { wishlistId, actorId, groupGiftId })`
-- [ ] T041 [US6] `src/server/commands/items.ts` : `cancelGroupGiftAsMember` ; `src/server/actions.ts` : `cancelGroupGiftAction`
-- [ ] T042 [US6] `components/site/reservation-card.tsx` (et `reservations-reveal.tsx`) : carte de cadeau commun (`list:reservations.groupGift`, état, participants, « Annuler la participation », « Annuler le cadeau commun » avec la confirmation `cancelGroupGiftBody`) ; `app/lists/[id]/page.tsx` : compteur de l'onglet par entrée
-- [ ] T043 [US6] API membres, sans casser les anciens clients : `src/server/api/views.ts` `MemberReservationView` + `groupGiftId` (nullable), `MemberList.groupGifts: [{ id, itemId, status }]` ; route `app/api/v1/lists/[listId]/group-gifts/[groupGiftId]/route.ts` (`DELETE`, 204 / 403 `notMember` / 404 `groupGiftMissing`) ; décrire d'abord dans `specs/004-mobile-api/contracts/openapi.yaml` (contracts/api.md, version mineure suivante) ; `tests/domain/api-contract.test.ts` vert
-- [ ] T044 [P] [US6] Textes FR/EN dans `locales/{fr,en}/list.json`
-- [ ] T045 [US6] Parcours quickstart.md § US6 (étapes 1 à 6)
-- [ ] T046 [US6] Commit de la story : lint, types et tests verts, puis `feat: show group gifts to list members (US6)`, sans demander
+- [X] T039 [P] [US6] Tests : `tests/domain/offrir.test.ts` (`toOffrirRows` regroupe les participations d'un cadeau, aucune ligne ne contient `amountCents`) ; `tests/domain/surprise.test.ts` (cadeau commun rangé comme une idée réservée, en mode surprise ou non) ; `tests/domain/items.test.ts` (suppression et déplacement refusés) ; `tests/domain/group-gift.test.ts` (`cancelGroupGiftAsMember` : `notMember` ; supprime participations, messages et cadeau) ; `tests/domain/mcp-server.test.ts` (`get_list` : `reserved: true`, aucun autre détail) ; `tests/domain/account-export.test.ts` (export d'une liste par un membre : participations sans montant)
+- [X] T040 [US6] `src/domain/offrir.ts` : `OffrirRow` + `groupGift: { id, status, participants: [{ reservationId, fromName, note }] } | null`, une entrée par cadeau ; `src/domain/group-gift.ts` : `cancelGroupGiftAsMember(doc, { wishlistId, actorId, groupGiftId })`
+- [X] T041 [US6] `src/server/commands/items.ts` : `cancelGroupGiftAsMember` ; `src/server/actions.ts` : `cancelGroupGiftAction`
+- [X] T042 [US6] `components/site/reservation-card.tsx` (et `reservations-reveal.tsx`) : carte de cadeau commun (`list:reservations.groupGift`, état, participants, « Annuler la participation », « Annuler le cadeau commun » avec la confirmation `cancelGroupGiftBody`) ; `app/lists/[id]/page.tsx` : compteur de l'onglet par entrée
+- [X] T043 [US6] API membres, sans casser les anciens clients : `src/server/api/views.ts` `MemberReservationView` + `groupGiftId` (nullable), `MemberList.groupGifts: [{ id, itemId, status }]` ; route `app/api/v1/lists/[listId]/group-gifts/[groupGiftId]/route.ts` (`DELETE`, 204 / 403 `notMember` / 404 `groupGiftMissing`) ; décrire d'abord dans `specs/004-mobile-api/contracts/openapi.yaml` (contracts/api.md, version mineure suivante) ; `tests/domain/api-contract.test.ts` vert
+- [X] T044 [P] [US6] Textes FR/EN dans `locales/{fr,en}/list.json`
+- [X] T045 [US6] Parcours quickstart.md § US6 (étapes 1 à 6)
+- [X] T046 [US6] Commit de la story : lint, types et tests verts, puis `feat: show group gifts to list members (US6)`, sans demander
 
 ---
 

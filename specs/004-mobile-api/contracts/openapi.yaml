@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Oh, You Shouldn't! API
-  version: "1.10.0"
+  version: "1.11.0"
   description: |
     Accès aux listes pour un client autre que le site (app mobile, script).
 
@@ -42,6 +42,11 @@ info:
       mode surprise rend `itemLockedSurprise` (400).
     - 1.10.0 : noms d'une liste suivie (feature 024). `customTitle`, `customOwnerName` et `ownerName` dans
       `SubscribedListSummary` ; `follow` dans `PublicList` ; `PUT /subscriptions/{readToken}` pour les choisir.
+    - 1.11.0 : cadeau commun (feature 028). Une participation à un cadeau commun est une réservation :
+      `MemberReservation` gagne `groupGiftId` et `groupGiftStatus` (une ligne par participation, à
+      regrouper par `groupGiftId`) ; `DELETE /lists/{listId}/group-gifts/{groupGiftId}` annule tout le
+      cadeau commun (membre). Sans `groupGifts=true`, `GET /public/lists/{readToken}` traite un cadeau
+      commun comme une réservation : absent pour qui n'y participe pas, `mine` pour un participant.
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -1039,6 +1044,22 @@ paths:
         "204": { description: Annulée }
         "404": { $ref: "#/components/responses/Error" }
 
+  /lists/{listId}/group-gifts/{groupGiftId}:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+      - name: groupGiftId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [sharing]
+      summary: Annuler tout un cadeau commun de sa liste (membre, depuis 1.11.0)
+      description: Supprime toutes les participations du cadeau commun et ses messages ; l'idée redevient libre.
+      responses:
+        "204": { description: Annulé }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
   /lists/{listId}/invite-link:
     parameters:
       - $ref: "#/components/parameters/listId"
@@ -1542,6 +1563,16 @@ components:
         fromName: { type: [string, "null"] }
         note: { type: [string, "null"] }
         createdAt: { type: string, format: date-time }
+        groupGiftId:
+          type: [string, "null"]
+          description: |
+            Depuis 1.11.0. Participation à un cadeau commun : les participations d'un même cadeau
+            partagent cet identifiant. null pour une réservation seule. Le montant annoncé n'est jamais
+            donné aux membres.
+        groupGiftStatus:
+          type: [string, "null"]
+          enum: [open, complete, null]
+          description: Depuis 1.11.0. État du cadeau commun ; null pour une réservation seule.
 
     Member:
       type: object

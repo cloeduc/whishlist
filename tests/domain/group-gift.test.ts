@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  cancelGroupGiftAsMember,
   groupGiftDetail,
   groupGiftTotals,
   joinGroupGift,
@@ -12,12 +13,13 @@ import {
   setGroupGiftStatus,
   startGroupGift,
 } from "../../src/domain/group-gift";
-import { cancelReservation } from "../../src/domain/items";
+import { cancelReservation, deleteItem } from "../../src/domain/items";
 import { wipeWishlist } from "../../src/domain/membership";
-import { listMyOffers } from "../../src/domain/offrir";
+import { listMyOffers, listOffrir } from "../../src/domain/offrir";
 import { listPublicVisibleItems, toPublicItem } from "../../src/domain/read";
 import { reserveItem } from "../../src/domain/reserve";
-import { toPublicListView } from "../../src/server/api/views";
+import { asSeenBy, visibleReservations } from "../../src/domain/surprise";
+import { memberReservations, toPublicListView } from "../../src/server/api/views";
 import { apiDoc } from "./helpers/api-fixtures";
 import { chipIn, docWithGroupGift, gift } from "./helpers/group-gift-fixtures";
 
@@ -347,4 +349,67 @@ test("complete: a participant leaving keeps it complete; the last one frees the 
   assert.ok(last.ok);
   assert.deepEqual(last.doc.groupGifts, []);
   assert.deepEqual(listPublicVisibleItems(last.doc, "w", new Set(), { groupGifts: true }).map((i) => i.id), ["gift", "gift2"]);
+});
+
+test("members: a group gift is one row with each participant, never an amount", () => {
+  const doc = docWithGroupGift();
+  doc.groupGifts[0].status = "complete";
+  const rows = listOffrir(doc, "w");
+  assert.deepEqual(
+    rows.map((row) => [row.reservationId, row.fromName, row.groupGift?.id ?? null]),
+    [
+      ["r-taken", "Sam", null],
+      ["p-sam", null, "g"],
+    ],
+  );
+  assert.deepEqual(rows[1].groupGift, {
+    id: "g",
+    status: "complete",
+    participants: [
+      { reservationId: "p-sam", fromName: "Sam", note: null },
+      { reservationId: "p-alex", fromName: "Alex", note: "Je l'achète" },
+    ],
+  });
+  assert.equal(JSON.stringify(rows).includes("amount"), false);
+  assert.equal(JSON.stringify(rows).includes("1000"), false);
+});
+
+test("members: a group gift is a reserved idea (shelf, surprise mode, refusals)", () => {
+  const doc = docWithGroupGift();
+  const item = doc.items.find((i) => i.id === "gift")!;
+  assert.equal(asSeenBy(doc, item, "alex").archived, true);
+  assert.deepEqual(deleteItem(doc, { wishlistId: "w", actorId: "alex", itemId: "gift" }), {
+    ok: false,
+    error: "itemHasReservation",
+  });
+  doc.memberships[0].surpriseMode = true;
+  assert.equal(asSeenBy(doc, item, "alex").archived, false);
+  assert.deepEqual(visibleReservations(doc, "w", "alex"), []);
+});
+
+test("members: the API rows carry the gift's id and state, never the amount", () => {
+  const rows = memberReservations(docWithGroupGift(), docWithGroupGift().reservations);
+  const sam = rows.find((row) => row.id === "p-sam")!;
+  assert.equal(sam.groupGiftId, "g");
+  assert.equal(sam.groupGiftStatus, "open");
+  assert.equal("amountCents" in sam, false);
+  assert.equal(rows.find((row) => row.id === "r-taken")!.groupGiftId, null);
+});
+
+test("members: cancelling the whole group gift frees the idea; only a member of the list can", () => {
+  const doc = docWithGroupGift();
+  doc.groupGiftMessages.push({ id: "m1", groupGiftId: "g", userId: "alex", authorName: "Alex", body: "Salut", createdAt: "x" });
+  assert.deepEqual(cancelGroupGiftAsMember(doc, { wishlistId: "w", actorId: "camille", groupGiftId: "g" }), {
+    ok: false,
+    error: "notMember",
+  });
+  assert.deepEqual(cancelGroupGiftAsMember(doc, { wishlistId: "w", actorId: "alex", groupGiftId: "nope" }), {
+    ok: false,
+    error: "groupGiftMissing",
+  });
+  const cancelled = cancelGroupGiftAsMember(doc, { wishlistId: "w", actorId: "alex", groupGiftId: "g" });
+  assert.ok(cancelled.ok);
+  assert.deepEqual(cancelled.doc.groupGifts, []);
+  assert.deepEqual(cancelled.doc.groupGiftMessages, []);
+  assert.deepEqual(cancelled.doc.reservations.map((r) => r.id), ["r-taken"]);
 });

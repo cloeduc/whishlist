@@ -28,7 +28,21 @@
     "cancelTitle": "Annuler cette réservation ?",
     "cancelBody": "Ce cadeau sera de nouveau disponible à la réservation.",
     "cancelConfirm": "Annuler la réservation",
-    "cancelKeep": "Garder la réservation"
+    "cancelKeep": "Garder la réservation",
+    "groupGift_one": "Cadeau commun · {{count}} participant",
+    "groupGift_other": "Cadeau commun · {{count}} participants",
+    "groupGiftComplete": "Complet",
+    "anonymous": "Anonyme",
+    "cancelParticipation": "Annuler la participation",
+    "cancelParticipationTitle": "Annuler cette participation ?",
+    "cancelParticipationBody": "Cette personne ne participera plus au cadeau commun. Si c'était la dernière, l'idée redeviendra disponible.",
+    "cancelParticipationConfirm": "Annuler la participation",
+    "cancelParticipationKeep": "Garder la participation",
+    "cancelGroupGift": "Annuler le cadeau commun",
+    "cancelGroupGiftTitle": "Annuler tout le cadeau commun ?",
+    "cancelGroupGiftBody": "Toutes les participations et les messages seront supprimés, et le lien du cadeau ne mènera plus à rien. L'idée redeviendra disponible.",
+    "cancelGroupGiftConfirm": "Annuler le cadeau commun",
+    "cancelGroupGiftKeep": "Garder le cadeau commun"
   },
   "surprise": {
     "title": "Garder la surprise",

@@ -1907,6 +1907,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lists/{listId}/group-gifts/{groupGiftId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                listId: components["parameters"]["listId"];
+                groupGiftId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Annuler tout un cadeau commun de sa liste (membre, depuis 1.11.0)
+         * @description Supprime toutes les participations du cadeau commun et ses messages ; l'idée redevient libre.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    listId: components["parameters"]["listId"];
+                    groupGiftId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Annulé */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lists/{listId}/invite-link": {
         parameters: {
             query?: never;
@@ -2608,6 +2653,17 @@ export interface components {
             note: string | null;
             /** Format: date-time */
             createdAt: string;
+            /**
+             * @description Depuis 1.11.0. Participation à un cadeau commun : les participations d'un même cadeau
+             *     partagent cet identifiant. null pour une réservation seule. Le montant annoncé n'est jamais
+             *     donné aux membres.
+             */
+            groupGiftId?: string | null;
+            /**
+             * @description Depuis 1.11.0. État du cadeau commun ; null pour une réservation seule.
+             * @enum {string|null}
+             */
+            groupGiftStatus?: "open" | "complete" | null;
         };
         Member: {
             userId: string;

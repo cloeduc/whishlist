@@ -7,7 +7,7 @@ import { FormRefusal } from "@/components/site/form-refusal";
 import { ReservationCard } from "@/components/site/reservation-card";
 import { Empty, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import type { OffrirRow } from "@/src/domain/offrir";
-import { cancelReservationAction, revealReservationsAction } from "@/src/server/actions";
+import { cancelGroupGiftAction, cancelReservationAction, revealReservationsAction } from "@/src/server/actions";
 
 /**
  * Reservations tab in surprise mode (020): nothing is in the page until the member confirms.
@@ -34,8 +34,18 @@ export function ReservationsReveal({ wishlistId }: { wishlistId: string }) {
       setOffers(null);
       await cancelReservationAction(formData);
     };
+    const cancelGiftAndHide = async (formData: FormData) => {
+      setOffers(null);
+      await cancelGroupGiftAction(formData);
+    };
     return offers.map((row) => (
-      <ReservationCard key={row.reservationId} wishlistId={wishlistId} row={row} cancelAction={cancelAndHide} />
+      <ReservationCard
+        key={row.reservationId}
+        wishlistId={wishlistId}
+        row={row}
+        cancelAction={cancelAndHide}
+        cancelGroupGift={cancelGiftAndHide}
+      />
     ));
   }
 
