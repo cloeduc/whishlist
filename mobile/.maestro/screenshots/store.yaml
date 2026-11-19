@@ -1,0 +1,86 @@
+# Store screenshots (App Store, Google Play): five screens of the demo data, saved as PNG in Maestro's output
+# folder; NAME and DESCRIPTION (the new idea, in the device's language) are given by scripts/store-screenshots.mjs.
+# Run against the demo database, in the device's language.
+# Not part of the e2e suite (outside flows/): it checks nothing, it only shows the screens.
+appId: app.ohyoushouldnt.mobile
+name: "Store screenshots"
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: alex@example.test
+
+# 1. « Mes listes ».
+- waitForAnimationToEnd
+- takeScreenshot: 01-lists
+
+# 2. The ideas of the demo list.
+- tapOn:
+    id: lists.card-demo-list
+- extendedWaitUntil:
+    visible:
+      id: list.add-item
+    timeout: 20000
+# One category open, to show its ideas.
+- tapOn:
+    id: list.category-demo-list:livres
+- waitForAnimationToEnd
+- takeScreenshot: 02-list
+
+# 3. « Ajouter une idée cadeau », filled in.
+- runFlow: ../subflows/open-new-item.yaml
+- tapOn:
+    id: item-form.url
+- inputText: https://www.example.com/casque-audio
+- hideKeyboard:
+    optional: true
+# The description (several lines) before the name: only a one-line field closes the keyboard.
+- tapOn:
+    id: item-form.description
+- inputText: ${DESCRIPTION}
+- tapOn:
+    id: item-form.name
+- inputText: ${NAME}
+# « Retour » on a one-line field closes the keyboard.
+- pressKey: Enter
+- scrollUntilVisible:
+    element:
+      id: item-form.url
+    direction: UP
+- waitForAnimationToEnd
+- takeScreenshot: 03-new-idea
+
+# 4. The demo list as Sam sees it from its link: the group gift and the ideas to offer.
+- runFlow: ../subflows/launch-clean.yaml
+- runFlow:
+    file: ../subflows/submit-login.yaml
+    env:
+      EMAIL: sam@example.test
+      PASSWORD: ${MAESTRO_DEMO_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 20000
+- runFlow:
+    file: ../subflows/open-app-link.yaml
+    env:
+      URL: http://localhost:3010/l/demo-list-lecture
+- extendedWaitUntil:
+    visible:
+      id: guest.title
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: 04-shared-list
+
+# 5. The group gift, as Sam (participant with an account) sees it.
+- runFlow:
+    file: ../subflows/open-app-link.yaml
+    env:
+      URL: http://localhost:3010/g/demo-cadeau-commun
+- extendedWaitUntil:
+    visible:
+      id: gift.summary
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: 05-group-gift

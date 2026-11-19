@@ -140,3 +140,14 @@ Scripts de `scripts/` utiles aux parcours :
 
 - chaque `id:` d'un parcours existe dans l'app (`__tests__/e2e/test-ids.test.ts`) ;
 - chaque user story des features 005 et 006 a son parcours ou une ligne « story entière » dans `exclusions.md` (`__tests__/e2e/coverage.test.ts`).
+
+## Captures des stores
+
+`screenshots/store.yaml` prend les cinq captures des fiches App Store et Google Play (Mes listes, idées d'une liste, nouvelle idée, liste partagée, cadeau commun) sur les données de démo. Il ne fait pas partie de la suite (hors de `flows/`). Prérequis : le serveur de la suite (plus haut) et l'app en build Release pointée dessus.
+
+```bash
+DEMO_PASSWORD=… node mobile/scripts/store-screenshots.mjs --platform ios                 # iPhone 17 Pro Max démarré (6,9")
+DEMO_PASSWORD=… node mobile/scripts/store-screenshots.mjs --platform android --device <serial>
+```
+
+Le script règle la langue (`--langs fr,en`), la barre d'état (9:41, batterie pleine) et range les PNG dans `tmp/store-screenshots/` comme les attendent fastlane `deliver` (iOS) et `supply` (Android). Sur Android, la langue de l'app suit celle du téléphone (l'effacement de l'app au début du parcours annule une langue propre à l'app) : passez le téléphone dans la langue voulue, en mode Ne pas déranger. Par défaut, il ne prend qu'un émulateur ; un téléphone se désigne avec `--device`, et ses données de l'app sont effacées.
