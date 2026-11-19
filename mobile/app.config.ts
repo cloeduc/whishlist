@@ -52,7 +52,7 @@ function appName(brand: string) {
   return IS_DEV ? `${brand} (Dev)` : brand;
 }
 
-/** App name and text of the camera access request (scanning a list's QR code, 012), per language. */
+/** Launcher name (short, the home screen truncates long ones) and text of the camera access request (scanning a list's QR code, 012), per language. */
 function localized(brand: string, cameraUsage: string) {
   const name = appName(brand);
   return { ios: { CFBundleDisplayName: name, NSCameraUsageDescription: cameraUsage }, android: { app_name: name } };
@@ -61,7 +61,7 @@ function localized(brand: string, cameraUsage: string) {
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   owner: "tat-lonestone",
-  name: appName(commonFr.brand),
+  name: appName(commonFr.shortBrand),
   slug: "ohyoushouldnt",
   scheme: "ohyoushouldnt",
   version: "1.2.0",
@@ -70,8 +70,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   icon: "./assets/images/icon.png",
   backgroundColor: "#e8f0ff",
   locales: {
-    fr: localized(commonFr.brand, mobileFr.shared.cameraUsage),
-    en: localized(commonEn.brand, mobileEn.shared.cameraUsage),
+    fr: localized(commonFr.shortBrand, mobileFr.shared.cameraUsage),
+    en: localized(commonEn.shortBrand, mobileEn.shared.cameraUsage),
   },
   ios: {
     bundleIdentifier: PACKAGE,

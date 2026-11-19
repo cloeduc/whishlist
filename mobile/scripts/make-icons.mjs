@@ -11,10 +11,11 @@ await mkdir(out, { recursive: true });
 const files = {
   // iOS: no transparency; the site's frame on the app's background.
   "icon.png": svg(1024, { background: theme.background, scale: 0.78 }),
-  // Android: foreground in the safe zone (66 %), background in app.config.ts.
-  "android-icon-foreground.png": svg(1024, { scale: 0.6 }),
+  // Android: the launcher masks the icon itself, so the foreground is the bare gift (no frame,
+  // which would show as a second border) inside the safe zone (66 %); background in app.config.ts.
+  "android-icon-foreground.png": svg(1024, { scale: 1, framed: false }),
   "android-icon-monochrome.png": svg(1024, {
-    scale: 0.6,
+    scale: 1,
     framed: false,
     colors: { primary: "#000", accent: "#000", highlight: "#000" },
     stroke: "#000",
