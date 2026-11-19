@@ -64,7 +64,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: appName(commonFr.shortBrand),
   slug: "ohyoushouldnt",
   scheme: "ohyoushouldnt",
-  version: "1.2.0",
+  version: "1.2.1",
   orientation: "portrait",
   userInterfaceStyle: "light",
   icon: "./assets/images/icon.png",
