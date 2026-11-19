@@ -17,3 +17,10 @@ export function parseAmount(input: string | null | undefined): number | null | "
   if (cents === "invalid") return "invalid";
   return validAmount(cents) ? cents : "invalid";
 }
+
+/** Amount as typed on the site (text) or already in cents (API): null when empty, "invalid" otherwise. */
+export function amountFrom(input: string | number | null | undefined): number | null | "invalid" {
+  if (typeof input === "string") return parseAmount(input);
+  if (input === null || input === undefined) return null;
+  return validAmount(input) ? input : "invalid";
+}

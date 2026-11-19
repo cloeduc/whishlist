@@ -3,13 +3,12 @@
 import { useActionState, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Field, FieldDescription, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/components/ui/field";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { reserveAction } from "@/src/server/actions";
 import { FormRefusal } from "@/components/site/form-refusal";
+import { GiverFields } from "@/components/site/giver-fields";
 
 /** Refusals that the page's « plus disponible » notice already explains. */
 const UNAVAILABLE_ERRORS = new Set(["itemAlreadyReserved", "itemNotInList"]);
@@ -47,10 +46,6 @@ export function ReservationForm({
         <input type="hidden" name="readToken" value={readToken} />
         <input type="hidden" name="typeId" value={itemId ? "" : typeId} />
         {itemId ? <input type="hidden" name="itemId" value={itemId} /> : null}
-        <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
-          <label htmlFor={honeypotId}>Website</label>
-          <input id={honeypotId} name="website" type="text" tabIndex={-1} autoComplete="off" />
-        </div>
         {itemId ? null : (
           <Field>
             <FieldLabel htmlFor="itemId">{t("reserve.giftLabel")}</FieldLabel>
@@ -83,27 +78,7 @@ export function ReservationForm({
             <ModeChoice value="group" label={t("reserve.modeGroup")} hint={t("reserve.modeGroupHint")} />
           </RadioGroup>
         </FieldSet>
-        {group ? (
-          <Field>
-            <FieldLabel htmlFor="amount">{t("groupGift.amount")}</FieldLabel>
-            <Input id="amount" name="amount" inputMode="decimal" autoComplete="off" defaultValue={state?.values.amount} />
-            <p className="text-sm text-muted-foreground">{t("groupGift.amountHint")}</p>
-          </Field>
-        ) : null}
-        <Field>
-          <FieldLabel htmlFor="fromName">{t("reserve.fromName")}</FieldLabel>
-          <Input id="fromName" name="fromName" autoComplete="name" defaultValue={state?.values.fromName} />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="note">{t("reserve.note")}</FieldLabel>
-          <Textarea id="note" name="note" defaultValue={state?.values.note} />
-          <p className="text-sm text-muted-foreground">
-            {group ? t("groupGift.privacyHint") : t("reserve.privacyHint")}
-          </p>
-        </Field>
-        <p className="text-sm text-muted-foreground">
-          {group ? t("groupGift.noPurchaseHint") : t("reserve.noPurchaseHint")}
-        </p>
+        <GiverFields honeypotId={honeypotId} values={state?.values} group={group} />
         <Button type="submit" disabled={pending}>
           {t("reserve.submit")}
         </Button>
@@ -119,9 +94,7 @@ function ModeChoice({ value, label, hint }: { value: string; label: string; hint
       <RadioGroupItem id={id} value={value} aria-describedby={`${id}-hint`} className="mt-0.5" />
       <div className="flex flex-col gap-0.5">
         <FieldLabel htmlFor={id}>{label}</FieldLabel>
-        <p id={`${id}-hint`} className="text-sm text-muted-foreground">
-          {hint}
-        </p>
+        <FieldDescription id={`${id}-hint`}>{hint}</FieldDescription>
       </div>
     </div>
   );

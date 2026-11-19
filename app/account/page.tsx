@@ -199,11 +199,13 @@ export default async function AccountPage({
                               amount: formatPrice(offer.groupGift.amountCents, intlLocale(locale)),
                             })
                           : null,
-                        offer.groupGift.remainingCents !== null && offer.groupGift.remainingCents > 0
-                          ? t("account.offersRemaining", {
-                              amount: formatPrice(offer.groupGift.remainingCents, intlLocale(locale)),
-                            })
-                          : null,
+                        offer.groupGift.remainingCents === null
+                          ? null
+                          : offer.groupGift.remainingCents > 0
+                            ? t("account.offersRemaining", {
+                                amount: formatPrice(offer.groupGift.remainingCents, intlLocale(locale)),
+                              })
+                            : t("account.offersGoalReached"),
                       ]
                         .filter(Boolean)
                         .join(" · ")}

@@ -29,13 +29,15 @@ import type { Metadata } from "next";
  */
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params;
-  const [t, doc] = await Promise.all([getTranslations("public"), getDocument()]);
+  const [t, doc, user] = await Promise.all([getTranslations("public"), getDocument(), currentUser()]);
   const gift = findGroupGiftByToken(doc, token);
+  const list = gift ? doc.wishlists.find((entry) => entry.id === gift.wishlistId) : undefined;
   const item = gift ? doc.items.find((entry) => entry.id === gift.itemId) : undefined;
-  return {
-    title: item ? t("groupGift.pageTitle", { name: item.name }) : t("groupGift.missing"),
-    robots: { index: false, follow: false },
-  };
+  const robots = { index: false, follow: false };
+  if (!list || !item) return { title: t("groupGift.missing"), robots };
+  // Before the read password, only the list's title, as on its lock screen (FR-014).
+  if (!(await canAccessPublicList(doc, list, user))) return { title: list.title, robots };
+  return { title: t("groupGift.pageTitle", { name: item.name }), robots };
 }
 
 export default async function GroupGiftPage({

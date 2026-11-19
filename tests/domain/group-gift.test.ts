@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
+  amountFrom,
   cancelGroupGiftAsMember,
   deleteGroupGiftMessage,
   groupGiftDetail,
@@ -197,6 +198,21 @@ test("join: one more participation, without an account or with one", () => {
   assert.ok(anonymous.ok);
   assert.equal(anonymous.reservation.fromName, null);
   assert.equal(anonymous.reservation.amountCents, null);
+});
+
+test("join: refused once the idea is archived, so the gift's link takes no new participation", () => {
+  const doc = docWithGroupGift();
+  doc.items.find((i) => i.id === "gift")!.archived = true;
+  assert.deepEqual(joinGroupGift(doc, { groupGiftId: "g", claimedIds: new Set() }), { ok: false, error: "itemNotInList" });
+});
+
+test("amountFrom: text as typed or cents from the API", () => {
+  assert.equal(amountFrom("12,50"), 1250);
+  assert.equal(amountFrom(""), null);
+  assert.equal(amountFrom(null), null);
+  assert.equal(amountFrom(undefined), null);
+  assert.equal(amountFrom(900), 900);
+  for (const value of ["abc", "0", 0, -5, 1.5, MAX_AMOUNT_CENTS + 1]) assert.equal(amountFrom(value), "invalid");
 });
 
 test("join: refused twice for the same account or the same claim, and on a missing gift", () => {

@@ -20,6 +20,8 @@ import {
   unlockGroupGift,
 } from "@/features/group-gift/api";
 import { useGroupGift } from "@/features/group-gift/useGroupGift";
+import { webUrl } from "@/features/guest/GuestItemCard";
+import { UnlockCard } from "@/features/guest/UnlockCard";
 import { currentLocale, intlLocale } from "@/i18n";
 import { useOnline } from "@/network";
 import { tokens } from "@/theme/tokens";
@@ -33,14 +35,9 @@ import { Empty } from "@/ui/Empty";
 import { Field } from "@/ui/Field";
 import { Input } from "@/ui/Input";
 import { NetworkNote } from "@/ui/NetworkNote";
-import { PasswordInput } from "@/ui/PasswordInput";
 import { Screen } from "@/ui/Screen";
 import { Text } from "@/ui/Text";
-
-/** Only web links open: an idea's address comes from the list, not from this phone (011). */
-function webUrl(url: string | null): string | null {
-  return url && /^https?:\/\//i.test(url) ? url : null;
-}
+import { Textarea } from "@/ui/Textarea";
 
 /**
  * A group gift (028), opened from the guest view or by its own link, like the site's `/g/<token>`: the idea
@@ -86,48 +83,18 @@ export default function GroupGiftScreen() {
 
 /** The list is protected: its password, as for the list itself. */
 function Unlock({ token, title, onUnlocked }: { token: string; title: string; onUnlocked: () => void }) {
-  const { t } = useTranslation("public");
-  const online = useOnline();
-  const [password, setPassword] = useState("");
-  const unlock = useServerAction(
-    useCallback(async () => {
-      await unlockGroupGift(token, password);
-      onUnlocked();
-    }, [token, password, onUnlocked]),
-  );
+  const unlock = useCallback((password: string) => unlockGroupGift(token, password), [token]);
   return (
     <Screen testID="gift.screen">
       <BackLink />
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("unlock.heading")}</CardTitle>
-          <CardDescription>{title ? `${title} — ${t("unlock.description")}` : t("unlock.description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Field label={t("unlock.password")} description={t("unlock.passwordHint")}>
-            <PasswordInput
-              testID="gift.password"
-              accessibilityLabel={t("unlock.password")}
-              value={password}
-              onChangeText={setPassword}
-              autoComplete="off"
-            />
-          </Field>
-          {unlock.error ? (
-            <Alert testID="gift.unlock-error" variant="destructive">
-              {unlock.error}
-            </Alert>
-          ) : null}
-          <Button
-            testID="gift.unlock"
-            title={t("unlock.submit")}
-            fullWidth
-            disabled={!online || unlock.busy || !password}
-            onPress={() => void unlock.run()}
-          />
-          <NetworkNote />
-        </CardContent>
-      </Card>
+      <UnlockCard
+        title={title}
+        unlock={unlock}
+        onUnlocked={onUnlocked}
+        passwordTestID="gift.password"
+        errorTestID="gift.unlock-error"
+        submitTestID="gift.unlock"
+      />
     </Screen>
   );
 }
@@ -290,12 +257,11 @@ function Join({ token, reload }: { token: string; reload: () => void }) {
           />
         </Field>
         <Field label={t("reserve.note")} description={t("groupGift.privacyHint")}>
-          <Input
+          <Textarea
             testID="gift.note"
             accessibilityLabel={t("reserve.note")}
             value={note}
             onChangeText={setNote}
-            multiline
             maxLength={2000}
           />
         </Field>
@@ -533,12 +499,11 @@ function Thread({
           </View>
         ))}
         <Field label={t("groupGift.message")}>
-          <Input
+          <Textarea
             testID="gift.message"
             accessibilityLabel={t("groupGift.message")}
             value={body}
             onChangeText={setBody}
-            multiline
             maxLength={2000}
           />
         </Field>

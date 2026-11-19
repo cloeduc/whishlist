@@ -14,7 +14,7 @@ export const PUT = withApi<{ token: string }>(async (api, { token }) => {
   if (status !== "open" && status !== "complete") return apiError("invalidStatus", api.locale, api.cors);
   const ctx = await commandContext(api);
   const proofs = guestProofsForList(api.req);
-  const result = await setStatus(ctx, { token, status, claimsFor: proofs.claimsFor });
+  const result = await setStatus(ctx, { token, status, ...proofs });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);
   const gift = await readGroupGift(ctx, { token, ...proofs });
   if (!gift.ok) return apiError(gift.error, api.locale, api.cors);

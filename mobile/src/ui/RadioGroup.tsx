@@ -15,7 +15,7 @@ const RadioContext = createContext<{ value: string; onChange: (value: string) =>
  * `components/ui/radio-group.tsx`: a group of choices (`RadioGroupItem`), one chosen at a time.
  * `label` is the question, read by screen readers and shown above the choices.
  */
-export function RadioGroup<T extends string>({
+export function RadioGroup({
   label,
   value,
   onChange,
@@ -23,13 +23,14 @@ export function RadioGroup<T extends string>({
   testID,
 }: {
   label: string;
-  value: T;
-  onChange: (value: T) => void;
+  value: string;
+  /** The chosen item's `value`: the screen narrows it to its own choices. */
+  onChange: (value: string) => void;
   children: ReactNode;
   testID?: string;
 }) {
   return (
-    <RadioContext.Provider value={{ value, onChange: (next) => onChange(next as T) }}>
+    <RadioContext.Provider value={{ value, onChange }}>
       <View testID={testID} accessibilityRole="radiogroup" accessibilityLabel={label} style={{ gap: tokens.space[2] }}>
         <Text weight="heading">{label}</Text>
         {children}

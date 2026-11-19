@@ -118,7 +118,8 @@ export default async function ReadPage({
   const qui = people.some((person) => person.id === query.qui) ? query.qui! : null;
   const budget = parseBudget(query.budget);
   const priceLocale = intlLocale(locale);
-  const visible = listPublicVisibleItems(doc, list.id, mineIds, { groupGifts: true });
+  // A member who does not chip in sees a group gift as a reservation (SC-005).
+  const visible = listPublicVisibleItems(doc, list.id, mineIds, { groupGifts: !isMember });
   const filtered = sortByPriority(applyBudget(applyPerson(visible, qui), budget));
   const groups = groupByCategory(filtered, types).map((group) => ({
     ...group,

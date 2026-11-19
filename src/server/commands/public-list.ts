@@ -4,7 +4,7 @@ import { READ_UNLOCK_TTL_SEC, signReadUnlock } from "../../auth/read-unlock";
 import { signReservationClaim } from "../../auth/reservation-claim";
 import { sessionSecret } from "../../auth/session";
 import { findMembership } from "../../domain/access";
-import { parseAmount, startGroupGift } from "../../domain/group-gift";
+import { amountFrom, groupGiftOfItem, startGroupGift } from "../../domain/group-gift";
 import { cancelOwnReservation } from "../../domain/items";
 import { findWishlistByReadToken, mineReservationIdsFor } from "../../domain/read";
 import { hasReadPassword, verifyReadPassword } from "../../domain/read-password";
@@ -238,11 +238,13 @@ export async function reserve(
     isUnlocked: IsUnlocked;
   },
 ): Promise<
-  CommandResult<{ wishlist: Wishlist; reservation: Reservation; claim: string | null; groupGiftToken: string | null }>
+  | CommandResult<{ wishlist: Wishlist; reservation: Reservation; claim: string | null; groupGiftToken: string | null }>
+  /** « Lancer un cadeau commun » on an idea where someone has just started one: its link, to join it. */
+  | { ok: false; error: "itemAlreadyReserved"; groupGiftToken: string }
 > {
   rateLimitForIp(`reserve:${input.readToken.slice(0, 12)}`, ctx.ip, 15, 60 * 60 * 1000);
   const group = input.mode === "group";
-  const amountCents = !group ? null : typeof input.amount === "string" ? parseAmount(input.amount) : (input.amount ?? null);
+  const amountCents = group ? amountFrom(input.amount) : null;
   if (amountCents === "invalid") return { ok: false, error: "invalidAmount" };
   const account = publicAccount(ctx);
   const doc = await readDocument();
@@ -251,7 +253,9 @@ export async function reserve(
   if (!(await canAccessPublicListWith(doc, wishlist, account, input.isUnlocked))) {
     return { ok: false, error: "readPasswordRequired" };
   }
-  type Reserved = { ok: true; reservation: Reservation; groupGiftToken: string | null } | { ok: false; error: string };
+  type Reserved =
+    | { ok: true; reservation: Reservation; groupGiftToken: string | null }
+    | { ok: false; error: string; groupGiftToken?: string };
   const result = await updateDocument<Reserved>((current) => {
     const fields = {
       wishlistId: wishlist.id,
@@ -263,7 +267,11 @@ export async function reserve(
     };
     if (group) {
       const started = startGroupGift(current, { ...fields, amountCents });
-      if (!started.ok) return { doc: current, result: started };
+      if (!started.ok) {
+        const open = started.error === "itemAlreadyReserved" ? groupGiftOfItem(current, input.itemId) : null;
+        const result = open?.status === "open" ? { ...started, groupGiftToken: open.token } : started;
+        return { doc: current, result };
+      }
       return {
         doc: started.doc,
         result: { ok: true, reservation: started.reservation, groupGiftToken: started.groupGift.token },
@@ -273,7 +281,12 @@ export async function reserve(
     if (!saved.ok) return { doc: current, result: saved };
     return { doc: saved.doc, result: { ok: true, reservation: saved.reservation, groupGiftToken: null } };
   });
-  if (!result.ok) return result;
+  if (!result.ok) {
+    if (result.error === "itemAlreadyReserved" && result.groupGiftToken) {
+      return { ok: false, error: "itemAlreadyReserved", groupGiftToken: result.groupGiftToken };
+    }
+    return { ok: false, error: result.error };
+  }
   const secret = sessionSecret();
   const claim = secret ? signReservationClaim(input.readToken, result.reservation.id, secret) : null;
   return { ok: true, wishlist, reservation: result.reservation, claim, groupGiftToken: result.groupGiftToken };

@@ -258,6 +258,34 @@ test("rejected: each integrity check names the collection and the id, never the 
         }),
       /^subscriptions: w-9\/camille → wishlistId missing \(w-9\)/m,
     ],
+    [
+      "two group gifts for one idea",
+      (d) => d.groupGifts.push(groupGift("g-1", "tok-1"), groupGift("g-2", "tok-2")),
+      /^groupGifts: several group gifts for the same idea \(g-1, g-2\)/m,
+    ],
+    [
+      "duplicate group gift token",
+      (d) => d.groupGifts.push(groupGift("g-1", "tok-1"), { ...groupGift("g-2", "tok-1"), itemId: "gift2" }),
+      /^groupGifts: duplicate token \(g-1, g-2\)/m,
+    ],
+    [
+      "participation pointing to a missing group gift",
+      (d) => d.reservations.push(participation("p-1", "g-9")),
+      /^reservations: p-1 → groupGiftId missing \(g-9\)/m,
+    ],
+    [
+      "message pointing to a missing group gift",
+      (d) =>
+        d.groupGiftMessages.push({
+          id: "m-1",
+          groupGiftId: "g-9",
+          userId: null,
+          authorName: null,
+          body: "Coucou",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        }),
+      /^groupGiftMessages: m-1 → groupGiftId missing \(g-9\)/m,
+    ],
   ];
   for (const [label, breakDoc, expected] of cases) {
     await withTempDataPath(async (dataPath) => {
@@ -268,6 +296,39 @@ test("rejected: each integrity check names the collection and the id, never the 
       throw new Error(`${label} : ${(error as Error).message}`);
     });
   }
+});
+
+function groupGift(id: string, token: string): Doc["groupGifts"][number] {
+  return { id, wishlistId: "w", itemId: "gift", token, status: "open", createdAt: "2026-01-01T00:00:00.000Z", completedAt: null };
+}
+
+function participation(id: string, groupGiftId: string): Doc["reservations"][number] {
+  return {
+    id,
+    wishlistId: "w",
+    itemId: "gift",
+    fromName: null,
+    note: null,
+    userId: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    groupGiftId,
+    amountCents: 500,
+  };
+}
+
+test("import: several participations in one group gift are accepted on the same idea (028)", async () => {
+  await withTempDataPath(async (dataPath) => {
+    const doc = apiDoc();
+    doc.groupGifts.push(groupGift("g-1", "tok-1"));
+    doc.reservations.push(participation("p-1", "g-1"), participation("p-2", "g-1"));
+    await writeFile(dataPath, JSON.stringify(doc));
+    const imported = await readDocument();
+    assert.deepEqual(
+      imported.reservations.filter((r) => r.groupGiftId === "g-1").map((r) => r.id),
+      ["p-1", "p-2"],
+    );
+    assert.equal(imported.groupGifts[0]?.token, "tok-1");
+  });
 });
 
 test("rejected: required field missing or of the wrong type, named by collection and id", async () => {

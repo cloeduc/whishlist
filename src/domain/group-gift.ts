@@ -1,8 +1,10 @@
 import { clone, findMembership } from "./access";
 import { validAmount } from "./amount";
-import { groupGiftOfItem, groupGiftTotals, ownParticipation, participationsOf, type GroupGiftTotals } from "./group-gift-view";
+import { groupGiftTotals, ownParticipation, participationsOf, type GroupGiftTotals } from "./group-gift-view";
+import { cancelOwnReservation } from "./items";
 import { formatPrice } from "./price";
-import { MAX_FROM_NAME, MAX_NOTE } from "./reserve";
+import { MAX_FROM_NAME, MAX_NOTE, reservableItem } from "./reserve";
+import { blankToNull } from "./text";
 import { newId, newToken } from "./tokens";
 import type { Database, GroupGift, GroupGiftMessage, GroupGiftStatus, Reservation } from "./types";
 
@@ -13,7 +15,7 @@ import type { Database, GroupGift, GroupGiftMessage, GroupGiftStatus, Reservatio
  * A group gift exists while it has at least one participation (`pruneGroupGifts`).
  */
 
-export { MAX_AMOUNT_CENTS, parseAmount, validAmount } from "./amount";
+export { amountFrom, MAX_AMOUNT_CENTS, parseAmount, validAmount } from "./amount";
 export {
   findGroupGiftByToken,
   groupGiftOfItem,
@@ -32,11 +34,6 @@ export function pruneGroupGifts(doc: Database): void {
   if (gone.size === 0) return;
   doc.groupGifts = doc.groupGifts.filter((gift) => !gone.has(gift.id));
   doc.groupGiftMessages = doc.groupGiftMessages.filter((message) => !gone.has(message.groupGiftId));
-}
-
-function blank(value: string | null | undefined): string | null {
-  const trimmed = (value ?? "").trim();
-  return trimmed ? trimmed : null;
 }
 
 type Failure = { ok: false; error: string };
@@ -67,8 +64,8 @@ function newParticipation(
     id: input.id ?? newId(),
     wishlistId,
     itemId,
-    fromName: blank(input.fromName),
-    note: blank(input.note),
+    fromName: blankToNull(input.fromName),
+    note: blankToNull(input.note),
     userId: input.userId?.trim() ? input.userId.trim() : null,
     createdAt: (input.now ?? new Date()).toISOString(),
     groupGiftId,
@@ -84,15 +81,10 @@ export function startGroupGift(
   doc: Database,
   input: ParticipationInput & { wishlistId: string; itemId: string; typeId?: string; groupGiftId?: string; token?: string },
 ): { ok: true; doc: Database; groupGift: GroupGift; reservation: Reservation } | Failure {
-  if (!input.itemId) return { ok: false, error: "chooseItem" };
-  const invalid = fieldsError(input);
-  if (invalid) return { ok: false, error: invalid };
-  const item = doc.items.find((i) => i.id === input.itemId && i.wishlistId === input.wishlistId);
-  if (item && (doc.reservations.some((r) => r.itemId === item.id) || groupGiftOfItem(doc, item.id))) {
-    return { ok: false, error: "itemAlreadyReserved" };
-  }
-  if (!item || item.archived) return { ok: false, error: "itemNotInList" };
-  if (input.typeId && item.typeId !== input.typeId) return { ok: false, error: "itemWrongType" };
+  const checked = reservableItem(doc, input);
+  if (!checked.ok) return checked;
+  if (!validAmount(input.amountCents ?? null)) return { ok: false, error: "invalidAmount" };
+  const item = checked.item;
   const now = input.now ?? new Date();
   const groupGift: GroupGift = {
     id: input.groupGiftId ?? newId(),
@@ -120,6 +112,9 @@ export function joinGroupGift(
   const invalid = fieldsError(input);
   if (invalid) return { ok: false, error: invalid };
   if (gift.status === "complete") return { ok: false, error: "groupGiftComplete" };
+  // An idea archived since the gift started is out of the list: its link takes no new participation.
+  const item = doc.items.find((i) => i.id === gift.itemId);
+  if (!item || item.archived) return { ok: false, error: "itemNotInList" };
   if (ownParticipation(doc, gift.id, input.userId ?? null, input.claimedIds)) {
     return { ok: false, error: "groupGiftAlreadyJoined" };
   }
@@ -136,12 +131,8 @@ export function leaveGroupGift(
 ): { ok: true; doc: Database } | Failure {
   const reservation = doc.reservations.find((r) => r.id === input.reservationId && r.groupGiftId === input.groupGiftId);
   if (!reservation) return { ok: false, error: "reservationMissing" };
-  const byAccount = Boolean(input.userId && reservation.userId === input.userId);
-  if (!byAccount && !input.claimedIds.has(reservation.id)) return { ok: false, error: "accessDenied" };
-  const next = clone(doc);
-  next.reservations = next.reservations.filter((r) => r.id !== reservation.id);
-  pruneGroupGifts(next);
-  return { ok: true, doc: next };
+  // Same proofs and same removal (the gift goes with its last participation).
+  return cancelOwnReservation(doc, { ...input, wishlistId: reservation.wishlistId });
 }
 
 /**

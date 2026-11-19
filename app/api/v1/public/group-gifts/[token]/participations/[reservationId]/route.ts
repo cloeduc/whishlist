@@ -14,9 +14,10 @@ export const PATCH = withApi<{ token: string; reservationId: string }>(async (ap
   const amount = amountField(body.body.amountCents);
   if (amount === "invalid") return apiError("invalidAmount", api.locale, api.cors);
   const ctx = await commandContext(api);
-  const result = await setAmount(ctx, { token, reservationId, amount });
+  const proofs = guestProofsForList(api.req);
+  const result = await setAmount(ctx, { token, reservationId, amount, isUnlocked: proofs.isUnlocked });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);
-  const gift = await readGroupGift(ctx, { token, ...guestProofsForList(api.req) });
+  const gift = await readGroupGift(ctx, { token, ...proofs });
   if (!gift.ok) return apiError(gift.error, api.locale, api.cors);
   return apiJson(toGroupGiftView(gift.gift, gift.wishlist), 200, api.cors);
 });

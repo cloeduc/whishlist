@@ -100,7 +100,7 @@ function itemBase(item: Item, locale: Locale) {
 
 /**
  * Same content as the public page: free ideas, plus this client's. A group gift (028) is shown to everyone
- * only to a client that asks (`groupGifts`); an older app sees it as a reservation.
+ * but the list's members, only to a client that asks (`groupGifts`); an older app sees it as a reservation.
  */
 export function toPublicListView(
   doc: Database,
@@ -114,7 +114,10 @@ export function toPublicListView(
   const mineByItem = new Map(
     doc.reservations.filter((r) => r.wishlistId === wishlist.id && mineIds.has(r.id)).map((r) => [r.itemId, r.id]),
   );
-  const items = listPublicVisibleItems(doc, wishlist.id, mineIds, options).map((item) => {
+  const { isMember, subscribed } = viewerRelation(doc, wishlist.id, viewerId);
+  // A member who does not chip in sees a group gift as a reservation: absent, even outside surprise mode (SC-005).
+  const visibleOptions = { ...options, groupGifts: options.groupGifts && !isMember };
+  const items = listPublicVisibleItems(doc, wishlist.id, mineIds, visibleOptions).map((item) => {
     const reservationId = mineByItem.get(item.id) ?? null;
     const view: PublicItemView = { ...itemBase(item, locale), mine: reservationId !== null, reservationId };
     if (options.groupGifts) {
@@ -123,7 +126,6 @@ export function toPublicListView(
     }
     return view;
   });
-  const { isMember, subscribed } = viewerRelation(doc, wishlist.id, viewerId);
   const subscription = subscribed && viewerId ? findSubscription(doc, wishlist.id, viewerId) : null;
   return {
     title: wishlist.title,

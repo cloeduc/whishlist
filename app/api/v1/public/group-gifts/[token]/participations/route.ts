@@ -1,5 +1,4 @@
-import { claimKeyFor, signReservationClaim } from "@/src/auth/reservation-claim";
-import { sessionSecret } from "@/src/auth/session";
+import { claimKeyFor } from "@/src/auth/reservation-claim";
 import { guestProofsForList } from "@/src/server/api/auth";
 import { commandContext } from "@/src/server/api/context";
 import { apiError, apiJson, apiPreflight, readJsonBody, text, withApi } from "@/src/server/api/http";
@@ -21,13 +20,11 @@ export const POST = withApi<{ token: string }>(async (api, { token }) => {
     ...guestProofsForList(api.req),
   });
   if (!result.ok) return apiError(result.error, api.locale, api.cors);
-  const secret = sessionSecret();
-  const { readToken } = result.wishlist;
   return apiJson(
     {
       reservationId: result.reservation.id,
-      claim: secret ? signReservationClaim(readToken, result.reservation.id, secret) : null,
-      claimKey: claimKeyFor(readToken),
+      claim: result.claim,
+      claimKey: claimKeyFor(result.wishlist.readToken),
     },
     201,
     api.cors,

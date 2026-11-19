@@ -786,6 +786,8 @@ export async function reserveAction(prev: FormState, formData: FormData): Promis
   if (!result.ok) {
     if (result.error === "listMissing") return localeRedirect("/");
     if (result.error === "readPasswordRequired") return localeRedirect(`/l/${readToken}`);
+    // Someone has just started a group gift on this idea: its page, to chip in (« Actions simultanées »).
+    if ("groupGiftToken" in result) return localeRedirect(`/g/${result.groupGiftToken}`);
     return backToForm(result.error);
   }
   await grantReservationClaim(readToken, result.reservation.id);
@@ -868,13 +870,14 @@ export async function setGroupGiftAmountAction(prev: FormState, formData: FormDa
       token,
       reservationId: String(formData.get("reservationId") ?? ""),
       amount: String(formData.get("amount") ?? ""),
+      isUnlocked: hasReadUnlock,
     });
   } catch (error) {
     if (isRateLimitError(error)) return refusal(prev, "rateLimited", formData, GROUP_GIFT_AMOUNT_KEPT_FIELDS);
     throw error;
   }
   if (!result.ok) {
-    if (result.error === "groupGiftMissing") return localeRedirect(`/g/${token}`);
+    if (result.error === "groupGiftMissing" || result.error === "readPasswordRequired") return localeRedirect(`/g/${token}`);
     return refusal(prev, result.error, formData, GROUP_GIFT_AMOUNT_KEPT_FIELDS);
   }
   return localeRedirect(`/g/${token}`);
@@ -885,13 +888,17 @@ export async function postGroupGiftMessageAction(prev: FormState, formData: Form
   const token = String(formData.get("token") ?? "");
   let result: Awaited<ReturnType<typeof postGroupGiftMessage>>;
   try {
-    result = await postGroupGiftMessage(await actionContext(), { token, body: String(formData.get("body") ?? "") });
+    result = await postGroupGiftMessage(await actionContext(), {
+      token,
+      body: String(formData.get("body") ?? ""),
+      isUnlocked: hasReadUnlock,
+    });
   } catch (error) {
     if (isRateLimitError(error)) return refusal(prev, "rateLimited", formData, GROUP_GIFT_MESSAGE_KEPT_FIELDS);
     throw error;
   }
   if (!result.ok) {
-    if (result.error === "groupGiftMissing") return localeRedirect(`/g/${token}`);
+    if (result.error === "groupGiftMissing" || result.error === "readPasswordRequired") return localeRedirect(`/g/${token}`);
     return refusal(prev, result.error, formData, GROUP_GIFT_MESSAGE_KEPT_FIELDS);
   }
   return localeRedirect(`/g/${token}#thread`);
@@ -900,10 +907,17 @@ export async function postGroupGiftMessageAction(prev: FormState, formData: Form
 /** Its author removes a message from the thread (028, US5). */
 export async function deleteGroupGiftMessageAction(formData: FormData) {
   const token = String(formData.get("token") ?? "");
-  const result = await deleteGroupGiftMessage(await actionContext(), {
-    token,
-    messageId: String(formData.get("messageId") ?? ""),
-  });
+  let result: Awaited<ReturnType<typeof deleteGroupGiftMessage>>;
+  try {
+    result = await deleteGroupGiftMessage(await actionContext(), {
+      token,
+      messageId: String(formData.get("messageId") ?? ""),
+      isUnlocked: hasReadUnlock,
+    });
+  } catch (error) {
+    if (isRateLimitError(error)) return localeRedirect(`/g/${token}?e=rateLimited`);
+    throw error;
+  }
   if (!result.ok) return localeRedirect(`/g/${token}?e=${result.error}`);
   return localeRedirect(`/g/${token}#thread`);
 }
@@ -933,7 +947,12 @@ export async function setGroupGiftStatusAction(formData: FormData) {
   const status = formData.get("status") === "complete" ? "complete" : "open";
   let result: Awaited<ReturnType<typeof setGroupGiftStatus>>;
   try {
-    result = await setGroupGiftStatus(await actionContext(), { token, status, claimsFor: claimsFromCookie });
+    result = await setGroupGiftStatus(await actionContext(), {
+      token,
+      status,
+      isUnlocked: hasReadUnlock,
+      claimsFor: claimsFromCookie,
+    });
   } catch (error) {
     if (isRateLimitError(error)) return localeRedirect(`/g/${token}?e=rateLimited`);
     throw error;

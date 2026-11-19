@@ -165,7 +165,12 @@ function ReserveForm({
               </Field>
             </>
           ) : null}
-          <RadioGroup testID="guest-reserve.mode" label={t("reserve.modeLabel")} value={mode} onChange={setMode}>
+          <RadioGroup
+            testID="guest-reserve.mode"
+            label={t("reserve.modeLabel")}
+            value={mode}
+            onChange={(next) => setMode(next === "group" ? "group" : "single")}
+          >
             <RadioGroupItem
               testID="guest-reserve.mode-single"
               value="single"

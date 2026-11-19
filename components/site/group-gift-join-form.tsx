@@ -3,9 +3,8 @@
 import { useActionState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { FieldGroup } from "@/components/ui/field";
+import { GiverFields } from "@/components/site/giver-fields";
 import { joinGroupGiftAction } from "@/src/server/actions";
 import { FormRefusal } from "@/components/site/form-refusal";
 
@@ -21,25 +20,7 @@ export function GroupGiftJoinForm({ token }: { token: string }) {
       <FieldGroup>
         <FormRefusal code={state?.error} />
         <input type="hidden" name="token" value={token} />
-        <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
-          <label htmlFor="website-gift">Website</label>
-          <input id="website-gift" name="website" type="text" tabIndex={-1} autoComplete="off" />
-        </div>
-        <Field>
-          <FieldLabel htmlFor="amount">{t("groupGift.amount")}</FieldLabel>
-          <Input id="amount" name="amount" inputMode="decimal" autoComplete="off" defaultValue={state?.values.amount} />
-          <p className="text-sm text-muted-foreground">{t("groupGift.amountHint")}</p>
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="fromName">{t("reserve.fromName")}</FieldLabel>
-          <Input id="fromName" name="fromName" autoComplete="name" defaultValue={state?.values.fromName} />
-        </Field>
-        <Field>
-          <FieldLabel htmlFor="note">{t("reserve.note")}</FieldLabel>
-          <Textarea id="note" name="note" defaultValue={state?.values.note} />
-          <p className="text-sm text-muted-foreground">{t("groupGift.privacyHint")}</p>
-        </Field>
-        <p className="text-sm text-muted-foreground">{t("groupGift.noPurchaseHint")}</p>
+        <GiverFields honeypotId="website-gift" values={state?.values} group />
         <Button type="submit" disabled={pending}>
           {t("groupGift.joinSubmit")}
         </Button>

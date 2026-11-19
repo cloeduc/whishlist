@@ -499,7 +499,7 @@ export interface paths {
         post?: never;
         /**
          * Retirer sa participation (depuis 1.11.0)
-         * @description Compte lié ou claim valide. Le dernier retrait libère l'idée et supprime le cadeau.
+         * @description Compte lié ou claim valide, sans le mot de passe de lecture (comme l'annulation d'une réservation). Le dernier retrait libère l'idée et supprime le cadeau.
          */
         delete: {
             parameters: {
@@ -526,11 +526,15 @@ export interface paths {
                 };
                 403: components["responses"]["Error"];
                 404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
             };
         };
         options?: never;
         head?: never;
-        /** Changer son montant (participant avec compte, depuis 1.11.0) */
+        /**
+         * Changer son montant (participant avec compte, depuis 1.11.0)
+         * @description Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+         */
         patch: {
             parameters: {
                 query?: never;
@@ -568,6 +572,7 @@ export interface paths {
                 401: components["responses"]["Error"];
                 403: components["responses"]["Error"];
                 404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
             };
         };
         trace?: never;
@@ -583,7 +588,10 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Déclarer le cadeau commun complet ou le rouvrir (participant, depuis 1.11.0) */
+        /**
+         * Déclarer le cadeau commun complet ou le rouvrir (participant, depuis 1.11.0)
+         * @description Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+         */
         put: {
             parameters: {
                 query?: never;
@@ -620,6 +628,7 @@ export interface paths {
                 400: components["responses"]["Error"];
                 403: components["responses"]["Error"];
                 404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
             };
         };
         post?: never;
@@ -643,12 +652,15 @@ export interface paths {
         put?: never;
         /**
          * Écrire dans le fil d'un cadeau commun (participant avec compte, depuis 1.11.0)
-         * @description Aucune notification n'est envoyée. Les membres de la liste ne voient jamais ce fil.
+         * @description Aucune notification n'est envoyée. Les membres de la liste ne voient jamais ce fil. Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
          */
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /** @description unlockToken de cette liste. */
+                    "X-Read-Unlock"?: components["parameters"]["readUnlock"];
+                };
                 path: {
                     /** @description Jeton du cadeau commun (lien `/g/<token>`). */
                     token: components["parameters"]["groupGiftToken"];
@@ -699,11 +711,17 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Supprimer son message du fil (depuis 1.11.0) */
+        /**
+         * Supprimer son message du fil (depuis 1.11.0)
+         * @description Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+         */
         delete: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /** @description unlockToken de cette liste. */
+                    "X-Read-Unlock"?: components["parameters"]["readUnlock"];
+                };
                 path: {
                     /** @description Jeton du cadeau commun (lien `/g/<token>`). */
                     token: components["parameters"]["groupGiftToken"];
@@ -723,6 +741,7 @@ export interface paths {
                 401: components["responses"]["Error"];
                 403: components["responses"]["Error"];
                 404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
             };
         };
         options?: never;

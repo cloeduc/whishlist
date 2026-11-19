@@ -354,6 +354,7 @@ paths:
     patch:
       tags: [public]
       summary: Changer son montant (participant avec compte, depuis 1.11.0)
+      description: Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
       security: [{ bearer: [] }]
       parameters:
         - $ref: "#/components/parameters/readUnlock"
@@ -377,10 +378,13 @@ paths:
         "401": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
     delete:
       tags: [public]
       summary: Retirer sa participation (depuis 1.11.0)
-      description: Compte lié ou claim valide. Le dernier retrait libère l'idée et supprime le cadeau.
+      description: >-
+        Compte lié ou claim valide, sans le mot de passe de lecture (comme l'annulation d'une réservation).
+        Le dernier retrait libère l'idée et supprime le cadeau.
       security: [{}, { bearer: [] }]
       parameters:
         - $ref: "#/components/parameters/reservationClaims"
@@ -388,6 +392,7 @@ paths:
         "204": { description: Retirée }
         "403": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
 
   /public/group-gifts/{token}/status:
     parameters:
@@ -395,6 +400,7 @@ paths:
     put:
       tags: [public]
       summary: Déclarer le cadeau commun complet ou le rouvrir (participant, depuis 1.11.0)
+      description: Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
       security: [{}, { bearer: [] }]
       parameters:
         - $ref: "#/components/parameters/readUnlock"
@@ -417,6 +423,7 @@ paths:
         "400": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
 
   /public/group-gifts/{token}/messages:
     parameters:
@@ -424,8 +431,11 @@ paths:
     post:
       tags: [public]
       summary: Écrire dans le fil d'un cadeau commun (participant avec compte, depuis 1.11.0)
-      description: Aucune notification n'est envoyée. Les membres de la liste ne voient jamais ce fil.
+      description: >-
+        Aucune notification n'est envoyée. Les membres de la liste ne voient jamais ce fil. Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
       security: [{ bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
       requestBody:
         required: true
         content:
@@ -457,12 +467,16 @@ paths:
     delete:
       tags: [public]
       summary: Supprimer son message du fil (depuis 1.11.0)
+      description: Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
       security: [{ bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
       responses:
         "204": { description: Supprimé }
         "401": { $ref: "#/components/responses/Error" }
         "403": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
 
   # ---------- Auth et compte ----------
 

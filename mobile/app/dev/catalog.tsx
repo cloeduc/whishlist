@@ -17,6 +17,7 @@ import { Field } from "@/ui/Field";
 import { GiftMark } from "@/ui/GiftMark";
 import { Input } from "@/ui/Input";
 import { PillTabs } from "@/ui/PillTabs";
+import { RadioGroup, RadioGroupItem } from "@/ui/RadioGroup";
 import { Screen } from "@/ui/Screen";
 import { Select } from "@/ui/Select";
 import { Separator } from "@/ui/Separator";
@@ -41,6 +42,7 @@ function Components() {
   const [tab, setTab] = useState("ideas");
   const [category, setCategory] = useState("books");
   const [priority, setPriority] = useState("3");
+  const [mode, setMode] = useState("single");
   return (
     <>
       <Section title="Buttons">
@@ -114,6 +116,12 @@ function Components() {
         <CollapsibleCard title="Card expanded at first" defaultExpanded>
           <Button title="Save" fullWidth />
         </CollapsibleCard>
+      </Section>
+      <Section title="Radio group">
+        <RadioGroup label="How do you give it?" value={mode} onChange={setMode}>
+          <RadioGroupItem value="single" label="Reserve on my own" description="You give the whole gift." />
+          <RadioGroupItem value="group" label="Start a group gift" description="Others can chip in." />
+        </RadioGroup>
       </Section>
       <Section title="Badges and stars">
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: tokens.space[3] }}>

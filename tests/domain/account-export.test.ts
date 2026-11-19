@@ -202,3 +202,14 @@ test("group gift (028): the participation with its amount, and the account's mes
   ]);
   assert.equal(exported().groupGiftMessages.length, 0);
 });
+
+test("group gift (028): a member's list export keeps participations as reservations, without amounts", () => {
+  const data = exportAccount(withLouGroupGift(accountDoc()), "camille", SITE, NOW);
+  assert.ok(data);
+  const reservations = data.lists.flatMap((list) => list.reservations);
+  assert.ok(reservations.length > 0);
+  for (const reservation of reservations) {
+    assert.deepEqual(Object.keys(reservation).sort(), ["byMe", "createdAt", "fromName", "item", "note"]);
+  }
+  assert.ok(!JSON.stringify(data.lists).includes("1500"));
+});
