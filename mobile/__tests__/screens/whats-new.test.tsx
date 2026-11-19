@@ -10,7 +10,7 @@ jest.mock("expo-router", () => ({ router: { push: jest.fn(), replace: jest.fn(),
 jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
 jest.mock("@/whats-new/releases", () => ({
   ...jest.requireActual<typeof import("@/whats-new/releases")>("@/whats-new/releases"),
-  RELEASES: ["1.1.1", "1.1.2"],
+  RELEASES: ["1.2.0", "1.2.1"],
 }));
 
 
@@ -23,22 +23,22 @@ afterEach(() => {
 });
 
 test("each version up to the installed one, newest first, with its news (022 US2)", async () => {
-  installVersion("1.1.2");
+  installVersion("1.2.1");
   await render(<WhatsNewScreen />);
   expect(await screen.findByTestId("whats-new.screen")).toBeOnTheScreen();
   const sections = screen.getAllByTestId(/^whats-new\.section-/).map((node) => node.props.testID);
-  expect(sections).toEqual(["whats-new.section-1_1_2", "whats-new.section-1_1_1"]);
-  expect(screen.getByText(i18n.t("mobile:whatsNew.version", { version: "1.1.1" }))).toBeOnTheScreen();
-  const sentences: unknown = i18n.t("mobile:whatsNew.releases.1_1_1", { returnObjects: true });
+  expect(sections).toEqual(["whats-new.section-1_2_1", "whats-new.section-1_2_0"]);
+  expect(screen.getByText(i18n.t("mobile:whatsNew.version", { version: "1.2.0" }))).toBeOnTheScreen();
+  const sentences: unknown = i18n.t("mobile:whatsNew.releases.1_2_0", { returnObjects: true });
   for (const sentence of Array.isArray(sentences) ? sentences : []) {
     expect(screen.getByText(`• ${String(sentence)}`)).toBeOnTheScreen();
   }
-  expect(RELEASES).toContain("1.1.2");
+  expect(RELEASES).toContain("1.2.1");
 });
 
 test("a version newer than the installed one is not listed", async () => {
-  installVersion("1.1.1");
+  installVersion("1.2.0");
   await render(<WhatsNewScreen />);
-  expect(await screen.findByTestId("whats-new.section-1_1_1")).toBeOnTheScreen();
-  expect(screen.queryByTestId("whats-new.section-1_1_2")).toBeNull();
+  expect(await screen.findByTestId("whats-new.section-1_2_0")).toBeOnTheScreen();
+  expect(screen.queryByTestId("whats-new.section-1_2_1")).toBeNull();
 });

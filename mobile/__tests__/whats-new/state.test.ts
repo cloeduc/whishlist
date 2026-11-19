@@ -6,10 +6,10 @@ import { freshDb } from "../helpers/memory-db";
 test("last seen version: none, then kept, and kept when signing out", async () => {
   await freshDb();
   expect(await getLastSeenVersion()).toBeNull();
-  await setLastSeenVersion("1.1.1");
-  expect(await getLastSeenVersion()).toBe("1.1.1");
+  await setLastSeenVersion("1.2.0");
+  expect(await getLastSeenVersion()).toBe("1.2.0");
   await clearAll();
-  expect(await getLastSeenVersion()).toBe("1.1.1");
+  expect(await getLastSeenVersion()).toBe("1.2.0");
 });
 
 test("past usage: none on an empty phone; a copy, a pending change or an account count", async () => {

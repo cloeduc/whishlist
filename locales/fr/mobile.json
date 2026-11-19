@@ -24,9 +24,12 @@
     "screenEyebrow": "L'application",
     "screenIntro": "Ce que chaque version a apporté, la plus récente en premier.",
     "releases": {
-      "1_1_1": [
+      "1_2_0": [
+        "Cadeau commun : sur une idée, choisissez « Lancer un cadeau commun », annoncez votre montant et partagez le lien du cadeau pour que d'autres participent.",
         "Gardez la surprise : dans l'onglet Partage d'une liste, cochez « Ne pas voir les cadeaux réservés ».",
-        "L'application vous prévient quand une nouvelle version est disponible."
+        "En ajoutant une idée, créez une catégorie sans quitter le formulaire avec « + Nouvelle catégorie ».",
+        "Renommez une liste suivie pour la retrouver facilement.",
+        "Les liens de gestion d'une liste s'ouvrent dans l'application, et l'application vous prévient quand une nouvelle version est disponible."
       ]
     }
   },

@@ -27,7 +27,7 @@ tags:
       id: whats-new.screen
     timeout: 10000
 - assertVisible:
-    id: whats-new.section-1_1_1
+    id: whats-new.section-1_2_0
 - tapOn:
     id: back-link.back
 - extendedWaitUntil:
