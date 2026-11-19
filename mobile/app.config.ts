@@ -131,6 +131,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "expo-splash-screen",
       { backgroundColor: "#e8f0ff", image: "./assets/images/splash-icon.png", imageWidth: 160 },
     ],
+    // Google Play: portrait screen and Wi-Fi are optional, so no device is left out.
+    "./plugins/optional-hardware",
   ],
   experiments: { typedRoutes: true },
   extra: {
