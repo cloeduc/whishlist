@@ -28,7 +28,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            /** @example 1.10.0 */
+                            /** @example 1.11.0 */
                             apiVersion: string;
                             /** @description Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page). */
                             enrich: boolean;
@@ -64,7 +64,13 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /**
+                     * @description Depuis 1.11.0. `true` : le client connaît le cadeau commun ; un cadeau commun ouvert reste visible
+                     *     de tous, avec `groupGift`. Absent : il est traité comme une réservation (anciennes versions).
+                     */
+                    groupGifts?: "true";
+                };
                 header?: {
                     /** @description unlockToken de cette liste. */
                     "X-Read-Unlock"?: components["parameters"]["readUnlock"];
@@ -194,6 +200,13 @@ export interface paths {
                         typeId?: string;
                         fromName?: string;
                         note?: string;
+                        /**
+                         * @description Depuis 1.11.0. `group` lance un cadeau commun, dont cette réservation est la première participation.
+                         * @enum {string}
+                         */
+                        mode?: "single" | "group";
+                        /** @description Depuis 1.11.0, en mode `group` seulement. Montant annoncé, sans paiement. */
+                        amountCents?: number | null;
                     };
                 };
             };
@@ -208,6 +221,10 @@ export interface paths {
                             reservationId: string;
                             /** @description À renvoyer dans `X-Reservation-Claims`. */
                             claim: string | null;
+                            /** @description Depuis 1.11.0. Voir `PublicList.claimKey`. */
+                            claimKey?: string;
+                            /** @description Depuis 1.11.0. En mode `group` : jeton du cadeau (lien `/g/<token>`). */
+                            groupGiftToken?: string | null;
                         };
                     };
                 };
@@ -262,6 +279,469 @@ export interface paths {
                 };
                 403: components["responses"]["Error"];
                 404: components["responses"]["Error"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/group-gifts/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+            };
+            cookie?: never;
+        };
+        /**
+         * Lire un cadeau commun par son lien (depuis 1.11.0)
+         * @description L'idée, le titre de la liste et les participants ; jamais le lien de la liste ni ses autres idées.
+         *     Montants et messages de participation : pour les participants seulement (compte ou claim).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description unlockToken de cette liste. */
+                    "X-Read-Unlock"?: components["parameters"]["readUnlock"];
+                    /** @description Claims de cette liste, séparés par des virgules (50 au plus). */
+                    "X-Reservation-Claims"?: components["parameters"]["reservationClaims"];
+                };
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupGift"];
+                    };
+                };
+                404: components["responses"]["Error"];
+                /** @description Mot de passe de lecture de la liste nécessaire (`readPasswordRequired`). Le corps contient aussi `title`. */
+                423: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"] & {
+                            title?: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/group-gifts/{token}/unlock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Déverrouiller la liste d'un cadeau commun (depuis 1.11.0)
+         * @description Même `unlockToken` que `POST /public/lists/{readToken}/unlock`, sans connaître le lien de la liste.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        password: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description OK */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            unlockToken: string | null;
+                            /** Format: date-time */
+                            expiresAt: string | null;
+                        };
+                    };
+                };
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/group-gifts/{token}/participations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Participer à un cadeau commun (depuis 1.11.0)
+         * @description Sans compte possible. Avec un bearer, la participation est liée au compte (montant modifiable).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description unlockToken de cette liste. */
+                    "X-Read-Unlock"?: components["parameters"]["readUnlock"];
+                    /** @description Claims de cette liste, séparés par des virgules (50 au plus). */
+                    "X-Reservation-Claims"?: components["parameters"]["reservationClaims"];
+                };
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        fromName?: string;
+                        note?: string;
+                        amountCents?: number | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Participation enregistrée */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            reservationId: string;
+                            /** @description À renvoyer dans `X-Reservation-Claims`. */
+                            claim: string | null;
+                            claimKey: string;
+                        };
+                    };
+                };
+                400: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                /** @description `groupGiftComplete` ou `groupGiftAlreadyJoined`. */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Error"];
+                    };
+                };
+                423: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/group-gifts/{token}/participations/{reservationId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+                reservationId: components["parameters"]["reservationId"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Retirer sa participation (depuis 1.11.0)
+         * @description Compte lié ou claim valide, sans le mot de passe de lecture (comme l'annulation d'une réservation). Le dernier retrait libère l'idée et supprime le cadeau.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description Claims de cette liste, séparés par des virgules (50 au plus). */
+                    "X-Reservation-Claims"?: components["parameters"]["reservationClaims"];
+                };
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                    reservationId: components["parameters"]["reservationId"];
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Retirée */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                403: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        options?: never;
+        head?: never;
+        /**
+         * Changer son montant (participant avec compte, depuis 1.11.0)
+         * @description Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description unlockToken de cette liste. */
+                    "X-Read-Unlock"?: components["parameters"]["readUnlock"];
+                    /** @description Claims de cette liste, séparés par des virgules (50 au plus). */
+                    "X-Reservation-Claims"?: components["parameters"]["reservationClaims"];
+                };
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                    reservationId: components["parameters"]["reservationId"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        amountCents: number | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Le cadeau à jour */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupGift"];
+                    };
+                };
+                400: components["responses"]["Error"];
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        trace?: never;
+    };
+    "/public/group-gifts/{token}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Déclarer le cadeau commun complet ou le rouvrir (participant, depuis 1.11.0)
+         * @description Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description unlockToken de cette liste. */
+                    "X-Read-Unlock"?: components["parameters"]["readUnlock"];
+                    /** @description Claims de cette liste, séparés par des virgules (50 au plus). */
+                    "X-Reservation-Claims"?: components["parameters"]["reservationClaims"];
+                };
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @enum {string} */
+                        status: "open" | "complete";
+                    };
+                };
+            };
+            responses: {
+                /** @description Le cadeau à jour */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupGift"];
+                    };
+                };
+                400: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/group-gifts/{token}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Écrire dans le fil d'un cadeau commun (participant avec compte, depuis 1.11.0)
+         * @description Aucune notification n'est envoyée. Les membres de la liste ne voient jamais ce fil. Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description unlockToken de cette liste. */
+                    "X-Read-Unlock"?: components["parameters"]["readUnlock"];
+                };
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        body: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Message ajouté */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["GroupGiftMessage"];
+                    };
+                };
+                400: components["responses"]["Error"];
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/group-gifts/{token}/messages/{messageId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                token: components["parameters"]["groupGiftToken"];
+                messageId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Supprimer son message du fil (depuis 1.11.0)
+         * @description Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description unlockToken de cette liste. */
+                    "X-Read-Unlock"?: components["parameters"]["readUnlock"];
+                };
+                path: {
+                    /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+                    token: components["parameters"]["groupGiftToken"];
+                    messageId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Supprimé */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Error"];
+                403: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+                429: components["responses"]["Error"];
             };
         };
         options?: never;
@@ -1907,6 +2387,51 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lists/{listId}/group-gifts/{groupGiftId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                listId: components["parameters"]["listId"];
+                groupGiftId: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Annuler tout un cadeau commun de sa liste (membre, depuis 1.11.0)
+         * @description Supprime toutes les participations du cadeau commun et ses messages ; l'idée redevient libre.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    listId: components["parameters"]["listId"];
+                    groupGiftId: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Annulé */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                401: components["responses"]["Error"];
+                404: components["responses"]["Error"];
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/lists/{listId}/invite-link": {
         parameters: {
             query?: never;
@@ -2442,6 +2967,8 @@ export interface components {
                  * @description Codes de `locales/*\/errors.json`, plus : unauthorized, invalidCredentials,
                  *     mustChangePassword, readPasswordRequired, invalidJson, payloadTooLarge,
                  *     unsupportedMediaType, originNotAllowed, apiVersionUnsupported, notFound.
+                 *     Depuis 1.11.0 : groupGiftMissing (404), groupGiftComplete et groupGiftAlreadyJoined (409),
+                 *     invalidAmount, invalidStatus, messageEmpty, messageMissing (404).
                  * @example itemAlreadyReserved
                  */
                 code: string;
@@ -2501,6 +3028,75 @@ export interface components {
             mine: boolean;
             /** @description Seulement si `mine`. */
             reservationId: string | null;
+            /** @description Depuis 1.11.0, avec `groupGifts=true` seulement. null si l'idée n'est pas un cadeau commun. */
+            groupGift?: components["schemas"]["GroupGiftSummary"] | null;
+        };
+        GroupGiftSummary: {
+            /** @description Lien `/g/<token>`. */
+            token: string;
+            /** @enum {string} */
+            status: "open" | "complete";
+            participantCount: number;
+            /** @description Somme des montants annoncés. */
+            totalCents: number;
+            /** @description Prix moins total, jamais négatif ; null si l'idée n'a pas de prix. */
+            remainingCents: number | null;
+            goalReached: boolean;
+            /** @description Ce client participe. */
+            mine: boolean;
+        };
+        GroupGiftParticipation: {
+            /** @description Seulement pour la sienne. */
+            reservationId: string | null;
+            /** @description null = « Anonyme ». */
+            name: string | null;
+            amountCents: number | null;
+            note: string | null;
+            mine: boolean;
+            /** @description Sienne et liée au compte connecté (montant modifiable). */
+            editable: boolean;
+        };
+        GroupGift: {
+            token: string;
+            /** @enum {string} */
+            status: "open" | "complete";
+            listTitle: string;
+            item: {
+                name: string;
+                typeLabel: string;
+                url: string | null;
+                imageUrl: string | null;
+                priceCents: number | null;
+                priceLabel: string | null;
+                description: string | null;
+                secondHandOk: boolean;
+            };
+            participantCount: number;
+            totalCents: number;
+            remainingCents: number | null;
+            goalReached: boolean;
+            /** @description Pour tout visiteur qui a accès ; null = « Anonyme ». */
+            participantNames: (string | null)[];
+            /** @description La participation de ce client, ou null. */
+            me: components["schemas"]["GroupGiftParticipation"] | null;
+            /** @description Pour les participants seulement (montants et messages) ; null sinon. */
+            participations: components["schemas"]["GroupGiftParticipation"][] | null;
+            /** @description Fil des participants qui ont un compte (participation liée au compte connecté) ; null sinon. */
+            thread: null | {
+                /** @description Les 200 derniers, du plus ancien au plus récent. */
+                messages: components["schemas"]["GroupGiftMessage"][];
+            };
+            /** @description Voir `PublicList.claimKey`. */
+            claimKey: string;
+        };
+        GroupGiftMessage: {
+            id: string;
+            /** @description null = « Ancien participant » (compte supprimé). */
+            authorName: string | null;
+            body: string;
+            /** Format: date-time */
+            createdAt: string;
+            mine: boolean;
         };
         PublicList: {
             title: string;
@@ -2516,6 +3112,11 @@ export interface components {
             categories: components["schemas"]["Category"][];
             people: components["schemas"]["Label"][];
             items: components["schemas"]["PublicItem"][];
+            /**
+             * @description Depuis 1.11.0. Clé opaque de cette liste : le client range sous elle les claims de la liste et ceux
+             *     reçus par un lien de cadeau commun, qui ne donne pas le lien de la liste.
+             */
+            claimKey: string;
         };
         FollowNames: {
             /** @description Nom donné à la liste par le compte connecté. */
@@ -2608,6 +3209,17 @@ export interface components {
             note: string | null;
             /** Format: date-time */
             createdAt: string;
+            /**
+             * @description Depuis 1.11.0. Participation à un cadeau commun : les participations d'un même cadeau
+             *     partagent cet identifiant. null pour une réservation seule. Le montant annoncé n'est jamais
+             *     donné aux membres.
+             */
+            groupGiftId?: string | null;
+            /**
+             * @description Depuis 1.11.0. État du cadeau commun ; null pour une réservation seule.
+             * @enum {string|null}
+             */
+            groupGiftStatus?: "open" | "complete" | null;
         };
         Member: {
             userId: string;
@@ -2700,6 +3312,19 @@ export interface components {
                 note: string | null;
                 /** Format: date-time */
                 createdAt: string;
+                /** @description Depuis 1.11.0. Participation à un cadeau commun, avec le montant annoncé ; null pour une réservation seule. */
+                groupGift: null | {
+                    /** @enum {string} */
+                    status: "open" | "complete";
+                    amountCents: number | null;
+                };
+            }[];
+            /** @description Depuis 1.11.0. Messages écrits par le compte dans le fil d'un cadeau commun. */
+            groupGiftMessages: {
+                item: string | null;
+                body: string;
+                /** Format: date-time */
+                createdAt: string;
             }[];
         };
         ExportedList: {
@@ -2775,6 +3400,8 @@ export interface components {
         listId: string;
         itemId: string;
         reservationId: string;
+        /** @description Jeton du cadeau commun (lien `/g/<token>`). */
+        groupGiftToken: string;
         /** @description unlockToken de cette liste. */
         readUnlock: string;
         /** @description Claims de cette liste, séparés par des virgules (50 au plus). */

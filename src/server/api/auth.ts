@@ -76,6 +76,12 @@ export async function optionalApiUser(req: NextRequest): Promise<User | null> {
 
 /** Guest proofs sent as headers: unlock and reservation claims. */
 export function guestProofs(req: NextRequest, readToken: string) {
+  const proofs = guestProofsForList(req);
+  return { isUnlocked: proofs.isUnlocked, claimedIds: proofs.claimsFor({ readToken }) };
+}
+
+/** Same proofs when the list is only found on the server (a group gift's link, 028). */
+export function guestProofsForList(req: NextRequest) {
   const secret = sessionSecret();
   const unlock = req.headers.get("x-read-unlock");
   const claims = (req.headers.get("x-reservation-claims") ?? "")
@@ -84,6 +90,7 @@ export function guestProofs(req: NextRequest, readToken: string) {
     .filter(Boolean);
   return {
     isUnlocked: (list: Wishlist) => (secret ? verifyReadUnlock(list, unlock, secret) : !list.readPasswordHash),
-    claimedIds: secret ? verifyReservationClaims(readToken, claims, secret) : new Set<string>(),
+    claimsFor: (list: Pick<Wishlist, "readToken">) =>
+      secret ? verifyReservationClaims(list.readToken, claims, secret) : new Set<string>(),
   };
 }

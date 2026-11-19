@@ -140,6 +140,31 @@ export const items = sqliteTable(
   (table) => [index("items_wishlist_id").on(table.wishlistId)],
 );
 
+export const groupGifts = sqliteTable(
+  "group_gifts",
+  {
+    id: text("id").primaryKey(),
+    wishlistId: text("wishlist_id")
+      .notNull()
+      .references(() => wishlists.id),
+    // One group gift per idea.
+    itemId: text("item_id")
+      .notNull()
+      .unique()
+      .references(() => items.id),
+    token: text("token").notNull().unique(),
+    status: text("status", { enum: ["open", "complete"] })
+      .notNull()
+      .default("open"),
+    createdAt: text("created_at").notNull(),
+    completedAt: text("completed_at"),
+  },
+  (table) => [
+    index("group_gifts_wishlist_id").on(table.wishlistId),
+    check("group_gifts_status", sql`${table.status} in ('open', 'complete')`),
+  ],
+);
+
 export const reservations = sqliteTable(
   "reservations",
   {
@@ -147,17 +172,40 @@ export const reservations = sqliteTable(
     wishlistId: text("wishlist_id")
       .notNull()
       .references(() => wishlists.id),
-    // Unique: two people cannot confirm the same idea (principle III).
     itemId: text("item_id")
       .notNull()
-      .unique()
       .references(() => items.id),
     fromName: text("from_name"),
     note: text("note"),
     userId: text("user_id").references(() => users.id),
     createdAt: text("created_at").notNull(),
+    groupGiftId: text("group_gift_id").references(() => groupGifts.id),
+    amountCents: integer("amount_cents"),
   },
-  (table) => [index("reservations_wishlist_id").on(table.wishlistId), index("reservations_user_id").on(table.userId)],
+  (table) => [
+    index("reservations_wishlist_id").on(table.wishlistId),
+    index("reservations_user_id").on(table.userId),
+    index("reservations_group_gift_id").on(table.groupGiftId),
+    // Principle III: two people cannot confirm the same idea, except as participations in one group gift (028).
+    uniqueIndex("reservations_item_single").on(table.itemId).where(sql`group_gift_id IS NULL`),
+    // An account chips in once per group gift (several participations without an account have a NULL user_id).
+    uniqueIndex("reservations_gift_user").on(table.groupGiftId, table.userId),
+  ],
+);
+
+export const groupGiftMessages = sqliteTable(
+  "group_gift_messages",
+  {
+    id: text("id").primaryKey(),
+    groupGiftId: text("group_gift_id")
+      .notNull()
+      .references(() => groupGifts.id),
+    userId: text("user_id").references(() => users.id),
+    authorName: text("author_name"),
+    body: text("body").notNull(),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => [index("group_gift_messages_group_gift_id").on(table.groupGiftId)],
 );
 
 export const passwordResets = sqliteTable(

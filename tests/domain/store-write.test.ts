@@ -55,6 +55,8 @@ test("an added reservation writes only one row", async () => {
         note: null,
         userId: null,
         createdAt: "2026-01-03T00:00:00.000Z",
+        groupGiftId: null,
+        amountCents: null,
       });
       return { doc, result: null };
     });
@@ -172,5 +174,75 @@ test("the database and its side files have mode 600", { skip: process.platform =
     for (const suffix of ["", "-wal", "-shm"]) {
       assert.equal((await stat(`${file}${suffix}`)).mode & 0o777, 0o600, `${file}${suffix}`);
     }
+  });
+});
+
+function groupGift(id: string, itemId: string) {
+  return { id, wishlistId: "w", itemId, token: `tok-${id}`, status: "open" as const, createdAt: "2026-01-03T00:00:00.000Z", completedAt: null };
+}
+
+function participation(id: string, groupGiftId: string, itemId: string, userId: string | null) {
+  return {
+    id,
+    wishlistId: "w",
+    itemId,
+    fromName: null,
+    note: null,
+    userId,
+    createdAt: "2026-01-03T00:00:00.000Z",
+    groupGiftId,
+    amountCents: 1000,
+  };
+}
+
+test("group gift: several participations on one idea are accepted by the database", async () => {
+  await withStore(apiDoc(), async () => {
+    await updateDocument((doc) => {
+      doc.groupGifts.push(groupGift("g", "gift"));
+      doc.reservations.push(participation("p1", "g", "gift", null), participation("p2", "g", "gift", null));
+      doc.reservations.push(participation("p3", "g", "gift", "alex"));
+      return { doc, result: null };
+    });
+    const saved = await readDocument();
+    assert.equal(saved.reservations.filter((r) => r.groupGiftId === "g").length, 3);
+  });
+});
+
+test("group gift: the database refuses an account chipping in twice, and a second group gift on one idea", async () => {
+  await withStore(apiDoc(), async () => {
+    await assert.rejects(
+      updateDocument((doc) => {
+        doc.groupGifts.push(groupGift("g", "gift"));
+        doc.reservations.push(participation("p1", "g", "gift", "alex"), participation("p2", "g", "gift", "alex"));
+        return { doc, result: null };
+      }),
+      /UNIQUE/,
+    );
+    await assert.rejects(
+      updateDocument((doc) => {
+        doc.groupGifts.push(groupGift("g", "gift"), groupGift("g2", "gift"));
+        return { doc, result: null };
+      }),
+      /UNIQUE/,
+    );
+    assert.deepStrictEqual(await readDocument(), apiDoc());
+  });
+});
+
+test("group gift: removing the last participation and the gift in one write is valid", async () => {
+  await withStore(apiDoc(), async () => {
+    await updateDocument((doc) => {
+      doc.groupGifts.push(groupGift("g", "gift"));
+      doc.reservations.push(participation("p1", "g", "gift", null));
+      doc.groupGiftMessages.push({ id: "m", groupGiftId: "g", userId: "alex", authorName: "Alex", body: "Salut", createdAt: "x" });
+      return { doc, result: null };
+    });
+    await updateDocument((doc) => {
+      doc.reservations = doc.reservations.filter((r) => r.id !== "p1");
+      doc.groupGifts = [];
+      doc.groupGiftMessages = [];
+      return { doc, result: null };
+    });
+    assert.deepStrictEqual(await readDocument(), apiDoc());
   });
 });

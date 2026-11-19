@@ -84,6 +84,8 @@ export function accountDoc(): Database {
       note: null,
       userId: null,
       createdAt: "2026-04-01T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
     {
       id: "r-shared",
@@ -93,6 +95,8 @@ export function accountDoc(): Database {
       note: "Pour Noël",
       userId: "camille",
       createdAt: "2026-04-02T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
     {
       id: "r-alexs",
@@ -102,6 +106,8 @@ export function accountDoc(): Database {
       note: "Avec Camille",
       userId: "lou",
       createdAt: "2026-04-03T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
     {
       id: "r-other",
@@ -111,6 +117,8 @@ export function accountDoc(): Database {
       note: "Surprise",
       userId: "lou",
       createdAt: "2026-04-04T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
   );
   for (const userId of ["lou", "alex"]) {

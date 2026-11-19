@@ -72,6 +72,8 @@ test("the member view shows reservations and members, without email or hash", as
         fromName: "Sam",
         note: "Pour ton anniversaire",
         createdAt: "2026-01-02T00:00:00.000Z",
+        groupGiftId: null,
+        groupGiftStatus: null,
       },
     ]);
     assert.deepEqual(list.members, [

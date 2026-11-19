@@ -1,12 +1,24 @@
 import "server-only";
 import { mustConfirmEmail } from "../../domain/email-confirmation";
-import { listPublicVisibleItems, mineReservationIdsFor, sortItems } from "../../domain/read";
+import { claimKeyFor } from "../../auth/reservation-claim";
+import { groupGiftOfItem, groupGiftSummary, type GroupGiftDetail, type GroupGiftSummary } from "../../domain/group-gift";
+import { listPublicVisibleItems, mineReservationIdsFor, sortItems, type PublicListOptions } from "../../domain/read";
 import { formatPrice } from "../../domain/price";
 import { hasReadPassword } from "../../domain/read-password";
 import { findSubscription, followNamesOf, isSubscriptionUnlocked, viewerRelation } from "../../domain/subscription";
 import { reservedItemIds } from "../../domain/reserve";
 import { memberShelf, surpriseModeOf, visibleReservations } from "../../domain/surprise";
-import type { Database, Item, Reservation, Role, Subscription, User, WishlistTheme, Wishlist } from "../../domain/types";
+import type {
+  Database,
+  GroupGiftStatus,
+  Item,
+  Reservation,
+  Role,
+  Subscription,
+  User,
+  WishlistTheme,
+  Wishlist,
+} from "../../domain/types";
 import { intlLocale, type Locale } from "../../i18n/config";
 import { withLocale } from "../../i18n/locale-path";
 import { emailConfirmationEnforced } from "../mail";
@@ -30,6 +42,8 @@ export type PublicItemView = {
   description: string | null;
   mine: boolean;
   reservationId: string | null;
+  /** Since 1.11.0, with `groupGifts=true` only: the idea is a group gift (028). */
+  groupGift?: GroupGiftSummary | null;
 };
 
 /** The names a subscriber sees for a list they follow (024), for them only. */
@@ -51,6 +65,8 @@ export type PublicListView = {
   categories: CategoryView[];
   people: LabelView[];
   items: PublicItemView[];
+  /** Since 1.11.0: key to file this list's claims under, without its read link (028). */
+  claimKey: string;
 };
 
 export function categoriesOf(doc: Database, wishlistId: string): CategoryView[] {
@@ -82,23 +98,34 @@ function itemBase(item: Item, locale: Locale) {
   };
 }
 
-/** Same content as the public page: free ideas, plus this client's. */
+/**
+ * Same content as the public page: free ideas, plus this client's. A group gift (028) is shown to everyone
+ * but the list's members, only to a client that asks (`groupGifts`); an older app sees it as a reservation.
+ */
 export function toPublicListView(
   doc: Database,
   wishlist: Wishlist,
   locale: Locale,
   mineIds: ReadonlySet<string>,
   viewerId: string | null = null,
+  options: PublicListOptions = {},
 ): PublicListView {
-  const reservationByItem = new Map(
-    doc.reservations.filter((r) => r.wishlistId === wishlist.id).map((r) => [r.itemId, r.id]),
+  // A participation in a group gift is « mine » like a reservation: an older app shows it as reserved by the visitor.
+  const mineByItem = new Map(
+    doc.reservations.filter((r) => r.wishlistId === wishlist.id && mineIds.has(r.id)).map((r) => [r.itemId, r.id]),
   );
-  const items = listPublicVisibleItems(doc, wishlist.id, mineIds).map((item) => {
-    const reservationId = reservationByItem.get(item.id) ?? null;
-    const mine = Boolean(reservationId && mineIds.has(reservationId));
-    return { ...itemBase(item, locale), mine, reservationId: mine ? reservationId : null };
-  });
   const { isMember, subscribed } = viewerRelation(doc, wishlist.id, viewerId);
+  // A member who does not chip in sees a group gift as a reservation: absent, even outside surprise mode (SC-005).
+  const visibleOptions = { ...options, groupGifts: options.groupGifts && !isMember };
+  const items = listPublicVisibleItems(doc, wishlist.id, mineIds, visibleOptions).map((item) => {
+    const reservationId = mineByItem.get(item.id) ?? null;
+    const view: PublicItemView = { ...itemBase(item, locale), mine: reservationId !== null, reservationId };
+    if (options.groupGifts) {
+      const gift = groupGiftOfItem(doc, item.id);
+      view.groupGift = gift ? groupGiftSummary(doc, gift, mineIds) : null;
+    }
+    return view;
+  });
   const subscription = subscribed && viewerId ? findSubscription(doc, wishlist.id, viewerId) : null;
   return {
     title: wishlist.title,
@@ -111,7 +138,15 @@ export function toPublicListView(
     categories: categoriesOf(doc, wishlist.id),
     people: peopleOf(doc, wishlist.id),
     items,
+    claimKey: claimKeyFor(wishlist.readToken),
   };
+}
+
+/** A group gift's page for a client (028): never the list's read link. */
+export type GroupGiftView = GroupGiftDetail & { claimKey: string };
+
+export function toGroupGiftView(detail: GroupGiftDetail, wishlist: Wishlist): GroupGiftView {
+  return { ...detail, claimKey: claimKeyFor(wishlist.readToken) };
 }
 
 export type MeView = {
@@ -161,19 +196,25 @@ export type MemberReservationView = {
   fromName: string | null;
   note: string | null;
   createdAt: string;
+  /** Since 1.11.0: participation in a group gift (028); never its amount. */
+  groupGiftId: string | null;
+  groupGiftStatus: GroupGiftStatus | null;
 };
 
 /** Given reservations of a list, as its members see them. */
 export function memberReservations(doc: Database, reservations: readonly Reservation[]): MemberReservationView[] {
   const itemName = new Map(doc.items.map((item) => [item.id, item.name]));
+  const giftStatus = new Map(doc.groupGifts.map((gift) => [gift.id, gift.status]));
   return reservations.map((reservation) => ({
-      id: reservation.id,
-      itemId: reservation.itemId,
-      itemName: itemName.get(reservation.itemId) ?? "",
-      fromName: reservation.fromName,
-      note: reservation.note,
-      createdAt: reservation.createdAt,
-    }));
+    id: reservation.id,
+    itemId: reservation.itemId,
+    itemName: itemName.get(reservation.itemId) ?? "",
+    fromName: reservation.fromName,
+    note: reservation.note,
+    createdAt: reservation.createdAt,
+    groupGiftId: reservation.groupGiftId,
+    groupGiftStatus: reservation.groupGiftId ? (giftStatus.get(reservation.groupGiftId) ?? null) : null,
+  }));
 }
 
 export type MemberListView = {

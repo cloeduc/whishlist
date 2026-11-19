@@ -24,8 +24,12 @@ const STATUS_BY_CODE: Record<string, number> = {
   reservationMissing: 404,
   accountMissing: 404,
   inviteLinkBroken: 404,
+  groupGiftMissing: 404,
+  messageMissing: 404,
 
   itemAlreadyReserved: 409,
+  groupGiftComplete: 409,
+  groupGiftAlreadyJoined: 409,
   idConflict: 409,
   emailAlreadyVerified: 409,
   apiVersionUnsupported: 410,

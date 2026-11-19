@@ -108,6 +108,37 @@ export interface Reservation {
   /** Set if the reservation was made while signed in. */
   userId: string | null;
   createdAt: string;
+  /** Group gift this reservation is a participation in (028); null for a reservation on one's own. */
+  groupGiftId: string | null;
+  /** Amount the participant puts in, in cents (028); null when not given, always null on a reservation on one's own. */
+  amountCents: number | null;
+}
+
+export type GroupGiftStatus = "open" | "complete";
+
+/** « Cadeau commun » (028): an idea several people chip in for. Exists while it has at least one participation. */
+export interface GroupGift {
+  id: string;
+  wishlistId: string;
+  itemId: string;
+  /** Token of the gift's own link (/g/<token>), which opens this gift only. */
+  token: string;
+  status: GroupGiftStatus;
+  createdAt: string;
+  /** Last time a participant marked it complete. */
+  completedAt: string | null;
+}
+
+/** A message in the thread of a group gift, written by a participant with an account (028). */
+export interface GroupGiftMessage {
+  id: string;
+  groupGiftId: string;
+  /** null once the author's account is deleted. */
+  userId: string | null;
+  /** Name frozen when written; null → « Ancien participant ». */
+  authorName: string | null;
+  body: string;
+  createdAt: string;
 }
 
 export interface PasswordReset {
@@ -168,7 +199,9 @@ export interface Database {
   people: Person[];
   views: View[];
   items: Item[];
+  groupGifts: GroupGift[];
   reservations: Reservation[];
+  groupGiftMessages: GroupGiftMessage[];
   passwordResets: PasswordReset[];
   apiSessions: ApiSession[];
   emailConfirmations: EmailConfirmation[];
@@ -212,7 +245,9 @@ export function emptyDatabase(): Database {
     people: [],
     views: [],
     items: [],
+    groupGifts: [],
     reservations: [],
+    groupGiftMessages: [],
     passwordResets: [],
     apiSessions: [],
     emailConfirmations: [],

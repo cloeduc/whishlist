@@ -3,7 +3,7 @@ import { formerPathsUnder } from "@/src/site/legacy-paths";
 import { siteOrigin } from "@/src/site/seo";
 
 /** Capability or session addresses. */
-const PRIVATE_PATHS = ["/l/", "/invite/", "/reset-password/", "/confirm-email/", "/account", "/lists/", "/login", "/register"];
+const PRIVATE_PATHS = ["/l/", "/g/", "/invite/", "/reset-password/", "/confirm-email/", "/account", "/lists/", "/login", "/register"];
 
 /** Their former French paths (feature 018): redirected, but a token in them must not be crawled before. */
 const LEGACY_PRIVATE_PATHS = formerPathsUnder(PRIVATE_PATHS);

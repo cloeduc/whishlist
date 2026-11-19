@@ -25,6 +25,7 @@ test("each link in the table opens its screen, in French as under /en", () => {
     ["/l/read/reserve", "/guest/read/reserve"],
     ["/l/read/types", "/guest/read"],
     ["/lists/abc", "/links/list/abc"],
+    ["/g/gift-token", "/gift/gift-token"],
   ];
   assert.equal(cases.length >= APP_LINK_ROUTES.length, true);
   for (const [site, app] of cases) {

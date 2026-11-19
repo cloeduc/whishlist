@@ -28,4 +28,5 @@ export const publicList = (items = [publicItem("i1", "t1"), publicItem("i2", "t2
   ],
   people: [{ id: "p", label: "Alex" }],
   items,
+  claimKey: "ck-rt",
 });

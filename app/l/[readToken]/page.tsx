@@ -35,6 +35,7 @@ import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import type { CSSProperties } from "react";
+import { groupGiftSummaryText } from "@/src/site/group-gift-text";
 import { unlockErrorMessage } from "@/src/site/read-unlock";
 
 export async function generateMetadata({
@@ -117,7 +118,8 @@ export default async function ReadPage({
   const qui = people.some((person) => person.id === query.qui) ? query.qui! : null;
   const budget = parseBudget(query.budget);
   const priceLocale = intlLocale(locale);
-  const visible = listPublicVisibleItems(doc, list.id, mineIds);
+  // A member who does not chip in sees a group gift as a reservation (SC-005).
+  const visible = listPublicVisibleItems(doc, list.id, mineIds, { groupGifts: !isMember });
   const filtered = sortByPriority(applyBudget(applyPerson(visible, qui), budget));
   const groups = groupByCategory(filtered, types).map((group) => ({
     ...group,
@@ -303,6 +305,24 @@ export default async function ReadPage({
                   cancelDescription={t("reservation.cancelBody")}
                   cancelConfirm={t("reservation.cancelConfirm")}
                   cancelKeep={t("reservation.cancelKeep")}
+                  groupGift={
+                    item.groupGift
+                      ? {
+                          badge: t("groupGift.badge"),
+                          summary: groupGiftSummaryText(t, item.groupGift, priceLocale),
+                          statusBadges: item.groupGift.mine
+                            ? [
+                                t("groupGift.mine"),
+                                ...(item.groupGift.status === "complete" ? [t("groupGift.complete")] : []),
+                              ]
+                            : [],
+                          actionLabel: item.groupGift.mine ? t("groupGift.open") : t("groupGift.join"),
+                          actionAria: item.groupGift.mine
+                            ? t("groupGift.openAria", { name: item.name })
+                            : t("groupGift.joinAria", { name: item.name }),
+                        }
+                      : null
+                  }
                 />
               ))}
             </section>

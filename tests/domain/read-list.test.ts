@@ -61,6 +61,8 @@ function sample(): Database {
     note: "pour noël",
     userId: null,
     createdAt: "2026-01-02T00:00:00.000Z",
+    groupGiftId: null,
+    amountCents: null,
   });
   return doc;
 }

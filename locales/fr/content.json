@@ -44,6 +44,10 @@
         "a": "Elle indique qu’une personne prévoit d’offrir ce cadeau. Aucun achat ni paiement n’est effectué sur le site."
       },
       {
+        "q": "Peut-on offrir un cadeau à plusieurs ?",
+        "a": "Oui. En réservant une idée, choisissez « Lancer un cadeau commun » : d’autres personnes peuvent y participer, en indiquant si elles le souhaitent le montant qu’elles mettent, et voient ce qu’il reste à réunir. Envoyez-leur le lien du cadeau commun : il ne montre que ce cadeau. Rien n’est payé sur le site ; quand le compte est bon, un participant déclare le cadeau complet."
+      },
+      {
         "q": "Puis-je préparer une liste avec quelqu’un ?",
         "a": "Oui. Envoyez le lien d’invitation à modifier. La personne devra se connecter ou créer un compte avant de rejoindre la liste."
       },
@@ -166,7 +170,7 @@
     "listsTitle": "Vos listes et vos idées",
     "listsBody": "Les listes, leurs catégories, les « qui » et les idées (nom, lien, image, prix, priorité) que vous et les autres membres ajoutez. Chaque membre d’une liste les voit.",
     "reservationsTitle": "Les réservations",
-    "reservationsBody": "Quand quelqu’un réserve un cadeau : le nom donné, le petit mot éventuel, la date, et le compte si la personne est connectée. Les membres de la liste voient ces réservations.",
+    "reservationsBody": "Quand quelqu’un réserve un cadeau : le nom donné, le petit mot éventuel, la date, et le compte si la personne est connectée. Les membres de la liste voient ces réservations. Pour un cadeau commun, chaque participation garde en plus le montant annoncé, s’il est indiqué : les autres participants le voient, les membres de la liste jamais. Les personnes qui ont le lien du cadeau commun voient le nom des participants. Les participants qui ont un compte peuvent aussi s’écrire dans le fil du cadeau commun : ces messages ne sont lus que par eux, jamais par les membres de la liste, et disparaissent avec le cadeau commun ; à la suppression d’un compte, ses messages restent, signés « Ancien participant ».",
     "retentionTitle": "Combien de temps",
     "retentionBody": "Vos données restent jusqu’à la suppression de votre compte. Une connexion dure 30 jours, un lien de réinitialisation du mot de passe 1 heure, un lien de confirmation d’adresse 24 heures. Les sauvegardes chiffrées du serveur sont gardées 14 jours : une donnée supprimée en disparaît au plus tard 14 jours après.",
     "cookiesTitle": "Cookies",

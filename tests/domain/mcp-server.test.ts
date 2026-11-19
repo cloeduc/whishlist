@@ -8,6 +8,7 @@ import { mcpAccess } from "../../src/server/mcp/gate";
 import { buildMcpServer } from "../../src/server/mcp/server";
 import { readDocument } from "../../src/store/db";
 import { apiDoc, apiDocWithSecondList, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtures";
+import { docWithGroupGift } from "./helpers/group-gift-fixtures";
 
 before(ensurePasswordHash);
 
@@ -86,6 +87,16 @@ test("list_lists and get_list: the account's lists; an idea says whether it is r
     const raw = JSON.stringify(list);
     assert.ok(!raw.includes("Sam") && !raw.includes("anniversaire"), "ni le nom ni le mot de la réservation");
     assert.equal(json(await alex.call("get_list", { listId: "w" })).ideas.some((idea: { id: string }) => idea.id === "taken"), false);
+  });
+});
+
+test("get_list: an idea that is a group gift is reserved, with no detail about it (028)", async () => {
+  const doc = docWithGroupGift();
+  await withStore(doc, async () => {
+    const list = json(await client(doc.users[0]!).call("get_list", { listId: "w", includeArchived: true }));
+    assert.equal(list.ideas.find((idea: { id: string }) => idea.id === "gift").reserved, true);
+    const raw = JSON.stringify(list);
+    assert.ok(!raw.includes("tok-g") && !raw.includes("Je l'achète") && !raw.includes("1000"));
   });
 });
 

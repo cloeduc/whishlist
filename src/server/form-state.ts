@@ -45,7 +45,10 @@ export const LIST_SETTINGS_KEPT_FIELDS = [
   "highlight",
   "background",
 ] as const;
-export const RESERVATION_KEPT_FIELDS = ["itemId", "fromName", "note"] as const;
+export const RESERVATION_KEPT_FIELDS = ["itemId", "fromName", "note", "mode", "amount"] as const;
+export const GROUP_GIFT_JOIN_KEPT_FIELDS = ["fromName", "note", "amount"] as const;
+export const GROUP_GIFT_AMOUNT_KEPT_FIELDS = ["amount"] as const;
+export const GROUP_GIFT_MESSAGE_KEPT_FIELDS = ["body"] as const;
 export const READ_UNLOCK_KEPT_FIELDS = [] as const;
 export const INVITE_EMAIL_KEPT_FIELDS = ["email"] as const;
 export const READ_PASSWORD_KEPT_FIELDS = [] as const;

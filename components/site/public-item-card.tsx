@@ -7,6 +7,17 @@ import { PriorityStars } from "@/components/site/priority-stars";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
+/** Texts of a group gift card (028), already translated by the page. */
+export interface GroupGiftCardText {
+  badge: string;
+  /** « 2 participants · il reste 20 € ». */
+  summary: string;
+  /** « Vous participez », « Complet »: only for a participant. */
+  statusBadges: string[];
+  actionLabel: string;
+  actionAria: string;
+}
+
 export function PublicItemCard({
   item,
   readToken,
@@ -21,6 +32,7 @@ export function PublicItemCard({
   cancelDescription,
   cancelConfirm,
   cancelKeep,
+  groupGift = null,
 }: {
   item: PublicItem;
   readToken: string;
@@ -35,6 +47,7 @@ export function PublicItemCard({
   cancelDescription: string;
   cancelConfirm: string;
   cancelKeep: string;
+  groupGift?: GroupGiftCardText | null;
 }) {
   return (
     <Card size="sm" className={item.mine ? "opacity-95" : undefined}>
@@ -60,6 +73,7 @@ export function PublicItemCard({
                 <p className="shrink-0 text-2xl leading-none font-bold tabular-nums">{item.priceLabel}</p>
               ) : null}
             </div>
+            {groupGift ? <p className="text-sm font-medium">{groupGift.summary}</p> : null}
             {item.description ? (
               <p className="text-sm break-words whitespace-pre-line text-pretty">{item.description}</p>
             ) : null}
@@ -67,7 +81,15 @@ export function PublicItemCard({
               <CardDescription className="flex flex-wrap gap-2">
                 <Badge variant="outline">{item.personLabel}</Badge>
                 {item.secondHandOk ? <Badge variant="outline">{secondHandLabel}</Badge> : null}
-                {item.mine ? <Badge variant="secondary">{mineLabel}</Badge> : null}
+                {groupGift ? <Badge variant="outline">{groupGift.badge}</Badge> : null}
+                {groupGift
+                  ? groupGift.statusBadges.map((label) => (
+                      <Badge key={label} variant="secondary">
+                        {label}
+                      </Badge>
+                    ))
+                  : null}
+                {item.mine && !groupGift ? <Badge variant="secondary">{mineLabel}</Badge> : null}
               </CardDescription>
               {item.url ? (
                 <a
@@ -86,7 +108,17 @@ export function PublicItemCard({
         </div>
       </CardHeader>
       <CardFooter className="border-t-2 border-border pt-3">
-        {item.mine && item.reservationId ? (
+        {groupGift && item.groupGift ? (
+          <LinkButton
+            href={`/g/${item.groupGift.token}`}
+            size="sm"
+            variant={item.groupGift.mine ? "outline" : "default"}
+            className="w-full sm:w-auto"
+            aria-label={groupGift.actionAria}
+          >
+            {groupGift.actionLabel}
+          </LinkButton>
+        ) : item.mine && item.reservationId ? (
           <ConfirmForm
             title={cancelTitle}
             description={cancelDescription}

@@ -19,7 +19,7 @@ tags:
 # Before: the reservation is counted and the idea sits in the archives.
 - assertVisible:
     id: tab-reservations
-    text: .*\(1\).*
+    text: .*\([0-9]+\).*
 
 # Tick the box in the Sharing tab.
 - scrollUntilVisible:
@@ -66,7 +66,7 @@ tags:
 # Reservations: no count, hidden until the confirmation.
 - assertNotVisible:
     id: tab-reservations
-    text: .*\(1\).*
+    text: .*\([0-9]+\).*
 - scrollUntilVisible:
     element:
       id: tab-reservations
@@ -131,5 +131,5 @@ tags:
 - scrollUntilVisible:
     element:
       id: tab-reservations
-      text: .*\(1\).*
+      text: .*\([0-9]+\).*
     direction: UP

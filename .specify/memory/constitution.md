@@ -1,5 +1,16 @@
 <!--
 Sync Impact Report
+- Version change: 2.1.0 → 2.2.0
+- Modified principles:
+  - III. Réservation sans collision : plusieurs personnes peuvent participer
+    ensemble à un cadeau commun (feature 028, WISH-23)
+  - V. Simplicité : montant annoncé et fil de messages d'un cadeau commun admis,
+    sans paiement ni messagerie générale
+- Rationale du MINOR : la règle s'étend, rien n'est retiré ; la réservation seule
+  garde exactement la règle précédente.
+- Follow-up TODOs: none
+
+Previous report
 - Version change: 2.0.0 → 2.1.0
 - Modified sections: Hébergement PlanetHoster → Hébergement Docker
   (Mac mini + Cloudflare ; e-mail et services externes optionnels)
@@ -41,7 +52,9 @@ sans compte, ou avec un compte qui n'est pas membre, ne modifie rien.
 ### III. Réservation sans collision
 
 Une idée acceptée n'est plus proposable. Deux personnes ne doivent pas pouvoir
-confirmer la même idée. Annuler une réservation est une action d'un membre de
+confirmer la même idée, sauf en participant ensemble à un cadeau commun. Une
+idée ne peut pas être à la fois réservée seule et cadeau commun, et un cadeau
+commun déclaré complet n'est plus proposable. Annuler une réservation est une action d'un membre de
 cette liste, pas de l'invité. Le statut « réservé » reste visible sur la liste
 pour éviter un doublon. Le nom de l'offreur et le petit mot vivent sur la page
 « Je veux offrir » de cette liste, lisible par quiconque a le lien.
@@ -60,6 +73,9 @@ continue avec le doc source, pas de prix scrapés, pas d'annuaire public.
 La priorité est un texte optionnel affiché tel quel. On n'ajoute un mécanisme
 que s'il sert à créer, partager ou lire une liste, ou à tenir sur l'hébergement
 mutualisé.
+Le montant qu'un participant annonce et le fil de messages d'un cadeau commun
+servent à offrir une idée de la liste : ni collecte d'argent, ni messagerie
+générale.
 
 ## Hébergement Docker
 
@@ -101,4 +117,4 @@ principes et contre la section hébergement. Une complexité en plus (paiement,
 synchro Coda, annuaire public, envoi d'e-mail) doit être justifiée par une
 amendment ou une spec explicite. Décision d'amendment : Cloé.
 
-**Version**: 2.1.0 | **Ratified**: 2026-10-18 | **Last Amended**: 2026-10-28
+**Version**: 2.2.0 | **Ratified**: 2026-10-18 | **Last Amended**: 2026-11-18

@@ -24,7 +24,7 @@ test("robots.txt keeps the private addresses and their former forms out of crawl
   await withEnv({ APP_ORIGIN: ORIGIN }, async () => {
     const rules = robots().rules;
     const disallow = [rules].flat().flatMap((rule) => [rule.disallow ?? []].flat());
-    for (const path of ["/invite/", "/en/invite/", "/inviter/", "/en/inviter/", "/account", "/compte", "/lists/", "/listes/", "/login", "/register"]) {
+    for (const path of ["/g/", "/en/g/", "/invite/", "/en/invite/", "/inviter/", "/en/inviter/", "/account", "/compte", "/lists/", "/listes/", "/login", "/register"]) {
       assert.equal(disallow.includes(path), true, path);
     }
   });

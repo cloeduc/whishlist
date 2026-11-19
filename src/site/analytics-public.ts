@@ -7,6 +7,7 @@ export const ANALYTICS_OPTOUT_KEY = "wishlist-analytics-optout";
 /** Paths whose address is a capability or a session. Never sent. */
 const CURRENT_PRIVATE_PREFIXES = [
   "/l",
+  "/g",
   "/lists",
   "/login",
   "/register",

@@ -57,6 +57,13 @@
       "when": 1794910241838,
       "tag": "0007_followed_list_names",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1795019232898,
+      "tag": "0008_group_gifts",
+      "breakpoints": true
     }
   ]
 }

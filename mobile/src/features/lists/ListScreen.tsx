@@ -31,7 +31,10 @@ function tabLabels(list: ViewList, t: (key: string) => string) {
     { key: "idees", label: `${t("tabs.idees")} (${active})` },
     { key: "archives", label: `${t("tabs.archives")} (${archived})` },
     // In surprise mode (020) not even the number of reservations is shown.
-    { key: "reservations", label: list.surpriseMode ? t("tabs.reservations") : `${t("tabs.reservations")} (${list.reservations.length})` },
+    {
+      key: "reservations",
+      label: list.surpriseMode ? t("tabs.reservations") : `${t("tabs.reservations")} (${reservationEntries(list.reservations)})`,
+    },
     { key: "partage", label: t("tabs.partage") },
     { key: "reglages", label: t("tabs.reglages") },
   ];
@@ -136,4 +139,9 @@ function viewAsGuest(readUrl: string): void {
   const path = appPathForUrl(readUrl);
   if (path) router.push(`${path}?preview=1` as Href);
   else void Linking.openURL(readUrl);
+}
+
+/** Number of cards of the Reservations tab, like the site: a group gift (028) is one card for all its participations. */
+function reservationEntries(reservations: { id: string; groupGiftId?: string | null }[]): number {
+  return new Set(reservations.map((reservation) => reservation.groupGiftId ?? reservation.id)).size;
 }

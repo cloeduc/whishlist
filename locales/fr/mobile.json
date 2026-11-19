@@ -121,5 +121,9 @@
     "cameraDenied": "L'app n'a pas accès à l'appareil photo. Autorisez-le dans les réglages du téléphone, ou collez le lien de la liste.",
     "openSettings": "Ouvrir les réglages",
     "cameraUsage": "L'appareil photo sert à scanner le QR code d'une liste à suivre."
+  },
+  "groupGift": {
+    "share": "Partager le lien du cadeau",
+    "shareMessage": "Participez avec moi au cadeau commun « {{name}} » : {{url}}"
   }
 }

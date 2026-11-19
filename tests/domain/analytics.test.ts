@@ -29,6 +29,9 @@ test("list, account and invite addresses are not sent", () => {
   assert.equal(analyticsCollectAllowed("/en/faq"), true);
   assert.equal(analyticsCollectAllowed("/l/secret"), false);
   assert.equal(analyticsCollectAllowed("/en/l/secret"), false);
+  // A group gift's link (028) opens that gift: a capability too.
+  assert.equal(analyticsCollectAllowed("/g/secret"), false);
+  assert.equal(analyticsCollectAllowed("/en/g/secret"), false);
   assert.equal(analyticsCollectAllowed("/inviter/secret"), false);
   assert.equal(analyticsCollectAllowed("/en/reinitialiser/secret"), false);
   assert.equal(analyticsCollectAllowed("/confirmer-email/secret?suite=%2Finviter%2Fx"), false);

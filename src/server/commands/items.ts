@@ -2,6 +2,7 @@ import "server-only";
 import { findMembership } from "../../domain/access";
 import { idTaken, isClientId } from "../../domain/client-ids";
 import { fetchPageHtml } from "../../domain/fetch-page";
+import { cancelGroupGiftAsMember as cancelGroupGift } from "../../domain/group-gift";
 import {
   cancelReservation,
   copyItem as copyItemRule,
@@ -270,6 +271,19 @@ export async function cancelReservationAsMember(
   if (!active.ok) return active;
   return updateDocument<CommandResult>((doc) => {
     const saved = cancelReservation(doc, { ...input, actorId: active.user.id });
+    return saved.ok ? { doc: saved.doc, result: { ok: true } } : { doc, result: saved };
+  });
+}
+
+/** « Annuler le cadeau commun » (028): every participation, the thread and the gift's link go. */
+export async function cancelGroupGiftAsMember(
+  ctx: CommandContext,
+  input: { wishlistId: string; groupGiftId: string },
+): Promise<CommandResult> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  return updateDocument<CommandResult>((doc) => {
+    const saved = cancelGroupGift(doc, { ...input, actorId: active.user.id });
     return saved.ok ? { doc: saved.doc, result: { ok: true } } : { doc, result: saved };
   });
 }

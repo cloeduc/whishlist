@@ -345,3 +345,36 @@ test("back on the list (after a reservation): it is reloaded", async () => {
   onFocus(); // back on the screen
   await waitFor(() => expect(calls).toEqual(["GET /public/lists/rt", "GET /public/lists/rt"]));
 });
+
+test("group gift (028): asked for, its summary shown, « Participer » opens its screen", async () => {
+  let query = "";
+  const gift = { token: "gift-tok", status: "open", participantCount: 2, totalCents: 1500, remainingCents: 490, goalReached: false, mine: false };
+  fakeFetch({
+    "GET /public/lists/rt": (request) => {
+      query = new URL(request.url).search;
+      return json(200, publicList([item("i1", "t1", { groupGift: gift }), item("i2", "t2", { groupGift: null })]));
+    },
+  });
+  await render(<GuestList />);
+  expect(await screen.findByTestId("guest.group-gift-0")).toHaveTextContent("2 participants · il reste 4,90 €");
+  expect(query).toBe("?groupGifts=true");
+  expect(screen.queryByTestId("guest.offer-0")).toBeNull();
+  await fireEvent.press(screen.getByTestId("guest.group-gift-open-0"));
+  expect(router.push).toHaveBeenCalledWith("/gift/gift-tok");
+});
+
+test("group gift joined through its link: the list sends that claim once it knows the list's claim key", async () => {
+  await saveClaim({ giftToken: "gift-tok", claimKey: "ck-rt" }, "p1", "claim-gift");
+  const sent: (string | null)[] = [];
+  const mine = { token: "gift-tok", status: "open", participantCount: 1, totalCents: 0, remainingCents: 1990, goalReached: false, mine: true };
+  fakeFetch({
+    "GET /public/lists/rt": (request) => {
+      const claims = request.headers.get("X-Reservation-Claims");
+      sent.push(claims);
+      return json(200, publicList([item("i1", "t1", claims ? { mine: true, reservationId: "p1", groupGift: mine } : { groupGift: { ...mine, mine: false } })]));
+    },
+  });
+  await render(<GuestList />);
+  expect(await screen.findByText("Vous participez")).toBeOnTheScreen();
+  expect(sent).toEqual([null, "claim-gift"]);
+});

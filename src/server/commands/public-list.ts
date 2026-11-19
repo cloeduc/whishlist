@@ -4,6 +4,7 @@ import { READ_UNLOCK_TTL_SEC, signReadUnlock } from "../../auth/read-unlock";
 import { signReservationClaim } from "../../auth/reservation-claim";
 import { sessionSecret } from "../../auth/session";
 import { findMembership } from "../../domain/access";
+import { amountFrom, groupGiftOfItem, startGroupGift } from "../../domain/group-gift";
 import { cancelOwnReservation } from "../../domain/items";
 import { findWishlistByReadToken, mineReservationIdsFor } from "../../domain/read";
 import { hasReadPassword, verifyReadPassword } from "../../domain/read-password";
@@ -16,7 +17,7 @@ import {
   syncSubscriptionUnlock,
   unsubscribeWishlist,
 } from "../../domain/subscription";
-import type { Reservation, Wishlist } from "../../domain/types";
+import type { Database, Reservation, Wishlist } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import {
   toPublicListView,
@@ -32,7 +33,13 @@ type IsUnlocked = (list: Wishlist) => boolean | Promise<boolean>;
 
 export async function readPublicList(
   ctx: CommandContext,
-  input: { readToken: string; isUnlocked: IsUnlocked; claimedIds: ReadonlySet<string> },
+  input: {
+    readToken: string;
+    isUnlocked: IsUnlocked;
+    claimedIds: ReadonlySet<string>;
+    /** The client knows group gifts (028, `groupGifts=true`). */
+    groupGifts?: boolean;
+  },
 ): Promise<CommandResult<{ list: PublicListView }> | { ok: false; error: "readPasswordRequired"; title: string }> {
   const doc = await readDocument();
   const wishlist = findWishlistByReadToken(doc, input.readToken);
@@ -42,7 +49,10 @@ export async function readPublicList(
     return { ok: false, error: "readPasswordRequired", title: wishlist.title };
   }
   const mineIds = mineReservationIdsFor(doc, wishlist.id, account?.id ?? null, input.claimedIds);
-  return { ok: true, list: toPublicListView(doc, wishlist, ctx.locale, mineIds, account?.id ?? null) };
+  return {
+    ok: true,
+    list: toPublicListView(doc, wishlist, ctx.locale, mineIds, account?.id ?? null, { groupGifts: input.groupGifts }),
+  };
 }
 
 export async function unlockPublicList(
@@ -53,7 +63,20 @@ export async function unlockPublicList(
   const doc = await readDocument();
   const wishlist = findWishlistByReadToken(doc, input.readToken);
   if (!wishlist) return { ok: false, error: "listMissing" };
-  if (!(await verifyReadPassword(wishlist, input.password))) return { ok: false, error: "badPassword" };
+  return unlockWishlist(ctx, doc, wishlist, input.password);
+}
+
+/**
+ * Checks the list's read password and gives the unlock proof (cookie on the site, `unlockToken` for the API).
+ * Shared by the list's link and a group gift's link (028); the caller applies the rate limit.
+ */
+export async function unlockWishlist(
+  ctx: CommandContext,
+  doc: Database,
+  wishlist: Wishlist,
+  password: string,
+): Promise<CommandResult<{ wishlist: Wishlist; unlockToken: string | null; expiresAt: string | null }>> {
+  if (!(await verifyReadPassword(wishlist, password))) return { ok: false, error: "badPassword" };
   const account = publicAccount(ctx);
   const subscription = account ? findSubscription(doc, wishlist.id, account.id) : null;
   if (account && subscription && subscription.readPasswordHash !== wishlist.readPasswordHash) {
@@ -208,10 +231,21 @@ export async function reserve(
     typeId?: string;
     fromName?: string;
     note?: string;
+    /** « Réserver seul » (default) or « Lancer un cadeau commun » (028). */
+    mode?: "single" | "group";
+    /** Group gift only: as typed (site) or already in cents (API). */
+    amount?: string | number | null;
     isUnlocked: IsUnlocked;
   },
-): Promise<CommandResult<{ wishlist: Wishlist; reservation: Reservation; claim: string | null }>> {
+): Promise<
+  | CommandResult<{ wishlist: Wishlist; reservation: Reservation; claim: string | null; groupGiftToken: string | null }>
+  /** « Lancer un cadeau commun » on an idea where someone has just started one: its link, to join it. */
+  | { ok: false; error: "itemAlreadyReserved"; groupGiftToken: string }
+> {
   rateLimitForIp(`reserve:${input.readToken.slice(0, 12)}`, ctx.ip, 15, 60 * 60 * 1000);
+  const group = input.mode === "group";
+  const amountCents = group ? amountFrom(input.amount) : null;
+  if (amountCents === "invalid") return { ok: false, error: "invalidAmount" };
   const account = publicAccount(ctx);
   const doc = await readDocument();
   const wishlist = findWishlistByReadToken(doc, input.readToken);
@@ -219,22 +253,43 @@ export async function reserve(
   if (!(await canAccessPublicListWith(doc, wishlist, account, input.isUnlocked))) {
     return { ok: false, error: "readPasswordRequired" };
   }
-  type Reserved = { ok: true; reservation: Reservation } | { ok: false; error: string };
+  type Reserved =
+    | { ok: true; reservation: Reservation; groupGiftToken: string | null }
+    | { ok: false; error: string; groupGiftToken?: string };
   const result = await updateDocument<Reserved>((current) => {
-    const saved = reserveItem(current, {
+    const fields = {
       wishlistId: wishlist.id,
       itemId: input.itemId,
       typeId: input.typeId,
       fromName: input.fromName,
       note: input.note,
       userId: account?.id ?? null,
-    });
-    return { doc: saved.ok ? saved.doc : current, result: saved };
+    };
+    if (group) {
+      const started = startGroupGift(current, { ...fields, amountCents });
+      if (!started.ok) {
+        const open = started.error === "itemAlreadyReserved" ? groupGiftOfItem(current, input.itemId) : null;
+        const result = open?.status === "open" ? { ...started, groupGiftToken: open.token } : started;
+        return { doc: current, result };
+      }
+      return {
+        doc: started.doc,
+        result: { ok: true, reservation: started.reservation, groupGiftToken: started.groupGift.token },
+      };
+    }
+    const saved = reserveItem(current, fields);
+    if (!saved.ok) return { doc: current, result: saved };
+    return { doc: saved.doc, result: { ok: true, reservation: saved.reservation, groupGiftToken: null } };
   });
-  if (!result.ok) return result;
+  if (!result.ok) {
+    if (result.error === "itemAlreadyReserved" && result.groupGiftToken) {
+      return { ok: false, error: "itemAlreadyReserved", groupGiftToken: result.groupGiftToken };
+    }
+    return { ok: false, error: result.error };
+  }
   const secret = sessionSecret();
   const claim = secret ? signReservationClaim(input.readToken, result.reservation.id, secret) : null;
-  return { ok: true, wishlist, reservation: result.reservation, claim };
+  return { ok: true, wishlist, reservation: result.reservation, claim, groupGiftToken: result.groupGiftToken };
 }
 
 export async function cancelOwn(

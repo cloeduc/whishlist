@@ -28,7 +28,21 @@
     "cancelTitle": "Cancel this reservation?",
     "cancelBody": "This gift will be available to reserve again.",
     "cancelConfirm": "Cancel reservation",
-    "cancelKeep": "Keep reservation"
+    "cancelKeep": "Keep reservation",
+    "groupGift_one": "Group gift · {{count}} participant",
+    "groupGift_other": "Group gift · {{count}} participants",
+    "groupGiftComplete": "Complete",
+    "anonymous": "Anonymous",
+    "cancelParticipation": "Cancel this participation",
+    "cancelParticipationTitle": "Cancel this participation?",
+    "cancelParticipationBody": "This person will no longer chip in for the group gift. If they were the last one, the idea becomes available again.",
+    "cancelParticipationConfirm": "Cancel the participation",
+    "cancelParticipationKeep": "Keep the participation",
+    "cancelGroupGift": "Cancel the group gift",
+    "cancelGroupGiftTitle": "Cancel the whole group gift?",
+    "cancelGroupGiftBody": "Every participation and message will be deleted, and the gift's link will lead nowhere. The idea becomes available again.",
+    "cancelGroupGiftConfirm": "Cancel the group gift",
+    "cancelGroupGiftKeep": "Keep the group gift"
   },
   "surprise": {
     "title": "Keep the surprise",
