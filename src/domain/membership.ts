@@ -2,13 +2,9 @@ import { clone, findMembership } from "./access";
 import { parseThemeForm, resolveTheme, type WishlistTheme } from "./theme";
 import { newToken } from "./tokens";
 import type { Database, Membership, Wishlist } from "./types";
+import { blankToNull } from "./text";
 
 const SUBTITLE_MAX = 280;
-
-function blankToNull(value: string | null | undefined): string | null {
-  const trimmed = (value ?? "").trim();
-  return trimmed ? trimmed : null;
-}
 
 function validHttpUrl(url: string | null): boolean {
   if (url === null) return true;
@@ -73,6 +69,9 @@ export function wipeWishlist(doc: Database, wishlistId: string): void {
   doc.views = doc.views.filter((v) => v.wishlistId !== wishlistId);
   doc.items = doc.items.filter((i) => i.wishlistId !== wishlistId);
   doc.reservations = doc.reservations.filter((r) => r.wishlistId !== wishlistId);
+  const gifts = new Set(doc.groupGifts.filter((g) => g.wishlistId === wishlistId).map((g) => g.id));
+  doc.groupGifts = doc.groupGifts.filter((g) => !gifts.has(g.id));
+  doc.groupGiftMessages = doc.groupGiftMessages.filter((m) => !gifts.has(m.groupGiftId));
 }
 
 /** List of the invite link, or `undefined` (empty, unknown or regenerated token). */
@@ -101,6 +100,7 @@ export function acceptInvite(
     userId: input.userId,
     role: "member",
     joinedAt: (input.now ?? new Date()).toISOString(),
+    surpriseMode: false,
   });
   return { ok: true, doc: next, wishlistId: wishlist.id };
 }

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { emptyDatabase } from "../../src/domain/types";
 import { getPublicWishlist } from "../../src/domain/read";
+import { availableItems } from "../../src/domain/reserve";
 import type { Database } from "../../src/domain/types";
 
 function sample(): Database {
@@ -60,6 +61,8 @@ function sample(): Database {
     note: "pour noël",
     userId: null,
     createdAt: "2026-01-02T00:00:00.000Z",
+    groupGiftId: null,
+    amountCents: null,
   });
   return doc;
 }
@@ -80,4 +83,20 @@ test("sorting, empty fields, reserved items absent, no user", () => {
   assert.equal(pub.items[0]?.priority, null);
   assert.equal(pub.items[0]?.reserved, false);
   assert.equal("users" in pub, false);
+});
+
+test("a reserved idea that is not archived stays hidden from other guests, visible to its giver (020)", () => {
+  const doc = sample();
+  const reservation = doc.reservations[0]!;
+  assert.equal(doc.items.find((item) => item.id === reservation.itemId)?.archived, false);
+  assert.deepEqual(
+    getPublicWishlist(doc, "read")?.items.map((item) => item.id),
+    doc.items.filter((item) => item.id !== reservation.itemId).map((item) => item.id),
+  );
+  const mine = getPublicWishlist(doc, "read", "fr-FR", new Set([reservation.id]));
+  assert.equal(mine?.items.find((item) => item.id === reservation.itemId)?.mine, true);
+  assert.equal(
+    availableItems(doc, "w", "").some((item) => item.id === reservation.itemId),
+    false,
+  );
 });

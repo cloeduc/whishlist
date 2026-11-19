@@ -53,3 +53,21 @@ export async function unfollowList(readToken: string): Promise<{ ok: true } | { 
     throw error;
   }
 }
+
+/**
+ * Names a followed list and the person whose list it is (024), for this account only.
+ * `null` goes back to the list's title, or to its owner's display name.
+ */
+export async function renameFollowedList(
+  readToken: string,
+  names: { customTitle: string | null; customOwnerName: string | null },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  try {
+    await ok(api.PUT("/subscriptions/{readToken}", { params: { path: { readToken } }, body: names }));
+    await refreshLists();
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof ApiError) return { ok: false, error: error.code };
+    throw error;
+  }
+}

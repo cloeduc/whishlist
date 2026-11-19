@@ -48,6 +48,8 @@ function doc(): Database {
     note: null,
     userId: "u1",
     createdAt: "2026-01-02T00:00:00.000Z",
+    groupGiftId: null,
+    amountCents: null,
   });
   return data;
 }

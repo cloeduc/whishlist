@@ -3,6 +3,12 @@
 appId: app.ohyoushouldnt.mobile
 ---
 - waitForAnimationToEnd
+# A freshly installed Debug build can show its launcher a few seconds after the launch: wait for it,
+# without failing when it never comes (Release build, or the app already open on Metro).
+- extendedWaitUntil:
+    visible: Development Build
+    timeout: 8000
+    optional: true
 - runFlow:
     when:
       visible: Development Build

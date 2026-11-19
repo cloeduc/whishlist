@@ -1,8 +1,8 @@
 // Last link sent to TO, read in MailDev (MAILDEV_URL, passed by the e2e command).
-// KIND picks the link's page: confirmer-email (default), reinitialiser or inviter.
+// KIND picks the link's page: confirm-email (default), reset-password or invite.
 // Returns output.link (and output.confirmUrl, name kept for the 010 flows);
 // fails if no email has arrived yet (the caller retries).
-const kind = typeof KIND === "undefined" || !KIND ? "confirmer-email" : KIND;
+const kind = typeof KIND === "undefined" || !KIND ? "confirm-email" : KIND;
 const pattern = new RegExp("https?:\\/\\/\\S+\\/" + kind + "\\/[\\w-]+(\\?\\S*)?");
 const response = http.get(MAILDEV_URL + "/api/email");
 const emails = json(response.body).filter((email) =>

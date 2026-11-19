@@ -1,5 +1,6 @@
 import { clone, findMembership } from "./access";
 import { hasReadPassword } from "./read-password";
+import { blankToNull } from "./text";
 import type { Database, Subscription, Wishlist } from "./types";
 
 /**
@@ -26,6 +27,17 @@ export function viewerRelation(
   if (userId === null) return { isMember: false, subscribed: false };
   const isMember = findMembership(doc, wishlistId, userId) !== null;
   return { isMember, subscribed: !isMember && findSubscription(doc, wishlistId, userId) !== null };
+}
+
+/**
+ * Public address offered on the help page of a list's management address (026): only to an account
+ * that follows the list without managing it, since it already has that address. Anyone else gets null,
+ * so the page reveals nothing about the list (FR-003, FR-004).
+ */
+export function followedReadPath(doc: Database, wishlistId: string, userId: string): string | null {
+  if (!viewerRelation(doc, wishlistId, userId).subscribed) return null;
+  const wishlist = doc.wishlists.find((entry) => entry.id === wishlistId);
+  return wishlist ? `/l/${wishlist.readToken}` : null;
 }
 
 export function findSubscription(
@@ -90,6 +102,8 @@ export function subscribeWishlist(
     userId: input.userId,
     readPasswordHash: wishlist.readPasswordHash,
     createdAt: (input.now ?? new Date()).toISOString(),
+    customTitle: null,
+    customOwnerName: null,
   };
   next.subscriptions.push(subscription);
   return { ok: true, doc: next, subscription, replayed: false };
@@ -129,4 +143,59 @@ export function unsubscribeWishlist(
     (entry) => !(entry.wishlistId === input.wishlistId && entry.userId === input.userId),
   );
   return { ok: true, doc: next };
+}
+
+/** Longest name a subscriber can give a followed list or its person (024). */
+export const MAX_FOLLOWED_NAME = 80;
+
+/**
+ * Display name of the person whose list it is: the owner, otherwise the first member to join.
+ * Read each time, so it follows a new display name or a transfer of the list. null when empty.
+ */
+export function ownerName(doc: Database, wishlistId: string): string | null {
+  const members = doc.memberships
+    .filter((membership) => membership.wishlistId === wishlistId)
+    .sort((a, b) => a.joinedAt.localeCompare(b.joinedAt));
+  const owner = members.find((membership) => membership.role === "owner") ?? members[0];
+  const name = owner ? doc.users.find((user) => user.id === owner.userId)?.displayName.trim() : undefined;
+  return name ? name : null;
+}
+
+/**
+ * Sets the names a subscriber gives a followed list and its person (024). Each name is trimmed;
+ * an empty one goes back to the list's own value (null). Only the subscriber sees them.
+ */
+export function renameSubscription(
+  doc: Database,
+  input: { wishlistId: string; userId: string; customTitle: string | null; customOwnerName: string | null },
+): { ok: true; doc: Database; subscription: Subscription } | { ok: false; error: "listMissing" | "followedNameTooLong" } {
+  if (!findSubscription(doc, input.wishlistId, input.userId) || findMembership(doc, input.wishlistId, input.userId)) {
+    return { ok: false, error: "listMissing" };
+  }
+  const customTitle = blankToNull(input.customTitle);
+  const customOwnerName = blankToNull(input.customOwnerName);
+  if ((customTitle?.length ?? 0) > MAX_FOLLOWED_NAME || (customOwnerName?.length ?? 0) > MAX_FOLLOWED_NAME) {
+    return { ok: false, error: "followedNameTooLong" };
+  }
+  const next = clone(doc);
+  const target = findSubscription(next, input.wishlistId, input.userId)!;
+  target.customTitle = customTitle;
+  target.customOwnerName = customOwnerName;
+  return { ok: true, doc: next, subscription: target };
+}
+
+/**
+ * The names a subscriber sees for a list they follow (024), for them only. The owner's name is kept
+ * from a subscriber who lost access (read password changed), like the rest of the list.
+ */
+export function followNamesOf(
+  doc: Database,
+  wishlist: Wishlist,
+  subscription: Subscription,
+): { customTitle: string | null; customOwnerName: string | null; ownerName: string | null } {
+  return {
+    customTitle: subscription.customTitle,
+    customOwnerName: subscription.customOwnerName,
+    ownerName: isSubscriptionUnlocked(wishlist, subscription) ? ownerName(doc, wishlist.id) : null,
+  };
 }

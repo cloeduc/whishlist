@@ -16,7 +16,7 @@ function addList(doc: Database, id: string, title: string, members: [string, Rol
     createdAt: "2026-01-01T00:00:00.000Z",
   });
   for (const [userId, role, joinedAt] of members) {
-    doc.memberships.push({ wishlistId: id, userId, role, joinedAt });
+    doc.memberships.push({ wishlistId: id, userId, role, joinedAt, surpriseMode: false });
   }
   doc.types.push({ id: `${id}-type`, wishlistId: id, label: `Catégorie ${id}`, sortOrder: 0 });
   doc.people.push({ id: `${id}-person`, wishlistId: id, label: `Qui ${id}` });
@@ -84,6 +84,8 @@ export function accountDoc(): Database {
       note: null,
       userId: null,
       createdAt: "2026-04-01T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
     {
       id: "r-shared",
@@ -93,6 +95,8 @@ export function accountDoc(): Database {
       note: "Pour Noël",
       userId: "camille",
       createdAt: "2026-04-02T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
     {
       id: "r-alexs",
@@ -102,6 +106,8 @@ export function accountDoc(): Database {
       note: "Avec Camille",
       userId: "lou",
       createdAt: "2026-04-03T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
     {
       id: "r-other",
@@ -111,6 +117,8 @@ export function accountDoc(): Database {
       note: "Surprise",
       userId: "lou",
       createdAt: "2026-04-04T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
   );
   for (const userId of ["lou", "alex"]) {
@@ -145,12 +153,16 @@ export function accountDoc(): Database {
       userId: "lou",
       readPasswordHash: null,
       createdAt: "2026-04-04T00:00:00.000Z",
+      customTitle: null,
+      customOwnerName: null,
     },
     {
       wishlistId: "solo",
       userId: "camille",
       readPasswordHash: null,
       createdAt: "2026-04-02T00:00:00.000Z",
+      customTitle: null,
+      customOwnerName: null,
     },
   );
   return doc;

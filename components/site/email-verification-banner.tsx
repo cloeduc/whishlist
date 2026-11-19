@@ -39,14 +39,14 @@ function Banner({ origin }: { origin: string }) {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const path = stripLocalePrefix(pathname).path;
-  if (path.startsWith("/confirmer-email/")) return null;
+  if (path.startsWith("/confirm-email/")) return null;
 
   // Back to this page after the resend, without the result of a previous resend.
   const kept = new URLSearchParams(searchParams.toString());
   const verify = kept.get("verify");
-  const devLink = kept.get("lien");
+  const devLink = kept.get("link");
   kept.delete("verify");
-  kept.delete("lien");
+  kept.delete("link");
   const back = kept.size > 0 ? `${path}?${kept.toString()}` : path;
   const key = feedbackKey(verify);
   const feedback = key ? t(key) : null;
@@ -56,7 +56,7 @@ function Banner({ origin }: { origin: string }) {
       <AlertDescription className="flex flex-col gap-2">
         <span>{t("verifyBanner.message")}</span>
         {feedback ? <span role="status">{feedback}</span> : null}
-        {verify === "sent" ? <DevLinkAlert label={t("verifyBanner.devLink")} url={devLink} origin={origin} page="/confirmer-email/" /> : null}
+        {verify === "sent" ? <DevLinkAlert label={t("verifyBanner.devLink")} url={devLink} origin={origin} page="/confirm-email/" /> : null}
         <form action={resendEmailVerificationAction}>
           <input type="hidden" name="back" value={back} />
           <Button type="submit" variant="neutral" size="sm">

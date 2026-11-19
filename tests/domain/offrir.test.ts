@@ -32,6 +32,8 @@ test("offrir scoped to the list, empty fields, zero rows", () => {
       note: null,
       userId: null,
       createdAt: "2026-01-01T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
     {
       id: "r2",
@@ -41,6 +43,8 @@ test("offrir scoped to the list, empty fields, zero rows", () => {
       note: "mot",
       userId: "u1",
       createdAt: "2026-01-01T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
   );
   const rows = listOffrir(doc, "w");
@@ -90,6 +94,8 @@ test("my gifts: only the reservations linked to the account", () => {
       note: null,
       userId: null,
       createdAt: "2026-01-02T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
     {
       id: "mine",
@@ -99,6 +105,8 @@ test("my gifts: only the reservations linked to the account", () => {
       note: "surprise",
       userId: "u1",
       createdAt: "2026-01-03T00:00:00.000Z",
+      groupGiftId: null,
+      amountCents: null,
     },
   );
   const mine = listMyOffers(doc, "u1");

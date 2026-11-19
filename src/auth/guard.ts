@@ -10,9 +10,9 @@ export async function requireUser(options?: {
 }): Promise<User> {
   const user = await currentUser();
   const locale = await getLocale();
-  if (!user) redirect(withLocale(locale, "/connexion"));
+  if (!user) redirect(withLocale(locale, "/login"));
   if (user.mustChangePassword && !options?.allowMustChangePassword) {
-    redirect(withLocale(locale, "/compte"));
+    redirect(withLocale(locale, "/account"));
   }
   return user;
 }

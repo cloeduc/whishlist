@@ -10,6 +10,7 @@
   "itemMissing": "Cette idée n'existe pas.",
   "itemHasReservation": "Cette idée a une réservation. Annulez-la d'abord.",
   "itemReservedCannotMove": "Cette idée est réservée : elle reste dans sa liste, sinon la personne qui l’a réservée ne la retrouverait plus. Vous pouvez la copier.",
+  "itemLockedSurprise": "Cette idée ne peut pas être supprimée ou déplacée pour le moment. Voir les réservations pour en savoir plus.",
   "typeNeedsName": "Indiquez un nom de catégorie.",
   "typeExists": "Cette catégorie existe déjà dans cette liste.",
   "personExists": "Ce « qui » existe déjà dans cette liste.",
@@ -84,11 +85,19 @@
   "serverError": "Une erreur est survenue. Réessayez plus tard.",
   "idInvalid": "Identifiant invalide.",
   "idConflict": "Cet identifiant est déjà utilisé.",
+  "followedNameTooLong": "Ce nom est trop long (80 caractères au plus).",
   "subscriptionLinkInvalid": "Saisissez le lien valide d'une liste partagée.",
   "alreadyMember": "Vous faites déjà partie des membres de cette liste.",
   "apiKeyNeedsName": "Donnez un nom à la clé.",
   "apiKeyNameTooLong": "Le nom de la clé est trop long (60 caractères au plus).",
   "apiKeyLimit": "Vous avez déjà 20 clés. Révoquez-en une pour en créer une autre.",
   "apiKeyMissing": "Cette clé n'existe plus.",
-  "apiKeyNotAllowed": "Une clé d'API ne sert qu'au serveur MCP (/api/mcp). Pour l'API, connectez-vous avec votre mot de passe."
+  "apiKeyNotAllowed": "Une clé d'API ne sert qu'au serveur MCP (/api/mcp). Pour l'API, connectez-vous avec votre mot de passe.",
+  "groupGiftMissing": "Ce cadeau commun n'existe plus.",
+  "groupGiftComplete": "Ce cadeau commun est complet : il n'est plus possible d'y participer.",
+  "groupGiftAlreadyJoined": "Vous participez déjà à ce cadeau commun.",
+  "invalidAmount": "Indiquez un montant valide, par exemple 20 ou 15,50.",
+  "invalidStatus": "Indiquez l'état du cadeau commun : ouvert ou complet.",
+  "messageEmpty": "Écrivez un message avant de l'envoyer.",
+  "messageMissing": "Ce message n'existe plus."
 }

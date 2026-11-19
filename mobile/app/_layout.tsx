@@ -14,6 +14,8 @@ import { useAppFonts } from "@/theme/fonts";
 import { tokens } from "@/theme/tokens";
 import { LiveGiftMark } from "@/ui/LiveGiftMark";
 import { UpgradeRequired } from "@/features/account/UpgradeRequired";
+import { UpdatePrompt } from "@/features/update/UpdatePrompt";
+import { WhatsNew } from "@/features/whats-new/WhatsNew";
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -26,6 +28,8 @@ export default function RootLayout() {
   const fontsReady = useAppFonts();
   const session = useSession();
   const [upgradeMessage, setUpgradeMessage] = useState<string | null>(null);
+  // « Quoi de neuf » (022) goes first: the update prompt (021) waits until it is decided and closed.
+  const [whatsNewPending, setWhatsNewPending] = useState(true);
 
   useEffect(() => {
     configureClient({ onUpgradeRequired: setUpgradeMessage });
@@ -52,7 +56,12 @@ export default function RootLayout() {
       ) : upgradeMessage !== null ? (
         <UpgradeRequired message={upgradeMessage} />
       ) : (
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: tokens.colors.background } }} />
+        <>
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: tokens.colors.background } }} />
+          {/* Above every screen, including one opened from a link (021, 022); one dialog at a time. */}
+          <WhatsNew onShownChange={setWhatsNewPending} />
+          <UpdatePrompt paused={whatsNewPending} />
+        </>
       )}
     </I18nextProvider>
   );

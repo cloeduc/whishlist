@@ -17,6 +17,7 @@
     "empty": "Aucune idée archivée pour le moment.",
     "emptyHint": "Vous retrouverez ici les idées que vous archivez.",
     "restore": "Remettre dans la liste",
+    "reservedHint": "Cette idée est réservée : annulez la réservation pour la remettre dans la liste.",
     "deleteForever": "Supprimer définitivement"
   },
   "reservations": {
@@ -27,7 +28,38 @@
     "cancelTitle": "Annuler cette réservation ?",
     "cancelBody": "Ce cadeau sera de nouveau disponible à la réservation.",
     "cancelConfirm": "Annuler la réservation",
-    "cancelKeep": "Garder la réservation"
+    "cancelKeep": "Garder la réservation",
+    "groupGift_one": "Cadeau commun · {{count}} participant",
+    "groupGift_other": "Cadeau commun · {{count}} participants",
+    "groupGiftComplete": "Complet",
+    "anonymous": "Anonyme",
+    "cancelParticipation": "Annuler la participation",
+    "cancelParticipationTitle": "Annuler cette participation ?",
+    "cancelParticipationBody": "Cette personne ne participera plus au cadeau commun. Si c'était la dernière, l'idée redeviendra disponible.",
+    "cancelParticipationConfirm": "Annuler la participation",
+    "cancelParticipationKeep": "Garder la participation",
+    "cancelGroupGift": "Annuler le cadeau commun",
+    "cancelGroupGiftTitle": "Annuler tout le cadeau commun ?",
+    "cancelGroupGiftBody": "Toutes les participations et les messages seront supprimés, et le lien du cadeau ne mènera plus à rien. L'idée redeviendra disponible.",
+    "cancelGroupGiftConfirm": "Annuler le cadeau commun",
+    "cancelGroupGiftKeep": "Garder le cadeau commun"
+  },
+  "surprise": {
+    "title": "Garder la surprise",
+    "description": "Les idées réservées restent dans votre liste, sans que vous sachiez lesquelles. Les autres membres continuent de voir les réservations.",
+    "toggle": "Ne pas voir les cadeaux réservés",
+    "saved": "Mode surprise activé : vous ne voyez plus les cadeaux réservés.",
+    "cleared": "Mode surprise désactivé : vous voyez de nouveau les cadeaux réservés.",
+    "hiddenHint": "Vous avez choisi de ne pas voir les cadeaux réservés.",
+    "reveal": "Voir les réservations",
+    "revealTitle": "Voir les réservations ?",
+    "revealBody": "Vous allez voir quels cadeaux ont été réservés.",
+    "revealConfirm": "Voir les réservations",
+    "revealKeep": "Garder la surprise",
+    "guestViewTitle": "Ouvrir la vue invité ?",
+    "guestViewBody": "La vue invité ne montre pas les cadeaux déjà réservés : en la comparant à votre liste, vous pourriez deviner lesquels le sont.",
+    "guestViewConfirm": "Ouvrir la vue invité",
+    "guestViewKeep": "Rester ici"
   },
   "confirm": {
     "keep": "Conserver",
@@ -113,7 +145,9 @@
     "owner": "Propriétaire",
     "member": "Membre",
     "remove": "Retirer de la liste",
-    "leave": "Quitter cette liste"
+    "leave": "Quitter cette liste",
+    "action": "Partager",
+    "addressNote": "L’adresse de cette page est réservée aux personnes qui gèrent la liste. Pour partager, envoyez le lien de la liste."
   },
   "settings": {
     "title": "Réglages",
@@ -168,7 +202,8 @@
     "aiCo2": "Environ {{grams}} g de CO₂e — soit l’équivalent d’environ {{beef}} g de viande rouge",
     "aiDisclaimer": "Ordres de grandeur indicatifs, pas un bilan carbone certifié.",
     "secondHandOk": "L’occasion me va",
-    "secondHandOkHint": "La personne qui offre le verra sur la liste partagée."
+    "secondHandOkHint": "La personne qui offre le verra sur la liste partagée.",
+    "newTypeOption": "+ Nouvelle catégorie"
   },
   "transfer": {
     "open": "Déplacer ou copier…",
@@ -201,5 +236,13 @@
     "editTitle": "Modifier l’idée cadeau",
     "emptyCategory": "Aucune idée dans cette catégorie."
   },
-  "secondHandBadge": "Occasion OK"
+  "secondHandBadge": "Occasion OK",
+  "accessHelp": {
+    "title": "Cette adresse sert à gérer la liste",
+    "body": "Elle n’ouvre la liste qu’aux personnes qui la gèrent. Vous n’en faites pas partie avec ce compte.",
+    "howTo": "Pour voir la liste et réserver une idée, demandez le lien de la liste à la personne qui vous a envoyé cette adresse. Elle le trouve dans l’onglet « Partage » de sa liste.",
+    "followedBody": "Vous suivez déjà cette liste : vous pouvez l’ouvrir pour la consulter.",
+    "viewFollowed": "Voir la liste",
+    "backToLists": "Mes listes"
+  }
 }

@@ -8,6 +8,7 @@ import { mcpAccess } from "../../src/server/mcp/gate";
 import { buildMcpServer } from "../../src/server/mcp/server";
 import { readDocument } from "../../src/store/db";
 import { apiDoc, apiDocWithSecondList, ctx, ensurePasswordHash, withStore } from "./helpers/api-fixtures";
+import { docWithGroupGift } from "./helpers/group-gift-fixtures";
 
 before(ensurePasswordHash);
 
@@ -86,6 +87,38 @@ test("list_lists and get_list: the account's lists; an idea says whether it is r
     const raw = JSON.stringify(list);
     assert.ok(!raw.includes("Sam") && !raw.includes("anniversaire"), "ni le nom ni le mot de la réservation");
     assert.equal(json(await alex.call("get_list", { listId: "w" })).ideas.some((idea: { id: string }) => idea.id === "taken"), false);
+  });
+});
+
+test("get_list: an idea that is a group gift is reserved, with no detail about it (028)", async () => {
+  const doc = docWithGroupGift();
+  await withStore(doc, async () => {
+    const list = json(await client(doc.users[0]!).call("get_list", { listId: "w", includeArchived: true }));
+    assert.equal(list.ideas.find((idea: { id: string }) => idea.id === "gift").reserved, true);
+    const raw = JSON.stringify(list);
+    assert.ok(!raw.includes("tok-g") && !raw.includes("Je l'achète") && !raw.includes("1000"));
+  });
+});
+
+test("surprise mode: get_list says no idea is reserved, delete_idea gives the neutral refusal (020)", async () => {
+  const doc = apiDoc();
+  doc.memberships[0]!.surpriseMode = true;
+  await withStore(doc, async () => {
+    const alex = client(doc.users[0]!);
+    assert.deepEqual(json(await alex.call("list_lists", {})), [{ id: "w", title: "Liste d'Alex", role: "owner", ideas: 3 }]);
+    const ideas = json(await alex.call("get_list", { listId: "w" })).ideas as { id: string; reserved: boolean; archived: boolean }[];
+    assert.deepEqual(
+      ideas.map((idea) => [idea.id, idea.reserved, idea.archived]),
+      [
+        ["gift", false, false],
+        ["gift2", false, false],
+        ["taken", false, false],
+      ],
+    );
+    const refused = await alex.call("delete_idea", { listId: "w", ideaId: "taken" });
+    assert.equal(refused.isError, true);
+    assert.match(refused.content[0]!.text, /itemLockedSurprise/);
+    assert.doesNotMatch(refused.content[0]!.text, /itemHasReservation/);
   });
 });
 
@@ -179,7 +212,7 @@ test("delete_idea: deletes; a reserved idea is refused, as on the site", async (
 /** Alex becomes a member of Camille's list, which also has a « jeux » category. */
 function transferDoc() {
   const doc = apiDocWithSecondList();
-  doc.memberships.push({ wishlistId: "w-camille", userId: "alex", role: "member", joinedAt: "2026-01-06T00:00:00.000Z" });
+  doc.memberships.push({ wishlistId: "w-camille", userId: "alex", role: "member", joinedAt: "2026-01-06T00:00:00.000Z", surpriseMode: false });
   doc.types.push({ id: "t-camille-jeux", wishlistId: "w-camille", label: "jeux", sortOrder: 1 });
   return doc;
 }
@@ -251,7 +284,7 @@ test("rename_* and delete_*: category and « qui » by name; a label still in us
 
 test("create_list, rename_list, delete_list: only the owner deletes; a non-member does not see the list", async () => {
   const doc = apiDoc();
-  doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-01T00:00:00.000Z" });
+  doc.memberships.push({ wishlistId: "w", userId: "camille", role: "member", joinedAt: "2026-01-01T00:00:00.000Z", surpriseMode: false });
   await withStore(doc, async () => {
     const alex = client(doc.users[0]!);
     const created = json(await alex.call("create_list", { title: "Noël", category: "Livres", for: "Alex" })).created;

@@ -50,3 +50,22 @@ jest.mock("expo-file-system", () => {
 });
 
 jest.mock("expo-sharing", () => require("./helpers/sharing").sharingMock);
+
+// Store updates (021): nothing is available unless a test says otherwise; listeners are kept by event name.
+jest.mock("expo-in-app-updates", () => {
+  const listeners = new Map<string, Set<(event: unknown) => void>>();
+  return {
+    AppUpdateType: { FLEXIBLE: 0, IMMEDIATE: 1 },
+    checkForUpdate: jest.fn(async () => ({ updateAvailable: false })),
+    startUpdate: jest.fn(async () => true),
+    checkAndStartUpdate: jest.fn(async () => false),
+    addUpdateListener: jest.fn((name: string, listener: (event: unknown) => void) => {
+      const set = listeners.get(name) ?? new Set();
+      set.add(listener);
+      listeners.set(name, set);
+      return () => set.delete(listener);
+    }),
+    /** Test helper: sends an event to the registered listeners. */
+    __emit: (name: string, event: unknown) => listeners.get(name)?.forEach((listener) => listener(event)),
+  };
+});

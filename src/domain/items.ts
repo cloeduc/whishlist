@@ -1,17 +1,15 @@
 import { clone, findMembership } from "./access";
 import { MAX_DESCRIPTION, normalizeDescription } from "./description";
+import { pruneGroupGifts } from "./group-gift";
 import { normalizePriority } from "./priority";
+import { surpriseModeOf } from "./surprise";
+import { blankToNull } from "./text";
 import { newId } from "./tokens";
 
 import type { Database, Item } from "./types";
 
 // Pure, also used by the browser (label chips): kept out of this module, which imports node:crypto.
 export { splitLabels } from "./split-labels";
-
-function blankToNull(value: string | null | undefined): string | null {
-  const trimmed = (value ?? "").trim();
-  return trimmed ? trimmed : null;
-}
 
 function validUrl(url: string | null): boolean {
   if (url === null) return true;
@@ -194,6 +192,14 @@ type TransferInput = {
   personId: string;
 };
 
+/**
+ * A reserved idea is neither deleted nor moved. In surprise mode (020) the refusal does not say why:
+ * the member chose not to know which ideas are reserved.
+ */
+function reservedRefusal(doc: Database, input: { wishlistId: string; actorId: string }, error: string): string {
+  return surpriseModeOf(doc, input.wishlistId, input.actorId) ? "itemLockedSurprise" : error;
+}
+
 /** Rights on both lists, source idea, category and « pour qui » taken from the target list. */
 function checkTransfer(doc: Database, input: TransferInput): { ok: true; item: Item } | { ok: false; error: string } {
   if (!findMembership(doc, input.wishlistId, input.actorId)) return { ok: false, error: "notMember" };
@@ -220,7 +226,7 @@ function lastSortOrder(doc: Database, wishlistId: string): number {
 export function moveItem(doc: Database, input: TransferInput): { ok: true; doc: Database } | { ok: false; error: string } {
   const checked = checkTransfer(doc, input);
   if (!checked.ok) return checked;
-  if (doc.reservations.some((r) => r.itemId === input.itemId)) return { ok: false, error: "itemReservedCannotMove" };
+  if (doc.reservations.some((r) => r.itemId === input.itemId)) return { ok: false, error: reservedRefusal(doc, input, "itemReservedCannotMove") };
   const next = clone(doc);
   const item = next.items.find((i) => i.id === input.itemId)!;
   if (input.targetWishlistId !== input.wishlistId) item.sortOrder = lastSortOrder(next, input.targetWishlistId) + 1;
@@ -268,7 +274,7 @@ export function deleteItem(
     return { ok: false, error: "notMember" };
   }
   if (doc.reservations.some((r) => r.itemId === input.itemId)) {
-    return { ok: false, error: "itemHasReservation" };
+    return { ok: false, error: reservedRefusal(doc, input, "itemHasReservation") };
   }
   const next = clone(doc);
   const before = next.items.length;
@@ -477,9 +483,9 @@ function removeReservation(doc: Database, wishlistId: string, reservationId: str
     (r) => r.id === reservationId && r.wishlistId === wishlistId,
   );
   if (!reservation) return null;
-  const item = next.items.find((i) => i.id === reservation.itemId && i.wishlistId === wishlistId);
-  if (item) item.archived = false;
   next.reservations = next.reservations.filter((r) => r.id !== reservation.id);
+  // The last participation of a group gift takes the gift and its thread with it (028).
+  pruneGroupGifts(next);
   return next;
 }
 

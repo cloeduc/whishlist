@@ -44,6 +44,10 @@
         "a": "Elle indique qu’une personne prévoit d’offrir ce cadeau. Aucun achat ni paiement n’est effectué sur le site."
       },
       {
+        "q": "Peut-on offrir un cadeau à plusieurs ?",
+        "a": "Oui. En réservant une idée, choisissez « Lancer un cadeau commun » : d’autres personnes peuvent y participer, en indiquant si elles le souhaitent le montant qu’elles mettent, et voient ce qu’il reste à réunir. Envoyez-leur le lien du cadeau commun : il ne montre que ce cadeau. Rien n’est payé sur le site ; quand le compte est bon, un participant déclare le cadeau complet."
+      },
+      {
         "q": "Puis-je préparer une liste avec quelqu’un ?",
         "a": "Oui. Envoyez le lien d’invitation à modifier. La personne devra se connecter ou créer un compte avant de rejoindre la liste."
       },
@@ -53,7 +57,7 @@
       },
       {
         "q": "Qui peut voir les réservations ?",
-        "a": "Les personnes qui gèrent la liste peuvent consulter les réservations. Si la liste est pour vous, mieux vaut donc éviter cet écran — sauf si vous êtes aussi du genre à retourner la maison pour découvrir où sont cachés les cadeaux de Noël. Sur la liste partagée, la personne qui a réservé retrouve aussi ses propres réservations dans le même navigateur ou avec son compte."
+        "a": "Les personnes qui gèrent la liste peuvent consulter les réservations. Si la liste est pour vous, cochez « Ne pas voir les cadeaux réservés » dans l’onglet Partage : les idées réservées restent dans votre liste sans que vous sachiez lesquelles, et vous ne voyez les réservations que si vous le demandez — sauf si vous êtes du genre à retourner la maison pour découvrir où sont cachés les cadeaux de Noël. Sur la liste partagée, la personne qui a réservé retrouve aussi ses propres réservations dans le même navigateur ou avec son compte."
       },
       {
         "q": "Peut-on annuler une réservation ?",
@@ -98,7 +102,7 @@
       },
       {
         "title": "6. Suivez les réservations",
-        "body": "L’onglet Réservations indique les cadeaux réservés. Une réservation ne passe aucune commande : l’achat reste à effectuer séparément."
+        "body": "L’onglet Réservations indique les cadeaux réservés. Une réservation ne passe aucune commande : l’achat reste à effectuer séparément. Si la liste est pour vous, gardez la surprise : dans l’onglet Partage, cochez « Ne pas voir les cadeaux réservés »."
       }
     ],
     "guestTitle": "Vous avez reçu une liste ?",
@@ -166,18 +170,19 @@
     "listsTitle": "Vos listes et vos idées",
     "listsBody": "Les listes, leurs catégories, les « qui » et les idées (nom, lien, image, prix, priorité) que vous et les autres membres ajoutez. Chaque membre d’une liste les voit.",
     "reservationsTitle": "Les réservations",
-    "reservationsBody": "Quand quelqu’un réserve un cadeau : le nom donné, le petit mot éventuel, la date, et le compte si la personne est connectée. Les membres de la liste voient ces réservations.",
+    "reservationsBody": "Quand quelqu’un réserve un cadeau : le nom donné, le petit mot éventuel, la date, et le compte si la personne est connectée. Les membres de la liste voient ces réservations. Pour un cadeau commun, chaque participation garde en plus le montant annoncé, s’il est indiqué : les autres participants le voient, les membres de la liste jamais. Les personnes qui ont le lien du cadeau commun voient le nom des participants. Les participants qui ont un compte peuvent aussi s’écrire dans le fil du cadeau commun : ces messages ne sont lus que par eux, jamais par les membres de la liste, et disparaissent avec le cadeau commun ; à la suppression d’un compte, ses messages restent, signés « Ancien participant ».",
     "retentionTitle": "Combien de temps",
     "retentionBody": "Vos données restent jusqu’à la suppression de votre compte. Une connexion dure 30 jours, un lien de réinitialisation du mot de passe 1 heure, un lien de confirmation d’adresse 24 heures. Les sauvegardes chiffrées du serveur sont gardées 14 jours : une donnée supprimée en disparaît au plus tard 14 jours après.",
     "cookiesTitle": "Cookies",
     "cookiesBody": "Le site dépose des cookies : wishlist_session (connexion, 30 jours, httpOnly), NEXT_LOCALE (langue choisie, 1 an), un cookie wl_ru_… qui mémorise le mot de passe d’une liste pendant 14 jours, et un cookie wl_rc_… qui retrouve les réservations faites sans compte pendant 90 jours. Ces cookies ne servent pas à de la publicité.",
     "appTitle": "Dans l’app mobile",
-    "appBody": "L’app garde votre connexion dans le stockage sécurisé du téléphone, et une copie de vos listes et des changements pas encore envoyés dans sa base locale. Tout est effacé à la déconnexion ou à la suppression du compte. L’app ne mesure pas l’audience et ne demande aucune autorisation.",
+    "appBody": "L’app garde votre connexion dans le stockage sécurisé du téléphone, et une copie de vos listes et des changements pas encore envoyés dans sa base locale. Tout est effacé à la déconnexion ou à la suppression du compte, sauf trois réglages du téléphone, sans lien avec votre compte : la date de la dernière recherche de mise à jour, votre éventuel « Plus tard » et la dernière version dont vous avez vu les nouveautés. L’app ne mesure pas l’audience et ne demande aucune autorisation.",
     "providersTitle": "Prestataires",
     "cloudflareBody": "Le site et l’app passent par Cloudflare, Inc. (États-Unis), qui protège et diffuse le site : les adresses IP, les pages demandées et les échanges transitent par ses serveurs, y compris hors de l’Union européenne.",
     "mailBody": "Quand l’envoi d’e-mails est configuré, les messages (confirmation d’adresse, changement d’adresse, invitation, réinitialisation de mot de passe, adresse déjà utilisée) passent par Resend. L’adresse du destinataire et le contenu du message sont alors transmis à ce prestataire.",
     "aiBody": "Quand une clé Gemini ou OpenAI est configurée, le contenu de la page d’un lien cadeau peut être envoyé à ce service pour préremplir une idée. Rien n’est envoyé si aucune clé n’est configurée.",
     "audienceBody": "Quand une mesure d’audience est configurée, les visites des pages publiques sont comptées avec Umami, chez l’exploitant de l’instance. Les adresses de listes, de connexion, de compte, d’invitation, de réinitialisation et de confirmation d’adresse ne partent pas. Ce comptage ne dépose pas de cookie. Le refus se règle dans le pied de page et reste dans ce navigateur.",
+    "storesBody": "Pour savoir si une nouvelle version existe, l’app interroge l’App Store (Apple) sur iPhone, ou Google Play (Google) sur Android, au plus une fois par jour. Seuls l’identifiant de l’app et l’adresse IP du téléphone leur parviennent ; rien sur vous ni sur vos listes.",
     "optOut": "Ne pas mesurer ma visite",
     "optOutOn": "Visite non mesurée. Réactiver",
     "rightsTitle": "Vos droits",

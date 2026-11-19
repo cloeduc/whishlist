@@ -36,10 +36,10 @@ export function GuestHero({
         </div>
         <div className="guest-hero__cta flex flex-col items-start gap-2">
           <div className="flex flex-wrap gap-3">
-            <LinkButton href="/inscription" size="lg">
+            <LinkButton href="/register" size="lg">
               {createAccount}
             </LinkButton>
-            <LinkButton href="/connexion" size="lg" variant="outline">
+            <LinkButton href="/login" size="lg" variant="outline">
               {hasAccount}
             </LinkButton>
           </div>

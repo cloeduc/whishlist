@@ -1,0 +1,19 @@
+# 022 US1: a fresh install (the suite clears the app before each flow) shows no « Quoi de neuf » dialog,
+# neither on the sign-in screen nor once signed in. The dialog after a real update is checked by jest
+# (`whats-new.test.tsx`) and by hand (exclusions.md). In a Debug build the dialog is off (`__DEV__`):
+# the flow then only proves nothing is in the way.
+appId: app.ohyoushouldnt.mobile
+name: "022 US1 — No « What's new » dialog after a fresh install"
+tags:
+  - 022-us1
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+- assertNotVisible:
+    id: whats-new.dialog
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: alex@example.test
+- assertNotVisible:
+    id: whats-new.dialog

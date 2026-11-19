@@ -1,7 +1,7 @@
-import { api, ApiError, done } from "@/api/client";
+import { api, ApiError, done, ok, type Schemas } from "@/api/client";
 import { discardList } from "@/offline/outbox";
 
-import { forgetList, refreshList } from "./store";
+import { forgetList, refreshList, refreshLists } from "./store";
 
 // Sharing a list (017): invitations, read password, members, leaving and deleting.
 // Direct calls, unavailable offline, like the list settings (research R2): never through the queue.
@@ -63,4 +63,20 @@ export async function leaveList(listId: string): Promise<void> {
 export async function deleteList(listId: string): Promise<void> {
   await guarded(listId, () => done(api.DELETE("/lists/{listId}", { params: { path: { listId } } })));
   await dropList(listId);
+}
+
+/**
+ * « Ne pas voir les cadeaux réservés » for this account only (020). The list is read again: in surprise
+ * mode its copy on the phone has no reservation left, and « Mes listes » counts the ideas differently.
+ */
+export async function setSurpriseMode(listId: string, enabled: boolean): Promise<void> {
+  await guarded(listId, () => done(api.PUT("/lists/{listId}/surprise-mode", { params: { path: { listId } }, body: { enabled } })));
+  await refreshList(listId);
+  await refreshLists();
+}
+
+/** « Voir les réservations » (020): read from the server each time, never written on the phone. */
+export async function revealReservations(listId: string): Promise<Schemas["MemberReservation"][]> {
+  const body = await ok(api.GET("/lists/{listId}/reservations", { params: { path: { listId } } }));
+  return body.reservations;
 }

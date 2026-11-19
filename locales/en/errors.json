@@ -10,6 +10,7 @@
   "itemMissing": "This idea doesn’t exist.",
   "itemHasReservation": "This idea has a reservation. Cancel it first.",
   "itemReservedCannotMove": "This idea is reserved, so it stays on its list: otherwise the person who reserved it couldn’t find it anymore. You can copy it instead.",
+  "itemLockedSurprise": "This idea cannot be deleted or moved right now. See the reservations to find out more.",
   "typeNeedsName": "Enter a category name.",
   "typeExists": "This category is already on this list.",
   "personExists": "This recipient is already on this list.",
@@ -84,11 +85,19 @@
   "serverError": "Something went wrong. Try again later.",
   "idInvalid": "Invalid identifier.",
   "idConflict": "This identifier is already in use.",
+  "followedNameTooLong": "This name is too long (80 characters at most).",
   "subscriptionLinkInvalid": "Enter a valid shared wish list link.",
   "alreadyMember": "You’re already a member of this list.",
   "apiKeyNeedsName": "Give the key a name.",
   "apiKeyNameTooLong": "The key name is too long (60 characters at most).",
   "apiKeyLimit": "You already have 20 keys. Revoke one to create another.",
   "apiKeyMissing": "This key no longer exists.",
-  "apiKeyNotAllowed": "An API key only works with the MCP server (/api/mcp). For the API, sign in with your password."
+  "apiKeyNotAllowed": "An API key only works with the MCP server (/api/mcp). For the API, sign in with your password.",
+  "groupGiftMissing": "This group gift no longer exists.",
+  "groupGiftComplete": "This group gift is complete: you can no longer chip in.",
+  "groupGiftAlreadyJoined": "You're already chipping in for this group gift.",
+  "invalidAmount": "Enter a valid amount, for example 20 or 15.50.",
+  "invalidStatus": "Give the group gift's state: open or complete.",
+  "messageEmpty": "Write a message before sending it.",
+  "messageMissing": "This message no longer exists."
 }

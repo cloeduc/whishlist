@@ -9,6 +9,30 @@
     "title": "Mettez l'application à jour",
     "body": "Cette version de l'application n'est plus prise en charge par le serveur. Installez la dernière version pour continuer."
   },
+  "update": {
+    "title": "Nouvelle version disponible",
+    "body": "Une nouvelle version de l'application est disponible. Mettez-la à jour pour profiter des dernières nouveautés.",
+    "now": "Mettre à jour",
+    "later": "Plus tard"
+  },
+  "whatsNew": {
+    "title": "Quoi de neuf",
+    "version": "Version {{version}}",
+    "done": "C'est noté",
+    "account": "Nouveautés",
+    "screenTitle": "Nouveautés",
+    "screenEyebrow": "L'application",
+    "screenIntro": "Ce que chaque version a apporté, la plus récente en premier.",
+    "releases": {
+      "1_2_0": [
+        "Cadeau commun : sur une idée, choisissez « Lancer un cadeau commun », annoncez votre montant et partagez le lien du cadeau pour que d'autres participent.",
+        "Gardez la surprise : dans l'onglet Partage d'une liste, cochez « Ne pas voir les cadeaux réservés ».",
+        "En ajoutant une idée, créez une catégorie sans quitter le formulaire avec « + Nouvelle catégorie ».",
+        "Renommez une liste suivie pour la retrouver facilement.",
+        "Les liens de gestion d'une liste s'ouvrent dans l'application, et l'application vous prévient quand une nouvelle version est disponible."
+      ]
+    }
+  },
   "lists": {
     "itemCount_one": "{{count}} idée",
     "itemCount_other": "{{count}} idées",
@@ -80,7 +104,9 @@
   "links": {
     "confirming": "Confirmation de votre adresse…",
     "passwordSaved": "Votre mot de passe est enregistré. Connectez-vous avec votre nouveau mot de passe.",
-    "inviteChecking": "Ouverture de l'invitation…"
+    "inviteChecking": "Ouverture de l'invitation…",
+    "listSignIn": "Connectez-vous pour ouvrir cette liste",
+    "listChecking": "Ouverture de la liste…"
   },
   "shared": {
     "followButton": "Suivre une liste",
@@ -98,5 +124,9 @@
     "cameraDenied": "L'app n'a pas accès à l'appareil photo. Autorisez-le dans les réglages du téléphone, ou collez le lien de la liste.",
     "openSettings": "Ouvrir les réglages",
     "cameraUsage": "L'appareil photo sert à scanner le QR code d'une liste à suivre."
+  },
+  "groupGift": {
+    "share": "Partager le lien du cadeau",
+    "shareMessage": "Participez avec moi au cadeau commun « {{name}} » : {{url}}"
   }
 }

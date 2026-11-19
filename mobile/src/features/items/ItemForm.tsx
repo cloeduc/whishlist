@@ -7,6 +7,7 @@ import { MAX_DESCRIPTION } from "../../../../src/domain/description";
 import { useCapabilities } from "@/data/capabilities";
 import { enrich, type ItemInput } from "@/data/items";
 import { errorText } from "@/features/errors";
+import { NewLabelField } from "@/features/lists/NewLabelField";
 import { translateError } from "@/i18n";
 import { useOnline } from "@/network";
 import type { ViewList } from "@/offline/optimistic";
@@ -64,13 +65,17 @@ export function ItemForm({
   /** Link received from a share: fill from the link as soon as possible (once). */
   autoFill?: boolean;
 }) {
-  const { t } = useTranslation(["list", "common"]);
+  const { t } = useTranslation(["list", "common", "mobile"]);
   const online = useOnline();
   const capabilities = useCapabilities();
   const [draft, setDraft] = useState<Draft>(initial);
   const [enriching, setEnriching] = useState(false);
   const [enrichError, setEnrichError] = useState<string | null>(null);
   const [usedLlm, setUsedLlm] = useState(false);
+  /** « + Nouvelle catégorie » (023): a category created from the form, then chosen for the idea. */
+  const [newTypeOpen, setNewTypeOpen] = useState(false);
+  /** The category just created, shown even if the list has not been reloaded yet. */
+  const [created, setCreated] = useState<{ id: string; label: string } | null>(null);
 
   function set<K extends keyof Draft>(key: K, value: Draft[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -100,6 +105,7 @@ export function ItemForm({
   }
 
   const categories = [...list.categories].sort((a, b) => a.sortOrder - b.sortOrder).map((c) => ({ value: c.id, label: c.label }));
+  if (created && !categories.some((option) => option.value === created.id)) categories.push({ value: created.id, label: created.label });
   const people = list.people.map((p) => ({ value: p.id, label: p.label }));
   // Prefill: requires the server, and a list that already exists on the server.
   const canEnrich = online && !list.localOnly && draft.url.trim() !== "" && !enriching;
@@ -155,8 +161,40 @@ export function ItemForm({
         />
       </Field>
       <Field label={t("form.type")}>
-        <Select label={t("form.type")} value={draft.typeId} options={categories} onChange={(value) => set("typeId", value)} />
+        <Select
+          testID="item-form.type"
+          actionTestID="item-form.new-type"
+          label={t("form.type")}
+          value={draft.typeId}
+          options={categories}
+          onChange={(value) => set("typeId", value)}
+          action={{
+            label: t("form.newTypeOption"),
+            // Created on the server, like in the settings: online only, and for a list already sent.
+            disabled: !online || Boolean(list.localOnly),
+            hint: list.localOnly ? t("mobile:lists.notSentYet") : t("mobile:offline.needsNetwork"),
+            onPress: () => setNewTypeOpen(true),
+          }}
+        />
       </Field>
+      {newTypeOpen ? (
+        <NewLabelField
+          listId={list.id}
+          kind="types"
+          disabled={!online || Boolean(list.localOnly)}
+          onAdded={(label) => {
+            // Only the category changes: everything else typed stays as it is.
+            setCreated(label);
+            set("typeId", label.id);
+            setNewTypeOpen(false);
+          }}
+          onCancel={() => setNewTypeOpen(false)}
+          inputTestID="item-form.new-type-name"
+          addTestID="item-form.new-type-add"
+          cancelTestID="item-form.new-type-cancel"
+          errorTestID="item-form.new-type-error"
+        />
+      ) : null}
       <Field label={t("form.person")}>
         <Select label={t("form.person")} value={draft.personId} options={people} onChange={(value) => set("personId", value)} />
       </Field>

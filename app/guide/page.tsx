@@ -152,7 +152,7 @@ export default async function GuidePage() {
         </aside>
 
         <div className="flex justify-center">
-          <LinkButton href="/inscription" size="lg">
+          <LinkButton href="/register" size="lg">
             {t("guide.cta")}
           </LinkButton>
         </div>

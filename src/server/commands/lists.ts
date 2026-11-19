@@ -5,15 +5,19 @@ import { createWishlist } from "../../domain/import";
 import { listDefaults, memberListTitles, numberedTitle } from "../../domain/list-defaults";
 import { addPerson, addType, splitLabels } from "../../domain/items";
 import { updateWishlistSettings } from "../../domain/membership";
+import { listOffrir, type OffrirRow } from "../../domain/offrir";
 import { followedListsOf } from "../../domain/subscription";
+import { setSurpriseMode as setSurpriseModeRule } from "../../domain/surprise";
 import type { WishlistTheme } from "../../domain/types";
 import { readDocument, updateDocument } from "../../store/db";
 import { getTranslationsFor } from "../../i18n/server";
 import {
+  memberReservations,
   toListSummary,
   toMemberListView,
   toSubscribedListSummary,
   type ListSummaryView,
+  type MemberReservationView,
   type MemberListView,
   type SubscribedListSummaryView,
 } from "../api/views";
@@ -29,7 +33,7 @@ export async function listMine(
     .filter((membership) => membership.userId === active.user.id)
     .flatMap((membership) => {
       const wishlist = doc.wishlists.find((entry) => entry.id === membership.wishlistId);
-      return wishlist ? [toListSummary(doc, wishlist, membership.role, ctx.locale, ctx.origin)] : [];
+      return wishlist ? [toListSummary(doc, wishlist, membership, ctx.locale, ctx.origin)] : [];
     });
   const subscriptions = followedListsOf(doc, active.user.id).map(({ wishlist, subscription }) =>
     toSubscribedListSummary(doc, wishlist, subscription, ctx.locale, ctx.origin),
@@ -56,7 +60,7 @@ export async function memberListView(
   const membership = findMembership(doc, wishlistId, userId);
   const wishlist = doc.wishlists.find((entry) => entry.id === wishlistId);
   if (!membership || !wishlist) return { ok: false, error: "notMember" };
-  return { ok: true, list: toMemberListView(doc, wishlist, membership.role, ctx.locale, ctx.origin) };
+  return { ok: true, list: toMemberListView(doc, wishlist, membership, ctx.locale, ctx.origin) };
 }
 
 /**
@@ -133,4 +137,41 @@ export async function updateSettings(
   });
   if (!saved.ok) return saved;
   return memberListView(ctx, input.wishlistId, active.user.id);
+}
+
+/**
+ * « Ne pas voir les cadeaux réservés » for the signed-in member only (020); returns the list as they now see it.
+ * `enabled` comes as is from a JSON body: anything but a boolean is refused (`invalidJson`).
+ */
+export async function setSurpriseMode(
+  ctx: CommandContext,
+  input: { wishlistId: string; enabled: unknown },
+): Promise<CommandResult<{ list: MemberListView }>> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  const { enabled } = input;
+  if (typeof enabled !== "boolean") return { ok: false, error: "invalidJson" };
+  const saved = await updateDocument<CommandResult>((doc) => {
+    const result = setSurpriseModeRule(doc, { wishlistId: input.wishlistId, enabled, actorId: active.user.id });
+    return result.ok ? { doc: result.doc, result: { ok: true } } : { doc, result };
+  });
+  if (!saved.ok) return saved;
+  return memberListView(ctx, input.wishlistId, active.user.id);
+}
+
+/** Reservations of a list, shown on demand: what a member in surprise mode asks to see (020). */
+export async function revealReservations(
+  ctx: CommandContext,
+  input: { wishlistId: string },
+): Promise<CommandResult<{ reservations: MemberReservationView[]; offers: OffrirRow[] }>> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  const doc = await readDocument();
+  if (!findMembership(doc, input.wishlistId, active.user.id)) return { ok: false, error: "notMember" };
+  // `reservations` for the API, `offers` (with the category) for the site's cards.
+  return {
+    ok: true,
+    reservations: memberReservations(doc, doc.reservations.filter((r) => r.wishlistId === input.wishlistId)),
+    offers: listOffrir(doc, input.wishlistId),
+  };
 }

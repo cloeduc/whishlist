@@ -29,6 +29,8 @@ describe("site links opened by the app (011)", () => {
     expect(filter?.autoVerify).toBe(true);
     const data = Array.isArray(filter?.data) ? filter.data : [];
     expect(data.map((entry) => entry.pathPrefix)).toEqual(androidPathPrefixes());
+    // A list's management address and its former French form (026).
+    expect(data.map((entry) => entry.pathPrefix)).toEqual(expect.arrayContaining(["/lists/", "/en/lists/", "/listes/", "/en/listes/"]));
     expect(data.every((entry) => entry.scheme === "https" && entry.host === "ohyoushouldnt.app")).toBe(true);
   });
 

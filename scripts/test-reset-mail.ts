@@ -23,7 +23,7 @@ async function main() {
   console.log("configured=", mailConfigured());
   const result = await sendPasswordResetMail({
     to,
-    resetUrl: "http://localhost:3000/reinitialiser/test-token-local",
+    resetUrl: "http://localhost:3000/reset-password/test-token-local",
   });
   console.log("sent=", result.sent);
   if (!result.sent) process.exitCode = 1;

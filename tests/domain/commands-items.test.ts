@@ -29,7 +29,7 @@ const fields = {
 function docWithSecondList() {
   const doc = apiDoc();
   doc.wishlists.push({ ...doc.wishlists[0]!, id: "w2", readToken: "rt2", inviteToken: "it2" });
-  doc.memberships.push({ wishlistId: "w2", userId: "camille", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z" });
+  doc.memberships.push({ wishlistId: "w2", userId: "camille", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z", surpriseMode: false });
   doc.types.push({ id: "t2", wishlistId: "w2", label: "Livres", sortOrder: 0 });
   doc.people.push({ id: "p2", wishlistId: "w2", label: "Camille" });
   return doc;
@@ -144,5 +144,27 @@ test("saving an idea with a link: 60 image fetches per hour", async () => {
     for (let i = 0; i < 60; i += 1) await saveItem(alex, withLink);
     await assert.rejects(saveItem(alex, withLink), isRateLimitError);
     assert.equal((await saveItem(alex, { ...withLink, imageUrl: "https://images.example.test/a.png" })).ok, true);
+  });
+});
+
+test("a reserved idea comes back as the member sees it: « archived » outside surprise mode, among the ideas in it (020)", async () => {
+  const doc = apiDoc();
+  const alex = ctx(doc.users[0]!);
+  await withStore(doc, async () => {
+    // Outside surprise mode: the value from before 020, the reserved idea sits in the archives.
+    const edited = await saveItem(alex, { ...fields, itemId: "taken", name: "Idée taken modifiée" });
+    assert.deepEqual(edited.ok && [edited.item.name, edited.item.archived], ["Idée taken modifiée", true]);
+  });
+  const surprise = apiDoc();
+  surprise.memberships[0]!.surpriseMode = true;
+  await withStore(surprise, async () => {
+    const edited = await saveItem(alex, { ...fields, itemId: "taken", name: "Idée taken modifiée" });
+    assert.equal(edited.ok && edited.item.archived, false);
+    // Archiving it moves it to the archives, restoring brings it back; the reservation stays.
+    const archived = await setItemArchived(alex, { wishlistId: "w", itemId: "taken", archived: true });
+    assert.equal(archived.ok && archived.item.archived, true);
+    const restored = await setItemArchived(alex, { wishlistId: "w", itemId: "taken", archived: false });
+    assert.equal(restored.ok && restored.item.archived, false);
+    assert.equal((await readDocument()).reservations.some((reservation) => reservation.itemId === "taken"), true);
   });
 });

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { splitLabels } from "@/src/domain/split-labels";
 import { manageLabelAction } from "@/src/server/actions";
 import { FormRefusal } from "@/components/site/form-refusal";
+import { useAddLabel } from "@/components/site/use-add-label";
 
 type Chip = { id: string; label: string };
 type LabelOp = Parameters<typeof manageLabelAction>[0];
@@ -53,6 +54,8 @@ export function LabelChips({
   const [editValue, setEditValue] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  // Adding goes through the hook shared with the idea form (023); the chip shows at once.
+  const adding = useAddLabel(wishlistId, kind, { beforeSend: applyOptimistic });
 
   function run(op: LabelOp, onOk?: () => void) {
     setError(null);
@@ -68,9 +71,8 @@ export function LabelChips({
   }
 
   function addChip() {
-    const label = draft.trim();
-    if (!label || pending) return;
-    run({ kind, op: "add", wishlistId, label }, () => setDraft(""));
+    if (pending) return;
+    adding.add(draft, () => setDraft(""));
   }
 
   function saveEdit() {
@@ -161,7 +163,7 @@ export function LabelChips({
           type="button"
           variant="outline"
           size="sm"
-          disabled={pending || !draft.trim()}
+          disabled={pending || adding.pending || !draft.trim()}
           onClick={addChip}
           aria-label={addAria}
         >
@@ -169,6 +171,7 @@ export function LabelChips({
         </Button>
       </div>
       <FormRefusal message={error} />
+      <FormRefusal code={adding.error} />
     </div>
   );
 }

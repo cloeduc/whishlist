@@ -80,7 +80,8 @@ test("reservation, blank, type, empty fields", () => {
   const anon = reserveItem(data, { wishlistId: "w", itemId: "book" });
   assert.equal(anon.ok, true);
   if (anon.ok) assert.equal(anon.reservation.userId, null);
-  assert.equal(first.doc.items.find((item) => item.id === "gang")?.archived, true);
+  // The reservation alone says the idea is taken: it is not archived (020).
+  assert.equal(first.doc.items.find((item) => item.id === "gang")?.archived, false);
   assert.equal(availableItems(first.doc, "w", "").length, 1);
   const second = reserveItem(first.doc, { wishlistId: "w", itemId: "gang", fromName: "Sam" });
   assert.equal(second.ok, false);

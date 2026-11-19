@@ -11,8 +11,8 @@ function isShare(path: string): boolean {
 }
 
 /**
- * Address received by the app (feature 011) → screen: the site's `/reinitialiser/<jeton>` becomes
- * `/links/reset-password/<jeton>`. An unknown address opens the home screen. Never throws (an error here
+ * Address received by the app (feature 011) → screen: the site's `/reset-password/<token>` (or its former `/reinitialiser/<token>`) becomes
+ * `/links/reset-password/<token>`. An unknown address opens the home screen. Never throws (an error here
  * crashes the app) and does not write the address, which carries a token, to the console.
  *
  * A share received from another app (expo-sharing: `…://expo-sharing`) opens « Ajouter à une liste ». It is kept

@@ -11,8 +11,11 @@ import { Card, CollapsibleCard } from "@/ui/Card";
 import { Checkbox } from "@/ui/Checkbox";
 import { Input } from "@/ui/Input";
 import { PillTabs } from "@/ui/PillTabs";
+import { Select } from "@/ui/Select";
 import { Text } from "@/ui/Text";
 import { Textarea } from "@/ui/Textarea";
+
+jest.mock("react-native-safe-area-context", () => require("react-native-safe-area-context/jest/mock").default);
 
 function style(testID: string) {
   return StyleSheet.flatten(screen.getByTestId(testID).props.style);
@@ -128,6 +131,48 @@ test("PillTabs: the active tab is blue with white text", async () => {
   expect(StyleSheet.flatten(screen.getByText("Idées (8)").props.style)).toMatchObject({ color: tokens.colors.white });
   expect(style("tab-archives-box")).toMatchObject({ backgroundColor: tokens.colors.white });
   expect(screen.getAllByRole("tab")[0]).toBeSelected();
+});
+
+describe("Select with an action (023)", () => {
+  const options = [
+    { value: "a", label: "Livres" },
+    { value: "b", label: "Jeux" },
+  ];
+
+  test("the action is the last row of the sheet; it closes the sheet without changing the value", async () => {
+    const onChange = jest.fn();
+    const onPress = jest.fn();
+    await render(
+      <Select testID="field" label="Catégorie" value="a" options={options} onChange={onChange} actionTestID="new" action={{ label: "+ Nouvelle", onPress }} />,
+    );
+    await fireEvent.press(screen.getByTestId("field"));
+    const rows = screen.getAllByRole(/radio|button/).map((node) => node.props.accessibilityLabel ?? node.props.testID);
+    expect(rows.at(-1)).toBe("new");
+    await fireEvent.press(screen.getByTestId("new"));
+    expect(onPress).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("new")).toBeNull();
+  });
+
+  test("a disabled action does nothing and shows its hint", async () => {
+    const onPress = jest.fn();
+    await render(
+      <Select
+        testID="field"
+        label="Catégorie"
+        value="a"
+        options={options}
+        onChange={() => {}}
+        actionTestID="new"
+        action={{ label: "+ Nouvelle", onPress, disabled: true, hint: "Demande une connexion." }}
+      />,
+    );
+    await fireEvent.press(screen.getByTestId("field"));
+    expect(screen.getByTestId("new")).toBeDisabled();
+    expect(screen.getByText("Demande une connexion.")).toBeOnTheScreen();
+    await fireEvent.press(screen.getByTestId("new"));
+    expect(onPress).not.toHaveBeenCalled();
+  });
 });
 
 describe("CollapsibleCard", () => {

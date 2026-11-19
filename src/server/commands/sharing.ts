@@ -51,7 +51,7 @@ async function memberWrite<T extends object>(
 }
 
 function inviteUrl(ctx: CommandContext, inviteToken: string): string {
-  return `${ctx.origin}${withLocale(ctx.locale, `/inviter/${inviteToken}`)}`;
+  return `${ctx.origin}${withLocale(ctx.locale, `/invite/${inviteToken}`)}`;
 }
 
 export async function regenerateInvite(

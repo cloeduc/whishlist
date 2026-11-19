@@ -51,6 +51,7 @@ test("the bottom section, in the order of FR-001, ends with the destructive dele
     "Mentions légales",
     "Données personnelles",
     "Télécharger mes données",
+    "Nouveautés",
     "Licences",
     "Nous écrire",
     "Se déconnecter",
@@ -67,11 +68,13 @@ test("the links open the legal screens, the deletion screen and the e-mail app",
   await fireEvent.press(await screen.findByTestId("account.data-toggle"));
   await fireEvent.press(screen.getByRole("link", { name: "Mentions légales" }));
   await fireEvent.press(screen.getByRole("link", { name: "Données personnelles" }));
+  await fireEvent.press(screen.getByRole("link", { name: "Nouveautés" }));
   await fireEvent.press(screen.getByRole("link", { name: "Licences" }));
   await fireEvent.press(screen.getByRole("button", { name: "Supprimer mon compte" }));
   expect(jest.mocked(router.push).mock.calls.map(([path]) => path)).toEqual([
     "/legal/mentions",
     "/legal/privacy",
+    "/whats-new",
     "/legal/licenses",
     "/delete-account",
   ]);

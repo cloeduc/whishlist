@@ -5,7 +5,7 @@ import { apiJson, apiPreflight, withApi } from "@/src/server/api/http";
 
 export const runtime = "nodejs";
 
-const API_VERSION = "1.8.0";
+const API_VERSION = "1.11.0";
 
 export const GET = withApi(async ({ cors }) =>
   apiJson(

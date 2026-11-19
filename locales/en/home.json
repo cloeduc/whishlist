@@ -41,6 +41,8 @@
     "unfollowTitle": "Stop following “{{title}}”?",
     "unfollowBody": "It will be removed from your followed lists. Any gifts you reserved on this list will stay reserved.",
     "unfollowConfirm": "Unfollow",
-    "unfollowKeep": "Keep following"
+    "unfollowKeep": "Keep following",
+    "rename": "Rename",
+    "renameAria": "Rename “{{title}}”"
   }
 }

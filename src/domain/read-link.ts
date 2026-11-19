@@ -15,7 +15,7 @@ const HOST_FIRST_PATTERN = /^(?:localhost|[a-z0-9-]+(?:\.[a-z0-9-]+)+)(?::\d+)?\
  * Extracts a `readToken` from what a person pastes: full link (`https://.../l/<token>`,
  * `https://.../en/l/<token>`, uppercase scheme), link without scheme (`ohyoushouldnt.app/l/<token>`),
  * app link (`ohyoushouldnt://l/<token>`), path (`/l/<token>`), list sub-page
- * (`/l/<token>/reserver?…`) or raw token.
+ * (`/l/<token>/reserve?…`) or raw token.
  * Returns `null` if the input does not match a list read link.
  */
 export function extractReadToken(raw: string): string | null {

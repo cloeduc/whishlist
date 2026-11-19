@@ -81,8 +81,8 @@ test("mail.log in production: confirmation and address change links are redacted
   const noMail = { RESEND_API_KEY: undefined, MAIL_FROM: undefined, MAIL_DRY_RUN: undefined, MAIL_SMTP_URL: undefined };
   await withStore(apiDoc(), () =>
     withEnv({ ...noMail, NODE_ENV: "production" }, async () => {
-      const verify = "https://ohyoushouldnt.example.test/confirmer-email/jeton-verify";
-      const change = "https://ohyoushouldnt.example.test/confirmer-email/jeton-change";
+      const verify = "https://ohyoushouldnt.example.test/confirm-email/jeton-verify";
+      const change = "https://ohyoushouldnt.example.test/confirm-email/jeton-change";
       await sendEmailVerificationMail({ to: "sam@example.test", confirmUrl: verify, locale: "fr" });
       await sendEmailChangeMail({ to: "sam.b@example.test", confirmUrl: change, locale: "fr" });
       const log = await mailLog();

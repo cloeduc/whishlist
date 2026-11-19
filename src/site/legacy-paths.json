@@ -1,0 +1,30 @@
+{
+  "paths": [
+    { "from": "/listes", "to": "/lists" },
+    { "from": "/compte", "to": "/account" },
+    { "from": "/inscription", "to": "/register" },
+    { "from": "/connexion", "to": "/login" },
+    { "from": "/mot-de-passe-oublie", "to": "/forgot-password" },
+    { "from": "/changer-mot-de-passe", "to": "/change-password" },
+    { "from": "/reinitialiser", "to": "/reset-password" },
+    { "from": "/confirmer-email", "to": "/confirm-email" },
+    { "from": "/inviter", "to": "/invite" },
+    { "from": "/l/:readToken/reserver", "to": "/l/:readToken/reserve" },
+    { "from": "/mentions-legales", "to": "/legal-notice" },
+    { "from": "/donnees-personnelles", "to": "/privacy" },
+    { "from": "/projet", "to": "/about" }
+  ],
+  "params": [
+    {
+      "from": "onglet",
+      "to": "tab",
+      "values": { "idees": "ideas", "archives": "archive", "reservations": "reservations", "partage": "sharing", "reglages": "settings" }
+    },
+    { "from": "suite", "to": "next", "path": true },
+    { "from": "next", "to": "next", "path": true },
+    { "from": "lien", "to": "link" },
+    { "from": "envoi", "to": "mail", "values": { "echec": "failed" } },
+    { "from": "sansmail", "to": "nomail" },
+    { "from": "compte", "to": "own" }
+  ]
+}

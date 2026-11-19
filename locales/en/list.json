@@ -17,6 +17,7 @@
     "empty": "No archived ideas yet.",
     "emptyHint": "Ideas you archive will appear here.",
     "restore": "Restore to list",
+    "reservedHint": "This idea is reserved: cancel the reservation to put it back in the list.",
     "deleteForever": "Delete permanently"
   },
   "reservations": {
@@ -27,7 +28,38 @@
     "cancelTitle": "Cancel this reservation?",
     "cancelBody": "This gift will be available to reserve again.",
     "cancelConfirm": "Cancel reservation",
-    "cancelKeep": "Keep reservation"
+    "cancelKeep": "Keep reservation",
+    "groupGift_one": "Group gift · {{count}} participant",
+    "groupGift_other": "Group gift · {{count}} participants",
+    "groupGiftComplete": "Complete",
+    "anonymous": "Anonymous",
+    "cancelParticipation": "Cancel this participation",
+    "cancelParticipationTitle": "Cancel this participation?",
+    "cancelParticipationBody": "This person will no longer chip in for the group gift. If they were the last one, the idea becomes available again.",
+    "cancelParticipationConfirm": "Cancel the participation",
+    "cancelParticipationKeep": "Keep the participation",
+    "cancelGroupGift": "Cancel the group gift",
+    "cancelGroupGiftTitle": "Cancel the whole group gift?",
+    "cancelGroupGiftBody": "Every participation and message will be deleted, and the gift's link will lead nowhere. The idea becomes available again.",
+    "cancelGroupGiftConfirm": "Cancel the group gift",
+    "cancelGroupGiftKeep": "Keep the group gift"
+  },
+  "surprise": {
+    "title": "Keep the surprise",
+    "description": "Reserved ideas stay in your list, without you knowing which ones. Other members still see the reservations.",
+    "toggle": "Don’t show me reserved gifts",
+    "saved": "Surprise mode on: you no longer see reserved gifts.",
+    "cleared": "Surprise mode off: you see reserved gifts again.",
+    "hiddenHint": "You chose not to see reserved gifts.",
+    "reveal": "See reservations",
+    "revealTitle": "See reservations?",
+    "revealBody": "You are about to see which gifts have been reserved.",
+    "revealConfirm": "See reservations",
+    "revealKeep": "Keep the surprise",
+    "guestViewTitle": "Open the guest view?",
+    "guestViewBody": "The guest view leaves out gifts that are already reserved: comparing it with your list, you might guess which ones are.",
+    "guestViewConfirm": "Open the guest view",
+    "guestViewKeep": "Stay here"
   },
   "confirm": {
     "keep": "Keep",
@@ -113,7 +145,9 @@
     "owner": "Owner",
     "member": "Member",
     "remove": "Remove from list",
-    "leave": "Leave this list"
+    "leave": "Leave this list",
+    "action": "Share",
+    "addressNote": "The address of this page is only for the people who manage the list. To share it, send the list link."
   },
   "settings": {
     "title": "Settings",
@@ -168,7 +202,8 @@
     "aiCo2": "About {{grams}} g CO₂e — roughly equivalent to {{beef}} g of red meat",
     "aiDisclaimer": "Indicative orders of magnitude, not a certified carbon footprint.",
     "secondHandOk": "Second-hand is fine",
-    "secondHandOkHint": "Gift givers will see it on the shared list."
+    "secondHandOkHint": "Gift givers will see it on the shared list.",
+    "newTypeOption": "+ New category"
   },
   "transfer": {
     "open": "Move or copy…",
@@ -201,5 +236,13 @@
     "editTitle": "Edit gift idea",
     "emptyCategory": "No ideas in this category."
   },
-  "secondHandBadge": "Second-hand OK"
+  "secondHandBadge": "Second-hand OK",
+  "accessHelp": {
+    "title": "This address is for managing the list",
+    "body": "It only opens the list for the people who manage it. With this account, you’re not one of them.",
+    "howTo": "To see the list and reserve an idea, ask the person who sent you this address for the list link. They’ll find it in the “Sharing” tab of their list.",
+    "followedBody": "You already follow this list: you can open it to browse it.",
+    "viewFollowed": "View the list",
+    "backToLists": "My lists"
+  }
 }

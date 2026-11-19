@@ -1,5 +1,5 @@
 # Opens in the app (ohyoushouldnt:// scheme) the last KIND link received by TO in MailDev:
-# confirmer-email, reinitialiser or inviter (011). Locally, the web link would open the browser.
+# confirm-email, reset-password or invite (011, 018). Locally, the web link would open the browser.
 appId: app.ohyoushouldnt.mobile
 ---
 - retry:

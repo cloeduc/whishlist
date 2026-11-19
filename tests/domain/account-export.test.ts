@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { exportAccount } from "../../src/domain/account";
 import { exportFileName, isExportFileName } from "../../src/domain/export-file";
+import { renameSubscription } from "../../src/domain/subscription";
 import type { Locale } from "../../src/i18n/config";
 import { accountDoc } from "./helpers/account-fixtures";
+import { withLouGroupGift } from "./helpers/group-gift-fixtures";
 
 const NOW = new Date("2026-10-28T10:00:00.000Z");
 const SITE: { origin: string; locale: Locale } = { origin: "https://ohyoushouldnt.example.test", locale: "fr" };
@@ -67,6 +69,23 @@ test("each list the account is a member of, with its role and its contents by la
   assert.equal(data.lists[2]!.reservations[0]!.byMe, true);
 });
 
+test("surprise mode: the export keeps only the account's own reservations on that list, and says so (020)", () => {
+  const doc = accountDoc();
+  for (const membership of doc.memberships.filter((m) => m.userId === "lou" && ["shared", "alexs"].includes(m.wishlistId))) {
+    membership.surpriseMode = true;
+  }
+  const data = exportAccount(doc, "lou", SITE, NOW);
+  assert.ok(data);
+  const shared = data.lists.find((list) => list.title === "Noël en famille")!;
+  assert.equal(shared.surpriseMode, true);
+  assert.deepEqual(shared.reservations, [], "Camille's reservation, giver and note stay hidden");
+  assert.ok(!JSON.stringify(shared).includes("Pour Noël"));
+  // Lou's own reservation on a list where Lou is in surprise mode stays in the file.
+  const alexs = data.lists.find((list) => list.title === "Envies d'Alex")!;
+  assert.deepEqual(alexs.reservations.map((r) => r.byMe), [true]);
+  assert.equal(exported().lists.find((list) => list.title === "Noël en famille")!.surpriseMode, false);
+});
+
 test("the public address follows the requested language", () => {
   const data = exported({ ...SITE, locale: "en" });
   assert.equal(data.lists[0]!.publicUrl, "https://ohyoushouldnt.example.test/en/l/read-solo");
@@ -74,7 +93,14 @@ test("the public address follows the requested language", () => {
 
 test("myReservations: only the account's reservations on lists it is not a member of", () => {
   assert.deepEqual(exported().myReservations, [
-    { listTitle: "Liste de Camille", item: "Idée other", fromName: "Lou", note: "Surprise", createdAt: "2026-04-04T00:00:00.000Z" },
+    {
+      listTitle: "Liste de Camille",
+      item: "Idée other",
+      fromName: "Lou",
+      note: "Surprise",
+      createdAt: "2026-04-04T00:00:00.000Z",
+      groupGift: null,
+    },
   ]);
 });
 
@@ -85,6 +111,8 @@ test("subscriptions: only the lists this account follows, never who follows its 
       subtitle: null,
       publicUrl: "https://ohyoushouldnt.example.test/l/read-other",
       subscribedAt: "2026-04-04T00:00:00.000Z",
+      customTitle: null,
+      customOwnerName: null,
     },
   ]);
 });
@@ -144,4 +172,44 @@ test("a pending address change appears in the export (FR-020)", () => {
     createdAt: "2026-10-28T10:00:00.000Z",
   });
   assert.equal(exportAccount(doc, "lou", SITE, NOW)?.account.pendingEmail, "lou.b@example.test");
+});
+
+test("subscriptions: the names a subscriber chose are in their export only (024)", () => {
+  const named = renameSubscription(accountDoc(), {
+    wishlistId: "other",
+    userId: "lou",
+    customTitle: "Noël de Camille",
+    customOwnerName: "Ma sœur",
+  });
+  assert.ok(named.ok);
+  const lou = exportAccount(named.doc, "lou", SITE, NOW)!;
+  assert.equal(lou.subscriptions[0]!.customTitle, "Noël de Camille");
+  assert.equal(lou.subscriptions[0]!.customOwnerName, "Ma sœur");
+  const camille = exportAccount(named.doc, "camille", SITE, NOW)!;
+  assert.ok(!JSON.stringify(camille).includes("Ma sœur"));
+  assert.ok(!JSON.stringify(camille).includes("Noël de Camille"));
+});
+
+test("group gift (028): the participation with its amount, and the account's messages in the thread", () => {
+  const data = exportAccount(withLouGroupGift(accountDoc()), "lou", SITE, NOW);
+  assert.ok(data);
+  assert.deepEqual(data.myReservations.find((r) => r.listTitle === "Liste de Camille")?.groupGift, {
+    status: "open",
+    amountCents: 1500,
+  });
+  assert.deepEqual(data.groupGiftMessages, [
+    { item: "Idée other", body: "Je m'occupe du paquet", createdAt: "2026-04-06T00:00:00.000Z" },
+  ]);
+  assert.equal(exported().groupGiftMessages.length, 0);
+});
+
+test("group gift (028): a member's list export keeps participations as reservations, without amounts", () => {
+  const data = exportAccount(withLouGroupGift(accountDoc()), "camille", SITE, NOW);
+  assert.ok(data);
+  const reservations = data.lists.flatMap((list) => list.reservations);
+  assert.ok(reservations.length > 0);
+  for (const reservation of reservations) {
+    assert.deepEqual(Object.keys(reservation).sort(), ["byMe", "createdAt", "fromName", "item", "note"]);
+  }
+  assert.ok(!JSON.stringify(data.lists).includes("1500"));
 });

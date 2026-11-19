@@ -38,6 +38,7 @@ const list: ViewList = {
   readUrl: "https://ohyoushouldnt.example.test/l/rt",
   inviteUrl: "https://ohyoushouldnt.example.test/i/it",
   hasReadPassword: false,
+  surpriseMode: false,
   categories: [
     { id: "books", label: "Livres", sortOrder: 0 },
     { id: "games", label: "Jeux", sortOrder: 1 },

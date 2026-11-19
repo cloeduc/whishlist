@@ -93,6 +93,7 @@ export function createWishlist(
     userId: input.ownerId,
     role: "owner",
     joinedAt: now,
+    surpriseMode: false,
   });
   if (input.importTemplate) {
     if (!input.seed) return { ok: false, error: "seedMissing" };

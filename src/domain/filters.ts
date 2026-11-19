@@ -3,11 +3,11 @@ import { listItems } from "./read";
 import type { Database, Item } from "./types";
 
 export const BUDGETS = [
-  { id: "under-20", label: "Moins de 20 €" },
-  { id: "20-50", label: "20 à 50 €" },
-  { id: "50-100", label: "50 à 100 €" },
-  { id: "over-100", label: "Plus de 100 €" },
-  { id: "none", label: "Sans prix" },
+  { id: "under-20" },
+  { id: "20-50" },
+  { id: "50-100" },
+  { id: "over-100" },
+  { id: "none" },
 ] as const;
 
 export type BudgetId = (typeof BUDGETS)[number]["id"];

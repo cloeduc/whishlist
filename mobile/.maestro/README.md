@@ -15,9 +15,10 @@ npx maildev@3.0.0 --smtp 1025 --web 1080
 # 3. Serveur local sur la base de la suite (tmp/e2e/wishlist.db), qui envoie ses e-mails à MailDev
 #    (MAIL_SMTP_URL, ignorée en production). La commande e2e remplace la base à chaque exécution, en une
 #    transaction ; le serveur la relit à chaque requête, sans redémarrer. Sans GEMINI_API_KEY ni OPENAI_API_KEY.
+#    Le serveur de dev part d'un .next/ neuf (voir « Pages rechargées en boucle » plus bas).
 export DEMO_PASSWORD='demo-password-1'
 npm run demo:data -- tmp/e2e/wishlist.json
-MAIL_SMTP_URL=smtp://localhost:1025 WISHLIST_DATA_PATH=tmp/e2e/wishlist.json SESSION_SECRET=dev-secret-dev-secret-dev-secret-00 npm run dev -- --port 3010
+rm -rf .next && MAIL_SMTP_URL=smtp://localhost:1025 WISHLIST_DATA_PATH=tmp/e2e/wishlist.json SESSION_SECRET=dev-secret-dev-secret-dev-secret-00 npm run dev -- --port 3010
 
 # 4. App pointée sur ce serveur, au choix :
 #    - build Debug avec son Metro (pratique pour retoucher les écrans sans rebuild) ;
@@ -35,6 +36,8 @@ En build Debug, l'app contient le lanceur du dev client. Après l'effacement de 
 Sur iOS, `submit-register.yaml` ferme la feuille « Utiliser un mot de passe robuste ? » en appuyant sur la position de sa croix : cette feuille du système est invisible pour Maestro. Les sous-parcours refusent aussi « Enregistrer le mot de passe ? » (« Plus tard »).
 
 Sur un Safari neuf (simulateur effacé), iOS 26 ouvre au premier chargement une bulle « Afficher les signets, le menu Partager et les onglets ouverts » qui cache la page à Maestro : `subflows/dismiss-safari-tip.yaml` la ferme, et les sous-parcours qui passent par Safari (`confirm-email.yaml`, `share-from-safari.yaml`) l'appellent avant de taper dans la page.
+
+**Pages rechargées en boucle.** Le cache `.next/` de `next dev` peut se mettre à republier des compilations sans fin : le journal du serveur aligne alors des « ✓ Compiled in 0ms », et chaque page du site ouverte dans Safari se recharge plusieurs fois par seconde. Les parcours qui confirment une adresse échouent (l'appui sur « Confirmer » tombe pendant un rechargement), et Safari restaure ces onglets d'un parcours à l'autre. Remède : arrêter le serveur, supprimer `.next/`, le relancer. Cause probable : un `npm run build` lancé dans le même dossier que `next dev` (les deux écrivent dans `.next/`). Pendant la suite, ne lancez donc pas de build et ne travaillez pas dans le dossier que sert le serveur : servez la suite depuis un worktree à part si vous continuez à coder.
 
 Laissez le Mac branché et capot ouvert pendant la suite : une mise en veille coupe Maestro (« Device became unreachable »).
 
@@ -116,7 +119,7 @@ Sous-parcours disponibles dans `subflows/` :
 | `register` | crée un compte `e2e-…`, dont l'adresse est dans `output.email`, et confirme cette adresse |
 | `register-unconfirmed` | comme `register`, sans confirmer l'adresse (rappel affiché, création de liste bloquée) |
 | `confirm-email` | ouvre le dernier lien de confirmation reçu par `TO` dans MailDev, appuie sur « Confirmer », attend `DONE`, revient à l'app |
-| `open-mail-link` | ouvre **dans l'app** le dernier lien `KIND` (`confirmer-email`, `reinitialiser`, `inviter`) reçu par `TO` dans MailDev, par le schéma `ohyoushouldnt://` (011) |
+| `open-mail-link` | ouvre **dans l'app** le dernier lien `KIND` (`confirm-email`, `reset-password`, `invite`) reçu par `TO` dans MailDev, par le schéma `ohyoushouldnt://` (011) |
 | `submit-register` | remplit et envoie l'inscription (`NAME`, `EMAIL`), sans attendre d'écran |
 | `logout` | déconnexion |
 | `create-list` | crée une liste (`TITLE`) |
@@ -130,7 +133,7 @@ Scripts de `scripts/` utiles aux parcours :
 
 | Script | Rôle |
 |--------|------|
-| `maildev-link.js` | dernier lien `KIND` (par défaut `confirmer-email`) reçu par `TO` dans MailDev → `output.link` |
+| `maildev-link.js` | dernier lien `KIND` (par défaut `confirm-email`) reçu par `TO` dans MailDev → `output.link` |
 | `app-link.js` | adresse du site `URL` → même chemin au schéma de l'app, `output.appLink` (011) : en local, le domaine n'est pas associé à l'app, et un lien `http` ouvrirait le navigateur |
 
 `npm --prefix mobile test` vérifie deux choses sans simulateur :

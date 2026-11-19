@@ -1,3 +1,5 @@
+import { signIn } from "@/auth/session";
+
 /** Fake HTTP server: one response per « METHOD /path », and the list of calls received. */
 export function fakeFetch(routes: Record<string, (request: Request) => Response | Promise<Response>>) {
   const calls: string[] = [];
@@ -25,3 +27,8 @@ export const me = {
   emailVerified: true,
   pendingEmail: null as string | null,
 };
+
+/** Opens a session for `user` (Alex by default), with a token that does not expire. */
+export async function signInAs(user = me) {
+  await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user });
+}

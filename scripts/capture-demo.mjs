@@ -128,10 +128,10 @@ async function captureLocale(locale) {
   await gotoStable(`/?lang=${locale.code}`);
 
   await capture("liste-partagee", `/l/demo-list-lecture?lang=${locale.code}`);
-  await capture("reserver-cadeau", `/l/demo-list-lecture/reserver?lang=${locale.code}`);
-  await capture("inscription", `/inscription?lang=${locale.code}`);
+  await capture("reserver-cadeau", `/l/demo-list-lecture/reserve?lang=${locale.code}`);
+  await capture("inscription", `/register?lang=${locale.code}`);
 
-  await gotoStable(`/connexion?lang=${locale.code}`);
+  await gotoStable(`/login?lang=${locale.code}`);
   await page.getByLabel(locale.emailLabel).fill("alex@example.test");
   await page.getByLabel(locale.passwordLabel).fill(password);
   await page.getByRole("button", { name: locale.loginButton }).click();
@@ -155,7 +155,7 @@ async function captureLocale(locale) {
         };
 
   await capture("mes-listes", `/?lang=${locale.code}`);
-  await capture("nouvelle-idee", `/listes/demo-list?lang=${locale.code}`, {
+  await capture("nouvelle-idee", `/lists/demo-list?lang=${locale.code}`, {
     after: async () => {
       await page.evaluate(() => {
         const accordion = document.querySelector('[data-slot="accordion"]');
@@ -168,7 +168,7 @@ async function captureLocale(locale) {
       });
     },
   });
-  await capture("enrich-ia", `/listes/demo-list?lang=${locale.code}`, {
+  await capture("enrich-ia", `/lists/demo-list?lang=${locale.code}`, {
     selector: 'main [data-slot="card"]',
     after: async () => {
       await page.evaluate(() => {
@@ -203,7 +203,7 @@ async function captureLocale(locale) {
       }, aiCopy);
     },
   });
-  await capture("categories", `/listes/demo-list?lang=${locale.code}`, {
+  await capture("categories", `/lists/demo-list?lang=${locale.code}`, {
     after: async () => {
       await page.evaluate(() => {
         const formCard = document.querySelector('main [data-slot="card"]');
@@ -218,13 +218,13 @@ async function captureLocale(locale) {
       }
     },
   });
-  await capture("partage", `/listes/demo-list?onglet=partage&lang=${locale.code}`, {
+  await capture("partage", `/lists/demo-list?tab=sharing&lang=${locale.code}`, {
     after: async () => hideExtraCards(2),
   });
-  await capture("reglages", `/listes/demo-list?onglet=reglages&lang=${locale.code}`, {
+  await capture("reglages", `/lists/demo-list?tab=settings&lang=${locale.code}`, {
     after: async () => hideExtraCards(3),
   });
-  await capture("reservations", `/listes/demo-list?onglet=reservations&lang=${locale.code}`);
+  await capture("reservations", `/lists/demo-list?tab=reservations&lang=${locale.code}`);
 
   await context.close();
 }
@@ -257,22 +257,22 @@ async function captureMobile() {
     console.log(`${name}: ${page.url()}`);
   }
   await shot("01-accueil", "/?lang=fr");
-  await shot("02-connexion", "/connexion");
-  await shot("03-inscription", "/inscription");
+  await shot("02-connexion", "/login");
+  await shot("03-inscription", "/register");
   await shot("12-liste-publique", "/l/demo-list-lecture");
-  await page.goto(`${baseURL}/connexion`, { waitUntil: "load" });
+  await page.goto(`${baseURL}/login`, { waitUntil: "load" });
   await page.getByLabel(locales[0].emailLabel).fill("alex@example.test");
   await page.getByLabel(locales[0].passwordLabel).fill(password);
   await page.getByRole("button", { name: locales[0].loginButton }).click();
   await page.waitForURL("**/");
   await shot("04-mes-listes", "/");
-  await shot("05-nouvelle-liste", "/listes/new");
-  await shot("06-liste-idees", "/listes/demo-list");
-  await shot("07-liste-archives", "/listes/demo-list?onglet=archives");
-  await shot("08-liste-reservations", "/listes/demo-list?onglet=reservations");
-  await shot("09-liste-partage", "/listes/demo-list?onglet=partage");
-  await shot("10-liste-reglages", "/listes/demo-list?onglet=reglages");
-  await shot("11-compte", "/compte");
+  await shot("05-nouvelle-liste", "/lists/new");
+  await shot("06-liste-idees", "/lists/demo-list");
+  await shot("07-liste-archives", "/lists/demo-list?tab=archive");
+  await shot("08-liste-reservations", "/lists/demo-list?tab=reservations");
+  await shot("09-liste-partage", "/lists/demo-list?tab=sharing");
+  await shot("10-liste-reglages", "/lists/demo-list?tab=settings");
+  await shot("11-compte", "/account");
   await context.close();
 }
 

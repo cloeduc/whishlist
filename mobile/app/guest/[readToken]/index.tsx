@@ -8,22 +8,17 @@ import type { Schemas } from "@/api/client";
 import { useSession } from "@/auth/session";
 import { useIsFollowed } from "@/data/store";
 import { unlockGuestList } from "@/features/guest/api";
+import { UnlockCard } from "@/features/guest/UnlockCard";
 import { GuestFollow } from "@/features/guest/GuestFollow";
 import { GuestItemCard } from "@/features/guest/GuestItemCard";
 import { GuestListHeader } from "@/features/guest/GuestListHeader";
 import { memberListIdFor, useGuestList } from "@/features/guest/useGuestList";
-import { useServerAction } from "@/features/errors";
-import { useOnline } from "@/network";
 import { ListThemeProvider } from "@/theme/ListTheme";
 import { tokens } from "@/theme/tokens";
 import { Alert } from "@/ui/Alert";
 import { BackLink } from "@/ui/BackLink";
 import { Button } from "@/ui/Button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import { Empty } from "@/ui/Empty";
-import { Field } from "@/ui/Field";
-import { PasswordInput } from "@/ui/PasswordInput";
-import { NetworkNote } from "@/ui/NetworkNote";
 import { OfflineBanner } from "@/ui/OfflineBanner";
 import { PillTabs } from "@/ui/PillTabs";
 import { Screen } from "@/ui/Screen";
@@ -108,49 +103,18 @@ export default function GuestList() {
  * whose password changed can also be left from here, without unlocking it.
  */
 function Unlock({ readToken, onUnlocked }: { readToken: string; onUnlocked: () => void }) {
-  const { t } = useTranslation("public");
-  const online = useOnline();
   const followed = useIsFollowed(readToken);
-  const [password, setPassword] = useState("");
-  const unlock = useServerAction(
-    useCallback(async () => {
-      await unlockGuestList(readToken, password);
-      onUnlocked();
-    }, [readToken, password, onUnlocked]),
-  );
+  const unlock = useCallback((password: string) => unlockGuestList(readToken, password), [readToken]);
   return (
     <Screen testID="guest.screen">
       <BackLink />
-      <Card>
-        <CardHeader>
-          <CardTitle>{t("unlock.heading")}</CardTitle>
-          <CardDescription>{t("unlock.description")}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Field label={t("unlock.password")} description={t("unlock.passwordHint")}>
-            <PasswordInput
-              testID="guest.password"
-              accessibilityLabel={t("unlock.password")}
-              value={password}
-              onChangeText={setPassword}
-              autoComplete="off"
-            />
-          </Field>
-          {unlock.error ? (
-            <Alert testID="guest.unlock-error" variant="destructive">
-              {unlock.error}
-            </Alert>
-          ) : null}
-          <Button
-            testID="guest.unlock"
-            title={t("unlock.submit")}
-            fullWidth
-            disabled={!online || unlock.busy || !password}
-            onPress={() => void unlock.run()}
-          />
-          <NetworkNote />
-        </CardContent>
-      </Card>
+      <UnlockCard
+        unlock={unlock}
+        onUnlocked={onUnlocked}
+        passwordTestID="guest.password"
+        errorTestID="guest.unlock-error"
+        submitTestID="guest.unlock"
+      />
       {followed ? <GuestFollow readToken={readToken} subscribed onChanged={() => router.replace("/")} /> : null}
     </Screen>
   );
@@ -198,7 +162,7 @@ function Ready({
       <Text size="sm" color={tokens.colors.mutedForeground}>
         {t("intro")}
       </Text>
-      <GuestFollow readToken={readToken} subscribed={list.subscribed} isMember={list.isMember} onChanged={reload} />
+      <GuestFollow readToken={readToken} subscribed={list.subscribed} isMember={list.isMember} canRename onChanged={reload} />
       {categories.length > 1 ? (
         <PillTabs
           scroll

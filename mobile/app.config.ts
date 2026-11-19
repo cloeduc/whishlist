@@ -5,6 +5,7 @@ import commonFr from "../locales/fr/common.json";
 import mobileEn from "../locales/en/mobile.json";
 import mobileFr from "../locales/fr/mobile.json";
 import appLinkRoutes from "../src/site/app-link-routes.json";
+import legacyPaths from "../src/site/legacy-paths.json";
 
 // The server address is set at build time (FR-042): local demo, production…
 const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
@@ -25,9 +26,26 @@ const PACKAGE = IS_DEV ? "app.ohyoushouldnt.mobile.dev" : "app.ohyoushouldnt.mob
  * The domain publishes the association files (`/.well-known/…`); the development variant is not in them.
  */
 const APP_LINK_DOMAIN = IS_DEV ? null : (/^https:\/\/([^/:]+)/.exec(apiUrl)?.[1] ?? null);
+// Copy of `legacySitePatterns()` (src/site/legacy-paths.ts): Expo's config loader reads JSON but not that
+// TypeScript module. `__tests__/links/app-config.test.ts` checks that both give the same prefixes.
+const segments = (path: string) => path.split("/").slice(1);
+/** Former French forms of the table's paths (feature 018): emails sent before the change still carry them. */
+const LEGACY_SITE_PATTERNS = appLinkRoutes.flatMap(({ site }) =>
+  legacyPaths.paths.flatMap((rule) => {
+    const actual = segments(site);
+    const to = segments(rule.to);
+    if (actual.length < to.length || !to.every((part, index) => part === actual[index])) return [];
+    return [`/${[...segments(rule.from), ...actual.slice(to.length)].join("/")}`];
+  }),
+);
 /** Prefixes of the paths opened by the app, with and without `/en` (same computation as `androidPathPrefixes`, checked by a test). */
 const APP_LINK_PREFIXES = [
-  ...new Set(appLinkRoutes.flatMap((route) => [route.site.split(":")[0], `/en${route.site.split(":")[0]}`])),
+  ...new Set(
+    [...appLinkRoutes.map((route) => route.site), ...LEGACY_SITE_PATTERNS].flatMap((pattern) => [
+      pattern.split(":")[0],
+      `/en${pattern.split(":")[0]}`,
+    ]),
+  ),
 ];
 
 function appName(brand: string) {
@@ -46,7 +64,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   name: appName(commonFr.brand),
   slug: "ohyoushouldnt",
   scheme: "ohyoushouldnt",
-  version: "1.1.0",
+  version: "1.2.0",
   orientation: "portrait",
   userInterfaceStyle: "light",
   icon: "./assets/images/icon.png",
@@ -59,7 +77,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundleIdentifier: PACKAGE,
     supportsTablet: false,
     // Encryption: HTTPS only (exempt), so that TestFlight asks nothing on each build.
-    infoPlist: { CFBundleAllowMixedLocalizations: true, ITSAppUsesNonExemptEncryption: false },
+    infoPlist: {
+      CFBundleAllowMixedLocalizations: true,
+      ITSAppUsesNonExemptEncryption: false,
+      // expo-in-app-updates (021): the app is published in France, look it up on the French App Store.
+      // AppStoreID (numeric App Store id) can be added here to skip the lookup by bundle id.
+      AppStoreCountry: "fr",
+    },
     ...(APP_LINK_DOMAIN ? { associatedDomains: [`applinks:${APP_LINK_DOMAIN}`] } : {}),
   },
   android: {

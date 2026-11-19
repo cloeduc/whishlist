@@ -4,13 +4,14 @@ import { router } from "expo-router";
 
 import GuestReserve from "../../app/guest/[readToken]/reserve";
 import { signIn, signOut } from "@/auth/session";
-import { claimsFor, clearGuestAccess } from "@/features/guest/storage";
+import { claimsFor, claimsForScope, clearGuestAccess } from "@/features/guest/storage";
 import { i18n } from "@/i18n";
 import { watchNetwork } from "@/network";
 import { listChanges } from "@/offline/outbox";
 
 import { fakeFetch, json, me } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
+import { setOnline } from "../helpers/network";
 import { publicList } from "../helpers/public-list";
 
 const params: { readToken: string; itemId?: string; typeId?: string } = { readToken: "rt", itemId: "i1" };
@@ -58,7 +59,7 @@ test("reservation without an account: name and message sent, claim kept, back to
   expect(router.replace).not.toHaveBeenCalled();
 });
 
-test("form opened directly (/l/<t>/reserver link): the list view replaces it", async () => {
+test("form opened directly (/l/<t>/reserve link): the list view replaces it", async () => {
   jest.mocked(router.canGoBack).mockReturnValue(false);
   fakeFetch({
     "GET /public/lists/rt": () => json(200, publicList()),
@@ -125,4 +126,28 @@ test("offline: « Confirmer la réservation » is disabled, with the reason", as
   listener({ isConnected: false, isInternetReachable: false, type: NetInfoStateType.none, details: null, isWifiEnabled: false });
   expect(await screen.findByText(i18n.t("mobile:offline.needsNetwork"))).toBeOnTheScreen();
   expect(screen.getByTestId("guest-reserve.submit")).toBeDisabled();
+});
+
+test("start a group gift (028): mode and amount sent, claim filed under the gift, then its screen", async () => {
+  // The previous test leaves the phone offline.
+  await setOnline(true);
+  let body: Record<string, unknown> = {};
+  fakeFetch({
+    "GET /public/lists/rt": () => json(200, publicList()),
+    "POST /public/lists/rt/reservations": async (request) => {
+      body = await request.json();
+      return json(201, { reservationId: "p1", claim: "claim-gift", claimKey: "ck-rt", groupGiftToken: "gift-tok" });
+    },
+  });
+  await render(<GuestReserve />);
+  await fireEvent.press(await screen.findByTestId("guest-reserve.mode-group"));
+  await fireEvent.changeText(screen.getByTestId("guest-reserve.amount"), "abc");
+  expect(screen.getByText("Indiquez un montant valide, par exemple 20 ou 15,50.")).toBeOnTheScreen();
+  expect(screen.getByTestId("guest-reserve.submit")).toBeDisabled();
+  await fireEvent.changeText(screen.getByTestId("guest-reserve.amount"), "12,50");
+  await fillAndSubmit();
+  await waitFor(() => expect(router.replace).toHaveBeenCalledWith("/gift/gift-tok"));
+  expect(body).toEqual({ itemId: "i1", fromName: "Sam", note: "Joyeux anniversaire", mode: "group", amountCents: 1250 });
+  expect(await claimsForScope({ giftToken: "gift-tok" })).toEqual(["claim-gift"]);
+  expect(await claimsFor("rt")).toEqual(["claim-gift"]);
 });

@@ -13,12 +13,17 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import { PriorityStarPicker } from "@/components/site/priority-star-picker";
 import { MAX_DESCRIPTION } from "@/src/domain/description";
 import type { LlmImpact } from "@/src/domain/llm-impact";
+import { FormRefusal } from "@/components/site/form-refusal";
+import { useAddLabel } from "@/components/site/use-add-label";
 import {
   enrichFromUrlAction,
   saveItemAction,
   type ItemFormDraft,
   type SaveItemState,
 } from "@/src/server/actions";
+
+/** Value of the « + Nouvelle catégorie » option (023); never a category id. */
+const NEW_TYPE = "__new__";
 
 function initialDraft(input: {
   item?: {
@@ -61,7 +66,7 @@ export function ItemForm({
   people,
   item,
   price,
-  onglet = "idees",
+  tab = "ideas",
   llmEnabled = false,
 }: {
   wishlistId: string;
@@ -79,7 +84,7 @@ export function ItemForm({
     description?: string | null;
   };
   price?: string;
-  onglet?: string;
+  tab?: string;
   llmEnabled?: boolean;
 }) {
   const { t } = useTranslation(["list", "common", "errors"]);
@@ -92,6 +97,9 @@ export function ItemForm({
   const [enrichPending, startEnrich] = useTransition();
   const [impact, setImpact] = useState<LlmImpact | null>(null);
   const [usedLlm, setUsedLlm] = useState(false);
+  /** « + Nouvelle catégorie » (023): a category created from the form, then chosen for the idea. */
+  const [newType, setNewType] = useState<{ open: boolean; name: string }>({ open: false, name: "" });
+  const addingType = useAddLabel(wishlistId, "type");
 
   if (state !== appliedState) {
     setAppliedState(state);
@@ -103,6 +111,19 @@ export function ItemForm({
 
   function setField<K extends keyof ItemFormDraft>(key: K, value: ItemFormDraft[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function addCategory() {
+    addingType.add(newType.name, (created) => {
+      // Only the category changes: everything else typed stays as it is.
+      if (created) setField("typeId", created.id);
+      setNewType({ open: false, name: "" });
+    });
+  }
+
+  function closeNewType() {
+    addingType.clearError();
+    setNewType({ open: false, name: "" });
   }
 
   function enrich() {
@@ -142,7 +163,7 @@ export function ItemForm({
     <form action={formAction} className="flex flex-col gap-3">
       <FieldGroup className="gap-3">
         <input type="hidden" name="wishlistId" value={wishlistId} />
-        <input type="hidden" name="onglet" value={onglet} />
+        <input type="hidden" name="tab" value={tab} />
         {item ? <input type="hidden" name="itemId" value={item.id} /> : null}
         {error ? (
           <p className="rounded-base border-2 border-border bg-secondary-background px-3 py-2 text-sm font-medium text-destructive">
@@ -241,15 +262,57 @@ export function ItemForm({
               name="typeId"
               className="w-full"
               value={draft.typeId}
-              onChange={(e) => setField("typeId", e.target.value)}
+              onChange={(e) => {
+                // « + Nouvelle catégorie » is an action, not a value: the chosen category stays.
+                if (e.target.value === NEW_TYPE) setNewType({ open: true, name: "" });
+                else setField("typeId", e.target.value);
+              }}
               required
             >
+              {/* No category left (all removed in the settings): an empty choice, so that
+                  « + Nouvelle catégorie » is never selected by default and the idea cannot be sent without one. */}
+              {draft.typeId === "" ? <NativeSelectOption value="" disabled hidden /> : null}
               {types.map((type) => (
                 <NativeSelectOption key={type.id} value={type.id}>
                   {type.label}
                 </NativeSelectOption>
               ))}
+              <NativeSelectOption value={NEW_TYPE}>{t("form.newTypeOption")}</NativeSelectOption>
             </NativeSelect>
+            {newType.open ? (
+              <div className="flex flex-col gap-2">
+                <FieldLabel htmlFor={`${id}-new-type`}>{t("categories.newType")}</FieldLabel>
+                <Input
+                  id={`${id}-new-type`}
+                  value={newType.name}
+                  placeholder={t("categories.newTypePlaceholder")}
+                  onChange={(e) => setNewType((current) => ({ ...current, name: e.target.value }))}
+                  onKeyDown={(e) => {
+                    // Enter adds the category, it does not submit the idea.
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addCategory();
+                    }
+                  }}
+                />
+                <FormRefusal code={addingType.error} />
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="neutral"
+                    size="sm"
+                    disabled={addingType.pending || !newType.name.trim()}
+                    onClick={addCategory}
+                    aria-label={t("categories.addTypeAria")}
+                  >
+                    {t("categories.add")}
+                  </Button>
+                  <Button type="button" variant="link" size="sm" onClick={closeNewType}>
+                    {t("common:actions.cancel")}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
           </Field>
           <Field>
             <FieldLabel htmlFor={`${id}-person`}>{t("form.person")}</FieldLabel>

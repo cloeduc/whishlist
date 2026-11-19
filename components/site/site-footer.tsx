@@ -39,7 +39,7 @@ export function SiteFooter({
   return (
     <footer className="border-t-2 border-border pt-4 text-sm text-muted-foreground">
       <nav className="flex flex-wrap gap-x-4 gap-y-2" aria-label={infoLabel}>
-        <Link href={withLocale(locale, "/projet")} className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link href={withLocale(locale, "/about")} className="font-medium text-foreground underline-offset-4 hover:underline">
           {project}
         </Link>
         <Link href={withLocale(locale, "/faq")} className="font-medium text-foreground underline-offset-4 hover:underline">
@@ -49,13 +49,13 @@ export function SiteFooter({
           {guide}
         </Link>
         <Link
-          href={withLocale(locale, "/mentions-legales")}
+          href={withLocale(locale, "/legal-notice")}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           {legal}
         </Link>
         <Link
-          href={withLocale(locale, "/donnees-personnelles")}
+          href={withLocale(locale, "/privacy")}
           className="font-medium text-foreground underline-offset-4 hover:underline"
         >
           {privacy}

@@ -15,7 +15,15 @@ export class LegacyImportError extends Error {
 }
 
 const REQUIRED = ["users", "wishlists", "memberships", "types", "people", "views", "items", "reservations"] as const;
-const OPTIONAL = ["subscriptions", "passwordResets", "apiSessions", "emailConfirmations", "apiKeys"] as const;
+const OPTIONAL = [
+  "subscriptions",
+  "groupGifts",
+  "groupGiftMessages",
+  "passwordResets",
+  "apiSessions",
+  "emailConfirmations",
+  "apiKeys",
+] as const;
 
 /**
  * Expected shape of each field in the old file, before normalization.
@@ -45,12 +53,20 @@ const FIELDS: { [K in keyof Database]: Record<string, FieldCheck> } = {
     fromTemplate: "boolean",
     createdAt: "string",
   },
-  memberships: { wishlistId: "string", userId: "string", role: ["owner", "member"], joinedAt: "string" },
+  memberships: {
+    wishlistId: "string",
+    userId: "string",
+    role: ["owner", "member"],
+    joinedAt: "string",
+    surpriseMode: "boolean?",
+  },
   subscriptions: {
     wishlistId: "string",
     userId: "string",
     readPasswordHash: "string?",
     createdAt: "string",
+    customTitle: "string?",
+    customOwnerName: "string?",
   },
   types: { id: "string", wishlistId: "string", label: "string", sortOrder: "number?" },
   people: { id: "string", wishlistId: "string", label: "string" },
@@ -85,6 +101,25 @@ const FIELDS: { [K in keyof Database]: Record<string, FieldCheck> } = {
     fromName: "string?",
     note: "string?",
     userId: "string?",
+    createdAt: "string",
+    groupGiftId: "string?",
+    amountCents: "number?",
+  },
+  groupGifts: {
+    id: "string",
+    wishlistId: "string",
+    itemId: "string",
+    token: "string",
+    status: ["open", "complete"],
+    createdAt: "string",
+    completedAt: "string?",
+  },
+  groupGiftMessages: {
+    id: "string",
+    groupGiftId: "string",
+    userId: "string?",
+    authorName: "string?",
+    body: "string",
     createdAt: "string",
   },
   passwordResets: { id: "string", userId: "string", tokenHash: "string", expiresAt: "string", createdAt: "string" },
@@ -168,8 +203,12 @@ export function normalizeDocument(doc: Database): Database {
   if (!doc.apiSessions) doc.apiSessions = [];
   if (!doc.emailConfirmations) doc.emailConfirmations = [];
   if (!doc.apiKeys) doc.apiKeys = [];
+  if (!doc.groupGifts) doc.groupGifts = [];
+  if (!doc.groupGiftMessages) doc.groupGiftMessages = [];
   for (const subscription of doc.subscriptions) {
     if (subscription.readPasswordHash === undefined) subscription.readPasswordHash = null;
+    if (subscription.customTitle === undefined) subscription.customTitle = null;
+    if (subscription.customOwnerName === undefined) subscription.customOwnerName = null;
   }
   for (const user of doc.users) {
     // Accounts from before address validation: verified by default (010, FR-005b).
@@ -183,9 +222,14 @@ export function normalizeDocument(doc: Database): Database {
     if (list.readPasswordHash === undefined) list.readPasswordHash = null;
     list.theme = resolveTheme(list.theme);
   }
+  for (const membership of doc.memberships) {
+    if (membership.surpriseMode === undefined) membership.surpriseMode = false;
+  }
+  // A reservation no longer archives its idea (020): same rule as migration 0006.
+  const reservedItemIds = new Set(doc.reservations.map((reservation) => reservation.itemId));
   for (const item of doc.items) {
     if (item.imageUrl === undefined) item.imageUrl = null;
-    if (item.archived === undefined) item.archived = false;
+    if (item.archived === undefined || reservedItemIds.has(item.id)) item.archived = false;
     if (item.secondHandOk === undefined) item.secondHandOk = false;
     if (item.description === undefined) item.description = null;
   }
@@ -207,6 +251,15 @@ export function normalizeDocument(doc: Database): Database {
   }
   for (const reservation of doc.reservations) {
     if (reservation.userId === undefined) reservation.userId = null;
+    if (reservation.groupGiftId === undefined) reservation.groupGiftId = null;
+    if (reservation.amountCents === undefined) reservation.amountCents = null;
+  }
+  for (const gift of doc.groupGifts) {
+    if (gift.completedAt === undefined) gift.completedAt = null;
+  }
+  for (const message of doc.groupGiftMessages) {
+    if (message.userId === undefined) message.userId = null;
+    if (message.authorName === undefined) message.authorName = null;
   }
   return doc;
 }
@@ -244,6 +297,8 @@ export function checkDocument(doc: Database): string[] {
   idDoubled("views", doc.views);
   idDoubled("items", doc.items);
   idDoubled("reservations", doc.reservations);
+  idDoubled("groupGifts", doc.groupGifts);
+  idDoubled("groupGiftMessages", doc.groupGiftMessages);
   idDoubled("passwordResets", doc.passwordResets);
   idDoubled("apiSessions", doc.apiSessions);
   idDoubled("emailConfirmations", doc.emailConfirmations);
@@ -272,8 +327,10 @@ export function checkDocument(doc: Database): string[] {
   doubled(
     "reservations",
     "several reservations for the same idea",
-    duplicates(doc.reservations, (r) => r.itemId, byId),
+    duplicates(doc.reservations, (r) => (r.groupGiftId ? null : r.itemId), byId),
   );
+  doubled("groupGifts", "several group gifts for the same idea", duplicates(doc.groupGifts, (g) => g.itemId, byId));
+  doubled("groupGifts", "duplicate token", duplicates(doc.groupGifts, (g) => g.token, byId));
 
   const ids = (rows: { id: string }[]) => new Set(rows.map(byId));
   const users = ids(doc.users);
@@ -281,6 +338,7 @@ export function checkDocument(doc: Database): string[] {
   const types = ids(doc.types);
   const people = ids(doc.people);
   const items = ids(doc.items);
+  const gifts = ids(doc.groupGifts);
   const missing = (name: string, id: string, field: string, value: string) =>
     problems.push(`${name}: ${id} → ${field} missing (${value})`);
 
@@ -300,6 +358,7 @@ export function checkDocument(doc: Database): string[] {
   inList("views", doc.views);
   inList("items", doc.items);
   inList("reservations", doc.reservations);
+  inList("groupGifts", doc.groupGifts);
   for (const view of doc.views) {
     for (const typeId of view.typeIds) if (!types.has(typeId)) missing("views", view.id, "typeIds", typeId);
     if (view.personId !== null && !people.has(view.personId)) missing("views", view.id, "personId", view.personId);
@@ -312,6 +371,18 @@ export function checkDocument(doc: Database): string[] {
     if (!items.has(reservation.itemId)) missing("reservations", reservation.id, "itemId", reservation.itemId);
     if (reservation.userId !== null && !users.has(reservation.userId)) {
       missing("reservations", reservation.id, "userId", reservation.userId);
+    }
+    if (reservation.groupGiftId !== null && !gifts.has(reservation.groupGiftId)) {
+      missing("reservations", reservation.id, "groupGiftId", reservation.groupGiftId);
+    }
+  }
+  for (const gift of doc.groupGifts) {
+    if (!items.has(gift.itemId)) missing("groupGifts", gift.id, "itemId", gift.itemId);
+  }
+  for (const message of doc.groupGiftMessages) {
+    if (!gifts.has(message.groupGiftId)) missing("groupGiftMessages", message.id, "groupGiftId", message.groupGiftId);
+    if (message.userId !== null && !users.has(message.userId)) {
+      missing("groupGiftMessages", message.id, "userId", message.userId);
     }
   }
   const ofUser = (name: string, rows: { id: string; userId: string }[]) => {

@@ -1,0 +1,73 @@
+# 028 US7: from the demo list's public link, without an account, start a group gift on the first idea with
+# an amount: the gift's screen shows what is left and « Vous participez »; then withdraw, and the gift is gone.
+appId: app.ohyoushouldnt.mobile
+name: "028 US7 — Start a group gift in the app, then withdraw"
+tags:
+  - 028-us7
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+# Proof of the local server before writing, then without an account.
+- runFlow:
+    file: ../subflows/login.yaml
+    env:
+      EMAIL: alex@example.test
+- runFlow: ../subflows/logout.yaml
+
+- openLink: ohyoushouldnt://l/demo-list-lecture
+- extendedWaitUntil:
+    visible:
+      id: guest.title
+    timeout: 20000
+
+# « Lancer un cadeau commun » on the first idea, with 5 €.
+- tapOn:
+    id: guest.offer-0
+- extendedWaitUntil:
+    visible:
+      id: guest-reserve.mode-group
+    timeout: 10000
+- tapOn:
+    id: guest-reserve.mode-group
+# The name first: the number pad (amount) has no key to close it on iOS, scrolling closes it.
+- tapOn:
+    id: guest-reserve.from-name
+- inputText: E2E cadeau commun
+- hideKeyboard:
+    optional: true
+- tapOn:
+    id: guest-reserve.amount
+- inputText: "5"
+# A drag closes the number pad (keyboardDismissMode), which would otherwise hide the submit button.
+- scroll
+- scrollUntilVisible:
+    element:
+      id: guest-reserve.submit
+- tapOn:
+    id: guest-reserve.submit
+
+# The gift's screen: one participant, what is left, one's own participation.
+- extendedWaitUntil:
+    visible:
+      id: gift.summary
+    timeout: 20000
+- assertVisible:
+    id: gift.summary
+    text: .*1 participant.*
+- assertVisible: ${output.t.public.groupGift.mine}
+- assertVisible:
+    id: gift.participant-0
+    text: .*E2E cadeau commun.*
+
+# Withdraw: the last participant frees the idea, the gift no longer exists.
+- scrollUntilVisible:
+    element:
+      id: gift.leave
+- tapOn:
+    id: gift.leave
+- tapOn:
+    id: gift.leave-confirm
+- extendedWaitUntil:
+    visible:
+      id: gift.missing
+    timeout: 20000

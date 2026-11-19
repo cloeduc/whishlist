@@ -1,5 +1,5 @@
 # Login with a demo account (alex@ or camille@example.test): env EMAIL; password DEMO_PASSWORD.
-# Then checks the demo list: it only exists in tmp/e2e/wishlist.json, which proves that the app
+# Then checks the demo list: it only exists in the suite's database (WISHLIST_DATA_PATH, e.g. tmp/e2e/wishlist.db), which proves that the app
 # talks to the suite's local server before any write (an app pointed elsewhere stops here).
 appId: app.ohyoushouldnt.mobile
 ---

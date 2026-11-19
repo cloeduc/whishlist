@@ -195,7 +195,7 @@ export function IdeasAccordion({
       text: here
         ? t("transfer.copiedHere", { name: item.name })
         : t(mode === "move" ? "transfer.moved" : "transfer.copied", { name: item.name, list: target.title }),
-      href: here ? null : withLocale(locale, `/listes/${target.id}`),
+      href: here ? null : withLocale(locale, `/lists/${target.id}`),
     });
   }
 
@@ -411,7 +411,7 @@ export function IdeasAccordion({
                 people={people}
                 item={editingItem}
                 price={editingItem.price}
-                onglet="idees"
+                tab="ideas"
                 llmEnabled={llmEnabled}
               />
               <div className="flex flex-wrap gap-2">
@@ -430,7 +430,7 @@ export function IdeasAccordion({
                   confirmLabel={t("confirm.deleteIdeaConfirm")}
                   cancelLabel={t("confirm.deleteIdeaKeep")}
                   action={deleteItemAction}
-                  fields={{ wishlistId, itemId: editingItem.id, onglet: "idees" }}
+                  fields={{ wishlistId, itemId: editingItem.id, tab: "ideas" }}
                   triggerLabel={t("form.delete")}
                   triggerVariant="destructive"
                   triggerSize="sm"

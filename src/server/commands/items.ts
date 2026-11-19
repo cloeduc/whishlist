@@ -2,6 +2,7 @@ import "server-only";
 import { findMembership } from "../../domain/access";
 import { idTaken, isClientId } from "../../domain/client-ids";
 import { fetchPageHtml } from "../../domain/fetch-page";
+import { cancelGroupGiftAsMember as cancelGroupGift } from "../../domain/group-gift";
 import {
   cancelReservation,
   copyItem as copyItemRule,
@@ -12,6 +13,7 @@ import {
   setItemType as setItemTypeRule,
   updateItem,
 } from "../../domain/items";
+import { asSeenBy } from "../../domain/surprise";
 import { estimateLlmImpact, type LlmImpact } from "../../domain/llm-impact";
 import { fetchOgImage } from "../../domain/og-image";
 import { parsePrice } from "../../domain/price";
@@ -59,7 +61,8 @@ async function writeItem(
     if (!saved.ok) return { doc, result: saved };
     const item = itemIn(saved.doc, wishlistId, saved.itemId);
     if (!item) return { doc, result: { ok: false, error: "itemMissing" } };
-    return { doc: saved.doc, result: { ok: true, item } };
+    // Returned as the member sees it: a reserved idea is « archived » outside surprise mode (020).
+    return { doc: saved.doc, result: { ok: true, item: asSeenBy(saved.doc, item, actorId) } };
   });
 }
 
@@ -268,6 +271,19 @@ export async function cancelReservationAsMember(
   if (!active.ok) return active;
   return updateDocument<CommandResult>((doc) => {
     const saved = cancelReservation(doc, { ...input, actorId: active.user.id });
+    return saved.ok ? { doc: saved.doc, result: { ok: true } } : { doc, result: saved };
+  });
+}
+
+/** « Annuler le cadeau commun » (028): every participation, the thread and the gift's link go. */
+export async function cancelGroupGiftAsMember(
+  ctx: CommandContext,
+  input: { wishlistId: string; groupGiftId: string },
+): Promise<CommandResult> {
+  const active = activeUser(ctx);
+  if (!active.ok) return active;
+  return updateDocument<CommandResult>((doc) => {
+    const saved = cancelGroupGift(doc, { ...input, actorId: active.user.id });
     return saved.ok ? { doc: saved.doc, result: { ok: true } } : { doc, result: saved };
   });
 }

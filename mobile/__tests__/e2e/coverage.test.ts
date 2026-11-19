@@ -14,6 +14,13 @@ const specs = {
   "012": "specs/012-list-subscriptions/spec.md",
   "016": "specs/016-password-field/spec.md",
   "017": "specs/017-mobile-sharing/spec.md",
+  "018": "specs/018-english-urls/spec.md",
+  "020": "specs/020-surprise-mode/spec.md",
+  "021": "specs/021-app-update-prompt/spec.md",
+  "022": "specs/022-whats-new/spec.md",
+  "023": "specs/023-add-category-from-idea/spec.md",
+  "024": "specs/024-followed-list-names/spec.md",
+  "026": "specs/026-access-denied-help/spec.md",
 };
 
 function storiesOf(feature: string, file: string): string[] {

@@ -3,7 +3,10 @@ import { useCallback, useState } from "react";
 import { Linking, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
+import { groupGiftSummaryText } from "../../../../src/site/group-gift-text";
+
 import type { Schemas } from "@/api/client";
+import { currentLocale, intlLocale } from "@/i18n";
 import { useServerAction } from "@/features/errors";
 import { useOnline } from "@/network";
 import { tokens } from "@/theme/tokens";
@@ -18,13 +21,14 @@ import { Text } from "@/ui/Text";
 import { cancelGuestReservation } from "./api";
 
 /** Only web links open: an idea's address comes from the list, not from this phone (011). */
-function webUrl(url: string | null): string | null {
+export function webUrl(url: string | null): string | null {
   return url && /^https?:\/\//i.test(url) ? url : null;
 }
 
 /**
  * An idea of the guest view, like the site `PublicItemCard`: name, priority, price, « pour qui », link,
- * then « Réserver ce cadeau », or the cancellation of one's own reservation.
+ * then « Réserver ce cadeau », or the cancellation of one's own reservation. A group gift (028) shows
+ * its participants and what is left, and opens its own screen (« Participer », « Voir le cadeau commun »).
  */
 export function GuestItemCard({
   index,
@@ -44,6 +48,7 @@ export function GuestItemCard({
   const [confirming, setConfirming] = useState(false);
   const person = list.people.find((entry) => entry.id === item.personId)?.label ?? "";
   const link = webUrl(item.url);
+  const gift = item.groupGift ?? null;
   const cancel = useServerAction(
     useCallback(async () => {
       if (!item.reservationId) return;
@@ -69,10 +74,29 @@ export function GuestItemCard({
       <CardContent>
         <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: tokens.space[1] }}>
           {person ? <Badge variant="neutral">{person}</Badge> : null}
-          {item.mine ? <Badge>{t("reservation.mine")}</Badge> : null}
+          {gift ? <Badge variant="neutral">{t("groupGift.badge")}</Badge> : null}
+          {gift?.mine ? <Badge>{t("groupGift.mine")}</Badge> : null}
+          {gift?.mine && gift.status === "complete" ? <Badge>{t("groupGift.complete")}</Badge> : null}
+          {item.mine && !gift ? <Badge>{t("reservation.mine")}</Badge> : null}
         </View>
+        {gift ? (
+          <Text testID={`guest.group-gift-${index}`} weight="heading">
+            {groupGiftSummaryText(t, gift, intlLocale(currentLocale()))}
+          </Text>
+        ) : null}
         <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: tokens.space[2] }}>
-          {item.mine && item.reservationId ? (
+          {gift ? (
+            <Button
+              testID={`guest.group-gift-open-${index}`}
+              title={gift.mine ? t("groupGift.open") : t("groupGift.join")}
+              accessibilityLabel={
+                gift.mine ? t("groupGift.openAria", { name: item.name }) : t("groupGift.joinAria", { name: item.name })
+              }
+              variant={gift.mine ? "neutral" : "default"}
+              size="sm"
+              onPress={() => router.push(`/gift/${gift.token}` as Href)}
+            />
+          ) : item.mine && item.reservationId ? (
             <Button
               testID={`guest.cancel-${index}`}
               title={t("reservation.cancel")}

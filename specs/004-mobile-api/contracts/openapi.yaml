@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Oh, You Shouldn't! API
-  version: "1.8.0"
+  version: "1.11.0"
   description: |
     Accès aux listes pour un client autre que le site (app mobile, script).
 
@@ -35,6 +35,25 @@ info:
       `followedLists` dans `AccountDeletionPreview`).
     - 1.8.0 : une clé d'API (`oys_…`) reçoit `403 apiKeyNotAllowed` sur toutes les routes ; elle
       n'ouvre que le serveur MCP (`/api/mcp`).
+    - 1.9.0 : mode surprise (feature 020). `MemberList.surpriseMode` ; `PUT /lists/{listId}/surprise-mode`
+      pour l'activer ou non ; `GET /lists/{listId}/reservations` pour voir les réservations sur demande.
+      Une réservation n'archive plus l'idée : `MemberItem.archived` reste vrai pour une idée réservée hors
+      mode surprise (comme avant), mais plus en mode surprise. Supprimer ou déplacer une idée réservée en
+      mode surprise rend `itemLockedSurprise` (400).
+    - 1.10.0 : noms d'une liste suivie (feature 024). `customTitle`, `customOwnerName` et `ownerName` dans
+      `SubscribedListSummary` ; `follow` dans `PublicList` ; `PUT /subscriptions/{readToken}` pour les choisir.
+    - 1.11.0 : cadeau commun (feature 028). Une participation à un cadeau commun est une réservation :
+      `MemberReservation` gagne `groupGiftId` et `groupGiftStatus` (une ligne par participation, à
+      regrouper par `groupGiftId`) ; `DELETE /lists/{listId}/group-gifts/{groupGiftId}` annule tout le
+      cadeau commun (membre). Sans `groupGifts=true`, `GET /public/lists/{readToken}` traite un cadeau
+      commun comme une réservation : absent pour qui n'y participe pas, `mine` pour un participant.
+      Avec `groupGifts=true`, chaque idée porte `groupGift` (résumé, visible de tous tant qu'il est ouvert).
+      `PublicList.claimKey` : clé où ranger les claims de la liste, sans son lien. `POST …/reservations`
+      accepte `mode` (`single` par défaut, `group`) et `amountCents`, et rend `claimKey` et `groupGiftToken`.
+      Routes `/public/group-gifts/{token}` : lire le cadeau, le déverrouiller, participer, changer son
+      montant, se retirer, le déclarer complet ou le rouvrir, et le fil des participants avec un compte
+      (`GroupGift.thread`, `POST`/`DELETE …/messages`). Elles ne donnent jamais le lien de la liste.
+      L'export du compte gagne `myReservations[].groupGift` et `groupGiftMessages`.
 
     Preuves à garder côté client :
     - `token` (connexion) → `Authorization: Bearer <token>`, 30 jours.
@@ -79,7 +98,7 @@ paths:
                 type: object
                 required: [apiVersion, enrich, mail, analytics]
                 properties:
-                  apiVersion: { type: string, example: "1.8.0" }
+                  apiVersion: { type: string, example: "1.11.0" }
                   enrich:
                     type: boolean
                     description: Préremplissage depuis un lien avec IA (sinon seulement les métadonnées de la page).
@@ -101,6 +120,13 @@ paths:
         - $ref: "#/components/parameters/readToken"
         - $ref: "#/components/parameters/readUnlock"
         - $ref: "#/components/parameters/reservationClaims"
+        - name: groupGifts
+          in: query
+          required: false
+          description: |
+            Depuis 1.11.0. `true` : le client connaît le cadeau commun ; un cadeau commun ouvert reste visible
+            de tous, avec `groupGift`. Absent : il est traité comme une réservation (anciennes versions).
+          schema: { type: string, enum: ["true"] }
       responses:
         "200":
           description: OK
@@ -171,6 +197,15 @@ paths:
                 typeId: { type: string, description: Optionnel, vérifie que l'idée est dans cette catégorie. }
                 fromName: { type: string, maxLength: 200 }
                 note: { type: string, maxLength: 2000 }
+                mode:
+                  type: string
+                  enum: [single, group]
+                  description: Depuis 1.11.0. `group` lance un cadeau commun, dont cette réservation est la première participation.
+                amountCents:
+                  type: [integer, "null"]
+                  minimum: 1
+                  maximum: 10000000
+                  description: Depuis 1.11.0, en mode `group` seulement. Montant annoncé, sans paiement.
       responses:
         "201":
           description: Réservée
@@ -182,6 +217,8 @@ paths:
                 properties:
                   reservationId: { type: string }
                   claim: { type: [string, "null"], description: À renvoyer dans `X-Reservation-Claims`. }
+                  claimKey: { type: string, description: Depuis 1.11.0. Voir `PublicList.claimKey`. }
+                  groupGiftToken: { type: [string, "null"], description: "Depuis 1.11.0. En mode `group` : jeton du cadeau (lien `/g/<token>`)." }
         "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
         "409":
@@ -203,6 +240,243 @@ paths:
         "204": { description: Annulée }
         "403": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    get:
+      tags: [public]
+      summary: Lire un cadeau commun par son lien (depuis 1.11.0)
+      description: |
+        L'idée, le titre de la liste et les participants ; jamais le lien de la liste ni ses autres idées.
+        Montants et messages de participation : pour les participants seulement (compte ou claim).
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupGift" }
+        "404": { $ref: "#/components/responses/Error" }
+        "423":
+          description: Mot de passe de lecture de la liste nécessaire (`readPasswordRequired`). Le corps contient aussi `title`.
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Error"
+                  - type: object
+                    properties:
+                      title: { type: string }
+
+  /public/group-gifts/{token}/unlock:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    post:
+      tags: [public]
+      summary: Déverrouiller la liste d'un cadeau commun (depuis 1.11.0)
+      description: Même `unlockToken` que `POST /public/lists/{readToken}/unlock`, sans connaître le lien de la liste.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [unlockToken, expiresAt]
+                properties:
+                  unlockToken: { type: [string, "null"] }
+                  expiresAt: { type: [string, "null"], format: date-time }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/participations:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    post:
+      tags: [public]
+      summary: Participer à un cadeau commun (depuis 1.11.0)
+      description: Sans compte possible. Avec un bearer, la participation est liée au compte (montant modifiable).
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fromName: { type: string, maxLength: 200 }
+                note: { type: string, maxLength: 2000 }
+                amountCents: { type: [integer, "null"], minimum: 1, maximum: 10000000 }
+      responses:
+        "201":
+          description: Participation enregistrée
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reservationId, claim, claimKey]
+                properties:
+                  reservationId: { type: string }
+                  claim: { type: [string, "null"], description: À renvoyer dans `X-Reservation-Claims`. }
+                  claimKey: { type: string }
+        "400": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "409":
+          description: "`groupGiftComplete` ou `groupGiftAlreadyJoined`."
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "423": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/participations/{reservationId}:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+      - $ref: "#/components/parameters/reservationId"
+    patch:
+      tags: [public]
+      summary: Changer son montant (participant avec compte, depuis 1.11.0)
+      description: Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+      security: [{ bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amountCents]
+              properties:
+                amountCents: { type: [integer, "null"], minimum: 1, maximum: 10000000 }
+      responses:
+        "200":
+          description: Le cadeau à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupGift" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+    delete:
+      tags: [public]
+      summary: Retirer sa participation (depuis 1.11.0)
+      description: >-
+        Compte lié ou claim valide, sans le mot de passe de lecture (comme l'annulation d'une réservation).
+        Le dernier retrait libère l'idée et supprime le cadeau.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/reservationClaims"
+      responses:
+        "204": { description: Retirée }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/status:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    put:
+      tags: [public]
+      summary: Déclarer le cadeau commun complet ou le rouvrir (participant, depuis 1.11.0)
+      description: Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+      security: [{}, { bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+        - $ref: "#/components/parameters/reservationClaims"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [open, complete] }
+      responses:
+        "200":
+          description: Le cadeau à jour
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupGift" }
+        "400": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/messages:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+    post:
+      tags: [public]
+      summary: Écrire dans le fil d'un cadeau commun (participant avec compte, depuis 1.11.0)
+      description: >-
+        Aucune notification n'est envoyée. Les membres de la liste ne voient jamais ce fil. Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+      security: [{ bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string, maxLength: 2000 }
+      responses:
+        "201":
+          description: Message ajouté
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GroupGiftMessage" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
+
+  /public/group-gifts/{token}/messages/{messageId}:
+    parameters:
+      - $ref: "#/components/parameters/groupGiftToken"
+      - name: messageId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [public]
+      summary: Supprimer son message du fil (depuis 1.11.0)
+      description: Sur une liste protégée, le mot de passe de lecture (`X-Read-Unlock`) est vérifié avant toute écriture.
+      security: [{ bearer: [] }]
+      parameters:
+        - $ref: "#/components/parameters/readUnlock"
+      responses:
+        "204": { description: Supprimé }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
 
   # ---------- Auth et compte ----------
 
@@ -302,7 +576,7 @@ paths:
       tags: [auth]
       summary: Choisir le nouveau mot de passe depuis le lien reçu
       description: |
-        Comme la page `/reinitialiser/{token}` du site : le mot de passe change, l'adresse est marquée
+        Comme la page `/reset-password/{token}` du site : le mot de passe change, l'adresse est marquée
         vérifiée et les autres connexions du compte tombent. Avec `signIn`, la réponse ouvre une session
         pour ce compte ; l'app l'envoie seulement si personne n'y est connecté. 20 essais par IP en 15 min.
         Depuis 1.4.0.
@@ -344,7 +618,7 @@ paths:
       tags: [auth]
       summary: Confirmer une adresse depuis le lien reçu
       description: |
-        Comme le bouton de la page `/confirmer-email/{token}` du site : validation de l'adresse ou
+        Comme le bouton de la page `/confirm-email/{token}` du site : validation de l'adresse ou
         changement d'adresse, selon le lien. Le jeton porte toute l'autorisation ; un bearer, facultatif,
         sert seulement à `ownAccount`. Après un changement, l'ancienne adresse est prévenue.
         20 essais par IP en 15 min. Depuis 1.4.0.
@@ -358,7 +632,7 @@ paths:
               required: [token]
               properties:
                 token: { type: string, description: Dernier segment du lien reçu. }
-                suite: { type: string, description: Paramètre `suite` du lien, s'il y en a un. }
+                suite: { type: string, description: "Paramètre `next` du lien (`suite` avant la feature 018), s'il y en a un." }
       responses:
         "200":
           description: Adresse confirmée
@@ -372,7 +646,7 @@ paths:
                   ownAccount: { type: boolean, description: Le lien est celui du compte du bearer. }
                   suite:
                     type: [string, "null"]
-                    description: Chemin interne du site où reprendre (`/inviter/…`), sinon null.
+                    description: Chemin interne du site où reprendre (`/invite/…`), sinon null. Une ancienne adresse française reçue est traduite (feature 018).
         "400":
           description: |
             `confirmationLinkInvalid` (inconnu, déjà utilisé, remplacé), `confirmationLinkExpired`, ou
@@ -772,8 +1046,12 @@ paths:
     delete:
       tags: [items]
       summary: Supprimer une idée
+      description: |
+        Une idée réservée n'est pas supprimée : `itemHasReservation`, ou `itemLockedSurprise` quand le
+        compte est en mode surprise (le message ne dit pas que l'idée est réservée).
       responses:
         "204": { description: Supprimée }
+        "400": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
 
   /lists/{listId}/items/{itemId}/move:
@@ -786,8 +1064,8 @@ paths:
       description: |
         Il faut être membre des deux listes. L'idée garde son identifiant ; `typeId` et `personId`
         sont ceux de la liste d'arrivée. Une idée réservée ne change pas de liste
-        (`itemReservedCannotMove`) : la personne qui a réservé ne peut annuler que depuis le lien de
-        la liste d'origine. Un renvoi après réussite (même liste d'arrivée, même catégorie, même
+        (`itemReservedCannotMove`, ou `itemLockedSurprise` en mode surprise, sans dire pourquoi) : la
+        personne qui a réservé ne peut annuler que depuis le lien de la liste d'origine. Un renvoi après réussite (même liste d'arrivée, même catégorie, même
         « qui ») rend l'idée déjà déplacée.
       requestBody:
         required: true
@@ -967,6 +1245,56 @@ paths:
 
   # ---------- Partage ----------
 
+  /lists/{listId}/surprise-mode:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    put:
+      tags: [lists]
+      summary: Activer ou désactiver le mode surprise du compte connecté (depuis 1.9.0)
+      description: |
+        « Ne pas voir les cadeaux réservés » : le réglage ne vaut que pour ce membre et cette liste.
+        Rend la liste telle que le membre la voit désormais.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled: { type: boolean }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MemberList" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/reservations:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+    get:
+      tags: [lists]
+      summary: Voir les réservations de la liste, sur demande (depuis 1.9.0)
+      description: |
+        Les réservations de la liste, quel que soit le mode surprise : c'est l'action volontaire
+        « Voir les réservations ». Le client ne les garde pas sur l'appareil.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [reservations]
+                properties:
+                  reservations: { type: array, items: { $ref: "#/components/schemas/MemberReservation" } }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+
   /lists/{listId}/reservations/{reservationId}:
     parameters:
       - $ref: "#/components/parameters/listId"
@@ -976,6 +1304,22 @@ paths:
       summary: Annuler une réservation de sa liste (membre)
       responses:
         "204": { description: Annulée }
+        "404": { $ref: "#/components/responses/Error" }
+
+  /lists/{listId}/group-gifts/{groupGiftId}:
+    parameters:
+      - $ref: "#/components/parameters/listId"
+      - name: groupGiftId
+        in: path
+        required: true
+        schema: { type: string }
+    delete:
+      tags: [sharing]
+      summary: Annuler tout un cadeau commun de sa liste (membre, depuis 1.11.0)
+      description: Supprime toutes les participations du cadeau commun et ses messages ; l'idée redevient libre.
+      responses:
+        "204": { description: Annulé }
+        "401": { $ref: "#/components/responses/Error" }
         "404": { $ref: "#/components/responses/Error" }
 
   /lists/{listId}/invite-link:
@@ -1182,6 +1526,33 @@ paths:
   /subscriptions/{readToken}:
     parameters:
       - $ref: "#/components/parameters/readToken"
+    put:
+      tags: [lists]
+      summary: Nommer une liste suivie et la personne à qui elle est (depuis 1.10.0)
+      description: >
+        Noms visibles du seul compte connecté. Une chaîne vide ou faite d'espaces vaut null
+        (retour au titre de la liste, ou au nom du propriétaire). 80 caractères au plus.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [customTitle, customOwnerName]
+              properties:
+                customTitle: { type: [string, "null"] }
+                customOwnerName: { type: [string, "null"] }
+      responses:
+        "200":
+          description: Noms enregistrés
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SubscribedListSummary" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "403": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "429": { $ref: "#/components/responses/Error" }
     delete:
       tags: [lists]
       summary: Se désabonner d'une liste suivie
@@ -1203,6 +1574,12 @@ components:
     listId: { name: listId, in: path, required: true, schema: { type: string } }
     itemId: { name: itemId, in: path, required: true, schema: { type: string } }
     reservationId: { name: reservationId, in: path, required: true, schema: { type: string } }
+    groupGiftToken:
+      name: token
+      in: path
+      required: true
+      description: Jeton du cadeau commun (lien `/g/<token>`).
+      schema: { type: string }
     readUnlock:
       name: X-Read-Unlock
       in: header
@@ -1266,6 +1643,8 @@ components:
                 Codes de `locales/*/errors.json`, plus : unauthorized, invalidCredentials,
                 mustChangePassword, readPasswordRequired, invalidJson, payloadTooLarge,
                 unsupportedMediaType, originNotAllowed, apiVersionUnsupported, notFound.
+                Depuis 1.11.0 : groupGiftMissing (404), groupGiftComplete et groupGiftAlreadyJoined (409),
+                invalidAmount, invalidStatus, messageEmpty, messageMissing (404).
               example: itemAlreadyReserved
             message: { type: string }
 
@@ -1334,10 +1713,98 @@ components:
         description: { type: [string, "null"], description: "Depuis 1.5.0. Contexte écrit par la liste : ce qu'est le produit, pourquoi il fait envie." }
         mine: { type: boolean, description: Réservée par ce client. }
         reservationId: { type: [string, "null"], description: Seulement si `mine`. }
+        groupGift:
+          description: Depuis 1.11.0, avec `groupGifts=true` seulement. null si l'idée n'est pas un cadeau commun.
+          oneOf:
+            - $ref: "#/components/schemas/GroupGiftSummary"
+            - type: "null"
+
+    GroupGiftSummary:
+      type: object
+      required: [token, status, participantCount, totalCents, remainingCents, goalReached, mine]
+      properties:
+        token: { type: string, description: Lien `/g/<token>`. }
+        status: { type: string, enum: [open, complete] }
+        participantCount: { type: integer }
+        totalCents: { type: integer, description: Somme des montants annoncés. }
+        remainingCents: { type: [integer, "null"], description: "Prix moins total, jamais négatif ; null si l'idée n'a pas de prix." }
+        goalReached: { type: boolean }
+        mine: { type: boolean, description: Ce client participe. }
+
+    GroupGiftParticipation:
+      type: object
+      required: [reservationId, name, amountCents, note, mine, editable]
+      properties:
+        reservationId: { type: [string, "null"], description: Seulement pour la sienne. }
+        name: { type: [string, "null"], description: null = « Anonyme ». }
+        amountCents: { type: [integer, "null"] }
+        note: { type: [string, "null"] }
+        mine: { type: boolean }
+        editable: { type: boolean, description: Sienne et liée au compte connecté (montant modifiable). }
+
+    GroupGift:
+      type: object
+      required:
+        [token, status, listTitle, item, participantCount, totalCents, remainingCents, goalReached, participantNames, me, participations, thread, claimKey]
+      properties:
+        token: { type: string }
+        status: { type: string, enum: [open, complete] }
+        listTitle: { type: string }
+        item:
+          type: object
+          required: [name, typeLabel, url, imageUrl, priceCents, priceLabel, description, secondHandOk]
+          properties:
+            name: { type: string }
+            typeLabel: { type: string }
+            url: { type: [string, "null"] }
+            imageUrl: { type: [string, "null"] }
+            priceCents: { type: [integer, "null"] }
+            priceLabel: { type: [string, "null"] }
+            description: { type: [string, "null"] }
+            secondHandOk: { type: boolean }
+        participantCount: { type: integer }
+        totalCents: { type: integer }
+        remainingCents: { type: [integer, "null"] }
+        goalReached: { type: boolean }
+        participantNames:
+          type: array
+          items: { type: [string, "null"] }
+          description: Pour tout visiteur qui a accès ; null = « Anonyme ».
+        me:
+          description: La participation de ce client, ou null.
+          oneOf:
+            - $ref: "#/components/schemas/GroupGiftParticipation"
+            - type: "null"
+        participations:
+          type: [array, "null"]
+          items: { $ref: "#/components/schemas/GroupGiftParticipation" }
+          description: Pour les participants seulement (montants et messages) ; null sinon.
+        thread:
+          description: Fil des participants qui ont un compte (participation liée au compte connecté) ; null sinon.
+          oneOf:
+            - type: "null"
+            - type: object
+              required: [messages]
+              properties:
+                messages:
+                  type: array
+                  description: Les 200 derniers, du plus ancien au plus récent.
+                  items: { $ref: "#/components/schemas/GroupGiftMessage" }
+        claimKey: { type: string, description: Voir `PublicList.claimKey`. }
+
+    GroupGiftMessage:
+      type: object
+      required: [id, authorName, body, createdAt, mine]
+      properties:
+        id: { type: string }
+        authorName: { type: [string, "null"], description: null = « Ancien participant » (compte supprimé). }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+        mine: { type: boolean }
 
     PublicList:
       type: object
-      required: [title, subtitle, coverImageUrl, theme, subscribed, isMember, categories, people, items]
+      required: [title, subtitle, coverImageUrl, theme, subscribed, isMember, follow, categories, people, items, claimKey]
       properties:
         title: { type: string }
         subtitle: { type: [string, "null"] }
@@ -1345,17 +1812,37 @@ components:
         theme: { $ref: "#/components/schemas/Theme" }
         subscribed: { type: boolean, description: Depuis 1.7.0. }
         isMember: { type: boolean, description: Depuis 1.7.0. }
+        follow:
+          description: >
+            Depuis 1.10.0. Noms de la liste pour le compte connecté s'il la suit ; null sinon
+            (visiteur, membre, non connecté). Le nom du propriétaire n'est jamais donné à qui ne suit pas.
+          oneOf:
+            - $ref: "#/components/schemas/FollowNames"
+            - type: "null"
         categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
         people: { type: array, items: { $ref: "#/components/schemas/Label" } }
         items: { type: array, items: { $ref: "#/components/schemas/PublicItem" } }
+        claimKey:
+          type: string
+          description: |
+            Depuis 1.11.0. Clé opaque de cette liste : le client range sous elle les claims de la liste et ceux
+            reçus par un lien de cadeau commun, qui ne donne pas le lien de la liste.
+
+    FollowNames:
+      type: object
+      required: [customTitle, customOwnerName, ownerName]
+      properties:
+        customTitle: { type: [string, "null"], description: Nom donné à la liste par le compte connecté. }
+        customOwnerName: { type: [string, "null"], description: Nom donné à la personne par le compte connecté. }
+        ownerName: { type: [string, "null"], description: Nom d'affichage du propriétaire actuel de la liste. }
 
     SubscribedListSummary:
       type: object
-      required: [id, readToken, title, subtitle, coverImageUrl, theme, itemCount, readUrl, subscribedAt, locked]
+      required: [id, readToken, title, subtitle, coverImageUrl, theme, itemCount, readUrl, subscribedAt, locked, customTitle, customOwnerName, ownerName]
       properties:
         id: { type: string }
         readToken: { type: string }
-        title: { type: string }
+        title: { type: string, description: Titre choisi par les membres. }
         subtitle: { type: [string, "null"] }
         coverImageUrl: { type: [string, "null"] }
         theme: { $ref: "#/components/schemas/Theme" }
@@ -1363,6 +1850,9 @@ components:
         readUrl: { type: string }
         subscribedAt: { type: string, format: date-time }
         locked: { type: boolean }
+        customTitle: { type: [string, "null"], description: Depuis 1.10.0. Nom donné à la liste par le compte connecté. }
+        customOwnerName: { type: [string, "null"], description: Depuis 1.10.0. Nom donné à la personne par le compte connecté. }
+        ownerName: { type: [string, "null"], description: Depuis 1.10.0. Nom d'affichage du propriétaire actuel de la liste. }
 
     ListSummary:
       type: object
@@ -1436,6 +1926,16 @@ components:
         fromName: { type: [string, "null"] }
         note: { type: [string, "null"] }
         createdAt: { type: string, format: date-time }
+        groupGiftId:
+          type: [string, "null"]
+          description: |
+            Depuis 1.11.0. Participation à un cadeau commun : les participations d'un même cadeau
+            partagent cet identifiant. null pour une réservation seule. Le montant annoncé n'est jamais
+            donné aux membres.
+        groupGiftStatus:
+          type: [string, "null"]
+          enum: [open, complete, null]
+          description: Depuis 1.11.0. État du cadeau commun ; null pour une réservation seule.
 
     Member:
       type: object
@@ -1447,7 +1947,7 @@ components:
 
     MemberList:
       type: object
-      required: [id, title, subtitle, coverImageUrl, theme, role, readUrl, inviteUrl, hasReadPassword, categories, people, items, reservations, members]
+      required: [id, title, subtitle, coverImageUrl, theme, role, readUrl, inviteUrl, hasReadPassword, surpriseMode, categories, people, items, reservations, members]
       properties:
         id: { type: string }
         title: { type: string }
@@ -1458,10 +1958,22 @@ components:
         readUrl: { type: string }
         inviteUrl: { type: string }
         hasReadPassword: { type: boolean }
+        surpriseMode:
+          type: boolean
+          description: |
+            Mode surprise du compte connecté pour cette liste (depuis 1.9.0). Vrai : `reservations` est
+            vide et `items[].archived` ne dit que si un membre a archivé l'idée ; une idée réservée y
+            figure comme une idée libre. Faux : `items[].archived` est vrai aussi pour une idée réservée.
         categories: { type: array, items: { $ref: "#/components/schemas/Category" } }
         people: { type: array, items: { $ref: "#/components/schemas/Label" } }
-        items: { type: array, items: { $ref: "#/components/schemas/MemberItem" }, description: Archivées comprises. }
-        reservations: { type: array, items: { $ref: "#/components/schemas/MemberReservation" } }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/MemberItem" }
+          description: Archivées comprises. Voir `surpriseMode` pour le sens de `archived`.
+        reservations:
+          type: array
+          items: { $ref: "#/components/schemas/MemberReservation" }
+          description: Vide quand `surpriseMode` est vrai ; `GET /lists/{listId}/reservations` les donne sur demande.
         members: { type: array, items: { $ref: "#/components/schemas/Member" } }
 
     AccountDeletionPreview:
@@ -1501,7 +2013,7 @@ components:
     AccountExport:
       type: object
       additionalProperties: false
-      required: [format, version, exportedAt, account, lists, subscriptions, myReservations]
+      required: [format, version, exportedAt, account, lists, subscriptions, myReservations, groupGiftMessages]
       properties:
         format: { const: ohyoushouldnt-export }
         version: { const: 1 }
@@ -1542,12 +2054,33 @@ components:
           items:
             type: object
             additionalProperties: false
-            required: [listTitle, item, fromName, note, createdAt]
+            required: [listTitle, item, fromName, note, createdAt, groupGift]
             properties:
               listTitle: { type: string }
               item: { type: [string, "null"] }
               fromName: { type: [string, "null"] }
               note: { type: [string, "null"] }
+              createdAt: { type: string, format: date-time }
+              groupGift:
+                description: Depuis 1.11.0. Participation à un cadeau commun, avec le montant annoncé ; null pour une réservation seule.
+                oneOf:
+                  - type: "null"
+                  - type: object
+                    additionalProperties: false
+                    required: [status, amountCents]
+                    properties:
+                      status: { type: string, enum: [open, complete] }
+                      amountCents: { type: [integer, "null"] }
+        groupGiftMessages:
+          type: array
+          description: Depuis 1.11.0. Messages écrits par le compte dans le fil d'un cadeau commun.
+          items:
+            type: object
+            additionalProperties: false
+            required: [item, body, createdAt]
+            properties:
+              item: { type: [string, "null"] }
+              body: { type: string }
               createdAt: { type: string, format: date-time }
 
     ExportedList:

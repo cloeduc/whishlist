@@ -1,5 +1,5 @@
 import { router, type Href } from "expo-router";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Linking, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -9,6 +9,7 @@ import type { ViewList } from "@/offline/optimistic";
 import { tokens } from "@/theme/tokens";
 import { BackLink } from "@/ui/BackLink";
 import { Button } from "@/ui/Button";
+import { ConfirmDialog } from "@/ui/ConfirmDialog";
 import { Empty } from "@/ui/Empty";
 import { ListCover } from "@/ui/ListCover";
 import { LiveGiftMark } from "@/ui/LiveGiftMark";
@@ -19,16 +20,9 @@ import { Screen } from "@/ui/Screen";
 import { Text } from "@/ui/Text";
 
 import { useList } from "./ListContext";
+import { LIST_TAB_ROUTES, type ListTab } from "./tab-routes";
 
-export type ListTab = "idees" | "archives" | "reservations" | "partage" | "reglages";
-
-const routes: Record<ListTab, string> = {
-  idees: "",
-  archives: "/archives",
-  reservations: "/reservations",
-  partage: "/share",
-  reglages: "/settings",
-};
+export type { ListTab };
 
 function tabLabels(list: ViewList, t: (key: string) => string) {
   const active = list.items.filter((item) => !item.archived).length;
@@ -36,14 +30,18 @@ function tabLabels(list: ViewList, t: (key: string) => string) {
   return [
     { key: "idees", label: `${t("tabs.idees")} (${active})` },
     { key: "archives", label: `${t("tabs.archives")} (${archived})` },
-    { key: "reservations", label: `${t("tabs.reservations")} (${list.reservations.length})` },
+    // In surprise mode (020) not even the number of reservations is shown.
+    {
+      key: "reservations",
+      label: list.surpriseMode ? t("tabs.reservations") : `${t("tabs.reservations")} (${reservationEntries(list.reservations)})`,
+    },
     { key: "partage", label: t("tabs.partage") },
     { key: "reglages", label: t("tabs.reglages") },
   ];
 }
 
 function isTab(key: string): key is ListTab {
-  return key in routes;
+  return key in LIST_TAB_ROUTES;
 }
 
 /**
@@ -54,6 +52,7 @@ export function ListScreen({ tab, children }: { tab: ListTab; children: (list: V
   const { t } = useTranslation(["list", "mobile", "home"]);
   const { list, listId, loaded, settled, missing, fetchedAt, refreshing, refresh } = useList();
   const pendingCount = usePendingCount();
+  const [askGuestView, setAskGuestView] = useState(false);
 
   if (missing) {
     return (
@@ -96,13 +95,35 @@ export function ListScreen({ tab, children }: { tab: ListTab; children: (list: V
         </View>
       </View>
       {list.readUrl ? (
-        <Button title={t("list:viewAsGuest")} variant="neutral" onPress={() => viewAsGuest(list.readUrl)} />
+        <>
+          <Button
+            testID="list.view-as-guest"
+            title={t("list:viewAsGuest")}
+            variant="neutral"
+            // In surprise mode the guest view would tell reserved ideas apart: warn first (020).
+            onPress={() => (list.surpriseMode ? setAskGuestView(true) : viewAsGuest(list.readUrl))}
+          />
+          <ConfirmDialog
+            visible={askGuestView}
+            title={t("list:surprise.guestViewTitle")}
+            body={t("list:surprise.guestViewBody")}
+            confirmLabel={t("list:surprise.guestViewConfirm")}
+            keepLabel={t("list:surprise.guestViewKeep")}
+            destructive={false}
+            testID="list.guest-view-confirm"
+            onKeep={() => setAskGuestView(false)}
+            onConfirm={() => {
+              setAskGuestView(false);
+              viewAsGuest(list.readUrl);
+            }}
+          />
+        </>
       ) : null}
       <PillTabs
         tabs={tabLabels(list, (key) => t(`list:${key}`))}
         active={tab}
         onChange={(key) => {
-          if (isTab(key) && key !== tab) router.replace(`/lists/${listId}${routes[key]}`);
+          if (isTab(key) && key !== tab) router.replace(`/lists/${listId}${LIST_TAB_ROUTES[key]}`);
         }}
       />
       {children(list)}
@@ -118,4 +139,9 @@ function viewAsGuest(readUrl: string): void {
   const path = appPathForUrl(readUrl);
   if (path) router.push(`${path}?preview=1` as Href);
   else void Linking.openURL(readUrl);
+}
+
+/** Number of cards of the Reservations tab, like the site: a group gift (028) is one card for all its participations. */
+function reservationEntries(reservations: { id: string; groupGiftId?: string | null }[]): number {
+  return new Set(reservations.map((reservation) => reservation.groupGiftId ?? reservation.id)).size;
 }

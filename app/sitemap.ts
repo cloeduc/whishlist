@@ -5,7 +5,7 @@ import { siteOrigin } from "@/src/site/seo";
 /** The origin is read per request: a build without APP_ORIGIN must not freeze localhost. */
 export const dynamic = "force-dynamic";
 
-const PATHS = ["/", "/projet", "/faq", "/guide", "/mentions-legales", "/donnees-personnelles"] as const;
+const PATHS = ["/", "/about", "/faq", "/guide", "/legal-notice", "/privacy"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = siteOrigin();

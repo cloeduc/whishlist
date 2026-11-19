@@ -2,6 +2,7 @@ import { router, type Href } from "expo-router";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
 
+import { followedDisplay } from "../../../src/domain/followed-display";
 import { useMyLists, usePendingCount } from "@/data/store";
 import { AppHeader } from "@/features/account/AppHeader";
 import { useEmailUnverified, VerificationBanner } from "@/features/account/VerificationBanner";
@@ -108,13 +109,18 @@ export default function MyLists() {
                 key={sub.readToken}
                 testID={`lists.shared-card-${sub.readToken}`}
                 onPress={() => router.push(`/guest/${sub.readToken}` as Href)}
-                accessibilityLabel={sub.title}
+                accessibilityLabel={followedDisplay(sub).title}
                 style={{ paddingVertical: tokens.space[3] }}
               >
                 <View style={{ flexDirection: "row", alignItems: "center", gap: tokens.space[3], paddingHorizontal: tokens.space[3] }}>
                   <ListCover coverImageUrl={sub.coverImageUrl} theme={sub.theme} size={48} framed={false} />
                   <View style={{ flex: 1, gap: tokens.space[1] }}>
-                    <Text weight="heading">{sub.title}</Text>
+                    <Text weight="heading">{followedDisplay(sub).title}</Text>
+                    {followedDisplay(sub).person ? (
+                      <Text testID={`lists.shared-person-${sub.readToken}`} size="sm">
+                        {followedDisplay(sub).person}
+                      </Text>
+                    ) : null}
                     {sub.subtitle ? (
                       <Text size="sm" color={tokens.colors.mutedForeground} numberOfLines={2}>
                         {sub.subtitle}

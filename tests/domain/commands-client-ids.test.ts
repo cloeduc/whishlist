@@ -146,7 +146,7 @@ test("saveItem with id: creation, then resend → same idea, no duplicate or cha
 test("saveItem: id of an idea from another list → idConflict", async () => {
   const doc = apiDoc();
   doc.wishlists.push({ ...doc.wishlists[0]!, id: "w2", readToken: "rt2", inviteToken: "it2" });
-  doc.memberships.push({ wishlistId: "w2", userId: "alex", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z" });
+  doc.memberships.push({ wishlistId: "w2", userId: "alex", role: "owner", joinedAt: "2026-01-01T00:00:00.000Z", surpriseMode: false });
   doc.types.push({ id: "t2", wishlistId: "w2", label: "Jeux", sortOrder: 0 });
   doc.people.push({ id: "p2", wishlistId: "w2", label: "Alex" });
   await withStore(doc, async () => {

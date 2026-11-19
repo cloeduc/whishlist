@@ -16,7 +16,8 @@ import {
   mineReservationIdsFor,
   toPublicItem,
 } from "../../../src/domain/read";
-import { viewerRelation } from "../../../src/domain/subscription";
+import { followedDisplay } from "../../../src/domain/followed-display";
+import { findSubscription, followNamesOf, viewerRelation } from "../../../src/domain/subscription";
 import { resolveTheme, themeToCssVars } from "../../../src/domain/theme";
 import { subscribeAction, unsubscribeAction } from "../../../src/server/actions";
 import { getDocument } from "../../../src/store/db";
@@ -34,6 +35,7 @@ import { getLocale, getTranslations, translateError } from "@/src/i18n/server";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import type { CSSProperties } from "react";
+import { groupGiftSummaryText } from "@/src/site/group-gift-text";
 import { unlockErrorMessage } from "@/src/site/read-unlock";
 
 export async function generateMetadata({
@@ -106,12 +108,18 @@ export default async function ReadPage({
   const mineIds = mineReservationIdsFor(doc, list.id, user?.id ?? null, claimedIds);
   const activeAccount = user && !user.mustChangePassword ? user : null;
   const { isMember, subscribed: isSubscribed } = viewerRelation(doc, list.id, activeAccount?.id ?? null);
+  // The subscriber's own names (024): only for an account that follows the list.
+  const subscription = isSubscribed && activeAccount ? findSubscription(doc, list.id, activeAccount.id) : null;
+  const shown = subscription
+    ? followedDisplay({ title: list.title, ...followNamesOf(doc, list, subscription) })
+    : { title: list.title, person: null };
   const types = doc.types.filter((type) => type.wishlistId === list.id);
   const people = doc.people.filter((person) => person.wishlistId === list.id);
   const qui = people.some((person) => person.id === query.qui) ? query.qui! : null;
   const budget = parseBudget(query.budget);
   const priceLocale = intlLocale(locale);
-  const visible = listPublicVisibleItems(doc, list.id, mineIds);
+  // A member who does not chip in sees a group gift as a reservation (SC-005).
+  const visible = listPublicVisibleItems(doc, list.id, mineIds, { groupGifts: !isMember });
   const filtered = sortByPriority(applyBudget(applyPerson(visible, qui), budget));
   const groups = groupByCategory(filtered, types).map((group) => ({
     ...group,
@@ -135,7 +143,8 @@ export default async function ReadPage({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
         <WishlistCover coverImageUrl={list.coverImageUrl} theme={theme} size="md" alt={list.title} />
         <div className="flex min-w-0 flex-col gap-2">
-          <h1 className="text-2xl font-bold tracking-tight">{list.title}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{shown.title}</h1>
+          {shown.person ? <p className="font-medium">{shown.person}</p> : null}
           {list.subtitle ? <p className="text-muted-foreground text-pretty">{list.subtitle}</p> : null}
           <p className="text-muted-foreground text-pretty text-sm">{t("intro")}</p>
         </div>
@@ -213,7 +222,7 @@ export default async function ReadPage({
         ))}
       </nav>
       <div className="flex flex-wrap items-center gap-2">
-        <LinkButton href={`/l/${readToken}/reserver`}>{t("reserveIdea")}</LinkButton>
+        <LinkButton href={`/l/${readToken}/reserve`}>{t("reserveIdea")}</LinkButton>
         {!isMember ? (
           activeAccount ? (
             isSubscribed ? (
@@ -242,7 +251,7 @@ export default async function ReadPage({
             )
           ) : (
             <LinkButton
-              href={`/connexion?next=${encodeURIComponent(`/l/${readToken}`)}`}
+              href={`/login?next=${encodeURIComponent(`/l/${readToken}`)}`}
               variant="neutral"
             >
               {t("subscription.follow")}
@@ -296,6 +305,24 @@ export default async function ReadPage({
                   cancelDescription={t("reservation.cancelBody")}
                   cancelConfirm={t("reservation.cancelConfirm")}
                   cancelKeep={t("reservation.cancelKeep")}
+                  groupGift={
+                    item.groupGift
+                      ? {
+                          badge: t("groupGift.badge"),
+                          summary: groupGiftSummaryText(t, item.groupGift, priceLocale),
+                          statusBadges: item.groupGift.mine
+                            ? [
+                                t("groupGift.mine"),
+                                ...(item.groupGift.status === "complete" ? [t("groupGift.complete")] : []),
+                              ]
+                            : [],
+                          actionLabel: item.groupGift.mine ? t("groupGift.open") : t("groupGift.join"),
+                          actionAria: item.groupGift.mine
+                            ? t("groupGift.openAria", { name: item.name })
+                            : t("groupGift.joinAria", { name: item.name }),
+                        }
+                      : null
+                  }
                 />
               ))}
             </section>

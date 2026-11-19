@@ -70,7 +70,7 @@ test("+native-intent: a share opens « Ajouter à une liste » and is kept as th
   expect(afterSignIn()).toBe("/share");
   clearPendingLink();
   // Other addresses keep the site's link rule.
-  expect(redirectSystemPath({ path: "ohyoushouldnt://inviter/tok", initial: false })).toBe("/links/invite/tok");
+  expect(redirectSystemPath({ path: "ohyoushouldnt://invite/tok", initial: false })).toBe("/links/invite/tok");
   expect(afterSignIn()).toBe("/");
 });
 
@@ -82,6 +82,7 @@ const base = {
   readUrl: "https://ohyoushouldnt.example.test/l/rt",
   inviteUrl: "https://ohyoushouldnt.example.test/i/it",
   hasReadPassword: false,
+  surpriseMode: false,
   reservations: [],
   members: [],
   items: [],

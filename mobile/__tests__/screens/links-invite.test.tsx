@@ -2,12 +2,12 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react-nativ
 import { router } from "expo-router";
 
 import InviteLink from "../../app/links/invite/[token]";
-import { signIn, signOut } from "@/auth/session";
+import { signOut } from "@/auth/session";
 import { resetStore } from "@/data/store";
 import { i18n } from "@/i18n";
 import { afterSignIn, clearPendingLink } from "@/links/pending";
 
-import { fakeFetch, json, me } from "../helpers/fetch";
+import { fakeFetch, json, me, signInAs } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
 
 jest.mock("expo-router", () => ({
@@ -30,9 +30,6 @@ beforeEach(async () => {
   jest.mocked(router.push).mockClear();
 });
 
-async function signInAs(user = me) {
-  await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user });
-}
 
 test("without a session: the link is kept and sign-in or sign-up is offered", async () => {
   fakeFetch({});

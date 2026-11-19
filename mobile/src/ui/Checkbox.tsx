@@ -19,23 +19,33 @@ export function Checkbox({
   label,
   description,
   testID,
+  disabled = false,
 }: {
   checked: boolean;
   onChange: (checked: boolean) => void;
   label: string;
   description?: string;
   testID?: string;
+  /** As `disabled:opacity-50` on the site. */
+  disabled?: boolean;
 }) {
   const palette = useTheme();
   return (
     <Pressable
       testID={testID}
       accessibilityRole="checkbox"
-      accessibilityState={{ checked }}
+      accessibilityState={{ checked, disabled }}
+      disabled={disabled}
       accessibilityLabel={label}
       accessibilityHint={description}
       onPress={() => onChange(!checked)}
-      style={{ flexDirection: "row", alignItems: "flex-start", gap: tokens.space[2], minHeight: tokens.touchTarget }}
+      style={{
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: tokens.space[2],
+        minHeight: tokens.touchTarget,
+        opacity: disabled ? 0.5 : 1,
+      }}
     >
       <View style={{ paddingTop: 2 }}>
         <Shadow

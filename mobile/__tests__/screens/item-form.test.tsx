@@ -1,18 +1,21 @@
 import NetInfo, { NetInfoStateType } from "@react-native-community/netinfo";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { router } from "expo-router";
 
+import EditItem from "../../app/(app)/lists/[listId]/items/[itemId]";
 import NewItem from "../../app/(app)/lists/[listId]/items/new";
 import type { Schemas } from "@/api/client";
 import { apiTransport, resetStore } from "@/data/store";
 import { ListProvider } from "@/features/lists/ListContext";
 import { i18n } from "@/i18n";
 import { watchNetwork } from "@/network";
+import { enqueue } from "@/offline/outbox";
 import { putSnapshot } from "@/offline/snapshot";
 import { setTransport, stopSync } from "@/offline/sync";
 
 import { fakeFetch, json } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
+import { setOnline } from "../helpers/network";
 
 let mockParams: Record<string, string> = {};
 jest.mock("expo-router", () => ({
@@ -31,6 +34,7 @@ const list: Schemas["MemberList"] = {
   readUrl: "https://ohyoushouldnt.example.test/l/rt",
   inviteUrl: "https://ohyoushouldnt.example.test/i/it",
   hasReadPassword: false,
+  surpriseMode: false,
   categories: [{ id: "t", label: "Jeux", sortOrder: 0 }],
   people: [{ id: "p", label: "Alex" }],
   items: [],
@@ -211,4 +215,171 @@ test("the pre-fill button is disabled offline, with the explanation", async () =
   listener({ isConnected: false, isInternetReachable: false, type: NetInfoStateType.none, details: null, isWifiEnabled: false });
   await waitFor(() => expect(screen.getByTestId("enrich")).toBeDisabled());
   expect(screen.getByText(i18n.t("mobile:offline.needsNetwork"))).toBeOnTheScreen();
+});
+
+// 023 US1: « + Nouvelle catégorie » from the form.
+
+const withBooks: Schemas["MemberList"] = { ...list, categories: [...list.categories, { id: "t-books", label: "Livres", sortOrder: 1 }] };
+
+async function openNewCategory() {
+  await fireEvent.press(screen.getByTestId("item-form.type"));
+  await fireEvent.press(await screen.findByTestId("item-form.new-type"));
+  return screen.findByTestId("item-form.new-type-name");
+}
+
+async function fillNameAndPrice() {
+  await fireEvent.changeText(screen.getByLabelText("Nom du cadeau"), "Roman");
+  await fireEvent.changeText(screen.getByLabelText("Prix (€)"), "12");
+}
+
+function expectNameAndPriceKept() {
+  expect(screen.getByLabelText("Nom du cadeau").props.value).toBe("Roman");
+  expect(screen.getByLabelText("Prix (€)").props.value).toBe("12");
+}
+
+const capabilities = { "GET /capabilities": () => json(200, { apiVersion: "1.9.0", enrich: false, mail: false }) };
+
+test("a new category from the form is created, chosen, and the rest of the form stays (023)", async () => {
+  let sent: unknown = null;
+  let created = false;
+  routes({
+    ...capabilities,
+    "POST /lists/w/types": async (request) => {
+      sent = await request.json();
+      created = true;
+      return json(201, { id: "t-books", label: "Livres" });
+    },
+    "GET /lists/w": () => json(200, created ? withBooks : list),
+  });
+  await setOnline(true);
+  await renderForm();
+  await fillNameAndPrice();
+  await fireEvent.changeText(await openNewCategory(), "Livres");
+  await fireEvent.press(screen.getByTestId("item-form.new-type-add"));
+  await waitFor(() => expect(screen.queryByTestId("item-form.new-type-name")).toBeNull());
+  expect(sent).toEqual({ label: "Livres" });
+  expect(screen.getByTestId("item-form.type")).toHaveTextContent("Livres");
+  expectNameAndPriceKept();
+});
+
+test("the list fails to reload after the creation: the new category is still shown and chosen (023)", async () => {
+  routes({
+    ...capabilities,
+    "POST /lists/w/types": () => json(201, { id: "t-books", label: "Livres" }),
+    "GET /lists/w": () => json(500, { error: { code: "serverError", message: "x" } }),
+  });
+  await setOnline(true);
+  await renderForm();
+  await fireEvent.changeText(await openNewCategory(), "Livres");
+  await fireEvent.press(screen.getByTestId("item-form.new-type-add"));
+  await waitFor(() => expect(screen.queryByTestId("item-form.new-type-name")).toBeNull());
+  expect(screen.getByTestId("item-form.type")).toHaveTextContent("Livres");
+});
+
+test("a category that already exists: the settings' message, nothing chosen, everything typed stays (023)", async () => {
+  routes({ ...capabilities, "POST /lists/w/types": () => json(400, { error: { code: "typeExists", message: "x" } }) });
+  await setOnline(true);
+  await renderForm();
+  await fillNameAndPrice();
+  await fireEvent.changeText(await openNewCategory(), "jeux");
+  await fireEvent.press(screen.getByTestId("item-form.new-type-add"));
+  expect(await screen.findByTestId("item-form.new-type-error")).toHaveTextContent(i18n.t("errors:typeExists"));
+  expect(screen.getByTestId("item-form.new-type-name").props.value).toBe("jeux");
+  expect(screen.getByTestId("item-form.type")).toHaveTextContent("Jeux");
+  expectNameAndPriceKept();
+});
+
+test("like the settings, « Ajouter » stays disabled while the name is empty; « Annuler » keeps the category (023)", async () => {
+  const server = routes(capabilities);
+  await setOnline(true);
+  await renderForm();
+  await fireEvent.changeText(await openNewCategory(), "   ");
+  expect(screen.getByTestId("item-form.new-type-add")).toBeDisabled();
+  await fireEvent.press(screen.getByTestId("item-form.new-type-cancel"));
+  expect(screen.queryByTestId("item-form.new-type-name")).toBeNull();
+  expect(screen.getByTestId("item-form.type")).toHaveTextContent("Jeux");
+  expect(server.calls).not.toContain("POST /lists/w/types");
+});
+
+test("offline: « + Nouvelle catégorie » is disabled with the network explanation (023)", async () => {
+  routes(capabilities);
+  // The first watch also asks NetInfo once (answered « connected »): let that answer land, then cut.
+  await setOnline(true);
+  await act(async () => {
+    await NetInfo.fetch();
+  });
+  await setOnline(false);
+  await renderForm();
+  await fireEvent.press(screen.getByTestId("item-form.type"));
+  const row = await screen.findByTestId("item-form.new-type");
+  expect(row).toBeDisabled();
+  // Under « Remplir depuis le lien », and under the disabled row of the sheet.
+  expect(screen.getAllByText(i18n.t("mobile:offline.needsNetwork"))).toHaveLength(2);
+  await fireEvent.press(row);
+  expect(screen.queryByTestId("item-form.new-type-name")).toBeNull();
+});
+
+test("a list not sent yet: disabled even online, with the « pas encore envoyée » explanation (023)", async () => {
+  routes(capabilities);
+  await setOnline(true);
+  await enqueue({
+    kind: "createList",
+    listId: "new-list-id-00001",
+    targetId: "new-list-id-00001",
+    payload: { id: "new-list-id-00001", title: "Anniversaire", category: "Jeux", person: "Lou", categoryId: "c-new-list-00001", personId: "p-new-list-00001" },
+  });
+  await render(
+    <ListProvider listId="new-list-id-00001">
+      <NewItem />
+    </ListProvider>,
+  );
+  await screen.findByLabelText("Nom du cadeau");
+  await fireEvent.press(screen.getByTestId("item-form.type"));
+  expect(await screen.findByTestId("item-form.new-type")).toBeDisabled();
+  expect(screen.getByText(i18n.t("mobile:lists.notSentYet"))).toBeOnTheScreen();
+});
+
+test("editing an idea: the same entry creates and chooses a category, the name stays (023)", async () => {
+  const withIdea: Schemas["MemberList"] = {
+    ...list,
+    items: [
+      {
+        id: "i1",
+        name: "Puzzle",
+        typeId: "t",
+        personId: "p",
+        url: null,
+        imageUrl: null,
+        priceCents: null,
+        priceLabel: null,
+        priority: null,
+        secondHandOk: false,
+        description: null,
+        archived: false,
+        sortOrder: 0,
+      },
+    ],
+  };
+  let created = false;
+  routes({
+    ...capabilities,
+    "POST /lists/w/types": () => {
+      created = true;
+      return json(201, { id: "t-books", label: "Livres" });
+    },
+    "GET /lists/w": () => json(200, created ? { ...withIdea, categories: withBooks.categories } : withIdea),
+  });
+  await putSnapshot("list:w", withIdea);
+  await setOnline(true);
+  mockParams = { itemId: "i1" };
+  await render(
+    <ListProvider listId="w">
+      <EditItem />
+    </ListProvider>,
+  );
+  await screen.findByLabelText("Nom du cadeau");
+  await fireEvent.changeText(await openNewCategory(), "Livres");
+  await fireEvent.press(screen.getByTestId("item-form.new-type-add"));
+  await waitFor(() => expect(screen.getByTestId("item-form.type")).toHaveTextContent("Livres"));
+  expect(screen.getByLabelText("Nom du cadeau").props.value).toBe("Puzzle");
 });

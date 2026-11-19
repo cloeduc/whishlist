@@ -35,6 +35,7 @@ tsconfig.tsbuildinfo
 
 tmp/
 mobile/.maestro/scripts/strings.generated.js
+mobile/.maestro/scripts/legacy-paths.generated.js
 public/instance/
 
 # Local notes (do not commit)

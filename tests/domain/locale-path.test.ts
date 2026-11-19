@@ -70,3 +70,69 @@ test("internalPath: a site path only, never another origin", () => {
     assert.equal(internalPath(value), null, String(value));
   }
 });
+
+const route = (pathname: string, search = "", method?: string) =>
+  decideLocaleRoute({ pathname, search, nextUrl: null, method });
+
+test("a former address redirects permanently to its English address, in one step", () => {
+  const redirect = (pathname: string, search: string, locale: "fr" | "en") => ({
+    type: "redirect",
+    status: 301,
+    pathname,
+    search,
+    locale,
+  });
+  assert.deepEqual(route("/compte"), redirect("/account", "", "fr"));
+  assert.deepEqual(route("/en/compte/export"), redirect("/en/account/export", "", "en"));
+  assert.deepEqual(route("/fr/listes/abc", "?onglet=partage"), redirect("/lists/abc", "?tab=sharing", "fr"));
+  assert.deepEqual(
+    route("/connexion", "?next=%2Flistes%2Fabc&lang=en"),
+    redirect("/en/login", "?next=%2Flists%2Fabc", "en"),
+  );
+  assert.deepEqual(route("/en/inviter/tok", "?lang=fr"), redirect("/invite/tok", "", "fr"));
+  assert.deepEqual(route("/lists/abc", "?onglet=partage"), redirect("/lists/abc", "?tab=sharing", "fr"));
+  assert.deepEqual(route("/l/read/reserver", "?itemId=x"), redirect("/l/read/reserve", "?itemId=x", "fr"));
+  assert.deepEqual(route("/compte", "", "HEAD"), redirect("/account", "", "fr"));
+});
+
+test("a form posted to a former address is rewritten, not redirected", () => {
+  assert.deepEqual(route("/listes/abc", "?onglet=partage", "POST"), {
+    type: "rewrite",
+    pathname: "/lists/abc",
+    search: "?tab=sharing",
+    locale: "fr",
+  });
+  assert.deepEqual(route("/en/compte", "", "POST"), { type: "rewrite", pathname: "/account", search: "", locale: "en" });
+});
+
+test("current addresses are served without a redirect", () => {
+  for (const pathname of ["/", "/faq", "/l/read", "/l/read/types", "/lists/abc", "/account"]) {
+    assert.deepEqual(route(pathname), { type: "continue", locale: "fr" }, pathname);
+  }
+  assert.deepEqual(route("/en/lists/abc", "?tab=sharing"), {
+    type: "rewrite",
+    pathname: "/lists/abc",
+    search: "?tab=sharing",
+    locale: "en",
+  });
+});
+
+test("a former address reached from an English page keeps English, in one step", () => {
+  assert.deepEqual(decideLocaleRoute({ pathname: "/compte", search: "", nextUrl: "/en/faq" }), {
+    type: "redirect",
+    status: 301,
+    pathname: "/en/account",
+    search: "",
+    locale: "en",
+  });
+});
+
+test("a doubled slash behind the language prefix is not translated as a former address", () => {
+  // `/en//host` keeps its pre-018 handling (rewrite on this server); the legacy table does not touch it.
+  assert.deepEqual(route("/en//evil.test", "?onglet=idees"), {
+    type: "rewrite",
+    pathname: "//evil.test",
+    search: "?onglet=idees",
+    locale: "en",
+  });
+});

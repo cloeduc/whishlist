@@ -21,10 +21,12 @@ export const publicList = (items = [publicItem("i1", "t1"), publicItem("i2", "t2
   theme: { preset: "default" },
   subscribed: false,
   isMember: false,
+  follow: null,
   categories: [
     { id: "t1", label: "Jeux", sortOrder: 0 },
     { id: "t2", label: "Livres", sortOrder: 1 },
   ],
   people: [{ id: "p", label: "Alex" }],
   items,
+  claimKey: "ck-rt",
 });

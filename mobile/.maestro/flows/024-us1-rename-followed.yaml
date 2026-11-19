@@ -1,0 +1,76 @@
+# 024 US1: give a followed list your own name; the list view and « Listes suivies » show it,
+# and « Revenir aux noms de la liste » brings the list's title back.
+appId: app.ohyoushouldnt.mobile
+name: "024 US1 — Rename a followed list"
+tags:
+  - 024-us1
+---
+- runFlow: ../subflows/launch-clean.yaml
+- runScript: ../scripts/strings.generated.js
+
+# Sam (demo account, not a member of the demo list) follows it. Following again is harmless.
+- runFlow:
+    file: ../subflows/submit-login.yaml
+    env:
+      EMAIL: sam@example.test
+      PASSWORD: ${MAESTRO_DEMO_PASSWORD}
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 20000
+- tapOn:
+    id: lists.follow-open
+- tapOn:
+    id: follow.link
+- inputText: demo-list-lecture
+- tapOn:
+    id: follow.submit
+- extendedWaitUntil:
+    visible:
+      id: guest.screen
+    timeout: 10000
+
+# « Renommer »: a name of one's own.
+- tapOn:
+    id: guest.rename
+- extendedWaitUntil:
+    visible:
+      id: guest-names.list-name
+    timeout: 10000
+- tapOn:
+    id: guest-names.list-name
+- inputText: "Noel de demo"
+- hideKeyboard
+- tapOn:
+    id: guest-names.save
+- extendedWaitUntil:
+    visible:
+      id: guest.title
+      text: "Noel de demo"
+    timeout: 10000
+
+# « Mes listes » shows it too.
+- tapOn:
+    id: back-link.back
+- extendedWaitUntil:
+    visible:
+      id: lists.screen
+    timeout: 10000
+- assertVisible: "Noel de demo"
+
+# Back to the list's own title.
+- tapOn:
+    id: lists.shared-card-demo-list-lecture
+- tapOn:
+    id: guest.rename
+- extendedWaitUntil:
+    visible:
+      id: guest-names.reset
+    timeout: 10000
+- tapOn:
+    id: guest-names.reset
+- extendedWaitUntil:
+    notVisible:
+      id: guest.title
+      text: "Noel de demo"
+    timeout: 10000

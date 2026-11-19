@@ -4,6 +4,7 @@ import { createWishlist } from "../../src/domain/import";
 import {
   addPerson,
   addType,
+  cancelOwnReservation,
   cancelReservation,
   createItem,
   deleteItem,
@@ -14,6 +15,7 @@ import {
   setItemType,
 } from "../../src/domain/items";
 import { reserveItem } from "../../src/domain/reserve";
+import { setSurpriseMode } from "../../src/domain/surprise";
 import { emptyDatabase } from "../../src/domain/types";
 
 function ready() {
@@ -101,7 +103,7 @@ test("idea validation and a reservation that blocks deletion", () => {
   assert.equal(reserved.ok, true);
   if (!reserved.ok) return;
   assert.equal(reserved.reservation.fromName, null);
-  assert.equal(reserved.doc.items.find((item) => item.id === "item")?.archived, true);
+  assert.equal(reserved.doc.items.find((item) => item.id === "item")?.archived, false);
   const blocked = deleteItem(reserved.doc, { wishlistId: "w", actorId: "u", itemId: "item" });
   assert.equal(blocked.ok, false);
   if (blocked.ok) return;
@@ -116,6 +118,46 @@ test("idea validation and a reservation that blocks deletion", () => {
   if (!cancelled.ok) return;
   assert.equal(cancelled.doc.reservations.length, 0);
   assert.equal(cancelled.doc.items.find((item) => item.id === "item")?.archived, false);
+});
+
+test("surprise mode: deleting a reserved idea is refused with a neutral message, a free idea is deleted (020)", () => {
+  const created = createItem(ready(), { wishlistId: "w", actorId: "u", name: "X", typeId: "t", personId: "p", id: "item" });
+  assert.ok(created.ok);
+  const free = createItem(created.doc, { wishlistId: "w", actorId: "u", name: "Y", typeId: "t", personId: "p", id: "free" });
+  assert.ok(free.ok);
+  const reserved = reserveItem(free.doc, { wishlistId: "w", itemId: "item" });
+  assert.ok(reserved.ok);
+  const surprise = setSurpriseMode(reserved.doc, { wishlistId: "w", actorId: "u", enabled: true });
+  assert.ok(surprise.ok);
+  assert.deepEqual(deleteItem(surprise.doc, { wishlistId: "w", actorId: "u", itemId: "item" }), {
+    ok: false,
+    error: "itemLockedSurprise",
+  });
+  assert.ok(deleteItem(surprise.doc, { wishlistId: "w", actorId: "u", itemId: "free" }).ok);
+  assert.deepEqual(deleteItem(reserved.doc, { wishlistId: "w", actorId: "u", itemId: "item" }), {
+    ok: false,
+    error: "itemHasReservation",
+  });
+});
+
+test("cancelling a reservation keeps an idea a member archived in the archives", () => {
+  const created = createItem(ready(), { wishlistId: "w", actorId: "u", name: "X", typeId: "t", personId: "p", id: "item" });
+  assert.ok(created.ok);
+  const reserved = reserveItem(created.doc, { wishlistId: "w", itemId: "item" });
+  assert.ok(reserved.ok);
+  const archived = setItemArchived(reserved.doc, { wishlistId: "w", actorId: "u", itemId: "item", archived: true });
+  assert.ok(archived.ok);
+  const cancelled = cancelReservation(archived.doc, { wishlistId: "w", actorId: "u", reservationId: reserved.reservation.id });
+  assert.ok(cancelled.ok);
+  assert.equal(cancelled.doc.items.find((item) => item.id === "item")?.archived, true);
+  const own = cancelOwnReservation(archived.doc, {
+    wishlistId: "w",
+    reservationId: reserved.reservation.id,
+    userId: null,
+    claimedIds: new Set([reserved.reservation.id]),
+  });
+  assert.ok(own.ok);
+  assert.equal(own.doc.items.find((item) => item.id === "item")?.archived, true);
 });
 
 test("changing an idea's category", () => {

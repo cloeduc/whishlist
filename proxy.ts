@@ -21,7 +21,10 @@ function withLocaleCookie(response: NextResponse, request: NextRequest, locale: 
   });
 }
 
-/** The URL carries the language (not for `/api/`, which follows `Accept-Language`). French has no prefix, English is under `/en`. */
+/**
+ * The URL carries the language (not for `/api/`, which follows `Accept-Language`). French has no prefix, English is under `/en`.
+ * Former French addresses redirect to their English ones (feature 018).
+ */
 export function proxy(request: NextRequest) {
   const { requestHeaders, value } = cspHeaders(request);
   const moved = legacyHostRedirect(
@@ -39,6 +42,7 @@ export function proxy(request: NextRequest) {
     pathname: request.nextUrl.pathname,
     search: request.nextUrl.search,
     nextUrl: request.headers.get("next-url"),
+    method: request.method,
   });
 
   if (decision.type === "redirect") {

@@ -12,7 +12,7 @@ test("numberedTitle keeps a free name, numbers it otherwise", () => {
   );
   // case-insensitive and ignoring leading/trailing spaces
   assert.equal(numberedTitle("Liste de Nathan", ["  liste de nathan  "]), "Liste de Nathan 2");
-  // fills a gap: 2 taken, 3 free
+  // fills a gap: 3 taken, 2 free
   assert.equal(numberedTitle("L", ["L", "L 3"]), "L 2");
 });
 

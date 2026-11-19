@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
-import { addLabel, deleteLabel, renameLabel, type LabelKind } from "@/data/labels";
+import { deleteLabel, renameLabel, type LabelKind } from "@/data/labels";
 import { errorText } from "@/features/errors";
 import { useTheme } from "@/theme/ListTheme";
 import { tokens } from "@/theme/tokens";
@@ -15,37 +15,32 @@ import { Input } from "@/ui/Input";
 import { PressableShadow } from "@/ui/Shadow";
 import { Text } from "@/ui/Text";
 
+import { NewLabelField } from "./NewLabelField";
+
 type Label = { id: string; label: string };
 
 const texts = {
   types: {
     title: "categories.types",
     hint: "categories.typesHint",
-    newLabel: "categories.newType",
-    placeholder: "categories.newTypePlaceholder",
-    addAria: "categories.addTypeAria",
     renameAria: "categories.renameAria",
   },
   people: {
     title: "categories.people",
     hint: "categories.peopleHint",
-    newLabel: "categories.newPerson",
-    placeholder: "categories.newPersonPlaceholder",
-    addAria: "categories.addPersonAria",
     renameAria: "categories.renamePersonAria",
   },
 } as const;
 
 /**
  * Categories or « qui » as editable chips, like `components/site/label-chips.tsx`:
- * tap a chip to rename it, the cross to remove it, a field to add one.
+ * tap a chip to rename it, the cross to remove it, a field to add one (`NewLabelField`).
  * A label still in use is refused by the server, with its message (FR-016).
  */
 export function LabelEditor({ listId, kind, labels, disabled }: { listId: string; kind: LabelKind; labels: Label[]; disabled: boolean }) {
   const { t } = useTranslation("list");
   const palette = useTheme();
   const text = texts[kind];
-  const [draft, setDraft] = useState("");
   const [editing, setEditing] = useState<Label | null>(null);
   const [rename, setRename] = useState("");
   const [busy, setBusy] = useState(false);
@@ -124,18 +119,14 @@ export function LabelEditor({ listId, kind, labels, disabled }: { listId: string
             </View>
           </Field>
         ) : null}
-        <Field label={t(text.newLabel)}>
-          <Input testID={`settings.${kind}-new`} accessibilityLabel={t(text.newLabel)} placeholder={t(text.placeholder)} value={draft} onChangeText={setDraft} />
-          <Button
-            testID={`settings.${kind}-add`}
-            title={t("categories.add")}
-            accessibilityLabel={t(text.addAria)}
-            variant="neutral"
-            size="sm"
-            disabled={locked || !draft.trim()}
-            onPress={() => void run(() => addLabel(listId, kind, draft.trim()), () => setDraft(""))}
-          />
-        </Field>
+        <NewLabelField
+          listId={listId}
+          kind={kind}
+          disabled={locked}
+          inputTestID={`settings.${kind}-new`}
+          addTestID={`settings.${kind}-add`}
+          errorTestID={`settings.${kind}-error`}
+        />
         {error ? <Alert variant="destructive" testID={`settings.${kind}-error`}>{error}</Alert> : null}
       </CardContent>
     </Card>

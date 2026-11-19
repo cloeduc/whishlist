@@ -15,7 +15,7 @@ import { stripLocalePrefix, withLocale } from "@/src/i18n/locale-path";
 function isActive(pathname: string, href: string): boolean {
   const path = stripLocalePrefix(pathname).path;
   if (href === "/") {
-    return path === "/" || path.startsWith("/listes");
+    return path === "/" || path.startsWith("/lists");
   }
   return path === href || path.startsWith(`${href}/`);
 }
@@ -53,7 +53,7 @@ export function SiteNav({
           {!user.mustChangePassword ? (
             <>
               {navLink("/", t("nav.myLists"))}
-              {navLink("/compte", t("nav.account"))}
+              {navLink("/account", t("nav.account"))}
             </>
           ) : null}
           <form action={logoutAction}>
@@ -64,8 +64,8 @@ export function SiteNav({
         </>
       ) : (
         <>
-          {navLink("/connexion", t("nav.login"))}
-          {navLink("/inscription", t("nav.register"))}
+          {navLink("/login", t("nav.login"))}
+          {navLink("/register", t("nav.register"))}
         </>
       )}
       <Suspense fallback={null}>

@@ -54,6 +54,19 @@ test("import: the whole file is taken as is, then marked imported", async () => 
   });
 });
 
+test("import: a subscription from before 024 gets null names", async () => {
+  await withTempDataPath(async (dataPath) => {
+    const legacy = JSON.parse(JSON.stringify(apiDoc())) as Doc;
+    legacy.subscriptions = [
+      { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-11-02T00:00:00.000Z" } as Doc["subscriptions"][number],
+    ];
+    await writeFile(dataPath, JSON.stringify(legacy), "utf8");
+    const doc = await readDocument();
+    assert.equal(doc.subscriptions[0]!.customTitle, null);
+    assert.equal(doc.subscriptions[0]!.customOwnerName, null);
+  });
+});
+
 test("import: old fields get their default value", async () => {
   await withTempDataPath(async (dataPath) => {
     const legacy = JSON.parse(JSON.stringify(apiDoc())) as Record<string, unknown> & Doc;
@@ -62,6 +75,8 @@ test("import: old fields get their default value", async () => {
     delete (legacy as Partial<Doc>).passwordResets;
     delete (legacy as Partial<Doc>).emailConfirmations;
     delete (legacy as Partial<Doc>).apiKeys;
+    delete (legacy as Partial<Doc>).groupGifts;
+    delete (legacy as Partial<Doc>).groupGiftMessages;
     const user = legacy.users[0] as Partial<Doc["users"][number]>;
     delete user.sessionVersion;
     delete user.mustChangePassword;
@@ -75,6 +90,12 @@ test("import: old fields get their default value", async () => {
     delete item.imageUrl;
     delete item.archived;
     delete (legacy.reservations[0] as Partial<Doc["reservations"][number]>).userId;
+    // Before 028 a reservation had no group gift nor amount.
+    delete (legacy.reservations[0] as Partial<Doc["reservations"][number]>).groupGiftId;
+    delete (legacy.reservations[0] as Partial<Doc["reservations"][number]>).amountCents;
+    // Before 020 a reservation archived its idea, and memberships had no surprise mode.
+    legacy.items.find((entry) => entry.id === "taken")!.archived = true;
+    delete (legacy.memberships[0] as Partial<Doc["memberships"][number]>).surpriseMode;
     legacy.types.push({ id: "t0", wishlistId: "w", label: "Autres", sortOrder: 0 });
     // The first files had no sortOrder on labels.
     for (const type of legacy.types) delete (type as Partial<Doc["types"][number]>).sortOrder;
@@ -86,6 +107,10 @@ test("import: old fields get their default value", async () => {
     assert.deepEqual(doc.passwordResets, []);
     assert.deepEqual(doc.emailConfirmations, []);
     assert.deepEqual(doc.apiKeys, []);
+    assert.deepEqual(doc.groupGifts, []);
+    assert.deepEqual(doc.groupGiftMessages, []);
+    assert.equal(doc.reservations[0].groupGiftId, null);
+    assert.equal(doc.reservations[0].amountCents, null);
     // Account from before address validation: verified at its creation date (010, FR-005b).
     assert.equal(doc.users[0].emailVerifiedAt, doc.users[0].createdAt);
     assert.equal(doc.users[0].sessionVersion, 0);
@@ -97,6 +122,8 @@ test("import: old fields get their default value", async () => {
     assert.equal(doc.items[0].imageUrl, null);
     assert.equal(doc.items[0].archived, false);
     assert.equal(doc.reservations[0].userId, null);
+    assert.equal(doc.items.find((entry) => entry.id === "taken")?.archived, false);
+    assert.equal(doc.memberships[0].surpriseMode, false);
     // Missing sortOrder: alphabetical order recomputed (Autres, Jeux).
     assert.deepEqual(
       doc.types.map((t) => [t.id, t.sortOrder]),
@@ -213,8 +240,8 @@ test("rejected: each integrity check names the collection and the id, never the 
       "duplicate subscription",
       (d) =>
         d.subscriptions.push(
-          { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-01T00:00:00.000Z" },
-          { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-02T00:00:00.000Z" },
+          { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-01T00:00:00.000Z", customTitle: null, customOwnerName: null },
+          { wishlistId: "w", userId: "camille", readPasswordHash: null, createdAt: "2026-01-02T00:00:00.000Z", customTitle: null, customOwnerName: null },
         ),
       /^subscriptions: duplicate subscription \(w\/camille\)/m,
     ],
@@ -226,8 +253,38 @@ test("rejected: each integrity check names the collection and the id, never the 
           userId: "camille",
           readPasswordHash: null,
           createdAt: "2026-01-01T00:00:00.000Z",
+          customTitle: null,
+          customOwnerName: null,
         }),
       /^subscriptions: w-9\/camille → wishlistId missing \(w-9\)/m,
+    ],
+    [
+      "two group gifts for one idea",
+      (d) => d.groupGifts.push(groupGift("g-1", "tok-1"), groupGift("g-2", "tok-2")),
+      /^groupGifts: several group gifts for the same idea \(g-1, g-2\)/m,
+    ],
+    [
+      "duplicate group gift token",
+      (d) => d.groupGifts.push(groupGift("g-1", "tok-1"), { ...groupGift("g-2", "tok-1"), itemId: "gift2" }),
+      /^groupGifts: duplicate token \(g-1, g-2\)/m,
+    ],
+    [
+      "participation pointing to a missing group gift",
+      (d) => d.reservations.push(participation("p-1", "g-9")),
+      /^reservations: p-1 → groupGiftId missing \(g-9\)/m,
+    ],
+    [
+      "message pointing to a missing group gift",
+      (d) =>
+        d.groupGiftMessages.push({
+          id: "m-1",
+          groupGiftId: "g-9",
+          userId: null,
+          authorName: null,
+          body: "Coucou",
+          createdAt: "2026-01-01T00:00:00.000Z",
+        }),
+      /^groupGiftMessages: m-1 → groupGiftId missing \(g-9\)/m,
     ],
   ];
   for (const [label, breakDoc, expected] of cases) {
@@ -239,6 +296,39 @@ test("rejected: each integrity check names the collection and the id, never the 
       throw new Error(`${label} : ${(error as Error).message}`);
     });
   }
+});
+
+function groupGift(id: string, token: string): Doc["groupGifts"][number] {
+  return { id, wishlistId: "w", itemId: "gift", token, status: "open", createdAt: "2026-01-01T00:00:00.000Z", completedAt: null };
+}
+
+function participation(id: string, groupGiftId: string): Doc["reservations"][number] {
+  return {
+    id,
+    wishlistId: "w",
+    itemId: "gift",
+    fromName: null,
+    note: null,
+    userId: null,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    groupGiftId,
+    amountCents: 500,
+  };
+}
+
+test("import: several participations in one group gift are accepted on the same idea (028)", async () => {
+  await withTempDataPath(async (dataPath) => {
+    const doc = apiDoc();
+    doc.groupGifts.push(groupGift("g-1", "tok-1"));
+    doc.reservations.push(participation("p-1", "g-1"), participation("p-2", "g-1"));
+    await writeFile(dataPath, JSON.stringify(doc));
+    const imported = await readDocument();
+    assert.deepEqual(
+      imported.reservations.filter((r) => r.groupGiftId === "g-1").map((r) => r.id),
+      ["p-1", "p-2"],
+    );
+    assert.equal(imported.groupGifts[0]?.token, "tok-1");
+  });
 });
 
 test("rejected: required field missing or of the wrong type, named by collection and id", async () => {
@@ -353,5 +443,88 @@ test("migration 0001: accounts of an existing database are verified at their cre
     const doc = await readDocument();
     assert.equal(doc.users[0].emailVerifiedAt, "2026-03-01T00:00:00.000Z");
     assert.deepEqual(doc.emailConfirmations, []);
+  });
+});
+
+test("migration 0006: a reserved idea is no longer archived, memberships start without surprise mode", async () => {
+  await withTempDataPath(async () => {
+    const { readMigrationFiles } = await import("drizzle-orm/migrator");
+    const migrations = readMigrationFiles({ migrationsFolder: path.join(process.cwd(), "drizzle") });
+    const before = migrations.slice(0, migrations.findIndex((migration) => migration.sql.join("").includes("surprise_mode")));
+    // Database as in prod before 020: a reservation archived its idea.
+    const old = new Database(databaseFilePath());
+    old.exec("CREATE TABLE __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric)");
+    for (const migration of before) {
+      for (const statement of migration.sql) if (statement.trim()) old.exec(statement);
+      old.prepare("INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)").run(migration.hash, migration.folderMillis);
+    }
+    old.prepare("INSERT INTO meta (key, value) VALUES ('legacy_import', 'none')").run();
+    old.exec(`
+      INSERT INTO users (id, email, password_hash, display_name, created_at) VALUES ('u', 'u@example.test', 'h', 'U', '2026-03-01T00:00:00.000Z');
+      INSERT INTO wishlists (id, title, theme, read_token, invite_token, from_template, created_at)
+        VALUES ('w', 'L', '{}', 'read-w', 'invite-w', 0, '2026-03-01T00:00:00.000Z');
+      INSERT INTO memberships (wishlist_id, user_id, role, joined_at) VALUES ('w', 'u', 'owner', '2026-03-01T00:00:00.000Z');
+      INSERT INTO types (id, wishlist_id, label) VALUES ('t', 'w', 'Jeux');
+      INSERT INTO people (id, wishlist_id, label) VALUES ('p', 'w', 'U');
+      INSERT INTO items (id, wishlist_id, name, type_id, person_id, sort_order, archived) VALUES
+        ('taken', 'w', 'Réservée', 't', 'p', 0, 1),
+        ('stored', 'w', 'Archivée', 't', 'p', 1, 1),
+        ('free', 'w', 'Libre', 't', 'p', 2, 0);
+      INSERT INTO reservations (id, wishlist_id, item_id, created_at) VALUES ('r', 'w', 'taken', '2026-03-02T00:00:00.000Z');
+    `);
+    old.close();
+
+    const doc = await readDocument();
+    assert.deepEqual(
+      doc.items.map((item) => [item.id, item.archived]),
+      [
+        ["taken", false],
+        ["stored", true],
+        ["free", false],
+      ],
+    );
+    assert.equal(doc.memberships[0].surpriseMode, false);
+    assert.equal(doc.reservations.length, 1);
+  });
+});
+
+test("migration 0008: existing reservations stay reservations on one's own", async () => {
+  await withTempDataPath(async () => {
+    const { readMigrationFiles } = await import("drizzle-orm/migrator");
+    const migrations = readMigrationFiles({ migrationsFolder: path.join(process.cwd(), "drizzle") });
+    const before = migrations.slice(0, migrations.findIndex((migration) => migration.sql.join("").includes("group_gifts")));
+    const old = new Database(databaseFilePath());
+    old.exec("CREATE TABLE __drizzle_migrations (id SERIAL PRIMARY KEY, hash text NOT NULL, created_at numeric)");
+    for (const migration of before) {
+      for (const statement of migration.sql) if (statement.trim()) old.exec(statement);
+      old.prepare("INSERT INTO __drizzle_migrations (hash, created_at) VALUES (?, ?)").run(migration.hash, migration.folderMillis);
+    }
+    old.prepare("INSERT INTO meta (key, value) VALUES ('legacy_import', 'none')").run();
+    old.exec(`
+      INSERT INTO users (id, email, password_hash, display_name, created_at) VALUES ('u', 'u@example.test', 'h', 'U', '2026-03-01T00:00:00.000Z');
+      INSERT INTO wishlists (id, title, theme, read_token, invite_token, from_template, created_at)
+        VALUES ('w', 'L', '{}', 'read-w', 'invite-w', 0, '2026-03-01T00:00:00.000Z');
+      INSERT INTO types (id, wishlist_id, label) VALUES ('t', 'w', 'Jeux');
+      INSERT INTO people (id, wishlist_id, label) VALUES ('p', 'w', 'U');
+      INSERT INTO items (id, wishlist_id, name, type_id, person_id, sort_order, archived) VALUES ('taken', 'w', 'Réservée', 't', 'p', 0, 0);
+      INSERT INTO reservations (id, wishlist_id, item_id, from_name, user_id, created_at)
+        VALUES ('r', 'w', 'taken', 'Sam', 'u', '2026-03-02T00:00:00.000Z');
+    `);
+    old.close();
+
+    const doc = await readDocument();
+    assert.equal(doc.reservations.length, 1);
+    assert.equal(doc.reservations[0].fromName, "Sam");
+    assert.equal(doc.reservations[0].groupGiftId, null);
+    assert.equal(doc.reservations[0].amountCents, null);
+    assert.deepEqual(doc.groupGifts, []);
+    // The idea stays unique for reservations on one's own.
+    assert.throws(
+      () =>
+        openStore()
+          .writer.prepare("INSERT INTO reservations (id, wishlist_id, item_id, created_at) VALUES ('r2', 'w', 'taken', 'x')")
+          .run(),
+      /UNIQUE/,
+    );
   });
 });

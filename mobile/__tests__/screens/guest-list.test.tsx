@@ -38,6 +38,8 @@ test("without an account: the list, its categories, and « Réserver ce cadeau �
   await render(<GuestList />);
   expect(await screen.findByTestId("guest.title")).toHaveTextContent("Liste d'Alex");
   expect(screen.getByText("Idée i1")).toBeOnTheScreen();
+  // Not followed (024): no person's name.
+  expect(screen.queryByTestId("guest.person")).toBeNull();
   expect(screen.queryByText(/Modifier|Archiver/)).toBeNull();
   await fireEvent.press(screen.getByTestId("guest.offer-0"));
   expect(router.push).toHaveBeenCalledWith("/guest/rt/reserve?itemId=i1");
@@ -175,7 +177,28 @@ const summary = {
   readUrl: "https://api.example.test/l/rt",
   subscribedAt: "2026-11-02T10:00:00.000Z",
   locked: false,
+  customTitle: null,
+  customOwnerName: null,
+  ownerName: "Alex",
 };
+
+test("a followed list shows the subscriber's name in its header (024), and offers « Renommer »", async () => {
+  await signedIn();
+  fakeFetch({
+    "GET /public/lists/rt": () =>
+      json(200, {
+        ...publicList(),
+        subscribed: true,
+        follow: { customTitle: "Noël d'Alex", customOwnerName: null, ownerName: "Alex" },
+      }),
+    "GET /lists": () => json(200, { lists: [], subscriptions: [{ ...summary, customTitle: "Noël d'Alex" }] }),
+  });
+  await render(<GuestList />);
+  expect(await screen.findByTestId("guest.title")).toHaveTextContent("Noël d'Alex");
+  expect(screen.getByTestId("guest.person")).toHaveTextContent("Alex");
+  await fireEvent.press(screen.getByTestId("guest.rename"));
+  expect(router.push).toHaveBeenCalledWith("/guest/rt/names");
+});
 
 test("with an account: follow the list, then unfollow it after confirmation", async () => {
   await signedIn();
@@ -321,4 +344,37 @@ test("back on the list (after a reservation): it is reloaded", async () => {
   onFocus(); // first focus, on opening: already read
   onFocus(); // back on the screen
   await waitFor(() => expect(calls).toEqual(["GET /public/lists/rt", "GET /public/lists/rt"]));
+});
+
+test("group gift (028): asked for, its summary shown, « Participer » opens its screen", async () => {
+  let query = "";
+  const gift = { token: "gift-tok", status: "open", participantCount: 2, totalCents: 1500, remainingCents: 490, goalReached: false, mine: false };
+  fakeFetch({
+    "GET /public/lists/rt": (request) => {
+      query = new URL(request.url).search;
+      return json(200, publicList([item("i1", "t1", { groupGift: gift }), item("i2", "t2", { groupGift: null })]));
+    },
+  });
+  await render(<GuestList />);
+  expect(await screen.findByTestId("guest.group-gift-0")).toHaveTextContent("2 participants · il reste 4,90 €");
+  expect(query).toBe("?groupGifts=true");
+  expect(screen.queryByTestId("guest.offer-0")).toBeNull();
+  await fireEvent.press(screen.getByTestId("guest.group-gift-open-0"));
+  expect(router.push).toHaveBeenCalledWith("/gift/gift-tok");
+});
+
+test("group gift joined through its link: the list sends that claim once it knows the list's claim key", async () => {
+  await saveClaim({ giftToken: "gift-tok", claimKey: "ck-rt" }, "p1", "claim-gift");
+  const sent: (string | null)[] = [];
+  const mine = { token: "gift-tok", status: "open", participantCount: 1, totalCents: 0, remainingCents: 1990, goalReached: false, mine: true };
+  fakeFetch({
+    "GET /public/lists/rt": (request) => {
+      const claims = request.headers.get("X-Reservation-Claims");
+      sent.push(claims);
+      return json(200, publicList([item("i1", "t1", claims ? { mine: true, reservationId: "p1", groupGift: mine } : { groupGift: { ...mine, mine: false } })]));
+    },
+  });
+  await render(<GuestList />);
+  expect(await screen.findByText("Vous participez")).toBeOnTheScreen();
+  expect(sent).toEqual([null, "claim-gift"]);
 });

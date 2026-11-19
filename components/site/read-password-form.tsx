@@ -17,7 +17,7 @@ export function ReadPasswordForm({ wishlistId, hasPassword }: { wishlistId: stri
     <form key={state?.attempt ?? 0} action={formAction}>
       <FieldGroup>
         <input type="hidden" name="wishlistId" value={wishlistId} />
-        <input type="hidden" name="onglet" value="partage" />
+        <input type="hidden" name="tab" value="sharing" />
         <p className="text-sm font-medium">
           {hasPassword ? t("share.readPasswordChange") : t("share.readPasswordDefine")}
         </p>

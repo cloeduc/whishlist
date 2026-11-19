@@ -39,9 +39,16 @@ test("demo database: accounts are verified, usable without email", async () => {
       created_at: string;
       email_verified_at: string | null;
     }[];
+    // A group gift (028) on the ceramics workshop, with two participations and one message.
+    const gifts = db.prepare("SELECT token, item_id FROM group_gifts").all();
+    const participations = db.prepare("SELECT amount_cents FROM reservations WHERE group_gift_id IS NOT NULL").all();
+    const messages = db.prepare("SELECT COUNT(*) AS n FROM group_gift_messages").get() as { n: number };
     db.close();
     assert.equal(users.length, 3);
     for (const user of users) assert.equal(user.email_verified_at, user.created_at);
+    assert.deepEqual(gifts, [{ token: "demo-cadeau-commun", item_id: "demo-list:atelier" }]);
+    assert.deepEqual(participations, [{ amount_cents: 4000 }, { amount_cents: 3000 }]);
+    assert.equal(messages.n, 1);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

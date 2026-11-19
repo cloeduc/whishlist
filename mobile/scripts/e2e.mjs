@@ -9,6 +9,7 @@ import { fileURLToPath } from "node:url";
 import checks from "./e2e/checks.cjs";
 import flowFiles from "./e2e/flows.cjs";
 import junit from "./e2e/junit.cjs";
+import legacyPaths from "./e2e/legacy-paths.cjs";
 import locale from "./e2e/locale.cjs";
 import strings from "./e2e/strings.cjs";
 
@@ -78,7 +79,8 @@ async function request(url, init) {
 
 function serverHint(apiUrl) {
   const port = new URL(apiUrl).port || "80";
-  return `MAIL_SMTP_URL=smtp://localhost:1025 WISHLIST_DATA_PATH=tmp/e2e/wishlist.json npm run dev -- --port ${port}`;
+  // A fresh .next/: a stale dev cache can reload the pages open in Safari endlessly (see README).
+  return `rm -rf .next && MAIL_SMTP_URL=smtp://localhost:1025 WISHLIST_DATA_PATH=tmp/e2e/wishlist.json npm run dev -- --port ${port}`;
 }
 
 const MAILDEV_HINT = "npx maildev@3.0.0 --smtp 1025 --web 1080";
@@ -161,6 +163,10 @@ async function main() {
   }
 
   writeFileSync(path.join(suiteDir, "scripts/strings.generated.js"), strings.renderStringsScript(strings.buildStrings(lang, repoRoot)));
+  writeFileSync(
+    path.join(suiteDir, "scripts/legacy-paths.generated.js"),
+    legacyPaths.renderLegacyPathsScript(legacyPaths.readLegacyPaths(repoRoot)),
+  );
 
   const skipped = flowFiles.skippedOn(device.platform, flows);
   const toRun = flows.filter((flow) => !skipped.includes(flow));
