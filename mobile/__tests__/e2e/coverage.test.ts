@@ -20,6 +20,7 @@ const specs = {
   "022": "specs/022-whats-new/spec.md",
   "023": "specs/023-add-category-from-idea/spec.md",
   "024": "specs/024-followed-list-names/spec.md",
+  "026": "specs/026-access-denied-help/spec.md",
 };
 
 function storiesOf(feature: string, file: string): string[] {

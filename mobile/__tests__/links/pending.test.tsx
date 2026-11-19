@@ -1,9 +1,10 @@
 import { render, screen } from "@testing-library/react-native";
+import { useLocalSearchParams } from "expo-router";
 
 import AuthLayout from "../../app/(auth)/_layout";
 import ChangePassword from "../../app/change-password";
 import { signIn, signOut } from "@/auth/session";
-import { afterSignIn, clearPendingLink, setPendingLink } from "@/links/pending";
+import { afterSignIn, clearPendingLink, setPendingLink, useNextLink } from "@/links/pending";
 
 import { me } from "../helpers/fetch";
 import { freshDb } from "../helpers/memory-db";
@@ -15,6 +16,7 @@ jest.mock("expo-router", () => ({
     return <RNText>{`redirect:${href}`}</RNText>;
   },
   Stack: () => null,
+  useLocalSearchParams: jest.fn(() => ({})),
 }));
 
 beforeEach(freshDb);
@@ -48,4 +50,34 @@ test("forced password change: it comes first, then the app resumes the link (R5)
   await signIn({ token: "t", expiresAt: "2099-01-01T00:00:00.000Z", user: me });
   await render(<ChangePassword />);
   expect(screen.getByText("redirect:/links/invite/tok")).toBeOnTheScreen();
+});
+
+function SignInScreen() {
+  useNextLink();
+  return null;
+}
+
+async function openSignInWith(next: string | undefined) {
+  jest.mocked(useLocalSearchParams).mockReturnValue(next === undefined ? {} : { next });
+  await render(<SignInScreen />);
+}
+
+test("sign-in opened with an invitation in `next`: it is kept for after sign-in", async () => {
+  await openSignInWith("/invite/tok");
+  expect(afterSignIn()).toBe("/links/invite/tok");
+});
+
+test("sign-in opened with a list's management address in `next`, current or former form: it is kept (026)", async () => {
+  await openSignInWith("/lists/abc");
+  expect(afterSignIn()).toBe("/links/list/abc");
+  clearPendingLink();
+  await openSignInWith("/listes/abc");
+  expect(afterSignIn()).toBe("/links/list/abc");
+});
+
+test("sign-in opened with any other `next`: ignored", async () => {
+  await openSignInWith("/account");
+  expect(afterSignIn()).toBe("/");
+  await openSignInWith(undefined);
+  expect(afterSignIn()).toBe("/");
 });

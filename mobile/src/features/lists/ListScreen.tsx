@@ -20,16 +20,9 @@ import { Screen } from "@/ui/Screen";
 import { Text } from "@/ui/Text";
 
 import { useList } from "./ListContext";
+import { LIST_TAB_ROUTES, type ListTab } from "./tab-routes";
 
-export type ListTab = "idees" | "archives" | "reservations" | "partage" | "reglages";
-
-const routes: Record<ListTab, string> = {
-  idees: "",
-  archives: "/archives",
-  reservations: "/reservations",
-  partage: "/share",
-  reglages: "/settings",
-};
+export type { ListTab };
 
 function tabLabels(list: ViewList, t: (key: string) => string) {
   const active = list.items.filter((item) => !item.archived).length;
@@ -45,7 +38,7 @@ function tabLabels(list: ViewList, t: (key: string) => string) {
 }
 
 function isTab(key: string): key is ListTab {
-  return key in routes;
+  return key in LIST_TAB_ROUTES;
 }
 
 /**
@@ -127,7 +120,7 @@ export function ListScreen({ tab, children }: { tab: ListTab; children: (list: V
         tabs={tabLabels(list, (key) => t(`list:${key}`))}
         active={tab}
         onChange={(key) => {
-          if (isTab(key) && key !== tab) router.replace(`/lists/${listId}${routes[key]}`);
+          if (isTab(key) && key !== tab) router.replace(`/lists/${listId}${LIST_TAB_ROUTES[key]}`);
         }}
       />
       {children(list)}

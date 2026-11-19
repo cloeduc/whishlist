@@ -101,7 +101,9 @@
   "links": {
     "confirming": "Confirmation de votre adresse…",
     "passwordSaved": "Votre mot de passe est enregistré. Connectez-vous avec votre nouveau mot de passe.",
-    "inviteChecking": "Ouverture de l'invitation…"
+    "inviteChecking": "Ouverture de l'invitation…",
+    "listSignIn": "Connectez-vous pour ouvrir cette liste",
+    "listChecking": "Ouverture de la liste…"
   },
   "shared": {
     "followButton": "Suivre une liste",

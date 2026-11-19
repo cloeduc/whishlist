@@ -23,6 +23,8 @@ describe("receiving a link (011)", () => {
       ["/register", "/register"],
       ["/inscription", "/register"],
       ["/l/read/reserve?itemId=i1", "/guest/read/reserve?itemId=i1"],
+      ["https://api.example.test/lists/abc?tab=sharing", "/links/list/abc?tab=sharing"],
+      ["ohyoushouldnt://listes/abc", "/links/list/abc"],
     ];
     for (const [path, screen] of cases) expect(redirectSystemPath({ path, initial: false })).toBe(screen);
   });
@@ -32,7 +34,6 @@ describe("receiving a link (011)", () => {
       "ohyoushouldnt://guide",
       "https://evil.example/inviter/tok",
       "https://evil.example/invite/tok",
-      "https://api.example.test/lists/abc?tab=sharing",
       "ohyoushouldnt://inviter/%E0%A4%A",
       "",
     ]) {

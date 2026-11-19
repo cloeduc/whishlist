@@ -5,6 +5,7 @@ import { toOffrirRows } from "../../../src/domain/offrir";
 import { formatPrice, priceInput } from "../../../src/domain/price";
 import { IdeasAccordion } from "@/components/site/ideas-accordion";
 import { LinkButton } from "@/components/site/link-button";
+import { ListAccessHelp } from "@/components/site/list-access-help";
 import { llmConfigured } from "@/src/domain/product-llm";
 import { ItemForm } from "@/components/site/item-form";
 import { LabelChips } from "@/components/site/label-chips";
@@ -20,6 +21,7 @@ import {
 import { hasReadPassword } from "../../../src/domain/read-password";
 import { reservedItemIds } from "../../../src/domain/reserve";
 import { memberShelf, surpriseModeOf, visibleReservations } from "../../../src/domain/surprise";
+import { followedReadPath } from "../../../src/domain/subscription";
 import { resolveTheme } from "../../../src/domain/theme";
 import { getDocument } from "../../../src/store/db";
 import { AppearanceForm } from "@/components/site/appearance-form";
@@ -56,9 +58,8 @@ export default async function EditListPage({
   const { id } = await params;
   const query = await searchParams;
   const tab = parseListTab(query.tab);
-  const [t, tErrors, user, doc, locale] = await Promise.all([
+  const [t, user, doc, locale] = await Promise.all([
     getTranslations("list"),
-    getTranslations("errors"),
     currentUser(),
     getDocument(),
     getLocale(),
@@ -69,14 +70,7 @@ export default async function EditListPage({
   const list = doc.wishlists.find((entry) => entry.id === id);
   if (!list) notFound();
   const membership = findMembership(doc, id, user.id);
-  if (!membership) {
-    return (
-      <main className="flex flex-col gap-2">
-        <h1 className="text-2xl font-medium tracking-tight">{tErrors("accessDenied")}</h1>
-        <p className="text-muted-foreground">{tErrors("notMember")}</p>
-      </main>
-    );
-  }
+  if (!membership) return <ListAccessHelp followedReadPath={followedReadPath(doc, id, user.id)} />;
   const base = await origin();
   const readUrl = `${base}${withLocale(locale, `/l/${list.readToken}`)}`;
   const inviteUrl = `${base}${withLocale(locale, `/invite/${list.inviteToken}`)}`;
@@ -139,23 +133,31 @@ export default async function EditListPage({
           <LiveGiftMark className="size-12" />
           <h1 className="text-2xl font-medium tracking-tight">{list.title}</h1>
         </div>
-        {surpriseMode ? (
-          // The guest view leaves reserved ideas out: compared with « Idées », it would tell them apart (020).
-          <ConfirmForm
-            title={t("surprise.guestViewTitle")}
-            description={t("surprise.guestViewBody")}
-            confirmLabel={t("surprise.guestViewConfirm")}
-            cancelLabel={t("surprise.guestViewKeep")}
-            triggerLabel={t("viewAsGuest")}
-            triggerSize="sm"
-            confirmVariant="default"
-            href={readUrl}
-          />
-        ) : (
-          <LinkButton href={readUrl} variant="outline" size="sm">
-            {t("viewAsGuest")}
-          </LinkButton>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* The way to the list link, from every tab: the address of this page is not the one to send (026). */}
+          {tab === "sharing" ? null : (
+            <LinkButton href={tabHref(id, "sharing")} size="sm">
+              {t("share.action")}
+            </LinkButton>
+          )}
+          {surpriseMode ? (
+            // The guest view leaves reserved ideas out: compared with « Idées », it would tell them apart (020).
+            <ConfirmForm
+              title={t("surprise.guestViewTitle")}
+              description={t("surprise.guestViewBody")}
+              confirmLabel={t("surprise.guestViewConfirm")}
+              cancelLabel={t("surprise.guestViewKeep")}
+              triggerLabel={t("viewAsGuest")}
+              triggerSize="sm"
+              confirmVariant="default"
+              href={readUrl}
+            />
+          ) : (
+            <LinkButton href={readUrl} variant="outline" size="sm">
+              {t("viewAsGuest")}
+            </LinkButton>
+          )}
+        </div>
       </div>
       {error ? (
         <Alert variant="destructive">
@@ -311,6 +313,7 @@ export default async function EditListPage({
           <div className="flex flex-col gap-2">
             <h2 className="text-2xl font-bold tracking-tight">{t("share.title")}</h2>
             <p className="text-muted-foreground text-pretty">{t("share.description")}</p>
+            <p className="text-muted-foreground text-pretty">{t("share.addressNote")}</p>
           </div>
           <Card>
             <CardHeader>

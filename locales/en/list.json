@@ -131,7 +131,9 @@
     "owner": "Owner",
     "member": "Member",
     "remove": "Remove from list",
-    "leave": "Leave this list"
+    "leave": "Leave this list",
+    "action": "Share",
+    "addressNote": "The address of this page is only for the people who manage the list. To share it, send the list link."
   },
   "settings": {
     "title": "Settings",
@@ -220,5 +222,13 @@
     "editTitle": "Edit gift idea",
     "emptyCategory": "No ideas in this category."
   },
-  "secondHandBadge": "Second-hand OK"
+  "secondHandBadge": "Second-hand OK",
+  "accessHelp": {
+    "title": "This address is for managing the list",
+    "body": "It only opens the list for the people who manage it. With this account, you’re not one of them.",
+    "howTo": "To see the list and reserve an idea, ask the person who sent you this address for the list link. They’ll find it in the “Sharing” tab of their list.",
+    "followedBody": "You already follow this list: you can open it to browse it.",
+    "viewFollowed": "View the list",
+    "backToLists": "My lists"
+  }
 }
