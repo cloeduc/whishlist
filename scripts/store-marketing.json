@@ -1,0 +1,223 @@
+{
+  "_comment": "Texts of the marketing store screenshots (scripts/store-marketing.mjs). In headlines, *word* is the accent in serif italic and \n a line break. `shot` is the raw Maestro screenshot (mobile/.maestro/screenshots/store.yaml). Card texts repeat the app's own labels (locales/).",
+  "screens": [
+    {
+      "id": "01",
+      "layout": "hero",
+      "shot": "01-lists",
+      "fr": {
+        "kicker": "Oh, mais fallait pas !",
+        "headline": "Toutes vos envies,\n*au même endroit.*",
+        "subhead": "Vos idées cadeaux, rangées et partagées avec vos proches."
+      },
+      "en": {
+        "kicker": "Oh, You Shouldn't!",
+        "headline": "All your wishes,\n*in one place.*",
+        "subhead": "Your gift ideas, sorted and shared with your loved ones."
+      }
+    },
+    {
+      "id": "02",
+      "layout": "callouts",
+      "shot": "06-sharing",
+      "fr": {
+        "kicker": "Liste de couple",
+        "headline": "Une liste *à deux,*\nou à plusieurs.",
+        "subhead": "Invitez votre moitié : vous ajoutez et rangez vos idées ensemble.",
+        "cards": [
+          {
+            "at": "right",
+            "top": 1320,
+            "title": "Gérer la liste à plusieurs",
+            "body": "Toute personne invitée rejoint la liste et peut la modifier.",
+            "button": "Copier le lien d'invitation"
+          },
+          {
+            "at": "left",
+            "top": 1980,
+            "title": "Gérer les membres",
+            "rows": [
+              [
+                "Alex",
+                "Propriétaire"
+              ],
+              [
+                "Camille",
+                "Membre"
+              ]
+            ]
+          }
+        ]
+      },
+      "en": {
+        "kicker": "A list for two",
+        "headline": "One list *for two,*\nor more.",
+        "subhead": "Invite your partner: add and sort your ideas together.",
+        "cards": [
+          {
+            "at": "right",
+            "top": 1320,
+            "title": "Invite people to edit",
+            "body": "Anyone you invite joins the list and can edit it.",
+            "button": "Copy invitation link"
+          },
+          {
+            "at": "left",
+            "top": 1980,
+            "title": "People managing this list",
+            "rows": [
+              [
+                "Alex",
+                "Owner"
+              ],
+              [
+                "Camille",
+                "Member"
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "03",
+      "layout": "tilt",
+      "tilt": -6,
+      "shot": "03-new-idea",
+      "fr": {
+        "kicker": "Ajouter une idée",
+        "headline": "Une idée ?\n*Un lien* suffit.",
+        "subhead": "Collez le lien d'une boutique, l'app remplit le reste.",
+        "cards": [
+          {
+            "at": "right",
+            "top": 1380,
+            "title": "Lien du cadeau",
+            "body": "https://boutique.example/casque",
+            "button": "Remplir depuis le lien"
+          }
+        ]
+      },
+      "en": {
+        "kicker": "Add an idea",
+        "headline": "An idea?\n*A link* is enough.",
+        "subhead": "Paste a shop's link, the app fills in the rest.",
+        "cards": [
+          {
+            "at": "right",
+            "top": 1380,
+            "title": "Gift link",
+            "body": "https://shop.example/headphones",
+            "button": "Fill from link"
+          }
+        ]
+      }
+    },
+    {
+      "id": "04",
+      "layout": "tilt",
+      "tilt": 6,
+      "shot": "04-shared-list",
+      "fr": {
+        "kicker": "Partager la liste",
+        "headline": "Vos proches\n*réservent* en secret.",
+        "subhead": "Un lien suffit, sans compte. Fini les cadeaux en double.",
+        "cards": [
+          {
+            "at": "left",
+            "top": 2080,
+            "title": "Lampe de lecture",
+            "badge": "49,00 €",
+            "button": "Réserver ce cadeau"
+          }
+        ]
+      },
+      "en": {
+        "kicker": "Share the list",
+        "headline": "Your loved ones\n*reserve* in secret.",
+        "subhead": "Just a link, no account needed. No more duplicate gifts.",
+        "cards": [
+          {
+            "at": "left",
+            "top": 2080,
+            "title": "Reading lamp",
+            "badge": "€49.00",
+            "button": "Reserve this gift"
+          }
+        ]
+      }
+    },
+    {
+      "id": "05",
+      "layout": "callouts",
+      "shot": "05-group-gift",
+      "fr": {
+        "kicker": "Cadeau commun",
+        "headline": "Un cadeau,\n*plusieurs amis.*",
+        "subhead": "Chacun annonce sa part, tout le monde voit ce qu'il reste.",
+        "cards": [
+          {
+            "at": "right",
+            "top": 1260,
+            "title": "2 participants · il reste 40,00 €",
+            "progress": 0.64,
+            "body": "Total annoncé : 70,00 €"
+          },
+          {
+            "at": "left",
+            "top": 1760,
+            "title": "Sam · 40,00 €",
+            "body": "Je peux réserver le créneau."
+          },
+          {
+            "at": "right",
+            "top": 2230,
+            "title": "Messages entre participants",
+            "body": "Sam : Il manque 40 € : quelqu’un d’autre ?"
+          }
+        ]
+      },
+      "en": {
+        "kicker": "Group gift",
+        "headline": "One gift,\n*many friends.*",
+        "subhead": "Everyone says how much they put in, everyone sees what's left.",
+        "cards": [
+          {
+            "at": "right",
+            "top": 1260,
+            "title": "2 participants · €40.00 to go",
+            "progress": 0.64,
+            "body": "Pledged so far: €70.00"
+          },
+          {
+            "at": "left",
+            "top": 1760,
+            "title": "Sam · €40.00",
+            "body": "I can book the time slot."
+          },
+          {
+            "at": "right",
+            "top": 2230,
+            "title": "Messages between participants",
+            "body": "Sam: €40 still to go: anyone else?"
+          }
+        ]
+      }
+    },
+    {
+      "id": "06",
+      "layout": "hero",
+      "shot": "02-list",
+      "fr": {
+        "kicker": "Organiser",
+        "headline": "Chaque idée,\n*bien rangée.*",
+        "subhead": "Catégories, prix, niveau d'envie et pour qui : tout est clair."
+      },
+      "en": {
+        "kicker": "Organize",
+        "headline": "Every idea,\n*neatly sorted.*",
+        "subhead": "Categories, price, wish level and who it's for: all clear."
+      }
+    }
+  ]
+}

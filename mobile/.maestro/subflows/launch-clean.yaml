@@ -18,6 +18,14 @@ appId: app.ohyoushouldnt.mobile
       EXDevMenuShowsAtLaunch: "NO"
       EXDevMenuIsOnboardingFinished: "YES"
 - runFlow: dev-client-reconnect.yaml
+# A newer version on the store opens « Nouvelle version disponible » over the login (021): « Plus tard ».
+- extendedWaitUntil:
+    visible:
+      id: login.screen|update.prompt-keep
+    timeout: 60000
+- tapOn:
+    id: update.prompt-keep
+    optional: true
 - extendedWaitUntil:
     visible:
       id: login.screen

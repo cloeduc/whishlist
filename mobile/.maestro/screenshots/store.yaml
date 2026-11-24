@@ -1,4 +1,4 @@
-# Store screenshots (App Store, Google Play): five screens of the demo data, saved as PNG in Maestro's output
+# Store screenshots (App Store, Google Play): six screens of the demo data, saved as PNG in Maestro's output
 # folder; NAME and DESCRIPTION (the new idea, in the device's language) are given by scripts/store-screenshots.mjs.
 # Run against the demo database, in the device's language.
 # Not part of the e2e suite (outside flows/): it checks nothing, it only shows the screens.
@@ -27,6 +27,25 @@ name: "Store screenshots"
     id: list.category-demo-list:livres
 - waitForAnimationToEnd
 - takeScreenshot: 02-list
+
+# 6. « Partage »: the list is managed together (Alex, owner, and Camille).
+- tapOn:
+    id: tab-partage
+# The member row (a View) is not seen by Maestro on iOS: its « Retirer » button is.
+- scrollUntilVisible:
+    element:
+      id: share.remove-demo-member
+    centerElement: true
+    # Last card of the tab, after the QR code, the invite, the password and surprise mode.
+    timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: 06-sharing
+- scrollUntilVisible:
+    element:
+      id: tab-idees
+    direction: UP
+- tapOn:
+    id: tab-idees
 
 # 3. « Ajouter une idée cadeau », filled in.
 - runFlow: ../subflows/open-new-item.yaml

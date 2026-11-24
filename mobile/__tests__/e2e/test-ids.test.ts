@@ -57,7 +57,8 @@ test("every id: used by a flow is a testID of the app", () => {
     [...prefixes].some((prefix) => id.startsWith(prefix) && id.length > prefix.length);
   const used = usedIds();
   expect(used.length).toBeGreaterThan(20);
-  expect(used.filter(({ id }) => !known(id))).toEqual([]);
+  // An alternative (`login.screen|update.prompt-keep`) is known when each of its ids is.
+  expect(used.filter(({ id }) => !known(id) && !id.split("|").every(known))).toEqual([]);
 });
 
 test("no testID holds an e-mail address or a space", () => {
