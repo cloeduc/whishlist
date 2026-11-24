@@ -1,6 +1,7 @@
 import { clone, findMembership } from "./access";
 import { MAX_DESCRIPTION, normalizeDescription } from "./description";
 import { pruneGroupGifts } from "./group-gift";
+import { sameAddress } from "./image-url";
 import { normalizePriority } from "./priority";
 import { surpriseModeOf } from "./surprise";
 import { blankToNull } from "./text";
@@ -64,6 +65,7 @@ export function createItem(
   const imageUrl = blankToNull(input.imageUrl);
   if (!validUrl(url)) return { ok: false, error: "urlMustBeHttp" };
   if (!validUrl(imageUrl)) return { ok: false, error: "imageMustBeHttp" };
+  if (sameAddress(imageUrl, url)) return { ok: false, error: "imageIsPage" };
   if (input.priceCents !== undefined && input.priceCents !== null && input.priceCents < 0) {
     return { ok: false, error: "priceNegative" };
   }
@@ -138,6 +140,8 @@ export function updateItem(
   const next = clone(doc);
   const item = next.items.find((i) => i.id === input.itemId && i.wishlistId === input.wishlistId);
   if (!item) return { ok: false, error: "itemMissing" };
+  // An image already stored this way stays editable: only a new one is refused.
+  if (imageUrl !== item.imageUrl && sameAddress(imageUrl, url)) return { ok: false, error: "imageIsPage" };
   item.name = name;
   item.typeId = input.typeId;
   item.personId = input.personId;

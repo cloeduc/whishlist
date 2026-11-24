@@ -5,6 +5,8 @@
   "personNotInList": "Ce destinataire n'est pas dans cette liste.",
   "urlMustBeHttp": "Saisissez un lien commençant par http:// ou https://.",
   "imageMustBeHttp": "Saisissez un lien d'image commençant par http:// ou https://.",
+  "imageIsPage": "L'adresse de l'image est celle du lien de l'idée. Collez l'adresse de l'image elle-même (clic droit sur l'image, « Copier l'adresse de l'image »).",
+  "imageNotImage": "Cette adresse ne mène pas à une image. Collez l'adresse de l'image elle-même (clic droit sur l'image, « Copier l'adresse de l'image »).",
   "priceNegative": "Le prix ne peut pas être négatif.",
   "descriptionTooLong": "La description ne peut pas dépasser 2 000 caractères.",
   "itemMissing": "Cette idée n'existe pas.",

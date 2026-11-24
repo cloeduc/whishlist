@@ -2,6 +2,7 @@ import { ExternalLinkIcon } from "lucide-react";
 import type { PublicItem } from "@/src/domain/read";
 import { cancelMyReservationAction } from "@/src/server/actions";
 import { ConfirmForm } from "@/components/site/confirm-form";
+import { IdeaImage } from "@/components/site/idea-image";
 import { LinkButton } from "@/components/site/link-button";
 import { PriorityStars } from "@/components/site/priority-stars";
 import { Badge } from "@/components/ui/badge";
@@ -53,16 +54,7 @@ export function PublicItemCard({
     <Card size="sm" className={item.mine ? "opacity-95" : undefined}>
       <CardHeader>
         <div className="flex items-start gap-3">
-          {item.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={item.imageUrl}
-              alt={item.name}
-              className="size-20 shrink-0 rounded-base border-2 border-border object-cover shadow-shadow"
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
-          ) : null}
+          {item.imageUrl ? <IdeaImage src={item.imageUrl} alt={item.name} className="size-20" lazy /> : null}
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 flex-col gap-1">

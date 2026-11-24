@@ -375,10 +375,15 @@ export function ItemForm({
               {previewImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
+                  key={previewImage}
                   src={previewImage}
                   alt={draft.name.trim() || t("form.imageAlt")}
                   className="size-full object-cover"
                   referrerPolicy="no-referrer"
+                  // A failed preview leaves the neutral box empty rather than showing the alt text.
+                  onError={(event) => {
+                    event.currentTarget.hidden = true;
+                  }}
                 />
               ) : null}
             </div>

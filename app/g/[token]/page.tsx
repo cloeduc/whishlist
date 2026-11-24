@@ -10,6 +10,7 @@ import { CopyLinkField } from "@/components/site/copy-link-field";
 import { GroupGiftAmountForm } from "@/components/site/group-gift-amount-form";
 import { GroupGiftJoinForm } from "@/components/site/group-gift-join-form";
 import { GroupGiftThread } from "@/components/site/group-gift-thread";
+import { IdeaImage } from "@/components/site/idea-image";
 import { ReadUnlockForm } from "@/components/site/read-unlock-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -103,15 +104,7 @@ export default async function GroupGiftPage({
         </Alert>
       ) : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        {item.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={item.imageUrl}
-            alt={item.name}
-            className="size-28 shrink-0 rounded-base border-2 border-border object-cover shadow-shadow"
-            referrerPolicy="no-referrer"
-          />
-        ) : null}
+        {item.imageUrl ? <IdeaImage src={item.imageUrl} alt={item.name} className="size-28" /> : null}
         <div className="flex min-w-0 flex-col gap-2">
           <div className="flex flex-wrap gap-2">
             <Badge variant="outline">{t("groupGift.badge")}</Badge>

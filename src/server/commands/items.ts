@@ -15,6 +15,7 @@ import {
 } from "../../domain/items";
 import { asSeenBy } from "../../domain/surprise";
 import { estimateLlmImpact, type LlmImpact } from "../../domain/llm-impact";
+import { probeImage, sameAddress } from "../../domain/image-url";
 import { fetchOgImage } from "../../domain/og-image";
 import { parsePrice } from "../../domain/price";
 import { extractProductHints } from "../../domain/product-from-url";
@@ -29,19 +30,37 @@ function blankUrl(value: string): string | null {
   return trimmed ? trimmed : null;
 }
 
-/** Idea image: entered, unchanged, or looked up on the link's page (network call limited by `beforeFetch`). */
+/**
+ * Idea image: entered, unchanged, or looked up on the link's page (network calls limited by `beforeFetch`).
+ * A newly entered address that the server says is not an image is refused.
+ */
 async function resolveImageUrl(input: {
   url: string | null;
   manual: string | null;
   previousUrl: string | null;
   previousImage: string | null;
   beforeFetch: () => void;
-}): Promise<string | null> {
-  if (input.manual) return input.manual;
-  if (!input.url) return null;
-  if (input.url === input.previousUrl && input.previousImage) return input.previousImage;
+}): Promise<{ ok: true; imageUrl: string | null } | { ok: false; error: string }> {
+  if (input.manual) {
+    // Unchanged, not http(s) or the link itself: left to the domain rules, without a network call.
+    const unchecked =
+      input.manual === input.previousImage || !/^https?:\/\//.test(input.manual) || sameAddress(input.manual, input.url);
+    if (unchecked) return { ok: true, imageUrl: input.manual };
+    try {
+      input.beforeFetch();
+    } catch {
+      // Over the lookup limit: the check is skipped, an entered image is still saved.
+      return { ok: true, imageUrl: input.manual };
+    }
+    if ((await probeImage(input.manual)) === "notImage") return { ok: false, error: "imageNotImage" };
+    return { ok: true, imageUrl: input.manual };
+  }
+  if (!input.url) return { ok: true, imageUrl: null };
+  if (input.url === input.previousUrl && input.previousImage) return { ok: true, imageUrl: input.previousImage };
   input.beforeFetch();
-  return (await fetchOgImage(input.url)) ?? (input.url === input.previousUrl ? input.previousImage : null);
+  const found = await fetchOgImage(input.url);
+  const usable = found && !sameAddress(found, input.url) ? found : null;
+  return { ok: true, imageUrl: usable ?? (input.url === input.previousUrl ? input.previousImage : null) };
 }
 
 function itemIn(doc: Database, wishlistId: string, itemId: string): Item | undefined {
@@ -123,13 +142,15 @@ export async function saveItem(
   if (sent) return sent;
   const current = input.itemId ? itemIn(doc, input.wishlistId, input.itemId) : null;
   const url = blankUrl(input.url);
-  const imageUrl = await resolveImageUrl({
+  const image = await resolveImageUrl({
     url,
     manual: blankUrl(input.imageUrl),
     previousUrl: current?.url ?? null,
     previousImage: current?.imageUrl ?? null,
     beforeFetch: () => rateLimitForIp(`item-image:${actorId}`, ctx.ip, 60, 60 * 60 * 1000),
   });
+  if (!image.ok) return image;
+  const imageUrl = image.imageUrl;
   const fields = {
     wishlistId: input.wishlistId,
     actorId,
@@ -288,6 +309,12 @@ export async function cancelGroupGiftAsMember(
   });
 }
 
+/** A suggested image is dropped when it is the product page itself or when the server says it is not an image. */
+async function usableImage(imageUrl: string, pageUrls: string[]): Promise<boolean> {
+  if (pageUrls.some((pageUrl) => sameAddress(imageUrl, pageUrl))) return false;
+  return (await probeImage(imageUrl)) !== "notImage";
+}
+
 export async function enrichFromUrl(
   ctx: CommandContext,
   input: { wishlistId: string; url: string },
@@ -326,6 +353,9 @@ export async function enrichFromUrl(
     if (refined.usage.totalTokens > 0) {
       impact = estimateLlmImpact(refined.usage.totalTokens);
     }
+  }
+  if (hints.imageUrl && !(await usableImage(hints.imageUrl, [trimmed, page.finalUrl]))) {
+    hints = { ...hints, imageUrl: null };
   }
   if (!hints.name && !hints.price && !hints.imageUrl) {
     return { ok: false, error: usedLlm ? "enrichEmpty" : "enrichEmptyNoLlm" };

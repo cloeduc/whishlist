@@ -13,6 +13,7 @@ import {
   renamePerson,
   setItemArchived,
   setItemType,
+  updateItem,
 } from "../../src/domain/items";
 import { reserveItem } from "../../src/domain/reserve";
 import { setSurpriseMode } from "../../src/domain/surprise";
@@ -297,4 +298,24 @@ test("renaming and removing a person (blocked if used)", () => {
     removed.doc.views.some((view) => view.kind === "person" && view.personId === "p"),
     false,
   );
+});
+
+test("an idea's image cannot be the idea's own link; one already stored that way stays editable", () => {
+  const doc = ready();
+  const page = "https://shop.example/p-123.html";
+  const base = { wishlistId: "w", actorId: "u", name: "Book", typeId: "t", personId: "p", url: page };
+  const samePage = createItem(doc, { ...base, imageUrl: `${page}#reviews` });
+  assert.deepEqual(samePage, { ok: false, error: "imageIsPage" });
+
+  const created = createItem(doc, { ...base, imageUrl: "https://cdn.shop.example/p-123.jpg", id: "i" });
+  assert.equal(created.ok, true);
+  if (!created.ok) return;
+  const changedToPage = updateItem(created.doc, { ...base, itemId: "i", imageUrl: page });
+  assert.deepEqual(changedToPage, { ok: false, error: "imageIsPage" });
+
+  // Data saved before the rule: editing the idea without touching the image is still accepted.
+  const legacy = structuredClone(created.doc);
+  legacy.items.find((item) => item.id === "i")!.imageUrl = page;
+  const renamed = updateItem(legacy, { ...base, itemId: "i", name: "Book (paperback)", imageUrl: page });
+  assert.equal(renamed.ok, true);
 });
