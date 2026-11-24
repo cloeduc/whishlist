@@ -1,8 +1,8 @@
 // Marketing store screenshots: each raw Maestro screenshot inside a phone, on the brand's blue gradient,
 // with a headline whose accent word is in serif italic. Rendered from HTML by Playwright, at the exact
 // App Store size (6.9", 1320×2868), without transparency.
-//   node scripts/store-marketing.mjs [--in tmp/store-screenshots] [--out tmp/store-marketing] [--only 01] [--langs fr,en]
-// Reads <in>/ios/<fr-FR|en-US>/<shot>.png and writes <out>/ios/<fr-FR|en-US>/<id>.png (fastlane deliver).
+//   node scripts/store-marketing.mjs [--platform ios|android] [--in tmp/store-screenshots] [--out tmp/store-marketing] [--only 01] [--langs fr,en]
+// Same size on Google Play (1320×2868: ratio under 2.3, sides under 3840 px).
 import { readFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { chromium } from "playwright";
@@ -13,6 +13,11 @@ const args = Object.fromEntries(
 const input = path.resolve(args.in ?? "tmp/store-screenshots");
 const output = path.resolve(args.out ?? "tmp/store-marketing");
 const langs = (args.langs ?? "fr,en").split(",");
+// ios: <in>/ios/<locale>/<shot>.png → <out>/ios/<locale>/<id>.png (deliver);
+// android: <in>/android/<locale>/images/phoneScreenshots/… → same layout under <out> (supply).
+const platform = args.platform ?? "ios";
+const folderOf = (root, locale) =>
+  platform === "ios" ? path.join(root, "ios", locale) : path.join(root, "android", locale, "images", "phoneScreenshots");
 const STORE = { fr: "fr-FR", en: "en-US" };
 const { screens } = JSON.parse(await readFile(path.resolve("scripts/store-marketing.json"), "utf8"));
 const icon = (await readFile(path.resolve("mobile/assets/images/icon.png"))).toString("base64");
@@ -75,6 +80,7 @@ const css = `
   .card .member .role { margin-left: auto; padding: 8px 18px; border: 3px solid #000; border-radius: 14px; font: 700 30px/1 "Inter", sans-serif; background: #e8f0ff; }
   .card .bar { height: 34px; border: 4px solid #000; border-radius: 18px; background: #e8f0ff; overflow: hidden; }
   .card .bar span { display: block; height: 100%; background: #ffd700; border-right: 4px solid #000; }
+  .punch { position: absolute; top: 40px; left: 50%; width: 64px; height: 64px; transform: translateX(-50%); border-radius: 50%; background: #000; }
   .island { position: absolute; top: 34px; left: 50%; width: 294px; height: 85px; transform: translateX(-50%); border-radius: 50px; background: #000; }
 `;
 
@@ -113,7 +119,7 @@ function render(screen, lang, shot) {
   <h1>${headline(text.headline)}</h1>
   <p class="subhead">${escape(text.subhead)}</p>
 </div>
-<div class="${device}" style="${style}"><div class="screen"><img src="data:image/png;base64,${shot}" alt=""><div class="island"></div></div></div>
+<div class="${device}" style="${style}"><div class="screen"><img src="data:image/png;base64,${shot}" alt=""><div class="${platform === "ios" ? "island" : "punch"}"></div></div></div>
 ${(text.cards ?? []).map(card).join("\n")}
 </body></html>`;
 }
@@ -122,10 +128,15 @@ ${(text.cards ?? []).map(card).join("\n")}
 const browser = await chromium.launch({ channel: "chrome" }).catch(() => chromium.launch());
 const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
 for (const lang of langs) {
-  const folder = path.join(output, "ios", STORE[lang]);
+  const folder = folderOf(output, STORE[lang]);
   await mkdir(folder, { recursive: true });
   for (const screen of screens.filter((s) => !args.only || s.id === args.only)) {
-    const shot = (await readFile(path.join(input, "ios", STORE[lang], `${screen.shot}.png`))).toString("base64");
+    const source = path.join(folderOf(input, STORE[lang]), `${screen.shot}.png`);
+    const shot = await readFile(source).then((bytes) => bytes.toString("base64")).catch(() => null);
+    if (!shot) {
+      console.warn(`Missing ${source}: screen ${screen.id} skipped`);
+      continue;
+    }
     await page.setContent(render(screen, lang, shot), { waitUntil: "networkidle" });
     await page.evaluate(() => document.fonts.ready);
     // Each headline line on one line: the size shrinks until the widest line fits the copy's width.
