@@ -226,6 +226,75 @@ doc.items.push(
   },
 );
 
+// Alex follows Sam's list: « Listes suivies » is not empty on Alex's home.
+doc.subscriptions.push({
+  wishlistId: otherList.id,
+  userId: owner.value.id,
+  readPasswordHash: null,
+  createdAt: "2026-10-23T08:00:00.000Z",
+  customTitle: null,
+  customOwnerName: null,
+});
+
+// DEMO_LANG=en: the same demo with its texts in English (store screenshots of the English listing).
+// Identifiers stay the same, so flows and links still work.
+const ENGLISH = {
+  "Nos envies toute l’année": "Our wishes all year round",
+  "Des petites envies, de beaux cadeaux et quelques idées à partager.": "Little wishes, lovely gifts and a few ideas to share.",
+  Livres: "Books",
+  Maison: "Home",
+  Loisirs: "Leisure",
+  Gourmand: "Treats",
+  "Nous deux": "Both of us",
+  "Toutes les idées": "All ideas",
+  "Un beau roman à découvrir": "A great novel to discover",
+  "Carnet relié pour les idées": "Hardbound notebook for ideas",
+  "Lampe de lecture": "Reading lamp",
+  "Plaid tout doux": "Super soft throw",
+  "Atelier de céramique à deux": "Pottery class for two",
+  "Jeu de société coopératif": "Cooperative board game",
+  "Assortiment de chocolats": "Chocolate assortment",
+  "Brunch du dimanche": "Sunday brunch",
+  "Ancienne idée déjà remplacée": "Old idea, already replaced",
+  "Je m’en occupe !": "I’ll take care of it!",
+  "Je peux réserver le créneau.": "I can book the time slot.",
+  "Il manque 40 € : quelqu’un d’autre ?": "€40 still to go: anyone else?",
+  "Les idées de Sam": "Sam’s ideas",
+  "Lectures, sorties et petits plaisirs pour l'anniversaire de Sam.": "Books, outings and little treats for Sam’s birthday.",
+  "Roman graphique de science-fiction": "Sci-fi graphic novel",
+  "Vinyle de jazz japonais": "Japanese jazz vinyl",
+  "Place de concert acoustique": "Acoustic concert ticket",
+};
+const lang = process.env.DEMO_LANG ?? "fr";
+if (lang !== "fr" && lang !== "en") {
+  console.error("DEMO_LANG is fr (default) or en.");
+  process.exit(1);
+}
+if (lang === "en") {
+  const missing = new Set();
+  const english = (text) => {
+    if (text === null || text === undefined) return text;
+    if (ENGLISH[text] !== undefined) return ENGLISH[text];
+    // Names of people stay as they are; anything else must have its translation.
+    if (!/^[A-Z][a-z]+$/.test(text)) missing.add(text);
+    return text;
+  };
+  const translate = (rows, fields) => {
+    for (const row of rows) for (const field of fields) if (field in row) row[field] = english(row[field]);
+  };
+  translate(doc.wishlists, ["title", "subtitle"]);
+  translate(doc.types, ["label"]);
+  translate(doc.people, ["label"]);
+  translate(doc.views, ["label"]);
+  translate(doc.items, ["name", "description"]);
+  translate(doc.reservations, ["note"]);
+  translate(doc.groupGiftMessages, ["body"]);
+  if (missing.size > 0) {
+    console.error(`Demo texts without an English version: ${[...missing].join(" | ")}`);
+    process.exit(1);
+  }
+}
+
 // The `.db` database next to the given path (same rule as WISHLIST_DATA_PATH), replaced in one transaction:
 // a server running on this database sees the new demo on the next request.
 process.env.WISHLIST_DATA_PATH = output;

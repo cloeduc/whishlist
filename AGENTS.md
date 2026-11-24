@@ -10,7 +10,7 @@
 - Types : `npm run typecheck`
 - Tests : `npm test` (tous les fichiers `tests/domain/*.test.ts`)
 - Build prod : `npm run build` (le `postbuild` complète `.next/standalone`), puis `npm start` (le `server.js` de l'image Docker)
-- Données de démo : `npm run demo:data -- tmp/demo-wishlist.json` (écrit la base `tmp/demo-wishlist.db`, même règle de chemin que `WISHLIST_DATA_PATH`) puis `WISHLIST_DATA_PATH=tmp/demo-wishlist.json npm run dev` (`DEMO_PASSWORD` obligatoire)
+- Données de démo : `npm run demo:data -- tmp/demo-wishlist.json` (écrit la base `tmp/demo-wishlist.db`, même règle de chemin que `WISHLIST_DATA_PATH` ; `DEMO_LANG=en` pour les mêmes données en anglais) puis `WISHLIST_DATA_PATH=tmp/demo-wishlist.json npm run dev` (`DEMO_PASSWORD` obligatoire)
 - Base SQLite : `npm run db:generate` après un changement de `src/store/schema.ts` (écrit une migration dans `drizzle/`, à relire et versionner) ; `npm run db:check -- <fichier.json|fichier.db> [--counts]` contrôle un fichier sans rien écrire ; `node scripts/db-backup.mjs <destination>` fait une sauvegarde à chaud
 - Captures du guide : `DEMO_BASE_URL=http://localhost:3010 npm run demo:capture` (écrit `public/guide/{fr,en}`) ; `-- --mobile` écrit les captures en largeur de téléphone dans `specs/005-mobile-list-app/design/web-mobile/`
 - Icônes : `node scripts/make-icons.mjs` écrit celles du site (`app/favicon.ico`, `app/icon1.svg`, `app/icon2.png`, `app/apple-icon.png`) et `node mobile/scripts/make-icons.mjs` celles de l'app, à relancer tous les deux après un changement du dessin commun `scripts/gift-icon.mjs`
